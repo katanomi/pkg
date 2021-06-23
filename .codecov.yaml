@@ -24,3 +24,6 @@ ignore:
   - "testing"
   - "third_party"
   - "vendor"
+  - "testbin"
+  - "examples/**"
+  - "mock/**"
