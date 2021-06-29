@@ -1,0 +1,2 @@
+# Use :nonroot base image for all containers
+# defaultBaseImage: index.docker.io/katanomi/distroless-static::nonroot

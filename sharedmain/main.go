@@ -125,8 +125,8 @@ func MainWithConfig(ctx context.Context, component string, cfg *rest.Config, opt
 	for _, controller := range ctors {
 		name := controller.Name()
 		// add here the logic to use atomicLevels
-		// logger.Desugar().WithOptions(zap.IncreaseLevel(atomicLevel)).Named(name).Sugar()
-		controller.Setup(ctx, mgr, logger.Named(name))
+		controllerLogger := logger.Desugar().Named(name).Sugar()
+		controller.Setup(ctx, mgr, controllerLogger)
 	}
 
 	eg, egCtx := errgroup.WithContext(ctx)
