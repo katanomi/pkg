@@ -10,6 +10,9 @@ import (
 	"os"
 	"time"
 
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	cminformer "knative.dev/pkg/configmap/informer"
+
 	"go.uber.org/zap"
 	"golang.org/x/sync/errgroup"
 	corev1 "k8s.io/api/core/v1"
@@ -17,6 +20,7 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/rest"
+	kubeclient "knative.dev/pkg/client/injection/kube/client"
 	"knative.dev/pkg/injection"
 	"knative.dev/pkg/injection/sharedmain"
 	"knative.dev/pkg/logging"
@@ -30,6 +34,7 @@ import (
 
 	"github.com/go-logr/zapr"
 	kclient "github.com/katanomi/pkg/client"
+	klogging "github.com/katanomi/pkg/logging"
 	kmanager "github.com/katanomi/pkg/manager"
 	kscheme "github.com/katanomi/pkg/scheme"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -80,10 +85,19 @@ func GetConfigOrDie(ctx context.Context) (context.Context, *rest.Config) {
 // with the given config.
 // TODO: needs to add support to webhooks and custom configuration
 func MainWithConfig(ctx context.Context, component string, cfg *rest.Config, opts ctrl.Options, ctors ...Controller) {
-
+	lvlMGR := klogging.NewLevelManager()
 	ctx, startInformers := injection.EnableInjectionOrDie(ctx, cfg)
+	loggingConfig, err := GetLoggingConfig(ctx)
+	if err != nil {
+		log.Fatal("Error reading/parsing logging configuration: ", err)
+	}
+	zapConfig, err := klogging.ZapConfigFromJSON(loggingConfig.LoggingConfig)
+	if err != nil {
+		log.Fatal("Error parsing logging zapConfig: ", err)
+	}
 
-	logger, atomicLevel := SetupLoggerOrDie(ctx, component)
+	//logger, atomicLevel := SetupLoggerOrDie(ctx, component)
+	logger, _ := SetupLoggerOrDie(ctx, component)
 	defer flush(logger)
 	ctx = logging.WithLogger(ctx, logger)
 
@@ -120,13 +134,20 @@ func MainWithConfig(ctx context.Context, component string, cfg *rest.Config, opt
 	// watches the logging configmap configuration while managing multiple atomicLevels
 	// uses the controller constructor below to provide a specific logger for each
 	// with the specified atomicLevel
-	sharedmain.WatchLoggingConfigOrDie(ctx, cmw, logger, atomicLevel, component)
+	//sharedmain.WatchLoggingConfigOrDie(ctx, cmw, logger, atomicLevel, component)
+	WatchLoggingConfigOrDie(ctx, cmw, logger, lvlMGR)
 	// call constructors
+	systemConfigMap, err := kubeclient.Get(ctx).CoreV1().ConfigMaps(system.Namespace()).Get(ctx, logging.ConfigMapName(),
+		metav1.GetOptions{})
+	if err != nil {
+		logger.Panic(err, "read logging configmap error")
+	}
+	cmw.OnChange(systemConfigMap)
 	for _, controller := range ctors {
 		name := controller.Name()
-		// add here the logic to use atomicLevels
-		// logger.Desugar().WithOptions(zap.IncreaseLevel(atomicLevel)).Named(name).Sugar()
-		controller.Setup(ctx, mgr, logger.Named(name))
+		controllerAtomicLevel := lvlMGR.Get(name)
+		controllerLogger := logger.Desugar().WithOptions(zap.UpdateCore(controllerAtomicLevel, *zapConfig)).Named(name).Sugar()
+		controller.Setup(ctx, mgr, controllerLogger)
 	}
 
 	eg, egCtx := errgroup.WithContext(ctx)
@@ -202,4 +223,16 @@ func GetLoggingConfig(ctx context.Context) (*logging.Config, error) {
 
 func flush(logger *zap.SugaredLogger) {
 	logger.Sync()
+}
+
+// WatchLoggingConfigOrDie establishes a watch of the logging config or dies by
+// calling log.Fatalw. Note, if the config does not exist, it will be defaulted
+// and this method will not die.
+func WatchLoggingConfigOrDie(ctx context.Context, cmw *cminformer.InformedWatcher, logger *zap.SugaredLogger, lvlMGR klogging.LevelManager) {
+	if _, err := kubeclient.Get(ctx).CoreV1().ConfigMaps(system.Namespace()).Get(ctx, logging.ConfigMapName(),
+		metav1.GetOptions{}); err == nil {
+		cmw.Watch(logging.ConfigMapName(), lvlMGR.Update())
+	} else if !apierrors.IsNotFound(err) {
+		logger.Fatalw("Error reading ConfigMap "+logging.ConfigMapName(), zap.Error(err))
+	}
 }

@@ -25,4 +25,5 @@ data:
     }
 kind: ConfigMap
 metadata:
+  namespace: pkg-system
   name: config-logging
