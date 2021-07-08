@@ -88,7 +88,7 @@ func (o *ObjectConditionSet) RemoveObjectConditionByObjRef(objref corev1.ObjectR
 	o.accessor.SetObjectConditions(o.accessor.GetObjectConditions().RemoveObjectConditionByObjRef(objref))
 }
 
-// GetObjectConditionByObjRef returns object conditon by object reference, returns nil if not found
+// GetObjectConditionByObjRef returns object condition by object reference, returns nil if not found
 func (o *ObjectConditionSet) GetObjectConditionByObjRef(objref corev1.ObjectReference) *ObjectCondition {
 	return o.accessor.GetObjectConditions().GetObjectConditionByObjRef(objref)
 }

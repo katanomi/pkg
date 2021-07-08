@@ -28,7 +28,7 @@ type ObjectCondition struct {
 }
 
 // IsTheSame compares both object conditions and returns true if its the same object
-// it uses the ObjectReference as comparisson method and ignore all condition related attributes
+// it uses the ObjectReference as comparisons method and ignore all condition related attributes
 // making this useful when managing ObjectConditions
 func (o ObjectCondition) IsTheSame(obj ObjectCondition) bool {
 	return IsTheSameObject(o.ObjectReference, obj.ObjectReference)
@@ -54,7 +54,7 @@ func (o ObjectConditions) SetObjectCondition(objc ObjectCondition) ObjectConditi
 	return o
 }
 
-// GetObjectConditionByObjRef get object conditon by object reference, returns nil if not found
+// GetObjectConditionByObjRef get object condition by object reference, returns nil if not found
 func (o ObjectConditions) GetObjectConditionByObjRef(objref corev1.ObjectReference) *ObjectCondition {
 	for _, each := range o {
 		if IsTheSameObject(each.ObjectReference, objref) {

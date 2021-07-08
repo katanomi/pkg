@@ -20,7 +20,7 @@ import corev1 "k8s.io/api/core/v1"
 
 type ObjectReference = corev1.ObjectReference
 
-// IsTheSameObjRef comapres two corev1.ObjectReference comparing:
+// IsTheSameObjRef compares two corev1.ObjectReference comparing:
 // APIVersion, Kind, Name and Namespace. All other attributes are ignored
 func IsTheSameObject(obj, compared corev1.ObjectReference) bool {
 	return obj.APIVersion == compared.APIVersion &&
