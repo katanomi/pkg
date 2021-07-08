@@ -14,26 +14,20 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package manager
+package testing
 
 import (
-	"context"
+	"io/ioutil"
 
-	"sigs.k8s.io/controller-runtime/pkg/manager"
+	"sigs.k8s.io/yaml"
 )
 
-type managerCtxKey struct{}
-
-// WithManager sets a manager instance into a context
-func WithManager(ctx context.Context, mgr manager.Manager) context.Context {
-	return context.WithValue(ctx, managerCtxKey{}, mgr)
-}
-
-// Manager returns a manager in a given context. Returns nil if not found
-func Manager(ctx context.Context) manager.Manager {
-	val := ctx.Value(managerCtxKey{})
-	if val == nil {
-		return nil
+// LoadYAML loads yaml
+func LoadYAML(file string, obj interface{}) (err error) {
+	var data []byte
+	if data, err = ioutil.ReadFile(file); err != nil {
+		return
 	}
-	return val.(manager.Manager)
+	err = yaml.Unmarshal(data, obj)
+	return
 }

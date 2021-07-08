@@ -14,26 +14,17 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package manager
+package v1alpha1
 
-import (
-	"context"
+import corev1 "k8s.io/api/core/v1"
 
-	"sigs.k8s.io/controller-runtime/pkg/manager"
-)
+type ObjectReference = corev1.ObjectReference
 
-type managerCtxKey struct{}
-
-// WithManager sets a manager instance into a context
-func WithManager(ctx context.Context, mgr manager.Manager) context.Context {
-	return context.WithValue(ctx, managerCtxKey{}, mgr)
-}
-
-// Manager returns a manager in a given context. Returns nil if not found
-func Manager(ctx context.Context) manager.Manager {
-	val := ctx.Value(managerCtxKey{})
-	if val == nil {
-		return nil
-	}
-	return val.(manager.Manager)
+// IsTheSameObjRef compares two corev1.ObjectReference comparing:
+// APIVersion, Kind, Name and Namespace. All other attributes are ignored
+func IsTheSameObject(obj, compared corev1.ObjectReference) bool {
+	return obj.APIVersion == compared.APIVersion &&
+		obj.Kind == compared.Kind &&
+		obj.Name == compared.Name &&
+		obj.Namespace == compared.Namespace
 }
