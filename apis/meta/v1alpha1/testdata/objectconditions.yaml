@@ -1,0 +1,10 @@
+- type: Ready
+  status: "True"
+  kind: Pod
+  apiVersion: v1
+  name: abc
+- type: Ready
+  status: "False"
+  kind: Pod
+  apiVersion: v1
+  name: def

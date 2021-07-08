@@ -1,0 +1,5 @@
+type: Ready
+status: "False"
+kind: Pod
+apiVersion: v1
+name: abc
