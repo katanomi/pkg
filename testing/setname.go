@@ -17,28 +17,11 @@ limitations under the License.
 package testing
 
 import (
-	"io/ioutil"
-
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-
-	. "github.com/onsi/gomega"
-	"sigs.k8s.io/yaml"
 )
 
-// LoadYAML loads yaml
-func LoadYAML(file string, obj interface{}) (err error) {
-	var data []byte
-	if data, err = ioutil.ReadFile(file); err != nil {
-		return
+func SetName(name string) func(metav1.Object) {
+	return func(obj metav1.Object) {
+		obj.SetName(name)
 	}
-	err = yaml.Unmarshal(data, obj)
-	return
-}
-
-func LoadObjectOrDie(g *WithT, file string, obj metav1.Object, patches ...func(metav1.Object)) metav1.Object {
-	g.Expect(LoadYAML(file, obj)).To(Succeed(), "could not load file into metav1.Object")
-	for _, p := range patches {
-		p(obj)
-	}
-	return obj
 }
