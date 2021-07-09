@@ -41,6 +41,14 @@ vet: ## Run go vet against code.
 test: fmt vet gomock goimports ## Run go test ./... against code
 	go test ./... -coverprofile cover.out
 
+generate: controller-gen ## Generate code containing DeepCopy, DeepCopyInto, and DeepCopyObject method implementations.
+	$(CONTROLLER_GEN) object:headerFile="hack/boilerplate.go.txt" paths="./..."
+
+CONTROLLER_GEN = $(shell pwd)/bin/controller-gen
+controller-gen: ## Download controller-gen locally if necessary.
+	## this is a necessary evil already reported by knative community https://github.com/kubernetes-sigs/controller-tools/ issue 560
+	## once the issue is fixed we can move to use the original package. the original line uses go-get-tools with sigs.k8s.io/controller-tools/cmd/controller-gen@v0.4.1
+	$(call go-get-fork,$(CONTROLLER_GEN),https://github.com/danielfbm/controller-tools,cmd/controller-gen,controller-gen)
 
 GOMOCK = $(shell pwd)/bin/gomock
 gomock: ## Download gomock locally if necessary.
@@ -61,6 +69,20 @@ cd $$TMP_DIR ;\
 go mod init tmp ;\
 echo "Downloading $(2)" ;\
 GOBIN=$(PROJECT_DIR)/bin go get $(2) ;\
+rm -rf $$TMP_DIR ;\
+}
+endef
+
+# go-get-fork is a "go-get-tool" like command to get temporary module forks.
+define go-get-fork
+@[ -f $(1) ] || { \
+set -e ;\
+TMP_DIR=$$(mktemp -d) ;\
+cd $$TMP_DIR ;\
+echo "Cloning $(2)" ;\
+git clone $(2) $(4) ;\
+cd $(4) ;\
+GOBIN=$(PROJECT_DIR)/bin go install ./$(3);\
 rm -rf $$TMP_DIR ;\
 }
 endef

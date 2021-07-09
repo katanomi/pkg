@@ -27,8 +27,6 @@ import (
 func TestObjectConditions(t *testing.T) {
 	g := NewGomegaWithT(t)
 
-	// ctx := context.TODO()
-
 	objcs := ObjectConditions{}
 	g.Expect(ktesting.LoadYAML("testdata/objectconditions.yaml", &objcs)).To(Succeed())
 
@@ -52,4 +50,18 @@ func TestObjectConditions(t *testing.T) {
 	g.Expect(abcobjcs).To(HaveLen(2))
 	diff = cmp.Diff(abcobjcs[1], abcPod)
 	g.Expect(diff).To(BeEmpty())
+}
+
+func TestDeepCopy(t *testing.T) {
+	g := NewGomegaWithT(t)
+
+	objcs := ObjectConditions{}
+	g.Expect(ktesting.LoadYAML("testdata/objectconditions.yaml", &objcs)).To(Succeed())
+
+	g.Expect(cmp.Diff(objcs, objcs.DeepCopy())).To(BeEmpty())
+
+	abcPod := ObjectCondition{}
+	g.Expect(ktesting.LoadYAML("testdata/objectcondition-pod-abc.yaml", &abcPod)).To(Succeed())
+
+	g.Expect(cmp.Diff(&abcPod, abcPod.DeepCopy())).To(BeEmpty())
 }
