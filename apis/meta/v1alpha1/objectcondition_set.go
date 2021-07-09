@@ -23,12 +23,14 @@ import (
 )
 
 // ObjectConditionAccessor sets and gets ObjectConditions
+// +k8s:deepcopy-gen=false
 type ObjectConditionAccessor interface {
 	GetObjectConditions() ObjectConditions
 	SetObjectConditions(ObjectConditions)
 }
 
 // ObjectConditionChanger sets and removes objects
+// +k8s:deepcopy-gen=false
 type ObjectConditionChanger interface {
 	SetObjectCondition(objc ObjectCondition)
 	GetObjectConditionByObjRef(objref corev1.ObjectReference) *ObjectCondition
@@ -36,6 +38,7 @@ type ObjectConditionChanger interface {
 }
 
 // ObjectConditionManager manages
+// +k8s:deepcopy-gen=false
 type ObjectConditionManager interface {
 	ObjectConditionAccessor
 	ObjectConditionChanger
@@ -63,6 +66,7 @@ func ManageObjectCondition(accessor ObjectConditionAccessor) ObjectConditionMana
 
 // ObjectConditionSet set of object conditions managed in a controller and added to specific object types
 // it helps iterate and update its contents
+// +k8s:deepcopy-gen=false
 type ObjectConditionSet struct {
 	accessor ObjectConditionAccessor
 }
