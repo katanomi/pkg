@@ -3,7 +3,8 @@ module github.com/katanomi/pkg
 go 1.16
 
 require (
-	github.com/go-logr/logr v0.3.0
+	github.com/blendle/zapdriver v1.3.1
+	github.com/go-logr/logr v0.3.0 // indirect
 	github.com/go-logr/zapr v0.2.0
 	github.com/golang/mock v1.6.0
 	github.com/google/go-cmp v0.5.5
@@ -19,3 +20,5 @@ require (
 	yunion.io/x/log v0.0.0-20201210064738-43181789dc74 // indirect
 	yunion.io/x/pkg v0.0.0-20210218105412-13a69f60034c
 )
+
+replace go.uber.org/zap v1.17.0 => github.com/katanomi/zap v1.18.2 // indirect

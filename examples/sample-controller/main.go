@@ -26,7 +26,7 @@ import (
 )
 
 func main() {
-	sharedmain.Main("test", scheme.Scheme, &Controller{})
+	sharedmain.Main("test", scheme.Scheme, &Controller{}, &Controller2{})
 }
 
 type Controller struct {
@@ -37,6 +37,24 @@ func (c *Controller) Name() string {
 }
 
 func (c *Controller) Setup(ctx context.Context, mgr manager.Manager, logger *zap.SugaredLogger) error {
-	logger.Infow("info msg", "hello", "world")
+	logger.Errorf("error msg", "hello", "001")
+	logger.Warnw("warn msg", "hello", "001")
+	logger.Infow("info msg", "hello", "001")
+	logger.Debugf("debug msg", "hello", "001")
+	return nil
+}
+
+type Controller2 struct {
+}
+
+func (c *Controller2) Name() string {
+	return "controller-test-bak"
+}
+
+func (c *Controller2) Setup(ctx context.Context, mgr manager.Manager, logger *zap.SugaredLogger) error {
+	logger.Errorf("error msg", "hello", "002")
+	logger.Warnw("warn msg", "hello", "002")
+	logger.Infow("info msg", "hello", "002")
+	logger.Debugf("debug msg", "hello", "002")
 	return nil
 }
