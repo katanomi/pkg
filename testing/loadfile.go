@@ -19,6 +19,7 @@ package testing
 import (
 	"io/ioutil"
 
+	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	. "github.com/onsi/gomega"
@@ -35,8 +36,18 @@ func LoadYAML(file string, obj interface{}) (err error) {
 	return
 }
 
+// LoadObjectOrDie loads object from yaml and returns
 func LoadObjectOrDie(g *WithT, file string, obj metav1.Object, patches ...func(metav1.Object)) metav1.Object {
 	g.Expect(LoadYAML(file, obj)).To(Succeed(), "could not load file into metav1.Object")
+	for _, p := range patches {
+		p(obj)
+	}
+	return obj
+}
+
+// LoadObjectReferenceOrDie loads object reference from yaml and returns
+func LoadObjectReferenceOrDie(g *WithT, file string, obj *corev1.ObjectReference, patches ...func(*corev1.ObjectReference)) *corev1.ObjectReference {
+	g.Expect(LoadYAML(file, obj)).To(Succeed(), "could not load file into corev1.ObjectReference")
 	for _, p := range patches {
 		p(obj)
 	}
