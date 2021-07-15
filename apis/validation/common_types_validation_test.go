@@ -26,7 +26,7 @@ import (
 	"k8s.io/apimachinery/pkg/util/validation/field"
 )
 
-func TestValidateName(t *testing.T) {
+func TestValidateCommonObject(t *testing.T) {
 	g := NewGomegaWithT(t)
 
 	table := map[string]struct {
@@ -67,7 +67,56 @@ func TestValidateName(t *testing.T) {
 	for i, test := range table {
 		t.Run(i, func(t *testing.T) {
 			g := NewGomegaWithT(t)
-			errs := ValidateName(test.Object, test.FieldPath)
+			errs := ValidateCommonObject(test.Object)
+			test.Evaluation(g, errs)
+		})
+	}
+
+}
+
+func TestValidateObjectReference(t *testing.T) {
+	g := NewGomegaWithT(t)
+
+	table := map[string]struct {
+		Object            *corev1.ObjectReference
+		optional          bool
+		needsResourceType bool
+		FieldPath         *field.Path
+		Evaluation        func(g *WithT, errs field.ErrorList)
+	}{
+		"Nil non optional, should error": {
+			nil,
+			false,
+			true,
+			nil,
+			func(g *WithT, errs field.ErrorList) {
+				g.Expect(errs).To(HaveLen(1))
+			},
+		},
+		"Object reference without name, apiversion and kind, should return three errors": {
+			ktesting.LoadObjectReferenceOrDie(g, "testdata/objectreference.namespace.yaml", &corev1.ObjectReference{}),
+			false,
+			true,
+			nil,
+			func(g *WithT, errs field.ErrorList) {
+				g.Expect(errs).To(HaveLen(3))
+			},
+		},
+		"Full pod object reference should succeed": {
+			ktesting.LoadObjectReferenceOrDie(g, "testdata/objectreference.pod.yaml", &corev1.ObjectReference{}),
+			false,
+			true,
+			nil,
+			func(g *WithT, errs field.ErrorList) {
+				g.Expect(errs).To(BeEmpty())
+			},
+		},
+	}
+
+	for i, test := range table {
+		t.Run(i, func(t *testing.T) {
+			g := NewGomegaWithT(t)
+			errs := ValidateObjectReference(test.Object, test.optional, test.needsResourceType, test.FieldPath)
 			test.Evaluation(g, errs)
 		})
 	}
