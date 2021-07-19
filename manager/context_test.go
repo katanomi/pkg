@@ -16,7 +16,7 @@ limitations under the License.
 
 package manager
 
-//go:generate mockgen -package=manager -destination=../mock/sigs.k8s.io/controller-runtime/pkg/manager/manager.go  sigs.k8s.io/controller-runtime/pkg/manager Manager
+//go:generate mockgen -package=manager -destination=../testing/mock/sigs.k8s.io/controller-runtime/pkg/manager/manager.go  sigs.k8s.io/controller-runtime/pkg/manager Manager
 
 import (
 	"context"
@@ -25,7 +25,7 @@ import (
 	"github.com/golang/mock/gomock"
 	. "github.com/onsi/gomega"
 
-	mockmgr "github.com/katanomi/pkg/mock/sigs.k8s.io/controller-runtime/pkg/manager"
+	mockmgr "github.com/katanomi/pkg/testing/mock/sigs.k8s.io/controller-runtime/pkg/manager"
 )
 
 func TestManagerContext(t *testing.T) {
