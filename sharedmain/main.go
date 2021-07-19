@@ -151,7 +151,7 @@ func MainWithConfig(ctx context.Context, component string, cfg *rest.Config, opt
 	// uses the controller constructor below to provide a specific logger for each
 	// with the specified atomicLevel
 	//sharedmain.WatchLoggingConfigOrDie(ctx, cmw, logger, atomicLevel, component)
-	WatchLoggingConfigOrDie(ctx, cmw, logger, lvlMGR)
+	WatchLoggingConfigOrDie(ctx, cmw, logger, &lvlMGR)
 	// call constructors
 	systemConfigMap, err := kubeclient.Get(ctx).CoreV1().ConfigMaps(system.Namespace()).Get(ctx, logging.ConfigMapName(),
 		metav1.GetOptions{})
@@ -224,7 +224,6 @@ func GetLoggingConfig(ctx context.Context) (*logging.Config, error) {
 	var lastErr error
 	if err := wait.PollImmediate(1*time.Second, 5*time.Second, func() (bool, error) {
 		lastErr := directClt.Get(ctx, key, loggingConfigMap)
-		fmt.Println("err?", lastErr, "key", key)
 		return lastErr == nil || apierrors.IsNotFound(lastErr), nil
 	}); err != nil {
 		return nil, fmt.Errorf("timed out waiting for the condition: %w", lastErr)
@@ -244,7 +243,7 @@ func flush(logger *zap.SugaredLogger) {
 // WatchLoggingConfigOrDie establishes a watch of the logging config or dies by
 // calling log.Fatalw. Note, if the config does not exist, it will be defaulted
 // and this method will not die.
-func WatchLoggingConfigOrDie(ctx context.Context, cmw *cminformer.InformedWatcher, logger *zap.SugaredLogger, lvlMGR klogging.LevelManager) {
+func WatchLoggingConfigOrDie(ctx context.Context, cmw *cminformer.InformedWatcher, logger *zap.SugaredLogger, lvlMGR *klogging.LevelManager) {
 	if _, err := kubeclient.Get(ctx).CoreV1().ConfigMaps(system.Namespace()).Get(ctx, logging.ConfigMapName(),
 		metav1.GetOptions{}); err == nil {
 		cmw.Watch(logging.ConfigMapName(), lvlMGR.Update())

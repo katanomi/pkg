@@ -26,7 +26,14 @@ import (
 )
 
 func main() {
-	sharedmain.Main("test", scheme.Scheme, &Controller{}, &Controller2{})
+	// sharedmain.Main("test", scheme.Scheme, &Controller{}, &Controller2{})
+
+	sharedmain.App("test").
+		Scheme(scheme.Scheme).
+		Log().
+		Profiling().
+		Controllers(&Controller{}, &Controller2{}).
+		Run()
 }
 
 type Controller struct {
