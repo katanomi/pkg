@@ -18,9 +18,12 @@ package validation
 
 import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime/schema"
 
 	corev1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/api/errors"
 	apimachineryvalidation "k8s.io/apimachinery/pkg/api/validation"
+	v1validation "k8s.io/apimachinery/pkg/apis/meta/v1/validation"
 	"k8s.io/apimachinery/pkg/util/validation/field"
 )
 
@@ -60,6 +63,8 @@ func ValidateCommonObject(obj metav1.Object) field.ErrorList {
 
 	errs = append(errs, ValidateName(obj, field.NewPath("metadata", "name"))...)
 
+	errs = append(errs, v1validation.ValidateLabels(obj.GetLabels(), field.NewPath("metadata", "labels"))...)
+
 	errs = append(errs, apimachineryvalidation.ValidateAnnotations(obj.GetAnnotations(), field.NewPath("metadata", "annotations"))...)
 
 	return errs
@@ -76,4 +81,13 @@ func ValidateItemName(name string, prefix bool, fld *field.Path) field.ErrorList
 		}
 	}
 	return errs
+}
+
+// ReturnInvalidError returns a Invalid error if the error list is not empty
+func ReturnInvalidError(gk schema.GroupKind, name string, errs field.ErrorList) error {
+	if len(errs) == 0 {
+		return nil
+	}
+	return errors.NewInvalid(gk, name, errs)
+
 }

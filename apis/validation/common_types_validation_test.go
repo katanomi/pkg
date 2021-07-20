@@ -17,12 +17,14 @@ limitations under the License.
 package validation
 
 import (
+	"fmt"
 	"testing"
 
 	ktesting "github.com/katanomi/pkg/testing"
 	. "github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/util/validation/field"
 )
 
@@ -120,5 +122,14 @@ func TestValidateObjectReference(t *testing.T) {
 			test.Evaluation(g, errs)
 		})
 	}
+
+}
+
+func TestReturnInvalidError(t *testing.T) {
+	g := NewGomegaWithT(t)
+	gk := schema.GroupKind{Group: "abc", Kind: "FooBar"}
+	g.Expect(ReturnInvalidError(gk, "abc", field.ErrorList{})).To(BeNil())
+
+	g.Expect(ReturnInvalidError(gk, "abc", field.ErrorList{field.InternalError(field.NewPath("abc"), fmt.Errorf("some err"))})).ToNot(BeNil())
 
 }
