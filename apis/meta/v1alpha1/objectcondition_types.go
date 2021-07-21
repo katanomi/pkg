@@ -25,6 +25,9 @@ import (
 type ObjectCondition struct {
 	apis.Condition         `json:",inline"`
 	corev1.ObjectReference `json:",inline"`
+	// Annotations necessary annotations for ObjectCondition
+	// +optional
+	Annotations map[string]string `json:"annotations,omitempty"`
 }
 
 // IsTheSame compares both object conditions and returns true if its the same object
