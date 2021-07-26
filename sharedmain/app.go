@@ -176,7 +176,9 @@ func (a *AppBuilder) Controllers(ctors ...Controller) *AppBuilder {
 		name := controller.Name()
 		controllerAtomicLevel := a.LevelManager.Get(name)
 		controllerLogger := a.Logger.Desugar().WithOptions(zap.UpdateCore(controllerAtomicLevel, *a.ZapConfig)).Named(name).Sugar()
-		controller.Setup(a.Context, a.Manager, controllerLogger)
+		if err := controller.Setup(a.Context, a.Manager, controllerLogger); err != nil {
+			a.Logger.Fatalw("controller setup error", "ctrl", name, "err", err)
+		}
 	}
 
 	a.startFunc = append(a.startFunc, func(ctx context.Context) error {
