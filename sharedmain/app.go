@@ -150,6 +150,7 @@ func (a *AppBuilder) Controllers(ctors ...Controller) *AppBuilder {
 			a.Logger.Fatalw("unable to load the config file", "err", err)
 		}
 	}
+	options.Scheme = a.scheme
 
 	// this logger will not respect the automatic level update feature
 	// and should not be used
@@ -176,13 +177,37 @@ func (a *AppBuilder) Controllers(ctors ...Controller) *AppBuilder {
 		name := controller.Name()
 		controllerAtomicLevel := a.LevelManager.Get(name)
 		controllerLogger := a.Logger.Desugar().WithOptions(zap.UpdateCore(controllerAtomicLevel, *a.ZapConfig)).Named(name).Sugar()
-		controller.Setup(a.Context, a.Manager, controllerLogger)
+		if err := controller.Setup(a.Context, a.Manager, controllerLogger); err != nil {
+			a.Logger.Fatalw("controller setup error", "ctrl", name, "err", err)
+		}
 	}
 
 	a.startFunc = append(a.startFunc, func(ctx context.Context) error {
 		return a.Manager.Start(ctx)
 	})
 
+	return a
+}
+
+// Webhooks adds webhook setup for objects in app
+func (a *AppBuilder) Webhooks(objs ...runtime.Object) *AppBuilder {
+	a.init()
+	for _, obj := range objs {
+		if obj == nil {
+			continue
+		}
+		var err error
+		if setup, ok := obj.(WebhookSetup); ok {
+			err = setup.SetupWebhookWithManager(a.Manager)
+		} else {
+			err = ctrl.NewWebhookManagedBy(a.Manager).
+				For(obj).
+				Complete()
+		}
+		if err != nil {
+			a.Logger.Fatalw("webhook setup error for obj", "obj", obj.GetObjectKind(), "err", err)
+		}
+	}
 	return a
 }
 
@@ -225,4 +250,9 @@ func (a *AppBuilder) Run() error {
 	}
 
 	return nil
+}
+
+// WebhookSetup method to inject and setup webhooks using the object
+type WebhookSetup interface {
+	SetupWebhookWithManager(mgr ctrl.Manager) error
 }

@@ -163,7 +163,9 @@ func MainWithConfig(ctx context.Context, component string, cfg *rest.Config, opt
 		name := controller.Name()
 		controllerAtomicLevel := lvlMGR.Get(name)
 		controllerLogger := logger.Desugar().WithOptions(zap.UpdateCore(controllerAtomicLevel, *zapConfig)).Named(name).Sugar()
-		controller.Setup(ctx, mgr, controllerLogger)
+		if err := controller.Setup(ctx, mgr, controllerLogger); err != nil {
+			logger.Fatalw("controller setup error", "ctrl", name, "err", err)
+		}
 	}
 
 	eg, egCtx := errgroup.WithContext(ctx)
