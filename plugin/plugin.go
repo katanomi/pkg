@@ -26,7 +26,6 @@ import (
 	"time"
 
 	"github.com/katanomi/pkg/plugin/client"
-	"github.com/katanomi/pkg/plugin/component/tracing"
 	"github.com/katanomi/pkg/plugin/config"
 
 	"github.com/emicklei/go-restful/v3"
@@ -62,16 +61,6 @@ func (p *plugin) WithClient(clients ...client.PluginClient) *plugin {
 func (p *plugin) prepare() {
 	if p.config == nil {
 		p.config = config.NewConfig()
-	}
-
-	if p.config.Trace.Enable {
-		closer, err := tracing.Config(&p.config.Trace)
-		if err != nil {
-			panic(fmt.Sprintf("add srevice error: %s", err.Error()))
-		}
-		if closer != nil {
-			p.shutdownFuncs = append(p.shutdownFuncs, closer.Close)
-		}
 	}
 
 	restful.DefaultContainer.Add(route.NewDefaultService())

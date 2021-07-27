@@ -19,6 +19,8 @@ package main
 import (
 	"context"
 
+	"github.com/katanomi/pkg/tracing"
+
 	"github.com/katanomi/pkg/sharedmain"
 	"go.uber.org/zap"
 	"k8s.io/client-go/kubernetes/scheme"
@@ -29,6 +31,7 @@ func main() {
 	sharedmain.App("test").
 		Scheme(scheme.Scheme).
 		Log().
+		Tracing().
 		Profiling().
 		Controllers(&Controller{}, &Controller2{}).
 		Run()
@@ -41,11 +44,19 @@ func (c *Controller) Name() string {
 	return "controller-test"
 }
 
-func (c *Controller) Setup(ctx context.Context, mgr manager.Manager, logger *zap.SugaredLogger) error {
+func (c *Controller) Setup(ctx context.Context, mgr manager.Manager, logger *zap.SugaredLogger, tracingManager *tracing.Manager) error {
 	logger.Errorf("error msg", "hello", "001")
 	logger.Warnw("warn msg", "hello", "001")
 	logger.Infow("info msg", "hello", "001")
 	logger.Debugf("debug msg", "hello", "001")
+
+	tracer, err := tracingManager.Tracer(c.Name())
+	if err != nil {
+		return err
+	}
+
+	tracer.StartSpan("controller 1 Setup")
+
 	return nil
 }
 
@@ -56,10 +67,18 @@ func (c *Controller2) Name() string {
 	return "controller-test-bak"
 }
 
-func (c *Controller2) Setup(ctx context.Context, mgr manager.Manager, logger *zap.SugaredLogger) error {
+func (c *Controller2) Setup(ctx context.Context, mgr manager.Manager, logger *zap.SugaredLogger, tracingManager *tracing.Manager) error {
 	logger.Errorf("error msg", "hello", "002")
 	logger.Warnw("warn msg", "hello", "002")
 	logger.Infow("info msg", "hello", "002")
 	logger.Debugf("debug msg", "hello", "002")
+
+	tracer, err := tracingManager.Tracer(c.Name())
+	if err != nil {
+		return err
+	}
+
+	tracer.StartSpan("controller 2 Setup")
+
 	return nil
 }

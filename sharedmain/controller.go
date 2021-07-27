@@ -19,6 +19,8 @@ package sharedmain
 import (
 	"context"
 
+	"github.com/katanomi/pkg/tracing"
+
 	"go.uber.org/zap"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 )
@@ -27,5 +29,5 @@ import (
 // a new controller and startup in the controller manager
 type Controller interface {
 	Name() string
-	Setup(context.Context, manager.Manager, *zap.SugaredLogger) error
+	Setup(context.Context, manager.Manager, *zap.SugaredLogger, *tracing.Manager) error
 }

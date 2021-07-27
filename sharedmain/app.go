@@ -24,6 +24,8 @@ import (
 	"net/http"
 	"sync"
 
+	"github.com/katanomi/pkg/tracing"
+
 	"github.com/go-logr/zapr"
 	kclient "github.com/katanomi/pkg/client"
 	klogging "github.com/katanomi/pkg/logging"
@@ -70,6 +72,9 @@ type AppBuilder struct {
 
 	// Profiling
 	ProfilingServer *http.Server
+
+	//tracing
+	tracingManager *tracing.Manager
 
 	startFunc []func(context.Context) error
 }
@@ -177,7 +182,7 @@ func (a *AppBuilder) Controllers(ctors ...Controller) *AppBuilder {
 		name := controller.Name()
 		controllerAtomicLevel := a.LevelManager.Get(name)
 		controllerLogger := a.Logger.Desugar().WithOptions(zap.UpdateCore(controllerAtomicLevel, *a.ZapConfig)).Named(name).Sugar()
-		if err := controller.Setup(a.Context, a.Manager, controllerLogger); err != nil {
+		if err := controller.Setup(a.Context, a.Manager, controllerLogger, a.tracingManager); err != nil {
 			a.Logger.Fatalw("controller setup error", "ctrl", name, "err", err)
 		}
 	}
@@ -208,6 +213,21 @@ func (a *AppBuilder) Webhooks(objs ...runtime.Object) *AppBuilder {
 			a.Logger.Fatalw("webhook setup error for obj", "obj", obj.GetObjectKind(), "err", err)
 		}
 	}
+	return a
+}
+
+func (a *AppBuilder) Tracing() *AppBuilder {
+	manager, err := tracing.SetupTracingOrDie(a.Context, a.Logger)
+	if err != nil {
+		a.Logger.Fatalw("set up tracing error", "err", err)
+
+		return a
+	}
+
+	manager.WatchTracingConfigOrDie(a.Context, a.ConfigMapWatcher, a.Logger)
+
+	a.tracingManager = manager
+
 	return a
 }
 
@@ -247,6 +267,10 @@ func (a *AppBuilder) Run() error {
 
 	if a.Logger != nil {
 		a.Logger.Sync()
+	}
+
+	if a.tracingManager != nil {
+		a.tracingManager.Sync()
 	}
 
 	return nil

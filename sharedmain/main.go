@@ -26,6 +26,8 @@ import (
 	"os"
 	"time"
 
+	"github.com/katanomi/pkg/tracing"
+
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	cminformer "knative.dev/pkg/configmap/informer"
 
@@ -152,6 +154,13 @@ func MainWithConfig(ctx context.Context, component string, cfg *rest.Config, opt
 	// with the specified atomicLevel
 	//sharedmain.WatchLoggingConfigOrDie(ctx, cmw, logger, atomicLevel, component)
 	WatchLoggingConfigOrDie(ctx, cmw, logger, &lvlMGR)
+
+	tracingManager, err := tracing.SetupTracingOrDie(ctx, logger)
+	if err != nil {
+		logger.Panic(err, "unable to set up tracing")
+	}
+	tracingManager.WatchTracingConfigOrDie(ctx, cmw, logger)
+
 	// call constructors
 	systemConfigMap, err := kubeclient.Get(ctx).CoreV1().ConfigMaps(system.Namespace()).Get(ctx, logging.ConfigMapName(),
 		metav1.GetOptions{})
@@ -163,7 +172,7 @@ func MainWithConfig(ctx context.Context, component string, cfg *rest.Config, opt
 		name := controller.Name()
 		controllerAtomicLevel := lvlMGR.Get(name)
 		controllerLogger := logger.Desugar().WithOptions(zap.UpdateCore(controllerAtomicLevel, *zapConfig)).Named(name).Sugar()
-		if err := controller.Setup(ctx, mgr, controllerLogger); err != nil {
+		if err := controller.Setup(ctx, mgr, controllerLogger, tracingManager); err != nil {
 			logger.Fatalw("controller setup error", "ctrl", name, "err", err)
 		}
 	}
