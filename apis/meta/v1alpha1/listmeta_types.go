@@ -14,32 +14,29 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package main
+package v1alpha1
 
 import (
-	"github.com/katanomi/pkg/examples/sample-plugin/harbor"
-
-	// "github.com/katanomi/pkg/plugin"
-	"github.com/katanomi/pkg/sharedmain"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-func main() {
-	/*
-		err := plugin.NewPlugin().WithClient(
-			harbor.New(),
-		).Run()
+// ListMeta extension of the metav1.ListMeta with paging related data
+type ListMeta struct {
+	metav1.ListMeta `json:",inline"`
 
-		if err != nil {
-			fmt.Printf("plugin run err: %s, exit\n", err.Error())
-			os.Exit(1)
-		}
-	*/
-	sharedmain.App("harbor-example").
-		Log().
-		Tracing(nil).
-		Profiling().
-		APIDocs().
-		Plugins(
-			harbor.New(),
-		).Run()
+	// TotalItems returned in the list
+	TotalItems int `json:"totalItems"`
+}
+
+// ListOptions options for list
+type ListOptions struct {
+	// ItemsPerPage desired number of items to be returned in each page
+	ItemsPerPage int `json:"itemsPerPage"`
+
+	// Page desired to be returned
+	Page int `json:"page"`
+
+	// Custom search options
+	// +optional
+	Search map[string][]string `json:",inline"`
 }

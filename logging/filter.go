@@ -14,32 +14,19 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package main
+package logging
 
 import (
-	"github.com/katanomi/pkg/examples/sample-plugin/harbor"
-
-	// "github.com/katanomi/pkg/plugin"
-	"github.com/katanomi/pkg/sharedmain"
+	"github.com/emicklei/go-restful/v3"
+	"go.uber.org/zap"
+	"knative.dev/pkg/logging"
 )
 
-func main() {
-	/*
-		err := plugin.NewPlugin().WithClient(
-			harbor.New(),
-		).Run()
-
-		if err != nil {
-			fmt.Printf("plugin run err: %s, exit\n", err.Error())
-			os.Exit(1)
-		}
-	*/
-	sharedmain.App("harbor-example").
-		Log().
-		Tracing(nil).
-		Profiling().
-		APIDocs().
-		Plugins(
-			harbor.New(),
-		).Run()
+// Filter prometheus metric filter for go restful
+func Filter(logger *zap.SugaredLogger) func(req *restful.Request, resp *restful.Response, chain *restful.FilterChain) {
+	return func(req *restful.Request, resp *restful.Response, chain *restful.FilterChain) {
+		// injects logger into context
+		req.Request = req.Request.WithContext(logging.WithLogger(req.Request.Context(), logger))
+		chain.ProcessFilter(req, resp)
+	}
 }

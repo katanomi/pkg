@@ -18,11 +18,13 @@ package route
 
 import (
 	"net/http"
-	"strconv"
 
 	restfulspec "github.com/emicklei/go-restful-openapi/v2"
 	"github.com/emicklei/go-restful/v3"
+	kerrors "github.com/katanomi/pkg/errors"
 	"github.com/katanomi/pkg/plugin/client"
+
+	metav1alpha1 "github.com/katanomi/pkg/apis/meta/v1alpha1"
 )
 
 type resourceList struct {
@@ -33,44 +35,29 @@ type resourceList struct {
 // NewResourceList create a list resource route with plugin client
 func NewResourceList(impl client.ResourceLister) Route {
 	return &resourceList{
-		tags: []string{"projects"},
+		tags: []string{"resources"},
 		impl: impl,
 	}
 }
 
 func (r *resourceList) Register(ws *restful.WebService) {
-	ws.Route(ws.GET("/resources").To(r.ResourceList).
-		// docs
-		Doc("list projects").
-		Metadata(restfulspec.KeyOpenAPITags, r.tags))
+	ws.Route(
+		ListOptionsDocs(ws.GET("/resources").To(r.ResourceList).
+			// docs
+			// keep the name the same as the method to store in IntegrationClass
+			Doc("ListResources").
+			Metadata(restfulspec.KeyOpenAPITags, r.tags).
+			Returns(http.StatusOK, "OK", metav1alpha1.ResourceList{})))
 }
 
 // ResourceList http handler for list resource
 func (r *resourceList) ResourceList(request *restful.Request, response *restful.Response) {
-	option := r.parseQuery(request)
+	option := GetListOptionsFromRequest(request)
 	resources, err := r.impl.ListResources(request.Request.Context(), option)
 	if err != nil {
-		response.WriteError(http.StatusInternalServerError, err)
+		kerrors.HandleError(request, response, err)
 		return
 	}
 
-	response.WriteEntity(resources)
-}
-
-func (r *resourceList) parseQuery(request *restful.Request) client.ListOption {
-	option := client.ListOption{
-		ItemsPerPage: 10,
-		Page:         1,
-	}
-
-	itemsPerPage := request.QueryParameter("itemsPerPage")
-	if v, err := strconv.Atoi(itemsPerPage); err == nil {
-		option.ItemsPerPage = v
-	}
-	page := request.QueryParameter("page")
-	if v, err := strconv.Atoi(page); err == nil {
-		option.Page = v
-	}
-
-	return option
+	response.WriteHeaderAndEntity(http.StatusOK, resources)
 }

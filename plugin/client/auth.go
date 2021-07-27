@@ -19,37 +19,40 @@ package client
 import (
 	"context"
 	"encoding/base64"
+	"encoding/json"
 	"fmt"
 	"net/http"
 
 	"github.com/emicklei/go-restful/v3"
+	"github.com/katanomi/pkg/errors"
 
-	"k8s.io/apimachinery/pkg/util/json"
+	corev1 "k8s.io/api/core/v1"
 )
 
-const authContextKey = "plugin-auth"
+type authContextKey struct{}
 
 // Auth plugin auth
 // Method auth method, such as basic, oauth2
 // Secret a base64 encoded json object, with auth field included
 type Auth struct {
-	Method string `json:"method"`
-	Secret string `json:"Secret"`
+	// Type secret type as in kubernetes secret.type
+	Type string `json:"type"`
+	// Secret 's data value extracted from kubernetes
+	Secret map[string][]byte `json:"data"`
 }
 
 // ExtractAuth extract auth from a specific context
 func ExtractAuth(ctx context.Context) *Auth {
-	value := ctx.Value(authContextKey)
+	value := ctx.Value(authContextKey{})
 	if v, ok := value.(*Auth); ok {
 		return v
 	}
-
 	return nil
 }
 
 // WithContext returns a copy of parent include with the auth
 func (a *Auth) WithContext(ctx context.Context) context.Context {
-	return context.WithValue(ctx, authContextKey, a)
+	return context.WithValue(ctx, authContextKey{}, a)
 }
 
 type AuthMethod interface {
@@ -63,11 +66,10 @@ type AuthBasic struct {
 
 // Basic return a Basic auth struct
 func (a *Auth) Basic() (*AuthBasic, error) {
-	basic := &AuthBasic{}
-	if err := json.Unmarshal([]byte(a.Secret), basic); err != nil {
-		return nil, err
+	basic := &AuthBasic{
+		Username: string(a.Secret[corev1.BasicAuthUsernameKey]),
+		Password: string(a.Secret[corev1.BasicAuthPasswordKey]),
 	}
-
 	return basic, nil
 }
 
@@ -81,32 +83,38 @@ type AuthOauth2 struct {
 // Oauth2 return a Oauth2 struct
 func (a *Auth) Oauth2() (*AuthOauth2, error) {
 	oauth2 := &AuthOauth2{}
-	if err := json.Unmarshal([]byte(a.Secret), oauth2); err != nil {
-		return nil, err
-	}
+	// TODO: needs to add specific const keys to do conversion here
 
 	return oauth2, nil
 }
 
-var (
-	headerPluginAuth = "X-Plugin-Auth"
-	headerAuthSecret = "X-Plugin-Secret"
+const (
+	// PluginAuthHeader header for auth type (kubernetes secret type)
+	PluginAuthHeader = "X-Plugin-Auth"
+	// PluginSecretHeader header to store data part of the secret
+	PluginSecretHeader = "X-Plugin-Secret"
 )
 
 // AuthFilter auth filter for go restful, parsing plugin auth
 func AuthFilter(req *restful.Request, resp *restful.Response, chain *restful.FilterChain) {
-	method := req.HeaderParameter(headerPluginAuth)
-	encodedSecret := req.HeaderParameter(headerAuthSecret)
+	method := req.HeaderParameter(PluginAuthHeader)
+	encodedSecret := req.HeaderParameter(PluginSecretHeader)
 
 	decodedSecret, err := base64.StdEncoding.DecodeString(encodedSecret)
 	if err != nil {
-		resp.WriteError(http.StatusInternalServerError, fmt.Errorf("decode secret error: %s", err.Error()))
+		errors.HandleError(req, resp, fmt.Errorf("decode secret error: %s", err.Error()))
+		return
+	}
+
+	data := map[string][]byte{}
+	if err = json.Unmarshal(decodedSecret, &data); err != nil {
+		errors.HandleError(req, resp, fmt.Errorf("decode secret error: %s", err.Error()))
 		return
 	}
 
 	auth := Auth{
-		Method: method,
-		Secret: string(decodedSecret),
+		Type:   method,
+		Secret: data,
 	}
 
 	ctx := req.Request.Context()

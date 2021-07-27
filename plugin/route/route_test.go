@@ -26,13 +26,15 @@ import (
 	"testing"
 
 	"github.com/emicklei/go-restful/v3"
+	metav1alpha1 "github.com/katanomi/pkg/apis/meta/v1alpha1"
 	"github.com/katanomi/pkg/plugin/client"
 	. "github.com/onsi/gomega"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 func TestMatch(t *testing.T) {
 	testCases := []struct {
-		c   client.PluginClient
+		c   client.Interface
 		len int
 	}{
 		{
@@ -65,7 +67,7 @@ func TestMatch(t *testing.T) {
 
 func TestRegister(t *testing.T) {
 	testCases := []struct {
-		c    client.PluginClient
+		c    client.Interface
 		path string
 	}{
 		{
@@ -101,7 +103,7 @@ func TestRegister(t *testing.T) {
 }
 
 func TestNewService(t *testing.T) {
-	testCases := []client.PluginClient{
+	testCases := []client.Interface{
 		&TestProjectList{},
 		&TestProjectCreate{},
 		&TestResourceList{},
@@ -123,16 +125,17 @@ func TestNewService(t *testing.T) {
 func TestProjectListNoMeta(t *testing.T) {
 	g := NewGomegaWithT(t)
 
-	ws, err := NewService(&TestProjectList{})
+	ws, err := NewService(&TestProjectList{}, client.MetaFilter)
 	g.Expect(err).To(BeNil())
 
-	restful.DefaultContainer.Add(ws)
+	container := restful.NewContainer()
+	container.Add(ws)
 
 	httpRequest, _ := http.NewRequest("GET", "/test-1/projects", nil)
 	httpRequest.Header.Set("Accept", "*/*")
 	httpWriter := httptest.NewRecorder()
 
-	restful.DefaultContainer.Dispatch(httpWriter, httpRequest)
+	container.Dispatch(httpWriter, httpRequest)
 
 	g.Expect(httpWriter.Code).To(Equal(http.StatusBadRequest))
 }
@@ -140,23 +143,27 @@ func TestProjectListNoMeta(t *testing.T) {
 func TestProjectListWithMeta(t *testing.T) {
 	g := NewGomegaWithT(t)
 
-	ws, err := NewService(&TestProjectList{})
+	ws, err := NewService(&TestProjectList{}, client.MetaFilter)
 	g.Expect(err).To(BeNil())
 
-	restful.DefaultContainer.Add(ws)
+	container := restful.NewContainer()
+
+	container.Add(ws)
 
 	httpRequest, _ := http.NewRequest("GET", "/test-1/projects", nil)
 	httpRequest.Header.Set("Accept", "application/json")
 
-	meta := base64.StdEncoding.EncodeToString([]byte("http://api.test:v1"))
-	httpRequest.Header.Set("X-plugin-Meta", meta)
+	metaData := client.Meta{BaseURL: "http://api.test", Version: "v1"}
+	data, _ := json.Marshal(metaData)
+	meta := base64.StdEncoding.EncodeToString(data)
+	httpRequest.Header.Set(client.PluginMetaHeader, meta)
 
 	httpWriter := httptest.NewRecorder()
 
-	restful.DefaultContainer.Dispatch(httpWriter, httpRequest)
+	container.Dispatch(httpWriter, httpRequest)
 	g.Expect(httpWriter.Code).To(Equal(http.StatusOK))
 
-	list := client.ProjectList{}
+	list := metav1alpha1.ProjectList{}
 	err = json.Unmarshal(httpWriter.Body.Bytes(), &list)
 	g.Expect(err).To(BeNil())
 	g.Expect(list.Items).ToNot(BeEmpty())
@@ -169,14 +176,18 @@ func (t *TestProjectList) Path() string {
 	return "test-1"
 }
 
-func (t *TestProjectList) ListProjects(ctx context.Context, option client.ListOption) (client.ProjectList, error) {
-	return client.ProjectList{
-		Items: []*client.Project{
+func (t *TestProjectList) ListProjects(ctx context.Context, option metav1alpha1.ListOptions) (*metav1alpha1.ProjectList, error) {
+	return &metav1alpha1.ProjectList{
+		Items: []metav1alpha1.Project{
 			{
-				Kind: "1",
+				TypeMeta: metav1.TypeMeta{
+					Kind: "1",
+				},
 			},
 			{
-				Kind: "2",
+				TypeMeta: metav1.TypeMeta{
+					Kind: "2",
+				},
 			},
 		},
 	}, nil
@@ -189,8 +200,8 @@ func (t *TestProjectCreate) Path() string {
 	return "test-2"
 }
 
-func (t *TestProjectCreate) CreateProject(ctx context.Context, project *client.Project) (*client.Project, error) {
-	return &client.Project{}, nil
+func (t *TestProjectCreate) CreateProject(ctx context.Context, project *metav1alpha1.Project) (*metav1alpha1.Project, error) {
+	return &metav1alpha1.Project{}, nil
 }
 
 type TestResourceList struct {
@@ -200,8 +211,8 @@ func (t *TestResourceList) Path() string {
 	return "test-3"
 }
 
-func (t *TestResourceList) ListResources(ctx context.Context, option client.ListOption) (client.ResourceList, error) {
-	return client.ResourceList{}, nil
+func (t *TestResourceList) ListResources(ctx context.Context, option metav1alpha1.ListOptions) (*metav1alpha1.ResourceList, error) {
+	return &metav1alpha1.ResourceList{}, nil
 }
 
 type TestProjectListCreate struct {
@@ -211,10 +222,10 @@ func (t *TestProjectListCreate) Path() string {
 	return "test-4"
 }
 
-func (t *TestProjectListCreate) ListProjects(ctx context.Context, option client.ListOption) (client.ProjectList, error) {
-	return client.ProjectList{}, nil
+func (t *TestProjectListCreate) ListProjects(ctx context.Context, option metav1alpha1.ListOptions) (*metav1alpha1.ProjectList, error) {
+	return &metav1alpha1.ProjectList{}, nil
 }
 
-func (t *TestProjectListCreate) CreateProject(ctx context.Context, project *client.Project) (*client.Project, error) {
-	return &client.Project{}, nil
+func (t *TestProjectListCreate) CreateProject(ctx context.Context, project *metav1alpha1.Project) (*metav1alpha1.Project, error) {
+	return &metav1alpha1.Project{}, nil
 }

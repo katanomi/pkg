@@ -18,34 +18,29 @@ package client
 
 import (
 	"context"
+
+	metav1alpha1 "github.com/katanomi/pkg/apis/meta/v1alpha1"
 )
 
-// ListOption list option for list option
-type ListOption struct {
-	Keyword      string
-	ItemsPerPage int
-	Page         int
-}
-
-// PluginClient plugin api sub path
-type PluginClient interface {
+// Interface base interface for plugins
+type Interface interface {
 	Path() string
 }
 
 // ProjectLister list project api
 type ProjectLister interface {
-	PluginClient
-	ListProjects(ctx context.Context, option ListOption) (ProjectList, error)
+	Interface
+	ListProjects(ctx context.Context, option metav1alpha1.ListOptions) (*metav1alpha1.ProjectList, error)
 }
 
 // ProjectCreator create project api
 type ProjectCreator interface {
-	PluginClient
-	CreateProject(ctx context.Context, project *Project) (*Project, error)
+	Interface
+	CreateProject(ctx context.Context, project *metav1alpha1.Project) (*metav1alpha1.Project, error)
 }
 
 // ResourceLister list resource api
 type ResourceLister interface {
-	PluginClient
-	ListResources(ctx context.Context, option ListOption) (ResourceList, error)
+	Interface
+	ListResources(ctx context.Context, option metav1alpha1.ListOptions) (*metav1alpha1.ResourceList, error)
 }

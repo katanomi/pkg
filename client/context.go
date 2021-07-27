@@ -37,3 +37,19 @@ func Client(ctx context.Context) client.Client {
 	}
 	return val.(client.Client)
 }
+
+type clientmanagerCtxKey struct{}
+
+//WithManager sets a manager instance into a context
+func WithManager(ctx context.Context, mgr *Manager) context.Context {
+	return context.WithValue(ctx, clientmanagerCtxKey{}, mgr)
+}
+
+// ManagerCtx returns a *Manager in a given context. Returns nil if not found
+func ManagerCtx(ctx context.Context) *Manager {
+	val := ctx.Value(clientmanagerCtxKey{})
+	if val == nil {
+		return nil
+	}
+	return val.(*Manager)
+}

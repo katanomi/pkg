@@ -26,7 +26,7 @@ import (
 	"github.com/katanomi/pkg/plugin/component/tracing"
 )
 
-var filters = []restful.FilterFunction{
+var DefaultFilters = []restful.FilterFunction{
 	tracing.Filter,
 	metrics.Filter,
 	client.AuthFilter,
@@ -39,7 +39,7 @@ type Route interface {
 }
 
 // match math route with plugin client
-func match(c client.PluginClient) []Route {
+func match(c client.Interface) []Route {
 	routes := make([]Route, 0)
 	if v, ok := c.(client.ProjectLister); ok {
 		routes = append(routes, NewProjectList(v))
@@ -57,7 +57,7 @@ func match(c client.PluginClient) []Route {
 }
 
 // NewService new service from plugin client
-func NewService(c client.PluginClient) (*restful.WebService, error) {
+func NewService(c client.Interface, filters ...restful.FilterFunction) (*restful.WebService, error) {
 	routes := match(c)
 	if len(routes) == 0 {
 		return nil, fmt.Errorf("no route for provider %s", c.Path())

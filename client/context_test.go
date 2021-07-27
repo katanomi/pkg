@@ -36,3 +36,16 @@ func TestClientContext(t *testing.T) {
 	ctx = WithClient(ctx, fakeClt)
 	g.Expect(Client(ctx)).To(Equal(fakeClt))
 }
+
+func TestManagerContext(t *testing.T) {
+	g := NewGomegaWithT(t)
+
+	ctx := context.TODO()
+
+	clt := ManagerCtx(ctx)
+	g.Expect(clt).To(BeNil())
+
+	mgr := NewManager(ctx, nil, nil)
+	ctx = WithManager(ctx, mgr)
+	g.Expect(ManagerCtx(ctx)).To(Equal(mgr))
+}

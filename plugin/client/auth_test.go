@@ -27,8 +27,8 @@ func TestAuth_WithContext(t *testing.T) {
 	g := NewGomegaWithT(t)
 
 	auth := &Auth{
-		Method: "basic",
-		Secret: "123",
+		Type:   "basic",
+		Secret: map[string][]byte{"123": []byte("456")},
 	}
 
 	authCtx := auth.WithContext(context.TODO())
@@ -40,8 +40,8 @@ func TestExtractAuth(t *testing.T) {
 	g := NewGomegaWithT(t)
 
 	auth := &Auth{
-		Method: "basic",
-		Secret: "123",
+		Type:   "basic",
+		Secret: map[string][]byte{"123": []byte("456")},
 	}
 
 	authCtx := auth.WithContext(context.TODO())

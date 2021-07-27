@@ -36,7 +36,7 @@ import (
 // Plugin
 type plugin struct {
 	config        *config.Config
-	clients       []client.PluginClient
+	clients       []client.Interface
 	shutdownFuncs []ShutdownFunc
 }
 
@@ -52,7 +52,7 @@ func (p *plugin) WithConfig(c *config.Config) {
 	p.config = c
 }
 
-func (p *plugin) WithClient(clients ...client.PluginClient) *plugin {
+func (p *plugin) WithClient(clients ...client.Interface) *plugin {
 	p.clients = append(p.clients, clients...)
 
 	return p

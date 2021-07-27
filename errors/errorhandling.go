@@ -20,6 +20,7 @@ import (
 	goerrors "errors"
 	"net/http"
 
+	"github.com/emicklei/go-restful/v3"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -39,4 +40,11 @@ func AsStatusCode(err error) int {
 		return int(status.Status().Code)
 	}
 	return http.StatusInternalServerError
+}
+
+// HandleError handles error in requests
+func HandleError(req *restful.Request, resp *restful.Response, err error) {
+	err = AsAPIError(err)
+	status := AsStatusCode(err)
+	resp.WriteError(status, err)
 }

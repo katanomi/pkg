@@ -20,14 +20,21 @@ import (
 	"context"
 	"errors"
 	"flag"
+	"fmt"
 	"log"
 	"net/http"
+	"path"
 	"sync"
 
+	"github.com/emicklei/go-restful/v3"
 	"github.com/go-logr/zapr"
 	kclient "github.com/katanomi/pkg/client"
 	klogging "github.com/katanomi/pkg/logging"
 	kmanager "github.com/katanomi/pkg/manager"
+	"github.com/katanomi/pkg/plugin/client"
+	"github.com/katanomi/pkg/plugin/component/tracing"
+	"github.com/katanomi/pkg/plugin/config"
+	"github.com/katanomi/pkg/plugin/route"
 	"go.uber.org/zap"
 	"golang.org/x/sync/errgroup"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -71,6 +78,16 @@ type AppBuilder struct {
 	// Profiling
 	ProfilingServer *http.Server
 
+	// plugins
+	plugins []client.Interface
+
+	// tracing
+	tracingConfig *config.Config
+
+	// restful container
+	container *restful.Container
+	filters   []restful.FilterFunction
+
 	startFunc []func(context.Context) error
 }
 
@@ -88,6 +105,9 @@ func (a *AppBuilder) init() {
 		a.startFunc = append(a.startFunc, func(ctx context.Context) error {
 			return a.ConfigMapWatcher.Start(ctx.Done())
 		})
+		// a.container = restful.NewContainer()
+		// // a.filters = route.DefaultFilters
+		a.filters = []restful.FilterFunction{}
 	})
 }
 
@@ -126,6 +146,9 @@ func (a *AppBuilder) Log() *AppBuilder {
 		a.Logger.Fatalw("read logging configmap error", "err", err)
 	}
 	a.ConfigMapWatcher.OnChange(systemConfigMap)
+
+	// adds filter for logger
+	a.filters = append(a.filters, klogging.Filter(a.Logger))
 
 	return a
 }
@@ -211,6 +234,76 @@ func (a *AppBuilder) Webhooks(objs ...runtime.Object) *AppBuilder {
 	return a
 }
 
+// Tracing adds tracing capabilities to this app
+// TODO: change this configuration to use a configmap watcher and turn on/off on the fly
+func (a *AppBuilder) Tracing(cfg *config.Config) *AppBuilder {
+	if cfg == nil {
+		cfg = config.NewConfig()
+	}
+	a.tracingConfig = cfg
+
+	if a.tracingConfig.Trace.Enable {
+		closer, err := tracing.Config(&a.tracingConfig.Trace)
+		if err != nil {
+			a.Logger.Fatalw("tracing start error", "err", err)
+		}
+		if closer != nil {
+			a.startFunc = append(a.startFunc, func(ctx context.Context) error {
+				// waits until it is shutting down to close
+				<-ctx.Done()
+				return closer.Close()
+			})
+
+		}
+	}
+	return a
+}
+
+// Filters customize filters to this app
+func (a *AppBuilder) Filters(filters ...restful.FilterFunction) *AppBuilder {
+	a.filters = append(a.filters, filters...)
+	return a
+}
+
+func (a *AppBuilder) ClientManager(mgr *kclient.Manager) *AppBuilder {
+	a.Context = kclient.WithManager(a.Context, mgr)
+	return a
+}
+
+// Container adds a containers
+func (a *AppBuilder) Container(container *restful.Container) *AppBuilder {
+	a.container = container
+	return a
+}
+
+func (a *AppBuilder) Webservices(basePath string, webServices ...*restful.WebService) *AppBuilder {
+	for _, ws := range webServices {
+		previousPath := ws.RootPath()
+		a.container.Add(ws.Path(path.Join(basePath, previousPath)))
+	}
+	return a
+}
+
+// Plugins adds plugins to this app
+func (a *AppBuilder) Plugins(plugins ...client.Interface) *AppBuilder {
+	a.plugins = plugins
+
+	for _, plugin := range a.plugins {
+		ws, err := route.NewService(plugin, a.filters...)
+		if err != nil {
+			a.Logger.Fatalw("plugin could not start correctly", "err", err, "plugin", plugin.Path())
+		}
+		a.container.Add(ws)
+	}
+	return a
+}
+
+// APIDocs adds api docs to the server
+func (a *AppBuilder) APIDocs() *AppBuilder {
+	a.container.Add(route.NewDocService())
+	return a
+}
+
 // Profiling enables profiling http server
 func (a *AppBuilder) Profiling() *AppBuilder {
 	a.init()
@@ -229,6 +322,28 @@ func (a *AppBuilder) Profiling() *AppBuilder {
 
 // Run starts all
 func (a *AppBuilder) Run() error {
+
+	// adds a http server if there are any endpoints registered
+	if a.container != nil && len(a.container.RegisteredWebServices()) > 0 {
+		a.startFunc = append(a.startFunc, func(ctx context.Context) error {
+			// TODO: find a better way to get this configuration
+			for _, filter := range a.filters {
+				a.container.Filter(filter)
+			}
+
+			port := 8100
+			srv := &http.Server{
+				Addr:    fmt.Sprintf(":%d", port),
+				Handler: a.container,
+			}
+			return srv.ListenAndServe()
+			// if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			// 	return err
+			// }
+			// return nil
+		})
+	}
+
 	a.startInformers()
 
 	eg, egCtx := errgroup.WithContext(a.Context)
