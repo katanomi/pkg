@@ -16,13 +16,35 @@ limitations under the License.
 
 package client
 
-type Project struct {
-	Name   string `json:"name"`
-	URL    string `json:"url"`
-	Public bool   `json:"public"`
+type ListMeta struct {
+	// Total number of items on the list. Used for pagination.
+	TotalItems int `json:"totalItems"`
 }
 
-type ProjectList []Project
+type ProjectList struct {
+	ListMeta ListMeta   `json:"listMeta"`
+	Items    []*Project `json:"items"`
+	Errors   []error    `json:"errors"`
+}
+
+type Project struct {
+	ApiVersion string          `json:"apiVersion"`
+	Kind       string          `json:"kind"`
+	Metadata   ProjectMetadata `json:"metadata"`
+	Spec       ProjectSpec     `json:"spec"`
+}
+
+type ProjectMetadata struct {
+	Name string `json:"name"`
+}
+
+type ProjectSpec struct {
+	Name         string   `json:"name"`
+	BindProjects []string `json:"bindProjects"`
+	Public       bool     `json:"public"`
+	URL          string   `json:"url"`
+	Attributes   map[string]interface{}
+}
 
 type Resource struct {
 	Name    string `json:"name"`
@@ -31,4 +53,4 @@ type Resource struct {
 	Type    string `json:"type"`
 }
 
-type ResourceList []Resource
+type ResourceList []*Resource

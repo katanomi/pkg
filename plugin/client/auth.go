@@ -27,7 +27,7 @@ import (
 	"k8s.io/apimachinery/pkg/util/json"
 )
 
-var authContextKey = struct{}{}
+const authContextKey = "plugin-auth"
 
 // Auth plugin auth
 // Method auth method, such as basic, oauth2

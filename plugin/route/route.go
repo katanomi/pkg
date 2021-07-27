@@ -64,7 +64,7 @@ func NewService(c client.PluginClient) (*restful.WebService, error) {
 	}
 
 	group := &restful.WebService{}
-	group.Path(c.Path())
+	group.Path(c.Path()).Consumes(restful.MIME_JSON).Produces(restful.MIME_JSON)
 
 	for _, filter := range filters {
 		group.Filter(filter)

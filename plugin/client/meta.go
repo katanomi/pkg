@@ -26,9 +26,9 @@ import (
 	"github.com/emicklei/go-restful/v3"
 )
 
-var (
+const (
 	headerPluginMeta = "X-Plugin-Meta"
-	pluginContextKey = struct{}{}
+	metaContextKey   = "plugin-meta"
 )
 
 // Meta Plugin meta with base url and version info, for calling plugin api
@@ -39,12 +39,12 @@ type Meta struct {
 
 // WithContext returns a copy of parent include with the plugin meta
 func (p *Meta) WithContext(ctx context.Context) context.Context {
-	return context.WithValue(ctx, pluginContextKey, p)
+	return context.WithValue(ctx, metaContextKey, p)
 }
 
 // ExtraMeta extract meta from a specific context
 func ExtraMeta(ctx context.Context) *Meta {
-	value := ctx.Value(pluginContextKey)
+	value := ctx.Value(metaContextKey)
 	if v, ok := value.(*Meta); ok {
 		return v
 	}
@@ -61,15 +61,16 @@ func MetaFilter(req *restful.Request, resp *restful.Response, chain *restful.Fil
 		return
 	}
 
-	metaAttrs := strings.Split(string(decodedMeta), ":")
-	if len(metaAttrs) < 2 {
+	// meta sample https://api.sample:v1
+	i := strings.LastIndex(string(decodedMeta), ":")
+	if i < 0 {
 		resp.WriteError(http.StatusBadRequest, fmt.Errorf("invalid plugin meta: %s", decodedMeta))
 		return
 	}
 
 	meta := &Meta{
-		Version: metaAttrs[1],
-		BaseURL: metaAttrs[0],
+		BaseURL: string(decodedMeta[:i]),
+		Version: string(decodedMeta[i+1:]),
 	}
 
 	ctx := req.Request.Context()

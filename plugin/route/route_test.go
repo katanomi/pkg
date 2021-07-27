@@ -18,7 +18,11 @@ package route
 
 import (
 	"context"
+	"encoding/base64"
+	"encoding/json"
 	"fmt"
+	"net/http"
+	"net/http/httptest"
 	"testing"
 
 	"github.com/emicklei/go-restful/v3"
@@ -116,6 +120,48 @@ func TestNewService(t *testing.T) {
 	}
 }
 
+func TestProjectListNoMeta(t *testing.T) {
+	g := NewGomegaWithT(t)
+
+	ws, err := NewService(&TestProjectList{})
+	g.Expect(err).To(BeNil())
+
+	restful.DefaultContainer.Add(ws)
+
+	httpRequest, _ := http.NewRequest("GET", "/test-1/projects", nil)
+	httpRequest.Header.Set("Accept", "*/*")
+	httpWriter := httptest.NewRecorder()
+
+	restful.DefaultContainer.Dispatch(httpWriter, httpRequest)
+
+	g.Expect(httpWriter.Code).To(Equal(http.StatusBadRequest))
+}
+
+func TestProjectListWithMeta(t *testing.T) {
+	g := NewGomegaWithT(t)
+
+	ws, err := NewService(&TestProjectList{})
+	g.Expect(err).To(BeNil())
+
+	restful.DefaultContainer.Add(ws)
+
+	httpRequest, _ := http.NewRequest("GET", "/test-1/projects", nil)
+	httpRequest.Header.Set("Accept", "application/json")
+
+	meta := base64.StdEncoding.EncodeToString([]byte("http://api.test:v1"))
+	httpRequest.Header.Set("X-plugin-Meta", meta)
+
+	httpWriter := httptest.NewRecorder()
+
+	restful.DefaultContainer.Dispatch(httpWriter, httpRequest)
+	g.Expect(httpWriter.Code).To(Equal(http.StatusOK))
+
+	list := client.ProjectList{}
+	err = json.Unmarshal(httpWriter.Body.Bytes(), &list)
+	g.Expect(err).To(BeNil())
+	g.Expect(list.Items).ToNot(BeEmpty())
+}
+
 type TestProjectList struct {
 }
 
@@ -124,7 +170,16 @@ func (t *TestProjectList) Path() string {
 }
 
 func (t *TestProjectList) ListProjects(ctx context.Context, option client.ListOption) (client.ProjectList, error) {
-	return client.ProjectList{}, nil
+	return client.ProjectList{
+		Items: []*client.Project{
+			{
+				Kind: "1",
+			},
+			{
+				Kind: "2",
+			},
+		},
+	}, nil
 }
 
 type TestProjectCreate struct {
