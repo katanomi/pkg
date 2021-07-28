@@ -14,21 +14,19 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package client
+package logging
 
-type Project struct {
-	Name   string `json:"name"`
-	URL    string `json:"url"`
-	Public bool   `json:"public"`
+import (
+	"github.com/emicklei/go-restful/v3"
+	"go.uber.org/zap"
+	"knative.dev/pkg/logging"
+)
+
+// Filter prometheus metric filter for go restful
+func Filter(logger *zap.SugaredLogger) func(req *restful.Request, resp *restful.Response, chain *restful.FilterChain) {
+	return func(req *restful.Request, resp *restful.Response, chain *restful.FilterChain) {
+		// injects logger into context
+		req.Request = req.Request.WithContext(logging.WithLogger(req.Request.Context(), logger))
+		chain.ProcessFilter(req, resp)
+	}
 }
-
-type ProjectList []Project
-
-type Resource struct {
-	Name    string `json:"name"`
-	URL     string `json:"url"`
-	Version string `json:"version"`
-	Type    string `json:"type"`
-}
-
-type ResourceList []Resource

@@ -21,6 +21,7 @@ import (
 	"fmt"
 	"os"
 
+	metav1alpha1 "github.com/katanomi/pkg/apis/meta/v1alpha1"
 	"github.com/katanomi/pkg/plugin/client"
 )
 
@@ -39,7 +40,7 @@ func (h *harbor) Path() string {
 	return "harbor"
 }
 
-func (h *harbor) ListProjects(ctx context.Context, option client.ListOption) (client.ProjectList, error) {
+func (h *harbor) ListProjects(ctx context.Context, option metav1alpha1.ListOptions) (*metav1alpha1.ProjectList, error) {
 	auth := client.ExtractAuth(ctx)
 
 	basic, err := auth.Basic()
@@ -55,7 +56,7 @@ func (h *harbor) ListProjects(ctx context.Context, option client.ListOption) (cl
 	return nil, nil
 }
 
-func (h *harbor) CreateProject(ctx context.Context, project *client.Project) (*client.Project, error) {
+func (h *harbor) CreateProject(ctx context.Context, project *metav1alpha1.Project) (*metav1alpha1.Project, error) {
 	auth := client.ExtractAuth(ctx)
 
 	oauth2, err := auth.Oauth2()
@@ -68,10 +69,10 @@ func (h *harbor) CreateProject(ctx context.Context, project *client.Project) (*c
 
 	fmt.Printf("basic auth: %v", oauth2)
 
-	return &client.Project{}, nil
+	return &metav1alpha1.Project{}, nil
 }
 
-func (h *harbor) ListResources(ctx context.Context, option client.ListOption) (client.ResourceList, error) {
+func (h *harbor) ListResources(ctx context.Context, option metav1alpha1.ListOptions) (*metav1alpha1.ResourceList, error) {
 	meta := client.ExtraMeta(ctx)
 
 	// list resource with harbor api

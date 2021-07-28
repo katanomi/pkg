@@ -18,11 +18,13 @@ package route
 
 import (
 	"net/http"
-	"strconv"
 
 	restfulspec "github.com/emicklei/go-restful-openapi/v2"
 	"github.com/emicklei/go-restful/v3"
+	kerrors "github.com/katanomi/pkg/errors"
 	"github.com/katanomi/pkg/plugin/client"
+
+	metav1alpha1 "github.com/katanomi/pkg/apis/meta/v1alpha1"
 )
 
 type projectList struct {
@@ -39,41 +41,27 @@ func NewProjectList(impl client.ProjectLister) Route {
 }
 
 func (p *projectList) Register(ws *restful.WebService) {
-	ws.Route(ws.GET("/projects").To(p.ListProjects).
-		// docs
-		Doc("list projects").
-		Metadata(restfulspec.KeyOpenAPITags, p.tags))
+	ws.Route(
+		ListOptionsDocs(
+			ws.GET("/projects").To(p.ListProjects).
+				// docs
+				Doc("ListProjects").
+				Metadata(restfulspec.KeyOpenAPITags, p.tags).
+				Returns(http.StatusOK, "OK", metav1alpha1.ProjectList{}),
+		),
+	)
 }
 
 // ListProjects http handler for list project
 func (p *projectList) ListProjects(request *restful.Request, response *restful.Response) {
-	option := p.parseQuery(request)
+	option := GetListOptionsFromRequest(request)
 	projects, err := p.impl.ListProjects(request.Request.Context(), option)
 	if err != nil {
-		response.WriteError(http.StatusInternalServerError, err)
+		kerrors.HandleError(request, response, err)
 		return
 	}
 
-	response.WriteEntity(projects)
-}
-
-func (p *projectList) parseQuery(request *restful.Request) client.ListOption {
-	option := client.ListOption{
-		Keyword:      request.QueryParameter("keyword"),
-		ItemsPerPage: 10,
-		Page:         1,
-	}
-
-	itemsPerPage := request.QueryParameter("itemsPerPage")
-	if v, err := strconv.Atoi(itemsPerPage); err == nil {
-		option.ItemsPerPage = v
-	}
-	page := request.QueryParameter("page")
-	if v, err := strconv.Atoi(page); err == nil {
-		option.Page = v
-	}
-
-	return option
+	response.WriteHeaderAndEntity(http.StatusOK, projects)
 }
 
 type projectCreate struct {
@@ -90,25 +78,27 @@ func NewProjectCreate(impl client.ProjectCreator) Route {
 }
 
 func (p *projectCreate) Register(ws *restful.WebService) {
-	ws.Route(ws.GET("/projects").To(p.CreateProject).
+	ws.Route(ws.POST("/projects").To(p.CreateProject).
 		// docs
-		Doc("list projects").
-		Metadata(restfulspec.KeyOpenAPITags, p.tags))
+		Doc("CreateProject").
+		Metadata(restfulspec.KeyOpenAPITags, p.tags).
+		Reads(metav1alpha1.Project{}, "Project").
+		Returns(http.StatusCreated, "Project Created", metav1alpha1.Project{}))
 }
 
 // CreateProject http handler for create project
 func (p *projectCreate) CreateProject(request *restful.Request, response *restful.Response) {
-	project := &client.Project{}
+	project := &metav1alpha1.Project{}
 	if err := request.ReadEntity(project); err != nil {
-		response.WriteError(http.StatusInternalServerError, err)
+		kerrors.HandleError(request, response, err)
 		return
 	}
 
 	resp, err := p.impl.CreateProject(request.Request.Context(), project)
 	if err != nil {
-		response.WriteError(http.StatusInternalServerError, err)
+		kerrors.HandleError(request, response, err)
 		return
 	}
 
-	response.WriteEntity(resp)
+	response.WriteHeaderAndEntity(http.StatusCreated, resp)
 }

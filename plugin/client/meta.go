@@ -19,32 +19,35 @@ package client
 import (
 	"context"
 	"encoding/base64"
+	"encoding/json"
 	"fmt"
-	"net/http"
-	"strings"
 
 	"github.com/emicklei/go-restful/v3"
+	"github.com/katanomi/pkg/errors"
+	apierrors "k8s.io/apimachinery/pkg/api/errors"
 )
 
-var (
-	headerPluginMeta = "X-Plugin-Meta"
-	pluginContextKey = struct{}{}
+const (
+	// PluginMetaHeader header to store metadata for the plugin
+	PluginMetaHeader = "X-Plugin-Meta"
 )
+
+type metaContextKey struct{}
 
 // Meta Plugin meta with base url and version info, for calling plugin api
 type Meta struct {
-	Version string
-	BaseURL string
+	Version string `json:"version,omitempty"`
+	BaseURL string `json:"baseURL,omitempty"`
 }
 
 // WithContext returns a copy of parent include with the plugin meta
 func (p *Meta) WithContext(ctx context.Context) context.Context {
-	return context.WithValue(ctx, pluginContextKey, p)
+	return context.WithValue(ctx, metaContextKey{}, p)
 }
 
 // ExtraMeta extract meta from a specific context
 func ExtraMeta(ctx context.Context) *Meta {
-	value := ctx.Value(pluginContextKey)
+	value := ctx.Value(metaContextKey{})
 	if v, ok := value.(*Meta); ok {
 		return v
 	}
@@ -54,22 +57,20 @@ func ExtraMeta(ctx context.Context) *Meta {
 
 // MetaFilter meta filter for go restful, parsing plugin meta
 func MetaFilter(req *restful.Request, resp *restful.Response, chain *restful.FilterChain) {
-	encodedMeta := req.HeaderParameter(headerPluginMeta)
+	encodedMeta := req.HeaderParameter(PluginMetaHeader)
 	decodedMeta, err := base64.StdEncoding.DecodeString(encodedMeta)
 	if err != nil {
-		resp.WriteError(http.StatusInternalServerError, fmt.Errorf("decode meta error: %s", err.Error()))
+		errors.HandleError(req, resp, fmt.Errorf("decode meta error: %s", err.Error()))
 		return
 	}
-
-	metaAttrs := strings.Split(string(decodedMeta), ":")
-	if len(metaAttrs) < 2 {
-		resp.WriteError(http.StatusBadRequest, fmt.Errorf("invalid plugin meta: %s", decodedMeta))
+	if len(decodedMeta) == 0 {
+		errors.HandleError(req, resp, apierrors.NewBadRequest("meta information not provided in header"))
 		return
 	}
-
-	meta := &Meta{
-		Version: metaAttrs[1],
-		BaseURL: metaAttrs[0],
+	meta := &Meta{}
+	if err = json.Unmarshal(decodedMeta, meta); err != nil {
+		errors.HandleError(req, resp, fmt.Errorf("decode meta error: %s", err.Error()))
+		return
 	}
 
 	ctx := req.Request.Context()
