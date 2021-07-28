@@ -22,6 +22,15 @@ import (
 	duckv1 "knative.dev/pkg/apis/duck/v1"
 )
 
+type ResourceSubType string
+
+const (
+	// OCI artifact registry project
+	ResourceSubTypeImageRegistry ResourceSubType = "ImageRegistry"
+	// Code repository project
+	ResourceSubTypeCodeRepository ResourceSubType = "CodeRepository"
+)
+
 var ResourceGVK = GroupVersion.WithKind("Resource")
 var ResourceListGVK = GroupVersion.WithKind("ResourceList")
 
@@ -45,6 +54,9 @@ type ResourceSpec struct {
 
 	// Type of resource
 	Type string `json:"type"`
+
+	// SubType of resource
+	SubType string `json:"subType"`
 
 	// Version of specified resource
 	// +optional
