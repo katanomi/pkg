@@ -48,6 +48,10 @@ type ProjectSpec struct {
 	// +optional
 	Access *duckv1.Addressable `json:"access,omitempty"`
 
+	// project subtype
+	// +optional
+	SubType string `json:"subType"`
+
 	// NamespaceRefs for which this project is already bound to
 	// +optional
 	NamespaceRefs []*corev1.ObjectReference `json:"namespaceRefs,omitempty"`
