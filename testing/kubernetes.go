@@ -20,7 +20,6 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"strings"
 
@@ -42,7 +41,6 @@ func LoadKubeResourcesAsUnstructured(file string) (objs []unstructured.Unstructu
 		}
 		obj := &unstructured.Unstructured{}
 		err = utilyaml.NewYAMLOrJSONDecoder(bytes.NewReader([]byte(y)), len([]byte(y))).Decode(obj)
-		fmt.Println("loaded obj", obj, "err", err)
 		if err != nil {
 			return
 		}
@@ -55,25 +53,9 @@ func LoadKubeResourcesAsUnstructured(file string) (objs []unstructured.Unstructu
 
 // LoadKubeResources loading kubernetes resources
 func LoadKubeResources(file string, clt client.Client) (err error) {
-	objs := []unstructured.Unstructured{}
-	var data []byte
-	if data, err = ioutil.ReadFile(file); err != nil {
+	objs, err := LoadKubeResourcesAsUnstructured(file)
+	if err != nil {
 		return
-	}
-	parts := strings.Split(string(data), "---")
-	for _, y := range parts {
-		if len(strings.TrimSpace(y)) == 0 {
-			continue
-		}
-		obj := &unstructured.Unstructured{}
-		err = utilyaml.NewYAMLOrJSONDecoder(bytes.NewReader([]byte(y)), len([]byte(y))).Decode(obj)
-		fmt.Println("loaded obj", obj, "err", err)
-		if err != nil {
-			return
-		}
-		if obj != nil {
-			objs = append(objs, *obj)
-		}
 	}
 	for _, obj := range objs {
 		if err = clt.Create(context.Background(), &obj); err != nil {

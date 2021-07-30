@@ -39,8 +39,6 @@ func (c *SomeStatusObj) SetObjectConditions(objs ObjectConditions) {
 func TestObjectConditionsSet(t *testing.T) {
 	g := NewGomegaWithT(t)
 
-	// ctx := context.TODO()
-
 	objcs := ObjectConditions{}
 	g.Expect(ktesting.LoadYAML("testdata/objectconditions.yaml", &objcs)).To(Succeed())
 
@@ -49,10 +47,6 @@ func TestObjectConditionsSet(t *testing.T) {
 
 	abcPod := ObjectCondition{}
 	g.Expect(ktesting.LoadYAML("testdata/objectcondition-pod-abc.yaml", &abcPod)).To(Succeed())
-
-	// g.Expect(gotObj).ToNot(BeNil())
-	// diff := cmp.Diff(*gotObj, abcPod)
-	// g.Expect(diff).To(Equal(""))
 
 	t.Run("MarkTrue", func(t *testing.T) {
 		g := NewGomegaWithT(t)
