@@ -18,8 +18,11 @@ package v1alpha1
 
 import (
 	"fmt"
+	"time"
 
 	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"knative.dev/pkg/apis"
 )
 
 // ObjectConditionAccessor sets and gets ObjectConditions
@@ -100,10 +103,7 @@ func (o *ObjectConditionSet) GetObjectConditionByObjRef(objref corev1.ObjectRefe
 // MarkTrue sets the status of t to true, and then marks the happy condition to
 // true if all dependents are true.
 func (o *ObjectConditionSet) MarkTrue(objref corev1.ObjectReference) {
-	if objCondition := o.GetObjectConditionByObjRef(objref); objCondition != nil {
-		objCondition.Status = corev1.ConditionTrue
-		o.SetObjectCondition(*objCondition)
-	}
+	o.markStatus(objref, corev1.ConditionTrue, "", "")
 }
 
 // MarkTrueWithReason sets the status of t to true with the reason
@@ -128,6 +128,7 @@ func (o *ObjectConditionSet) markStatus(objref corev1.ObjectReference, cond core
 		objCondition.Status = cond
 		objCondition.Reason = reason
 		objCondition.Message = fmt.Sprintf(messageFormat, messageA...)
+		objCondition.LastTransitionTime = apis.VolatileTime{Inner: metav1.NewTime(time.Now())}
 		o.SetObjectCondition(*objCondition)
 	}
 }

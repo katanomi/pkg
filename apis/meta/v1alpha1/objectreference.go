@@ -26,3 +26,11 @@ func IsTheSameObject(obj, compared corev1.ObjectReference) bool {
 		obj.Name == compared.Name &&
 		obj.Namespace == compared.Namespace
 }
+
+// IsTheSameObjectReference uses pointers to make comparison of objects
+func IsTheSameObjectReference(obj, compared *corev1.ObjectReference) bool {
+	if (obj == nil && compared != nil) || (obj != nil && compared == nil) {
+		return false
+	}
+	return (obj == nil && compared == nil) || (obj != nil && IsTheSameObject(*obj, *compared))
+}
