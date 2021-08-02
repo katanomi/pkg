@@ -20,6 +20,7 @@ import (
 	"context"
 
 	metav1alpha1 "github.com/katanomi/pkg/apis/meta/v1alpha1"
+	duckv1 "knative.dev/pkg/apis/duck/v1"
 )
 
 // Interface base interface for plugins
@@ -43,4 +44,13 @@ type ProjectCreator interface {
 type ResourceLister interface {
 	Interface
 	ListResources(ctx context.Context, option metav1alpha1.ListOptions) (*metav1alpha1.ResourceList, error)
+}
+
+// Client inteface for PluginClient, client code shoud use the interface
+// as dependency
+type Client interface {
+	Get(ctx context.Context, baseURL *duckv1.Addressable, uri string, options ...OptionFunc) error
+	Post(ctx context.Context, baseURL *duckv1.Addressable, uri string, options ...OptionFunc) error
+	Put(ctx context.Context, baseURL *duckv1.Addressable, uri string, options ...OptionFunc) error
+	Delete(ctx context.Context, baseURL *duckv1.Addressable, uri string, options ...OptionFunc) error
 }
