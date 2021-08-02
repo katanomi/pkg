@@ -60,6 +60,12 @@ type ObjectConditionManager interface {
 
 	// MarkFalse sets the status of t and the happy condition to False.
 	MarkFalse(t corev1.ObjectReference, reason, messageFormat string, messageA ...interface{})
+
+	// SetConditionType sets a condition type for object condition
+	SetConditionType(t corev1.ObjectReference, conditionType apis.ConditionType)
+
+	// SetSeverity sets a severity for object condition
+	SetSeverity(t corev1.ObjectReference, severity apis.ConditionSeverity)
 }
 
 // ManageObjectCondition returns a ObjectConditionManager
@@ -122,13 +128,33 @@ func (o *ObjectConditionSet) MarkFalse(objref corev1.ObjectReference, reason, me
 	o.markStatus(objref, corev1.ConditionFalse, reason, messageFormat, messageA...)
 }
 
-// MarkStatus set status
-func (o *ObjectConditionSet) markStatus(objref corev1.ObjectReference, cond corev1.ConditionStatus, reason, messageFormat string, messageA ...interface{}) {
+// SetConditionType sets a condition type for object condition
+func (o *ObjectConditionSet) SetConditionType(objref corev1.ObjectReference, conditionType apis.ConditionType) {
 	if objCondition := o.GetObjectConditionByObjRef(objref); objCondition != nil {
-		objCondition.Status = cond
-		objCondition.Reason = reason
-		objCondition.Message = fmt.Sprintf(messageFormat, messageA...)
-		objCondition.LastTransitionTime = apis.VolatileTime{Inner: metav1.NewTime(time.Now())}
+		objCondition.Type = conditionType
 		o.SetObjectCondition(*objCondition)
 	}
+}
+
+// SetSeverity sets a severity for object condition
+func (o *ObjectConditionSet) SetSeverity(objref corev1.ObjectReference, severity apis.ConditionSeverity) {
+	if objCondition := o.GetObjectConditionByObjRef(objref); objCondition != nil {
+		objCondition.Severity = severity
+		o.SetObjectCondition(*objCondition)
+	}
+}
+
+// MarkStatus set status
+func (o *ObjectConditionSet) markStatus(objref corev1.ObjectReference, cond corev1.ConditionStatus, reason, messageFormat string, messageA ...interface{}) {
+	var objCondition *ObjectCondition
+	if objCondition = o.GetObjectConditionByObjRef(objref); objCondition == nil {
+		objCondition = &ObjectCondition{ObjectReference: objref}
+	}
+	objCondition.Status = cond
+	objCondition.Reason = reason
+	objCondition.Message = fmt.Sprintf(messageFormat, messageA...)
+	if objCondition.Status != cond || objCondition.Reason != reason || objCondition.LastTransitionTime.Inner.IsZero() {
+		objCondition.LastTransitionTime = apis.VolatileTime{Inner: metav1.NewTime(time.Now())}
+	}
+	o.SetObjectCondition(*objCondition)
 }

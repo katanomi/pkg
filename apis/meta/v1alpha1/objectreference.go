@@ -16,7 +16,11 @@ limitations under the License.
 
 package v1alpha1
 
-import corev1 "k8s.io/api/core/v1"
+import (
+	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime"
+)
 
 // IsTheSameObjRef compares two corev1.ObjectReference comparing:
 // APIVersion, Kind, Name and Namespace. All other attributes are ignored
@@ -33,4 +37,37 @@ func IsTheSameObjectReference(obj, compared *corev1.ObjectReference) bool {
 		return false
 	}
 	return (obj == nil && compared == nil) || (obj != nil && IsTheSameObject(*obj, *compared))
+}
+
+// GetObjectReferenceFromObject extracts an object reference from an object
+func GetObjectReferenceFromObject(obj metav1.Object, opts ...ObjectRefOptionsFunc) (ref corev1.ObjectReference) {
+	ref.Name = obj.GetName()
+	for _, o := range opts {
+		o(obj, &ref)
+	}
+	return
+}
+
+type ObjectRefOptionsFunc func(obj metav1.Object, ref *corev1.ObjectReference)
+
+func ObjectRefWithTypeMeta() ObjectRefOptionsFunc {
+	return func(obj metav1.Object, ref *corev1.ObjectReference) {
+		if runobj, ok := obj.(runtime.Object); ok {
+			objkind := runobj.GetObjectKind()
+			ref.APIVersion = objkind.GroupVersionKind().GroupVersion().String()
+			ref.Kind = objkind.GroupVersionKind().Kind
+		}
+	}
+}
+
+func ObjectRefWithUID() ObjectRefOptionsFunc {
+	return func(obj metav1.Object, ref *corev1.ObjectReference) {
+		ref.UID = obj.GetUID()
+	}
+}
+
+func ObjectRefWithNamespace() ObjectRefOptionsFunc {
+	return func(obj metav1.Object, ref *corev1.ObjectReference) {
+		ref.Namespace = obj.GetNamespace()
+	}
 }
