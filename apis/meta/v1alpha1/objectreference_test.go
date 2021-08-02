@@ -21,6 +21,8 @@ import (
 
 	. "github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/types"
 )
 
 func TestObjectReferenceIsTheSame(t *testing.T) {
@@ -80,4 +82,30 @@ func TestObjectReferenceIsTheSame(t *testing.T) {
 			g.Expect((IsTheSameObjectReference(test.Object, test.Compared))).To(Equal(test.Expected))
 		})
 	}
+}
+
+func TestGetObjectReferenceFromObject(t *testing.T) {
+	g := NewGomegaWithT(t)
+	pod := &corev1.Pod{
+		TypeMeta: metav1.TypeMeta{
+			APIVersion: "v1",
+			Kind:       "Pod",
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "pod",
+			Namespace: "default",
+			UID:       types.UID("abc"),
+		},
+	}
+
+	ref := GetObjectReferenceFromObject(pod)
+	g.Expect(ref.Name).To(Equal("pod"))
+	g.Expect(ref.Namespace, ref.APIVersion, ref.Kind, ref.UID).To(BeEmpty())
+
+	ref = GetObjectReferenceFromObject(pod, ObjectRefWithTypeMeta(), ObjectRefWithNamespace(), ObjectRefWithUID())
+	g.Expect(ref.Name).To(Equal("pod"))
+	g.Expect(ref.Namespace).To(Equal("default"))
+	g.Expect(ref.APIVersion).To(Equal("v1"))
+	g.Expect(ref.Kind).To(Equal("Pod"))
+	g.Expect(ref.UID).To(Equal(types.UID("abc")))
 }
