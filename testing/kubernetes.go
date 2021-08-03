@@ -26,6 +26,7 @@ import (
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	utilyaml "k8s.io/apimachinery/pkg/util/yaml"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"yunion.io/x/pkg/errors"
 )
 
 func LoadKubeResourcesAsUnstructured(file string) (objs []unstructured.Unstructured, err error) {
@@ -65,10 +66,27 @@ func LoadKubeResources(file string, clt client.Client) (err error) {
 	return
 }
 
+// UnstructedToTyped converts an unstructured object into a object
+// Warning: This SHOULD never be used in production code, only in test code
 func UnstructedToTyped(from unstructured.Unstructured, to interface{}) error {
 	data, err := json.Marshal(from.Object)
 	if err != nil {
 		return err
 	}
 	return json.Unmarshal(data, to)
+}
+
+// DeleteResources delete resources contained in the file
+func DeleteResources(file string, clt client.Client) (err error) {
+	objs, err := LoadKubeResourcesAsUnstructured(file)
+	if err != nil {
+		return err
+	}
+	errs := []error{}
+	for _, obj := range objs {
+		if err = clt.Delete(context.Background(), &obj); err != nil {
+			errs = append(errs, err)
+		}
+	}
+	return errors.NewAggregate(errs)
 }

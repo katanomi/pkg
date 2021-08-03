@@ -1,5 +1,3 @@
-// +build e2e
-
 /*
 Copyright 2021 The Katanomi Authors.
 
@@ -16,26 +14,13 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package e2e
+package testing
 
-import (
-	"testing"
+import "go.uber.org/zap"
 
-	_ "github.com/katanomi/pkg/examples/sample-e2e/another"
-	"github.com/katanomi/pkg/testing/framework"
-	"k8s.io/client-go/kubernetes/scheme"
-)
-
-var fmw = framework.New("sample-e2e")
-
-func TestMain(m *testing.M) {
-	fmw.SynchronizedBeforeSuite(nil).
-		SynchronizedAfterSuite(nil).
-		WithScheme(scheme.Scheme).
-		MRun(m)
-}
-
-func TestE2E(t *testing.T) {
-	// start step to run e2e
-	fmw.Run(t)
+// WarningOnError set a warning on error
+func WarningOnError(logger *zap.SugaredLogger, err error, message string) {
+	if err != nil {
+		logger.Warnf(message, err)
+	}
 }

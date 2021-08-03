@@ -156,6 +156,7 @@ func (b *TestCaseBuilder) Do() bool {
 		ctx.Config = fmw.Config
 		ctx.Context = fmw.Context
 		ctx.SugaredLogger = fmw.SugaredLogger.Named(fullName)
+		ctx.Scheme = fmw.Scheme
 		b.testFunc(ctx)
 	})
 }

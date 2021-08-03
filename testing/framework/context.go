@@ -20,6 +20,7 @@ import (
 	"context"
 
 	"go.uber.org/zap"
+	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/rest"
 )
 
@@ -29,6 +30,8 @@ type TestContext struct {
 	Config  *rest.Config
 	Opts    Options
 	*zap.SugaredLogger
+
+	Scheme *runtime.Scheme
 }
 
 // TestFunction function used as describe

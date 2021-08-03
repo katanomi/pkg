@@ -37,7 +37,8 @@ var _ = P1Case("another-test").Cluster().WithFunc(func(ctx TestContext) {
 			ctx.Infow("just before each in another pkg")
 		})
 		JustAfterEach(func() {
-			ctx.Infow("just after each in another pkg")
+			Expect(ctx.Scheme).ToNot(BeNil())
+			ctx.Infow("just after each in another pkg", "scheme", ctx.Scheme)
 		})
 		It("it", func() {
 			Expect(ctx.Config).ToNot(BeNil())
