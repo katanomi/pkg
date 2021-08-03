@@ -117,7 +117,7 @@ func TestNewService(t *testing.T) {
 			ws, err := NewService(c)
 
 			g.Expect(err).To(BeNil())
-			g.Expect(ws.RootPath()).To(Equal(c.Path()))
+			g.Expect(ws.RootPath()).To(Equal("/" + c.Path()))
 		})
 	}
 }
