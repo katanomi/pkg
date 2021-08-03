@@ -30,6 +30,7 @@ import (
 	"github.com/onsi/gomega"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
+	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/rest"
 	"knative.dev/pkg/injection"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -43,6 +44,8 @@ type Framework struct {
 	Name string
 
 	Config *rest.Config
+
+	Scheme *runtime.Scheme
 
 	Context context.Context
 
@@ -92,6 +95,12 @@ func (f *Framework) Run(t *testing.T) {
 	var r []ginkgo.Reporter
 	r = append(r, reporters.NewJUnitReporter(f.Name+".xml"))
 	ginkgo.RunSpecsWithDefaultAndCustomReporters(t, f.Name, r)
+}
+
+// WithScheme adds a scheme object to the framework
+func (f *Framework) WithScheme(scheme *runtime.Scheme) *Framework {
+	f.Scheme = scheme
+	return f
 }
 
 // SynchronizedBeforeSuite basic before suite initialization
