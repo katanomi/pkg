@@ -31,25 +31,24 @@ import (
 
 func main() {
 	ws := new(restful.WebService)
-
+	ws.Path("/v1")
 	ws.Route(
-		ws.GET("/abc/def").To(func(req *restful.Request, res *restful.Response) {
+		ws.GET("/abc/def").Doc("hello-ok-api").Returns(200, "OK", map[string]string{"ok": "true"}).To(func(req *restful.Request, res *restful.Response) {
 			res.WriteHeaderAndJson(http.StatusOK, map[string]string{"ok": "true"}, restful.MIME_JSON)
 		}),
 	)
-	ws.Path("/v1")
 
-	container := restful.NewContainer()
-	container.Add(ws)
+	// container := restful.NewContainer()
+	// container.Add(ws)
 
 	sharedmain.App("test").
 		Scheme(scheme.Scheme).
 		Log().
-		Container(container).
-		// Webservices("/api", ws).
-		// APIDocs().
+		// Container(container).
+		Webservices(ws).
 		Profiling().
 		Controllers(&Controller{}, &Controller2{}).
+		APIDocs().
 		Run()
 }
 
@@ -62,10 +61,10 @@ func (c *Controller) Name() string {
 }
 
 func (c *Controller) Setup(ctx context.Context, mgr manager.Manager, logger *zap.SugaredLogger) error {
-	logger.Errorf("error msg", "hello", "001")
-	logger.Warnw("warn msg", "hello", "001")
-	logger.Infow("info msg", "hello", "001")
-	logger.Debugf("debug msg", "hello", "001")
+	// logger.Errorw("error msg", "hello", "001")
+	// logger.Warnw("warn msg", "hello", "001")
+	// logger.Infow("info msg", "hello", "001")
+	// logger.Debugw("debug msg", "hello", "001")
 	c.SugaredLogger = logger
 
 	return ctrl.NewControllerManagedBy(mgr).
@@ -74,11 +73,11 @@ func (c *Controller) Setup(ctx context.Context, mgr manager.Manager, logger *zap
 }
 
 func (c *Controller) Reconcile(ctx context.Context, req ctrl.Request) (result ctrl.Result, err error) {
-	log := c.With("key", req)
-	log.Errorf("error msg", "hello", "001")
-	log.Warnw("warn msg", "hello", "001")
-	log.Infow("info msg", "hello", "001")
-	log.Debugf("debug msg", "hello", "001")
+	// log := c.With("key", req)
+	// log.Errorw("error msg", "hello", "001")
+	// log.Warnw("warn msg", "hello", "001")
+	// log.Infow("info msg", "hello", "001")
+	// log.Debugw("debug msg", "hello", "001")
 	return
 }
 
@@ -90,9 +89,9 @@ func (c *Controller2) Name() string {
 }
 
 func (c *Controller2) Setup(ctx context.Context, mgr manager.Manager, logger *zap.SugaredLogger) error {
-	logger.Errorf("error msg", "hello", "002")
-	logger.Warnw("warn msg", "hello", "002")
-	logger.Infow("info msg", "hello", "002")
-	logger.Debugf("debug msg", "hello", "002")
+	// logger.Errorw("error msg", "hello", "002")
+	// logger.Warnw("warn msg", "hello", "002")
+	// logger.Infow("info msg", "hello", "002")
+	// logger.Debugw("debug msg", "hello", "002")
 	return nil
 }
