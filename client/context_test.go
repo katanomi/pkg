@@ -32,7 +32,7 @@ func TestClientContext(t *testing.T) {
 	clt := Client(ctx)
 	g.Expect(clt).To(BeNil())
 
-	fakeClt := fake.NewFakeClient()
+	fakeClt := fake.NewClientBuilder().Build()
 	ctx = WithClient(ctx, fakeClt)
 	g.Expect(Client(ctx)).To(Equal(fakeClt))
 }

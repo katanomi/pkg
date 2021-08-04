@@ -1,0 +1,32 @@
+run:
+  timeout: 10m
+
+  build-tags:
+    - e2e
+
+  skip-dirs:
+    - hack
+    - config
+    - .github
+    - bin
+    - testbin
+
+  # skip-files:
+  #   - ".*/go/pkg/mod/.*"
+
+linters:
+  enable:
+    - asciicheck
+    - gosec
+    - prealloc
+    - unconvert
+    - unparam
+  disable:
+    - errcheck
+
+issues:
+  exclude-rules:
+    - path: test # Excludes /test, *_test.go etc.
+      linters:
+        - gosec
+        - unparam

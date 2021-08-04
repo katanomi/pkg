@@ -81,6 +81,7 @@ func NewService(c client.Interface, filters ...restful.FilterFunction) (*restful
 func NewDefaultService() *restful.WebService {
 	routes := []Route{
 		NewSystem(),
+		NewHealthz(),
 	}
 
 	ws := &restful.WebService{}
@@ -92,9 +93,9 @@ func NewDefaultService() *restful.WebService {
 }
 
 //NewDocService go restful api doc
-func NewDocService() *restful.WebService {
+func NewDocService(webservices ...*restful.WebService) *restful.WebService {
 	config := restfulspec.Config{
-		WebServices: restful.RegisteredWebServices(),
+		WebServices: webservices,
 		APIPath:     "/openapi.json",
 	}
 	return restfulspec.NewOpenAPIService(config)
