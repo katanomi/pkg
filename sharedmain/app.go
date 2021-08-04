@@ -28,6 +28,7 @@ import (
 
 	"github.com/emicklei/go-restful/v3"
 	"github.com/go-logr/zapr"
+	"github.com/go-resty/resty/v2"
 	kclient "github.com/katanomi/pkg/client"
 	klogging "github.com/katanomi/pkg/logging"
 	kmanager "github.com/katanomi/pkg/manager"
@@ -35,6 +36,7 @@ import (
 	"github.com/katanomi/pkg/plugin/component/tracing"
 	"github.com/katanomi/pkg/plugin/config"
 	"github.com/katanomi/pkg/plugin/route"
+	"github.com/katanomi/pkg/restclient"
 	"go.uber.org/zap"
 	"golang.org/x/sync/errgroup"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -105,8 +107,7 @@ func (a *AppBuilder) init() {
 		a.startFunc = append(a.startFunc, func(ctx context.Context) error {
 			return a.ConfigMapWatcher.Start(ctx.Done())
 		})
-		// a.container = restful.NewContainer()
-		// // a.filters = route.DefaultFilters
+		a.container = restful.NewContainer()
 		a.filters = []restful.FilterFunction{}
 	})
 }
@@ -150,6 +151,12 @@ func (a *AppBuilder) Log() *AppBuilder {
 	// adds filter for logger
 	a.filters = append(a.filters, klogging.Filter(a.Logger))
 
+	return a
+}
+
+// RESTClient injects a RESTClient
+func (a *AppBuilder) RESTClient(client *resty.Client) *AppBuilder {
+	a.Context = restclient.WithRESTClient(a.Context, client)
 	return a
 }
 
