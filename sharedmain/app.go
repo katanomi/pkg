@@ -23,11 +23,11 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"path"
 	"sync"
 
 	"github.com/emicklei/go-restful/v3"
 	"github.com/go-logr/zapr"
+	"github.com/go-resty/resty/v2"
 	kclient "github.com/katanomi/pkg/client"
 	klogging "github.com/katanomi/pkg/logging"
 	kmanager "github.com/katanomi/pkg/manager"
@@ -35,6 +35,7 @@ import (
 	"github.com/katanomi/pkg/plugin/component/tracing"
 	"github.com/katanomi/pkg/plugin/config"
 	"github.com/katanomi/pkg/plugin/route"
+	"github.com/katanomi/pkg/restclient"
 	"go.uber.org/zap"
 	"golang.org/x/sync/errgroup"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -150,6 +151,12 @@ func (a *AppBuilder) Log() *AppBuilder {
 	// adds filter for logger
 	a.filters = append(a.filters, klogging.Filter(a.Logger))
 
+	return a
+}
+
+// RESTClient injects a RESTClient
+func (a *AppBuilder) RESTClient(client *resty.Client) *AppBuilder {
+	a.Context = restclient.WithRESTClient(a.Context, client)
 	return a
 }
 
@@ -276,10 +283,9 @@ func (a *AppBuilder) Container(container *restful.Container) *AppBuilder {
 	return a
 }
 
-func (a *AppBuilder) Webservices(basePath string, webServices ...*restful.WebService) *AppBuilder {
+func (a *AppBuilder) Webservices(webServices ...*restful.WebService) *AppBuilder {
 	for _, ws := range webServices {
-		previousPath := ws.RootPath()
-		a.container.Add(ws.Path(path.Join(basePath, previousPath)))
+		a.container.Add(ws)
 	}
 	return a
 }
@@ -300,7 +306,7 @@ func (a *AppBuilder) Plugins(plugins ...client.Interface) *AppBuilder {
 
 // APIDocs adds api docs to the server
 func (a *AppBuilder) APIDocs() *AppBuilder {
-	a.container.Add(route.NewDocService())
+	// NO-OP for compatibility, this function is now a standard once there are webservices added
 	return a
 }
 
@@ -325,6 +331,11 @@ func (a *AppBuilder) Run() error {
 
 	// adds a http server if there are any endpoints registered
 	if a.container != nil && len(a.container.RegisteredWebServices()) > 0 {
+		a.container.Add(route.NewDocService(a.container.RegisteredWebServices()...))
+
+		// adds profiling and health checks
+		a.container.Add(route.NewDefaultService())
+
 		a.startFunc = append(a.startFunc, func(ctx context.Context) error {
 			// TODO: find a better way to get this configuration
 			for _, filter := range a.filters {
@@ -337,10 +348,6 @@ func (a *AppBuilder) Run() error {
 				Handler: a.container,
 			}
 			return srv.ListenAndServe()
-			// if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-			// 	return err
-			// }
-			// return nil
 		})
 	}
 

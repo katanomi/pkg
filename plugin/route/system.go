@@ -33,6 +33,7 @@ func NewSystem() Route {
 func (s *system) Register(ws *restful.WebService) {
 	// prometheus metrics
 	ws.Route(ws.GET("/metrics").To(wrapperH(promhttp.Handler())))
+
 	// golang profile
 	ppprofPath := "/debug/pprof"
 	ws.Route(ws.GET(ppprofPath).To(wrapperF(pprof.Index)))

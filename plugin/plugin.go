@@ -38,12 +38,15 @@ type plugin struct {
 	config        *config.Config
 	clients       []client.Interface
 	shutdownFuncs []ShutdownFunc
+	container     *restful.Container
 }
 
 type ShutdownFunc func() error
 
 func NewPlugin() *plugin {
-	plugin := &plugin{}
+	plugin := &plugin{
+		container: restful.NewContainer(),
+	}
 
 	return plugin
 }
@@ -74,7 +77,7 @@ func (p *plugin) prepare() {
 		}
 	}
 
-	restful.DefaultContainer.Add(route.NewDefaultService())
+	p.container.Add(route.NewDefaultService())
 
 	for _, each := range p.clients {
 		ws, err := route.NewService(each)
@@ -82,10 +85,10 @@ func (p *plugin) prepare() {
 			panic(fmt.Sprintf("add srevice error: %s", err.Error()))
 		}
 
-		restful.DefaultContainer.Add(ws)
+		p.container.Add(ws)
 	}
 
-	restful.DefaultContainer.Add(route.NewDocService())
+	p.container.Add(route.NewDocService(p.container.RegisteredWebServices()...))
 }
 
 // Run plugin run and shutdown gracefully
@@ -101,7 +104,7 @@ func (p *plugin) Run() error {
 
 	srv := &http.Server{
 		Addr:    fmt.Sprintf(":%d", port),
-		Handler: restful.DefaultContainer,
+		Handler: p.container,
 	}
 
 	// Initializing the server in a goroutine so that
