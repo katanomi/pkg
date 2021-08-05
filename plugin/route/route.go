@@ -18,6 +18,7 @@ package route
 
 import (
 	"fmt"
+	"strings"
 
 	restfulspec "github.com/emicklei/go-restful-openapi/v2"
 	"github.com/emicklei/go-restful/v3"
@@ -64,7 +65,8 @@ func NewService(c client.Interface, filters ...restful.FilterFunction) (*restful
 	}
 
 	group := &restful.WebService{}
-	group.Path(c.Path()).Consumes(restful.MIME_JSON).Produces(restful.MIME_JSON)
+	path := strings.TrimPrefix(c.Path(), "/")
+	group.Path("/" + path).Consumes(restful.MIME_JSON).Produces(restful.MIME_JSON)
 
 	for _, filter := range filters {
 		group.Filter(filter)

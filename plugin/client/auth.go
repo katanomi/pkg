@@ -21,25 +21,55 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
-	"net/http"
 
 	"github.com/emicklei/go-restful/v3"
+	"github.com/go-resty/resty/v2"
 	"github.com/katanomi/pkg/errors"
 
 	corev1 "k8s.io/api/core/v1"
 )
 
-type authContextKey struct{}
+type AuthType string
+
+const (
+	AuthTypeBasic  = AuthType(corev1.SecretTypeBasicAuth)
+	AuthTypeOauth2 = AuthType("katanomi.dev/oauth2")
+)
 
 // Auth plugin auth
 // Method auth method, such as basic, oauth2
 // Secret a base64 encoded json object, with auth field included
 type Auth struct {
 	// Type secret type as in kubernetes secret.type
-	Type string `json:"type"`
+	Type AuthType `json:"type"`
 	// Secret 's data value extracted from kubernetes
 	Secret map[string][]byte `json:"data"`
 }
+
+// ToRequest set request header for resty.Request
+func (a *Auth) ToRequest(request *resty.Request) error {
+	method, err := a.authMethod()
+	if err != nil {
+		return err
+	}
+
+	method.ToRequest(request)
+
+	return nil
+}
+
+func (a *Auth) authMethod() (AuthMethod, error) {
+	switch a.Type {
+	case AuthTypeBasic:
+		return a.Basic()
+	case AuthTypeOauth2:
+		return a.Oauth2()
+	default:
+		return nil, fmt.Errorf("no auth method matched for %s", a.Type)
+	}
+}
+
+type authContextKey struct{}
 
 // ExtractAuth extract auth from a specific context
 func ExtractAuth(ctx context.Context) *Auth {
@@ -55,15 +85,6 @@ func (a *Auth) WithContext(ctx context.Context) context.Context {
 	return context.WithValue(ctx, authContextKey{}, a)
 }
 
-type AuthMethod interface {
-	WithAuth(request *http.Request)
-}
-
-type AuthBasic struct {
-	Username string
-	Password string
-}
-
 // Basic return a Basic auth struct
 func (a *Auth) Basic() (*AuthBasic, error) {
 	basic := &AuthBasic{
@@ -73,6 +94,28 @@ func (a *Auth) Basic() (*AuthBasic, error) {
 	return basic, nil
 }
 
+// Oauth2 return an Oauth2 struct
+func (a *Auth) Oauth2() (*AuthOauth2, error) {
+	oauth2 := &AuthOauth2{}
+	// TODO: needs to add specific const keys to do conversion here
+
+	return oauth2, nil
+}
+
+// AuthMethod set request header for resty.Request
+type AuthMethod interface {
+	ToRequest(request *resty.Request)
+}
+
+type AuthBasic struct {
+	Username string
+	Password string
+}
+
+func (a *AuthBasic) ToRequest(request *resty.Request) {
+	request.SetBasicAuth(a.Username, a.Password)
+}
+
 type AuthOauth2 struct {
 	Token        string
 	ClientID     string
@@ -80,12 +123,9 @@ type AuthOauth2 struct {
 	RefreshToken string
 }
 
-// Oauth2 return a Oauth2 struct
-func (a *Auth) Oauth2() (*AuthOauth2, error) {
-	oauth2 := &AuthOauth2{}
-	// TODO: needs to add specific const keys to do conversion here
-
-	return oauth2, nil
+func (a *AuthOauth2) ToRequest(request *resty.Request) {
+	//TODO: check token expired and refresh
+	request.Header.Set("Authorization", "Bearer "+a.Token)
 }
 
 const (
@@ -113,7 +153,7 @@ func AuthFilter(req *restful.Request, resp *restful.Response, chain *restful.Fil
 	}
 
 	auth := Auth{
-		Type:   method,
+		Type:   AuthType(method),
 		Secret: data,
 	}
 

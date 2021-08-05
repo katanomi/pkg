@@ -106,8 +106,9 @@ func (a *AppBuilder) init() {
 		a.startFunc = append(a.startFunc, func(ctx context.Context) error {
 			return a.ConfigMapWatcher.Start(ctx.Done())
 		})
-		a.container = restful.NewContainer()
+		//a.filters = route.DefaultFilters
 		a.filters = []restful.FilterFunction{}
+		a.container = restful.NewContainer()
 	})
 }
 
