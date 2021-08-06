@@ -88,6 +88,15 @@ func Main(component string, scheme *runtime.Scheme, ctors ...Controller) {
 	MainWithConfig(ctx, component, config, options, ctors...)
 }
 
+func GetClientManager(ctx context.Context) (context.Context, *kclient.Manager) {
+	clientManager := kclient.ManagerCtx(ctx)
+	if clientManager == nil {
+		clientManager = kclient.NewManager(ctx, nil, nil)
+		ctx = kclient.WithManager(ctx, clientManager)
+	}
+	return ctx, clientManager
+}
+
 func GetConfigOrDie(ctx context.Context) (context.Context, *rest.Config) {
 	cfg := injection.GetConfig(ctx)
 	if cfg == nil {

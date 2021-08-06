@@ -79,6 +79,9 @@ type AppBuilder struct {
 	// Profiling
 	ProfilingServer *http.Server
 
+	// client manager
+	ClientManager *kclient.Manager
+
 	// plugins
 	plugins []client.Interface
 
@@ -106,9 +109,10 @@ func (a *AppBuilder) init() {
 		a.startFunc = append(a.startFunc, func(ctx context.Context) error {
 			return a.ConfigMapWatcher.Start(ctx.Done())
 		})
-		//a.filters = route.DefaultFilters
-		a.filters = []restful.FilterFunction{}
+
 		a.container = restful.NewContainer()
+		a.Context, a.ClientManager = GetClientManager(a.Context)
+		a.filters = []restful.FilterFunction{a.ClientManager.Filter()}
 	})
 }
 
@@ -272,10 +276,10 @@ func (a *AppBuilder) Filters(filters ...restful.FilterFunction) *AppBuilder {
 	return a
 }
 
-func (a *AppBuilder) ClientManager(mgr *kclient.Manager) *AppBuilder {
-	a.Context = kclient.WithManager(a.Context, mgr)
-	return a
-}
+//func (a *AppBuilder) ClientManager(mgr *kclient.Manager) *AppBuilder {
+//	a.Context = kclient.WithManager(a.Context, mgr)
+//	return a
+//}
 
 // Container adds a containers
 func (a *AppBuilder) Container(container *restful.Container) *AppBuilder {
@@ -283,10 +287,20 @@ func (a *AppBuilder) Container(container *restful.Container) *AppBuilder {
 	return a
 }
 
-func (a *AppBuilder) Webservices(webServices ...*restful.WebService) *AppBuilder {
-	for _, ws := range webServices {
-		a.container.Add(ws)
+func (a *AppBuilder) Webservices(webServices ...WebService) *AppBuilder {
+	for _, item := range webServices {
+		name := item.Name()
+		webserviceAtomicLevel := a.LevelManager.Get(name)
+		webserviceLogger := a.Logger.Desugar().WithOptions(zap.UpdateCore(webserviceAtomicLevel, *a.ZapConfig)).Named(name).Sugar()
+
+		err := item.Setup(a.Context, func(ws *restful.WebService) {
+			a.container.Add(ws)
+		}, webserviceLogger)
+		if err != nil {
+			a.Logger.Fatalw("webservice setup error", "weservice", name, "err", err)
+		}
 	}
+
 	return a
 }
 
