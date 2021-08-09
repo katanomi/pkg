@@ -23,6 +23,7 @@ import (
 	"github.com/emicklei/go-restful/v3"
 	kerrors "github.com/katanomi/pkg/errors"
 	"go.uber.org/zap"
+	"k8s.io/client-go/dynamic"
 	"k8s.io/client-go/rest"
 	"knative.dev/pkg/injection"
 	"knative.dev/pkg/logging"
@@ -59,6 +60,16 @@ func NewManager(ctx context.Context, get GetConfigFunc, baseConfig GetBaseConfig
 // Filter returns a filter to be used in
 func (m *Manager) Filter() restful.FilterFunction {
 	return ManagerFilter(m)
+}
+
+func (m *Manager) DynamicClient(req *restful.Request) (dynamic.Interface, error) {
+	config := injection.GetConfig(req.Request.Context())
+	dynamicClient, err := dynamic.NewForConfig(config)
+	if err != nil {
+		return nil, err
+	}
+
+	return dynamicClient, nil
 }
 
 // ManagerFilter generates filter based on a manager to create a config based in a request and injects into context

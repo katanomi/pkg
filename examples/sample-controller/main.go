@@ -18,9 +18,7 @@ package main
 
 import (
 	"context"
-	"net/http"
 
-	"github.com/emicklei/go-restful/v3"
 	"github.com/katanomi/pkg/sharedmain"
 	"go.uber.org/zap"
 	corev1 "k8s.io/api/core/v1"
@@ -30,22 +28,10 @@ import (
 )
 
 func main() {
-	ws := new(restful.WebService)
-	ws.Path("/v1")
-	ws.Route(
-		ws.GET("/abc/def").Doc("hello-ok-api").Returns(200, "OK", map[string]string{"ok": "true"}).To(func(req *restful.Request, res *restful.Response) {
-			res.WriteHeaderAndJson(http.StatusOK, map[string]string{"ok": "true"}, restful.MIME_JSON)
-		}),
-	)
-
-	// container := restful.NewContainer()
-	// container.Add(ws)
 
 	sharedmain.App("test").
 		Scheme(scheme.Scheme).
 		Log().
-		// Container(container).
-		Webservices(ws).
 		Profiling().
 		Controllers(&Controller{}, &Controller2{}).
 		APIDocs().
