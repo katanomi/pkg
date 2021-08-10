@@ -49,6 +49,7 @@ import (
 	"knative.dev/pkg/profiling"
 	"knative.dev/pkg/system"
 	ctrl "sigs.k8s.io/controller-runtime"
+	ctrlcluster "sigs.k8s.io/controller-runtime/pkg/cluster"
 	"sigs.k8s.io/controller-runtime/pkg/healthz"
 	ctrllog "sigs.k8s.io/controller-runtime/pkg/log"
 )
@@ -288,6 +289,23 @@ func (a *AppBuilder) Container(container *restful.Container) *AppBuilder {
 }
 
 func (a *AppBuilder) Webservices(webServices ...WebService) *AppBuilder {
+
+	cluster, err := ctrlcluster.New(a.Config)
+	if err != nil {
+		a.Logger.Fatalw("cluster setup error", "err", err)
+	}
+	a.Context = kclient.WithClient(a.Context, cluster.GetClient())
+	a.startFunc = append(a.startFunc, func(ctx context.Context) error {
+		go func() {
+			err := cluster.Start(ctx)
+			if err != nil {
+				a.Logger.Fatalw("cluster start error", "err", err)
+			}
+		}()
+
+		return nil
+	})
+
 	for _, item := range webServices {
 		name := item.Name()
 		webserviceAtomicLevel := a.LevelManager.Get(name)

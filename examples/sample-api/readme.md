@@ -10,4 +10,11 @@ TOKEN=`kubectl get secret ${SECRET} --template "{{.data.token}}" | base64 -d`
 
 curl -H "Authorization: Bearer ${TOKEN}" -v "http://localhost:${PORT}/v1/hello"
 ```
-3. ensure that you will get all namespaces list
+3. ensure that you will get all namespaces list count like this:
+
+```json
+{
+ "client": 13,
+ "dynamicClient": 13
+}
+```

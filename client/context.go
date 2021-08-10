@@ -18,6 +18,9 @@ package client
 
 import (
 	"context"
+	"fmt"
+
+	"k8s.io/client-go/dynamic"
 
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
@@ -52,4 +55,21 @@ func ManagerCtx(ctx context.Context) *Manager {
 		return nil
 	}
 	return val.(*Manager)
+}
+
+type dynamicClientCtxKey struct{}
+
+// WithDynamicClient sets a dynamic.Interface client instance into a context
+func WithDynamicClient(ctx context.Context, client dynamic.Interface) context.Context {
+	return context.WithValue(ctx, dynamicClientCtxKey{}, client)
+}
+
+// DynamicClient returns a dynamic client.Client, returns nil if not found
+func DynamicClient(ctx context.Context) (dynamic.Interface, error) {
+	val := ctx.Value(dynamicClientCtxKey{})
+	if val == nil {
+		return nil, fmt.Errorf("not found")
+	}
+
+	return val.(dynamic.Interface), nil
 }
