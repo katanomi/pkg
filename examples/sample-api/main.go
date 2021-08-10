@@ -21,6 +21,8 @@ import (
 	"net/http"
 	"sync"
 
+	corev1 "k8s.io/api/core/v1"
+
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"knative.dev/pkg/logging"
@@ -58,6 +60,7 @@ var _ sharedmain.WebService = &Sample{}
 
 type Sample struct {
 	once sync.Once
+	ctx  context.Context
 }
 
 func (s *Sample) Name() string {
@@ -66,6 +69,7 @@ func (s *Sample) Name() string {
 
 func (s *Sample) Setup(ctx context.Context, add sharedmain.AddToRestContainer, logger *zap.SugaredLogger) error {
 	s.once.Do(func() {
+		s.ctx = ctx
 
 		ws := new(restful.WebService)
 		ws.Path("/v1")
@@ -81,10 +85,9 @@ func (s *Sample) Setup(ctx context.Context, add sharedmain.AddToRestContainer, l
 }
 
 func (s *Sample) Hello(req *restful.Request, res *restful.Response) {
-	ctx := req.Request.Context()
-	mgr := client.ManagerCtx(ctx)
+	reqCtx := req.Request.Context()
 
-	dclient, err := mgr.DynamicClient(req)
+	dclient, err := client.DynamicClient(reqCtx)
 	if err != nil {
 		res.WriteError(http.StatusInternalServerError, err)
 		return
@@ -93,12 +96,20 @@ func (s *Sample) Hello(req *restful.Request, res *restful.Response) {
 		Group:    "",
 		Version:  "v1",
 		Resource: "namespaces",
-	}).List(ctx, metav1.ListOptions{ResourceVersion: "0"})
+	}).List(reqCtx, metav1.ListOptions{ResourceVersion: "0"})
 
 	if err != nil {
 		res.WriteError(http.StatusInternalServerError, err)
 		return
 	}
 
-	res.WriteAsJson(list)
+	client := client.Client(s.ctx)
+	ns := &corev1.NamespaceList{}
+	err = client.List(reqCtx, ns)
+	if err != nil {
+		res.WriteError(http.StatusInternalServerError, err)
+		return
+	}
+
+	res.WriteAsJson(map[string]int{"dynamicClient": len(list.Items), "client": len(ns.Items)})
 }
