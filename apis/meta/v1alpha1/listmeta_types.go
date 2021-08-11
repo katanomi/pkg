@@ -40,3 +40,5 @@ type ListOptions struct {
 	// +optional
 	Search map[string][]string `json:",inline"`
 }
+
+type PathParams map[string]string

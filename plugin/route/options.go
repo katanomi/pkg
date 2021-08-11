@@ -45,3 +45,12 @@ func ListOptionsDocs(bldr *restful.RouteBuilder) *restful.RouteBuilder {
 	// TODO: adds parameters to lists here
 	return bldr
 }
+
+func GetPathParamsFromRequest(req *restful.Request, names ...string) (params metav1alpha1.PathParams) {
+	params = make(metav1alpha1.PathParams)
+	for _, name := range names {
+		params[name] = req.PathParameter(name)
+	}
+
+	return
+}
