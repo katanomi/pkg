@@ -55,8 +55,10 @@ func (a *artifactList) Register(ws *restful.WebService) {
 
 func (a *artifactList) ListArtifacts(request *restful.Request, response *restful.Response) {
 	option := GetListOptionsFromRequest(request)
-	pathParams := metav1alpha1.PathParams{
-		Project:    request.PathParameter("project"),
+	pathParams := metav1alpha1.ArtifactOptions{
+		RepositoryOptions: metav1alpha1.RepositoryOptions{
+			Project: request.PathParameter("project"),
+		},
 		Repository: request.PathParameter("repository"),
 	}
 	artifacts, err := a.impl.ListArtifacts(request.Request.Context(), pathParams, option)
@@ -96,8 +98,10 @@ func (a *artifactGetter) Register(ws *restful.WebService) {
 
 // GetArtifact http handler for get artifact detail
 func (a *artifactGetter) GetArtifact(request *restful.Request, response *restful.Response) {
-	pathParams := metav1alpha1.PathParams{
-		Project:    request.PathParameter("project"),
+	pathParams := metav1alpha1.ArtifactOptions{
+		RepositoryOptions: metav1alpha1.RepositoryOptions{
+			Project: request.PathParameter("project"),
+		},
 		Repository: request.PathParameter("repository"),
 		Artifact:   request.PathParameter("artifact"),
 	}
@@ -138,8 +142,10 @@ func (a *artifactDeleter) Register(ws *restful.WebService) {
 
 // DeleteArtifact http handler for delete artifact
 func (a *artifactDeleter) DeleteArtifact(request *restful.Request, response *restful.Response) {
-	pathParams := metav1alpha1.PathParams{
-		Project:    request.PathParameter("project"),
+	pathParams := metav1alpha1.ArtifactOptions{
+		RepositoryOptions: metav1alpha1.RepositoryOptions{
+			Project: request.PathParameter("project"),
+		},
 		Repository: request.PathParameter("repository"),
 		Artifact:   request.PathParameter("artifact"),
 	}
@@ -180,8 +186,10 @@ func (s *scanImage) Register(ws *restful.WebService) {
 
 // ScanImage http handler for scan image
 func (s *scanImage) ScanImage(request *restful.Request, response *restful.Response) {
-	pathParams := metav1alpha1.PathParams{
-		Project:    request.PathParameter("project"),
+	pathParams := metav1alpha1.ArtifactOptions{
+		RepositoryOptions: metav1alpha1.RepositoryOptions{
+			Project: request.PathParameter("project"),
+		},
 		Repository: request.PathParameter("repository"),
 		Artifact:   request.PathParameter("artifact"),
 	}
