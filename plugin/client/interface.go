@@ -46,6 +46,36 @@ type ResourceLister interface {
 	ListResources(ctx context.Context, option metav1alpha1.ListOptions) (*metav1alpha1.ResourceList, error)
 }
 
+// RepositoryLister list repository
+type RepositoryLister interface {
+	Interface
+	ListRepositories(ctx context.Context, params metav1alpha1.RepositoryOptions, option metav1alpha1.ListOptions) (*metav1alpha1.RepositoryList, error)
+}
+
+// ArtifactLister list artifact
+type ArtifactLister interface {
+	Interface
+	ListArtifacts(ctx context.Context, params metav1alpha1.ArtifactOptions, option metav1alpha1.ListOptions) (*metav1alpha1.ArtifactList, error)
+}
+
+// ArtifactGetter get artifact detail
+type ArtifactGetter interface {
+	Interface
+	GetArtifact(ctx context.Context, params metav1alpha1.ArtifactOptions) (*metav1alpha1.Artifact, error)
+}
+
+// ArtifactDeleter delete artifact
+type ArtifactDeleter interface {
+	Interface
+	DeleteArtifact(ctx context.Context, params metav1alpha1.ArtifactOptions) error
+}
+
+// ScanImage scan image
+type ScanImage interface {
+	Interface
+	ScanImage(ctx context.Context, params metav1alpha1.ArtifactOptions) error
+}
+
 // Client inteface for PluginClient, client code shoud use the interface
 // as dependency
 type Client interface {

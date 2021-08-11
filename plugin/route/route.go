@@ -54,6 +54,26 @@ func match(c client.Interface) []Route {
 		routes = append(routes, NewResourceList(v))
 	}
 
+	if v, ok := c.(client.RepositoryLister); ok {
+		routes = append(routes, NewRepositoryList(v))
+	}
+
+	if v, ok := c.(client.ArtifactLister); ok {
+		routes = append(routes, NewArtifactList(v))
+	}
+
+	if v, ok := c.(client.ArtifactGetter); ok {
+		routes = append(routes, NewArtifactGet(v))
+	}
+
+	if v, ok := c.(client.ArtifactDeleter); ok {
+		routes = append(routes, NewArtifactDelete(v))
+	}
+
+	if v, ok := c.(client.ScanImage); ok {
+		routes = append(routes, NewScanImage(v))
+	}
+
 	return routes
 }
 

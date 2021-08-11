@@ -40,3 +40,20 @@ type ListOptions struct {
 	// +optional
 	Search map[string][]string `json:",inline"`
 }
+
+// RepositoryOptions list repositroy path params
+type RepositoryOptions struct {
+	// project name
+	Project string `json:"project"`
+}
+
+// ArtifactOptions path params
+type ArtifactOptions struct {
+	RepositoryOptions
+
+	// repository name
+	Repository string `json:"repository"`
+
+	// artifact name
+	Artifact string `json:"artifact"`
+}
