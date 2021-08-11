@@ -40,11 +40,13 @@ func NewArtifactList(impl client.ArtifactLister) Route {
 }
 
 func (a *artifactList) Register(ws *restful.WebService) {
+	projectParam := ws.PathParameter("project", "repository belong to integraion")
+	repositoryParam := ws.PathParameter("repository", "artifact belong to repository")
 	ws.Route(
 		ListOptionsDocs(
 			ws.GET("/projects/{project}/repositories/{repository}/artifacts").To(a.ListArtifacts).
 				// docs
-				Doc("ListArtifacts").
+				Doc("ListArtifacts").Param(projectParam).Param(repositoryParam).
 				Metadata(restfulspec.KeyOpenAPITags, a.tags).
 				Returns(http.StatusOK, "OK", metav1alpha1.ArtifactList{}),
 		),
@@ -53,7 +55,10 @@ func (a *artifactList) Register(ws *restful.WebService) {
 
 func (a *artifactList) ListArtifacts(request *restful.Request, response *restful.Response) {
 	option := GetListOptionsFromRequest(request)
-	pathParams := GetPathParamsFromRequest(request, "project", "repository")
+	pathParams := metav1alpha1.PathParams{
+		Project:    request.PathParameter("project"),
+		Repository: request.PathParameter("repository"),
+	}
 	artifacts, err := a.impl.ListArtifacts(request.Request.Context(), pathParams, option)
 	if err != nil {
 		kerrors.HandleError(request, response, err)
@@ -77,17 +82,25 @@ func NewArtifactGet(impl client.ArtifactGetter) Route {
 }
 
 func (a *artifactGetter) Register(ws *restful.WebService) {
+	projectParam := ws.PathParameter("project", "repository belong to integraion")
+	repositoryParam := ws.PathParameter("repository", "artifact belong to repository")
+	artifactParam := ws.PathParameter("artifact", "artifact name, maybe is version or tag")
 	ws.Route(
 		ws.GET("/projects/{project}/repositories/{repository}/artifacts/{artifact}").To(a.GetArtifact).
 			// docs
-			Doc("GetArtifact").
+			Doc("GetArtifact").Param(projectParam).Param(repositoryParam).Param(artifactParam).
 			Metadata(restfulspec.KeyOpenAPITags, a.tags).
 			Returns(http.StatusOK, "OK", metav1alpha1.Artifact{}),
 	)
 }
 
+// GetArtifact http handler for get artifact detail
 func (a *artifactGetter) GetArtifact(request *restful.Request, response *restful.Response) {
-	pathParams := GetPathParamsFromRequest(request, "project", "repository", "artifact")
+	pathParams := metav1alpha1.PathParams{
+		Project:    request.PathParameter("project"),
+		Repository: request.PathParameter("repository"),
+		Artifact:   request.PathParameter("artifact"),
+	}
 	artifact, err := a.impl.GetArtifact(request.Request.Context(), pathParams)
 	if err != nil {
 		kerrors.HandleError(request, response, err)
@@ -111,17 +124,25 @@ func NewArtifactDelete(impl client.ArtifactDeleter) Route {
 }
 
 func (a *artifactDeleter) Register(ws *restful.WebService) {
+	projectParam := ws.PathParameter("project", "repository belong to integraion")
+	repositoryParam := ws.PathParameter("repository", "artifact belong to repository")
+	artifactParam := ws.PathParameter("artifact", "artifact name, maybe is version or tag")
 	ws.Route(
 		ws.DELETE("/projects/{project}/repositories/{repository}/artifacts/{artifact}").To(a.DeleteArtifact).
 			// docs
-			Doc("DeleteArtifact").
+			Doc("DeleteArtifact").Param(projectParam).Param(repositoryParam).Param(artifactParam).
 			Metadata(restfulspec.KeyOpenAPITags, a.tags).
 			Returns(http.StatusOK, "OK", nil),
 	)
 }
 
+// DeleteArtifact http handler for delete artifact
 func (a *artifactDeleter) DeleteArtifact(request *restful.Request, response *restful.Response) {
-	pathParams := GetPathParamsFromRequest(request, "project", "repository", "artifact")
+	pathParams := metav1alpha1.PathParams{
+		Project:    request.PathParameter("project"),
+		Repository: request.PathParameter("repository"),
+		Artifact:   request.PathParameter("artifact"),
+	}
 	err := a.impl.DeleteArtifact(request.Request.Context(), pathParams)
 	if err != nil {
 		kerrors.HandleError(request, response, err)
@@ -145,17 +166,25 @@ func NewScanImage(impl client.ScanImage) Route {
 }
 
 func (s *scanImage) Register(ws *restful.WebService) {
+	projectParam := ws.PathParameter("project", "repository belong to integraion")
+	repositoryParam := ws.PathParameter("repository", "artifact belong to repository")
+	artifactParam := ws.PathParameter("artifact", "artifact name, maybe is version or tag")
 	ws.Route(
 		ws.POST("/projects/{project}/repositories/{repository}/artifacts/{artifact}").To(s.ScanImage).
 			// docs
-			Doc("ScanImage").
+			Doc("ScanImage").Param(projectParam).Param(repositoryParam).Param(artifactParam).
 			Metadata(restfulspec.KeyOpenAPITags, s.tags).
 			Returns(http.StatusOK, "OK", nil),
 	)
 }
 
+// ScanImage http handler for scan image
 func (s *scanImage) ScanImage(request *restful.Request, response *restful.Response) {
-	pathParams := GetPathParamsFromRequest(request, "project", "repository", "artifact")
+	pathParams := metav1alpha1.PathParams{
+		Project:    request.PathParameter("project"),
+		Repository: request.PathParameter("repository"),
+		Artifact:   request.PathParameter("artifact"),
+	}
 	err := s.impl.ScanImage(request.Request.Context(), pathParams)
 	if err != nil {
 		kerrors.HandleError(request, response, err)

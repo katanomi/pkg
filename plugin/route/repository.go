@@ -40,20 +40,24 @@ func NewRepositoryList(impl client.RepositoryLister) Route {
 }
 
 func (r *repositoryList) Register(ws *restful.WebService) {
+	projectParam := ws.PathParameter("project", "repository belong to integraion")
 	ws.Route(
 		ListOptionsDocs(
 			ws.GET("/projects/{project}/repositories").To(r.ListRepositories).
 				// docs
-				Doc("ListRepositories").
+				Doc("ListRepositories").Param(projectParam).
 				Metadata(restfulspec.KeyOpenAPITags, r.tags).
 				Returns(http.StatusOK, "OK", metav1alpha1.RepositoryList{}),
 		),
 	)
 }
 
+// ListRepositories http handler for list repository
 func (r *repositoryList) ListRepositories(request *restful.Request, response *restful.Response) {
 	option := GetListOptionsFromRequest(request)
-	pathParams := GetPathParamsFromRequest(request, "project")
+	pathParams := metav1alpha1.PathParams{
+		Project: request.PathParameter("project"),
+	}
 	repositories, err := r.impl.ListRepositories(request.Request.Context(), pathParams, option)
 	if err != nil {
 		kerrors.HandleError(request, response, err)

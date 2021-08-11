@@ -41,4 +41,14 @@ type ListOptions struct {
 	Search map[string][]string `json:",inline"`
 }
 
-type PathParams map[string]string
+// PathParams record path params
+type PathParams struct {
+	// project name
+	Project string `json:"project"`
+
+	// repository name
+	Repository string `json:"repository"`
+
+	// artifact name
+	Artifact string `json:"artifact"`
+}
