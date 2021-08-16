@@ -20,6 +20,7 @@ import (
 	"context"
 
 	metav1alpha1 "github.com/katanomi/pkg/apis/meta/v1alpha1"
+	corev1 "k8s.io/api/core/v1"
 	duckv1 "knative.dev/pkg/apis/duck/v1"
 )
 
@@ -83,4 +84,8 @@ type Client interface {
 	Post(ctx context.Context, baseURL *duckv1.Addressable, uri string, options ...OptionFunc) error
 	Put(ctx context.Context, baseURL *duckv1.Addressable, uri string, options ...OptionFunc) error
 	Delete(ctx context.Context, baseURL *duckv1.Addressable, uri string, options ...OptionFunc) error
+}
+
+type ClientProjectGetter interface {
+	Project(meta Meta, secret corev1.Secret) ClientProject
 }

@@ -148,3 +148,8 @@ func (p *PluginClient) fullUrl(address *duckv1.Addressable, uri string) string {
 	url := address.URL.String()
 	return fmt.Sprintf("%s/%s", strings.TrimSuffix(url, "/"), strings.TrimPrefix(uri, "/"))
 }
+
+// Project get project client
+func (p *PluginClient) Project(meta Meta, secret corev1.Secret) ClientProject {
+	return newProject(p, meta, secret)
+}
