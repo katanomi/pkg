@@ -48,6 +48,7 @@ func GetObjectReferenceFromObject(obj metav1.Object, opts ...ObjectRefOptionsFun
 	return
 }
 
+// +k8s:deepcopy-gen=false
 type ObjectRefOptionsFunc func(obj metav1.Object, ref *corev1.ObjectReference)
 
 func ObjectRefWithTypeMeta() ObjectRefOptionsFunc {
