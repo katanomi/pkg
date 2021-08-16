@@ -88,7 +88,7 @@ func (p *PluginClient) Put(ctx context.Context, baseURL *duckv1.Addressable, pat
 // Delete performs a DELETE request with the given parameters
 func (p *PluginClient) Delete(ctx context.Context, baseURL *duckv1.Addressable, path string, options ...OptionFunc) error {
 	request := p.R(ctx, baseURL, options...)
-	_, err := request.Put(p.fullUrl(baseURL, path))
+	_, err := request.Delete(p.fullUrl(baseURL, path))
 	return err
 }
 
