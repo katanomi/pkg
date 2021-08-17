@@ -21,8 +21,10 @@ import (
 	"net/http"
 
 	"github.com/emicklei/go-restful/v3"
+	"github.com/go-resty/resty/v2"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime/schema"
 )
 
 //AsAPIError returns an error as a apimachinary api error
@@ -40,6 +42,25 @@ func AsStatusCode(err error) int {
 		return int(status.Status().Code)
 	}
 	return http.StatusInternalServerError
+}
+
+// AsStatusError transform resty response to status error
+func AsStatusError(response *resty.Response) error {
+	statusError := errors.NewGenericServerResponse(
+		response.StatusCode(),
+		response.Request.Method,
+		schema.GroupResource{},
+		response.Request.URL,
+		response.String(),
+		0,
+		false,
+	)
+
+	if err, ok := response.Error().(error); ok {
+		statusError.ErrStatus.Message = err.Error()
+	}
+
+	return statusError
 }
 
 // HandleError handles error in requests

@@ -30,8 +30,8 @@ import (
 var DefaultFilters = []restful.FilterFunction{
 	tracing.Filter,
 	metrics.Filter,
-	client.AuthFilter(),
-	client.MetaFilter(),
+	client.AuthFilter,
+	client.MetaFilter,
 }
 
 // Route a service should implement register func to register go restful webservice
@@ -48,6 +48,10 @@ func match(c client.Interface) []Route {
 
 	if v, ok := c.(client.ProjectCreator); ok {
 		routes = append(routes, NewProjectCreate(v))
+	}
+
+	if v, ok := c.(client.ProjectGetter); ok {
+		routes = append(routes, NewProjectGet(v))
 	}
 
 	if v, ok := c.(client.ResourceLister); ok {
@@ -75,6 +79,46 @@ func match(c client.Interface) []Route {
 	}
 
 	return routes
+}
+
+func GetMethods(c client.Interface) []string {
+	// TODO: maybe there is a better way to do this without having
+	// to manually add entries
+	methods := make([]string, 0, 10)
+	if _, ok := c.(client.ProjectLister); ok {
+		methods = append(methods, "ListProjects")
+	}
+	if _, ok := c.(client.ProjectCreator); ok {
+		methods = append(methods, "CreateProject")
+	}
+	if _, ok := c.(client.ResourceLister); ok {
+		methods = append(methods, "ListResources")
+	}
+	if _, ok := c.(client.RepositoryLister); ok {
+		methods = append(methods, "ListRepositories")
+	}
+	if _, ok := c.(client.ArtifactLister); ok {
+		methods = append(methods, "ListArtifacts")
+	}
+	if _, ok := c.(client.ArtifactGetter); ok {
+		methods = append(methods, "GetArtifact")
+	}
+	if _, ok := c.(client.ArtifactDeleter); ok {
+		methods = append(methods, "DeleteArtifact")
+	}
+	if _, ok := c.(client.ScanImage); ok {
+		methods = append(methods, "ScanImage")
+	}
+	if _, ok := c.(client.WebhookRegister); ok {
+		methods = append(methods, "CreateWebhook", "UpdateWebhook", "DeleteWebhook")
+	}
+	if _, ok := c.(client.WebhookResourceDiffer); ok {
+		methods = append(methods, "IsSameResource")
+	}
+	if _, ok := c.(client.WebhookReceiver); ok {
+		methods = append(methods, "ReceiveWebhook")
+	}
+	return methods
 }
 
 // NewService new service from plugin client

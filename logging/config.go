@@ -19,7 +19,6 @@ package logging
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"sync"
 
 	"knative.dev/pkg/logging"
@@ -122,7 +121,6 @@ func (l *LevelManager) Get(name string) zap.AtomicLevel {
 	l.Locker.Lock()
 	defer l.Locker.Unlock()
 	if _, ok := l.ControllerLevelMap[name]; !ok {
-		fmt.Println(ok)
 		l.ControllerLevelMap[name] = ControllerLevel{
 			Inherit: true,
 			Level:   zap.NewAtomicLevelAt(l.BaseLevel.Level()),

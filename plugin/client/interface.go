@@ -19,9 +19,13 @@ package client
 import (
 	"context"
 
+	"github.com/emicklei/go-restful/v3"
 	metav1alpha1 "github.com/katanomi/pkg/apis/meta/v1alpha1"
 	corev1 "k8s.io/api/core/v1"
+	"knative.dev/pkg/apis"
 	duckv1 "knative.dev/pkg/apis/duck/v1"
+
+	cloudevent "github.com/cloudevents/sdk-go/v2"
 )
 
 // Interface base interface for plugins
@@ -29,10 +33,36 @@ type Interface interface {
 	Path() string
 }
 
+// PluginRegister plugin registration methods to update IntegationClass status
+type PluginRegister interface {
+	Interface
+	GetIntegrationClassName() string
+	// Returns its own plugin access URL
+	GetAddressURL() *apis.URL
+	// Returns a Webhook accessible URL for external tools
+	// If not supported return nil, false
+	GetWebhookURL() (*apis.URL, bool)
+	// Returns a list of supported versions by the plugin
+	// For SaaS platform plugins use a "online" version.
+	GetSupportedVersions() []string
+	// Returns all secret types supported by the plugin
+	GetSecretTypes() []string
+	// GetReplicationPolicyTypes return replication policy types for ClusterIntegration
+	GetReplicationPolicyTypes() []string
+	// Returns a list of Resource types that can be used in ClusterIntegration and Integration
+	GetResourceTypes() []string
+}
+
 // ProjectLister list project api
 type ProjectLister interface {
 	Interface
 	ListProjects(ctx context.Context, option metav1alpha1.ListOptions) (*metav1alpha1.ProjectList, error)
+}
+
+// ProjectGetter list project api
+type ProjectGetter interface {
+	Interface
+	GetProject(ctx context.Context, id string) (*metav1alpha1.Project, error)
 }
 
 // ProjectCreator create project api
@@ -75,6 +105,29 @@ type ArtifactDeleter interface {
 type ScanImage interface {
 	Interface
 	ScanImage(ctx context.Context, params metav1alpha1.ArtifactOptions) error
+}
+
+// WebhookRegister used to register and manage webhooks
+type WebhookRegister interface {
+	// Use the methods below to manage webhooks in the target platform
+	CreateWebhook(ctx context.Context, spec metav1alpha1.WebhookRegisterSpec, secret corev1.Secret) (metav1alpha1.WebhookRegisterStatus, error)
+	UpdateWebhook(ctx context.Context, spec metav1alpha1.WebhookRegisterSpec, secret corev1.Secret) (metav1alpha1.WebhookRegisterStatus, error)
+	DeleteWebhook(ctx context.Context, spec metav1alpha1.WebhookRegisterSpec, secret corev1.Secret) error
+}
+
+// WebhookResourceDiffer used to compare different webhook resources in order to provide
+// a way to merge webhook registration requests. If not provided, the resource's URI will be directly compared
+type WebhookResourceDiffer interface {
+	// IsSameResource will provide two ResourceURI
+	// the plugin should discern if they are the same.
+	// If this method is not implemented a standard comparisons will be used
+	IsSameResource(ctx context.Context, i, j metav1alpha1.ResourceURI) bool
+}
+
+// WebhookReceiver receives a webhook request with validation and transform it into a cloud event
+type WebhookReceiver interface {
+	Interface
+	ReceiveWebhook(ctx context.Context, req *restful.Request, secret string) (cloudevent.Event, error)
 }
 
 // Client inteface for PluginClient, client code shoud use the interface

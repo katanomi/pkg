@@ -27,6 +27,7 @@ import (
 type ClientProject interface {
 	List(ctx context.Context, baseURL *duckv1.Addressable, options ...OptionFunc) (*metav1alpha1.ProjectList, error)
 	Create(ctx context.Context, baseURL *duckv1.Addressable, project *metav1alpha1.Project, options ...OptionFunc) (*metav1alpha1.Project, error)
+	Get(ctx context.Context, baseURL *duckv1.Addressable, id string, options ...OptionFunc) (*metav1alpha1.Project, error)
 }
 
 type project struct {
@@ -63,4 +64,15 @@ func (p *project) Create(ctx context.Context, baseURL *duckv1.Addressable, proje
 	}
 
 	return project, nil
+}
+
+// Get get project using plugin
+func (p *project) Get(ctx context.Context, baseURL *duckv1.Addressable, id string, options ...OptionFunc) (*metav1alpha1.Project, error) {
+	resp := &metav1alpha1.Project{}
+	options = append(options, MetaOpts(p.meta), SecretOpts(p.secret), ResultOpts(resp))
+	if err := p.client.Get(ctx, baseURL, "projects/"+id, options...); err != nil {
+		return nil, err
+	}
+
+	return resp, nil
 }

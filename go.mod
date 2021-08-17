@@ -6,6 +6,7 @@ require (
 	github.com/HdrHistogram/hdrhistogram-go v1.1.0 // indirect
 	github.com/blendle/zapdriver v1.3.1
 	github.com/caarlos0/env/v6 v6.6.2
+	github.com/cloudevents/sdk-go/v2 v2.5.0
 	github.com/emicklei/go-restful-openapi/v2 v2.3.0
 	github.com/emicklei/go-restful/v3 v3.5.1
 	github.com/go-logr/logr v0.3.0

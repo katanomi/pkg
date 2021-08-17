@@ -54,7 +54,7 @@ type ProjectSpec struct {
 
 	// NamespaceRefs for which this project is already bound to
 	// +optional
-	NamespaceRefs []*corev1.ObjectReference `json:"namespaceRefs,omitempty"`
+	NamespaceRefs []corev1.ObjectReference `json:"namespaceRefs,omitempty"`
 
 	// Properties extended properties for Project
 	Properties *runtime.RawExtension `json:"properties,omitempty"`
