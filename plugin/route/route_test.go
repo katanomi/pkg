@@ -65,6 +65,39 @@ func TestMatch(t *testing.T) {
 	}
 }
 
+func TestGetMethods(t *testing.T) {
+	testCases := []struct {
+		c       client.Interface
+		methods []string
+	}{
+		{
+			c:       &TestProjectList{},
+			methods: []string{"ListProjects"},
+		},
+		{
+			c:       &TestProjectCreate{},
+			methods: []string{"CreateProject"},
+		},
+		{
+			c:       &TestResourceList{},
+			methods: []string{"ListResources"},
+		},
+		{
+			c:       &TestProjectListCreate{},
+			methods: []string{"ListProjects", "CreateProject"},
+		},
+	}
+
+	g := NewGomegaWithT(t)
+
+	for i, item := range testCases {
+		t.Run(fmt.Sprintf("test-%d", i+1), func(t *testing.T) {
+			methods := GetMethods(item.c)
+			g.Expect(methods).To(Equal(item.methods))
+		})
+	}
+}
+
 func TestRegister(t *testing.T) {
 	testCases := []struct {
 		c    client.Interface

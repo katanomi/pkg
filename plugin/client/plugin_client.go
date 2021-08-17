@@ -64,10 +64,7 @@ type OptionFunc func(request *resty.Request)
 // Get performs a GET request using defined options
 func (p *PluginClient) Get(ctx context.Context, baseURL *duckv1.Addressable, path string, options ...OptionFunc) error {
 	request := p.R(ctx, baseURL, options...)
-	response, err := request.Get(p.fullUrl(baseURL, path))
-	if response != nil {
-		fmt.Println("response", response)
-	}
+	_, err := request.Get(p.fullUrl(baseURL, path))
 	return err
 }
 

@@ -24,9 +24,10 @@ import (
 
 // Config global config
 type Config struct {
-	Trace  TraceConfig
-	Log    LogConfig
-	Server ServerConfig
+	Trace   TraceConfig
+	Log     LogConfig
+	Server  ServerConfig
+	Service AccessConfig
 }
 
 type TraceConfig struct {
@@ -45,6 +46,12 @@ type ServerConfig struct {
 type LogConfig struct {
 	Level string `env:"LOG_LEVEL" envDefault:"info"`
 	Path  string `env:"LOG_PATH" envDefault:"stderr"`
+}
+
+type AccessConfig struct {
+	ServiceName     string `env:"SERVICE_NAME"`
+	SystemNamespace string `env:"SYSTEM_NAMESPACE"`
+	WebhookAddress  string `env:"WEBHOOK_ADDRESS"`
 }
 
 func NewConfig() *Config {
