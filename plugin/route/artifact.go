@@ -176,7 +176,7 @@ func (s *scanImage) Register(ws *restful.WebService) {
 	repositoryParam := ws.PathParameter("repository", "artifact belong to repository")
 	artifactParam := ws.PathParameter("artifact", "artifact name, maybe is version or tag")
 	ws.Route(
-		ws.POST("/projects/{project}/repositories/{repository}/artifacts/{artifact}").To(s.ScanImage).
+		ws.POST("/projects/{project}/repositories/{repository}/artifacts/{artifact}/scan").To(s.ScanImage).
 			// docs
 			Doc("ScanImage").Param(projectParam).Param(repositoryParam).Param(artifactParam).
 			Metadata(restfulspec.KeyOpenAPITags, s.tags).

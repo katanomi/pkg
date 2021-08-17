@@ -125,7 +125,7 @@ func TestNewService(t *testing.T) {
 func TestProjectListNoMeta(t *testing.T) {
 	g := NewGomegaWithT(t)
 
-	ws, err := NewService(&TestProjectList{}, client.MetaFilter)
+	ws, err := NewService(&TestProjectList{}, client.MetaFilter())
 	g.Expect(err).To(BeNil())
 
 	container := restful.NewContainer()
@@ -137,13 +137,13 @@ func TestProjectListNoMeta(t *testing.T) {
 
 	container.Dispatch(httpWriter, httpRequest)
 
-	g.Expect(httpWriter.Code).To(Equal(http.StatusBadRequest))
+	g.Expect(httpWriter.Code).To(Equal(http.StatusOK))
 }
 
 func TestProjectListWithMeta(t *testing.T) {
 	g := NewGomegaWithT(t)
 
-	ws, err := NewService(&TestProjectList{}, client.MetaFilter)
+	ws, err := NewService(&TestProjectList{}, client.MetaFilter())
 	g.Expect(err).To(BeNil())
 
 	container := restful.NewContainer()

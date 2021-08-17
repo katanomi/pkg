@@ -30,8 +30,8 @@ import (
 var DefaultFilters = []restful.FilterFunction{
 	tracing.Filter,
 	metrics.Filter,
-	client.AuthFilter,
-	client.MetaFilter,
+	client.AuthFilter(),
+	client.MetaFilter(),
 }
 
 // Route a service should implement register func to register go restful webservice

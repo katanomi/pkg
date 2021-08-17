@@ -325,6 +325,7 @@ func (a *AppBuilder) Webservices(webServices ...WebService) *AppBuilder {
 // Plugins adds plugins to this app
 func (a *AppBuilder) Plugins(plugins ...client.Interface) *AppBuilder {
 	a.plugins = plugins
+	a.filters = append(a.filters, client.MetaFilter(), client.AuthFilter())
 
 	for _, plugin := range a.plugins {
 		ws, err := route.NewService(plugin, a.filters...)
