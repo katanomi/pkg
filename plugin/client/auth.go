@@ -136,34 +136,34 @@ const (
 )
 
 // AuthFilter auth filter for go restful, parsing plugin auth
-func AuthFilter() restful.FilterFunction {
-	return func(req *restful.Request, resp *restful.Response, chain *restful.FilterChain) {
-		method := req.HeaderParameter(PluginAuthHeader)
-		encodedSecret := req.HeaderParameter(PluginSecretHeader)
-		if len(method) == 0 || len(encodedSecret) == 0 {
-			return
-		}
+func AuthFilter(req *restful.Request, resp *restful.Response, chain *restful.FilterChain) {
+	method := req.HeaderParameter(PluginAuthHeader)
+	encodedSecret := req.HeaderParameter(PluginSecretHeader)
 
-		decodedSecret, err := base64.StdEncoding.DecodeString(encodedSecret)
-		if err != nil {
-			errors.HandleError(req, resp, fmt.Errorf("decode secret error: %s", err.Error()))
-			return
-		}
-
-		data := map[string][]byte{}
-		if err = json.Unmarshal(decodedSecret, &data); err != nil {
-			errors.HandleError(req, resp, fmt.Errorf("decode secret error: %s", err.Error()))
-			return
-		}
-
-		auth := Auth{
-			Type:   AuthType(method),
-			Secret: data,
-		}
-
-		ctx := req.Request.Context()
-		req.Request = req.Request.WithContext(auth.WithContext(ctx))
-
+	if method == "" || encodedSecret == "" {
 		chain.ProcessFilter(req, resp)
+		return
 	}
+
+	decodedSecret, err := base64.StdEncoding.DecodeString(encodedSecret)
+	if err != nil {
+		errors.HandleError(req, resp, fmt.Errorf("decode secret error: %s", err.Error()))
+		return
+	}
+
+	data := map[string][]byte{}
+	if err = json.Unmarshal(decodedSecret, &data); err != nil {
+		errors.HandleError(req, resp, fmt.Errorf("decode secret error: %s", err.Error()))
+		return
+	}
+
+	auth := Auth{
+		Type:   AuthType(method),
+		Secret: data,
+	}
+
+	ctx := req.Request.Context()
+	req.Request = req.Request.WithContext(auth.WithContext(ctx))
+
+	chain.ProcessFilter(req, resp)
 }

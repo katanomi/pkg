@@ -22,10 +22,19 @@ import (
 	"strings"
 
 	"github.com/go-resty/resty/v2"
+	perrors "github.com/katanomi/pkg/errors"
 	corev1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/api/errors"
 	duckv1 "knative.dev/pkg/apis/duck/v1"
 
 	metav1alpha1 "github.com/katanomi/pkg/apis/meta/v1alpha1"
+)
+
+var (
+	defaultOptions = []OptionFunc{
+		ErrorOpts(&errors.StatusError{}),
+		HeaderOpts("Content-Type", "application/json"),
+	}
 )
 
 // PluginClient client for plugins
@@ -63,30 +72,42 @@ type OptionFunc func(request *resty.Request)
 
 // Get performs a GET request using defined options
 func (p *PluginClient) Get(ctx context.Context, baseURL *duckv1.Addressable, path string, options ...OptionFunc) error {
+	options = append(defaultOptions, options...)
+
 	request := p.R(ctx, baseURL, options...)
-	_, err := request.Get(p.fullUrl(baseURL, path))
-	return err
+	response, err := request.Get(p.fullUrl(baseURL, path))
+
+	return p.HandleError(response, err)
 }
 
 // Post performs a POST request with the given parameters
 func (p *PluginClient) Post(ctx context.Context, baseURL *duckv1.Addressable, path string, options ...OptionFunc) error {
+	options = append(defaultOptions, options...)
+
 	request := p.R(ctx, baseURL, options...)
-	_, err := request.Post(p.fullUrl(baseURL, path))
-	return err
+	response, err := request.Post(p.fullUrl(baseURL, path))
+
+	return p.HandleError(response, err)
 }
 
 // Put performs a PUT request with the given parameters
 func (p *PluginClient) Put(ctx context.Context, baseURL *duckv1.Addressable, path string, options ...OptionFunc) error {
+	options = append(defaultOptions, options...)
+
 	request := p.R(ctx, baseURL, options...)
-	_, err := request.Put(p.fullUrl(baseURL, path))
-	return err
+	response, err := request.Put(p.fullUrl(baseURL, path))
+
+	return p.HandleError(response, err)
 }
 
 // Delete performs a DELETE request with the given parameters
 func (p *PluginClient) Delete(ctx context.Context, baseURL *duckv1.Addressable, path string, options ...OptionFunc) error {
+	options = append(defaultOptions, options...)
+
 	request := p.R(ctx, baseURL, options...)
-	_, err := request.Delete(p.fullUrl(baseURL, path))
-	return err
+	response, err := request.Delete(p.fullUrl(baseURL, path))
+
+	return p.HandleError(response, err)
 }
 
 // R prepares a request based on the given information
@@ -144,6 +165,18 @@ func (p *PluginClient) Header(key, value string) OptionFunc {
 func (p *PluginClient) fullUrl(address *duckv1.Addressable, uri string) string {
 	url := address.URL.String()
 	return fmt.Sprintf("%s/%s", strings.TrimSuffix(url, "/"), strings.TrimPrefix(uri, "/"))
+}
+
+func (p *PluginClient) HandleError(response *resty.Response, err error) error {
+	if err != nil {
+		return err
+	}
+
+	if response.IsError() {
+		return perrors.AsStatusError(response)
+	}
+
+	return nil
 }
 
 // Project get project client

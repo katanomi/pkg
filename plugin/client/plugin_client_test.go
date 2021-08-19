@@ -18,10 +18,13 @@ package client
 
 import (
 	"context"
+	goerrors "errors"
 	"testing"
 
 	"github.com/go-resty/resty/v2"
 	. "github.com/onsi/gomega"
+	"k8s.io/apimachinery/pkg/api/errors"
+	"k8s.io/apimachinery/pkg/runtime/schema"
 
 	"github.com/jarcoal/httpmock"
 	corev1 "k8s.io/api/core/v1"
@@ -87,4 +90,55 @@ func TestPluginClientPut(t *testing.T) {
 	g.Expect(err).To(BeNil())
 	g.Expect(result.Message).To(Equal("Changed"))
 	g.Expect(result.Code).To(Equal(201))
+}
+
+func TestPluginClientError(t *testing.T) {
+	g := NewGomegaWithT(t)
+	httpmock.Reset()
+
+	responder, _ := httpmock.NewJsonResponder(404, nil)
+
+	fakeUrl := "https://example.com/api/v1/projects"
+	httpmock.RegisterResponder("GET", fakeUrl, responder)
+
+	RESTClient := resty.New()
+	httpmock.ActivateNonDefault(RESTClient.GetClient())
+	client := NewPluginClient(ClientOpts(RESTClient))
+
+	url, _ := apis.ParseURL("https://example.com/api/v1")
+	err := client.Get(context.Background(), &duckv1.Addressable{
+		URL: url,
+	}, "projects")
+
+	g.Expect(err).NotTo(BeNil())
+
+	statusError := &errors.StatusError{}
+	g.Expect(goerrors.As(err, &statusError)).To(BeTrue())
+	g.Expect(statusError.Status().Code).To(Equal(int32(404)))
+	g.Expect(errors.IsNotFound(err)).To(BeTrue())
+}
+
+func TestPluginClientErrorReason(t *testing.T) {
+	g := NewGomegaWithT(t)
+	httpmock.Reset()
+
+	responder, _ := httpmock.NewJsonResponder(404, errors.NewNotFound(schema.GroupResource{}, "Project"))
+
+	fakeUrl := "https://example.com/api/v1/projects"
+	httpmock.RegisterResponder("GET", fakeUrl, responder)
+
+	RESTClient := resty.New()
+	httpmock.ActivateNonDefault(RESTClient.GetClient())
+	client := NewPluginClient(ClientOpts(RESTClient))
+
+	url, _ := apis.ParseURL("https://example.com/api/v1")
+	err := client.Get(context.Background(), &duckv1.Addressable{
+		URL: url,
+	}, "projects")
+
+	g.Expect(err).NotTo(BeNil())
+
+	statusError := &errors.StatusError{}
+	g.Expect(goerrors.As(err, &statusError)).To(BeTrue())
+	g.Expect(errors.IsNotFound(err)).To(BeTrue())
 }

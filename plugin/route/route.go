@@ -30,8 +30,8 @@ import (
 var DefaultFilters = []restful.FilterFunction{
 	tracing.Filter,
 	metrics.Filter,
-	client.AuthFilter(),
-	client.MetaFilter(),
+	client.AuthFilter,
+	client.MetaFilter,
 }
 
 // Route a service should implement register func to register go restful webservice
@@ -48,6 +48,10 @@ func match(c client.Interface) []Route {
 
 	if v, ok := c.(client.ProjectCreator); ok {
 		routes = append(routes, NewProjectCreate(v))
+	}
+
+	if v, ok := c.(client.ProjectGetter); ok {
+		routes = append(routes, NewProjectGet(v))
 	}
 
 	if v, ok := c.(client.ResourceLister); ok {

@@ -59,6 +59,12 @@ type ProjectLister interface {
 	ListProjects(ctx context.Context, option metav1alpha1.ListOptions) (*metav1alpha1.ProjectList, error)
 }
 
+// ProjectGetter list project api
+type ProjectGetter interface {
+	Interface
+	GetProject(ctx context.Context, id string) (*metav1alpha1.Project, error)
+}
+
 // ProjectCreator create project api
 type ProjectCreator interface {
 	Interface

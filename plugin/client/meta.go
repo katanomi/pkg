@@ -24,7 +24,6 @@ import (
 
 	"github.com/emicklei/go-restful/v3"
 	"github.com/katanomi/pkg/errors"
-	apierrors "k8s.io/apimachinery/pkg/api/errors"
 )
 
 const (
@@ -56,30 +55,27 @@ func ExtraMeta(ctx context.Context) *Meta {
 }
 
 // MetaFilter meta filter for go restful, parsing plugin meta
-func MetaFilter() restful.FilterFunction {
-	return func(req *restful.Request, resp *restful.Response, chain *restful.FilterChain) {
-		encodedMeta := req.HeaderParameter(PluginMetaHeader)
-		if len(encodedMeta) == 0 {
-			return
-		}
-		decodedMeta, err := base64.StdEncoding.DecodeString(encodedMeta)
-		if err != nil {
-			errors.HandleError(req, resp, fmt.Errorf("decode meta error: %s", err.Error()))
-			return
-		}
-		if len(decodedMeta) == 0 {
-			errors.HandleError(req, resp, apierrors.NewBadRequest("meta information not provided in header"))
-			return
-		}
-		meta := &Meta{}
-		if err = json.Unmarshal(decodedMeta, meta); err != nil {
-			errors.HandleError(req, resp, fmt.Errorf("decode meta error: %s", err.Error()))
-			return
-		}
-
-		ctx := req.Request.Context()
-		req.Request = req.Request.WithContext(meta.WithContext(ctx))
-
+func MetaFilter(req *restful.Request, resp *restful.Response, chain *restful.FilterChain) {
+	encodedMeta := req.HeaderParameter(PluginMetaHeader)
+	if encodedMeta == "" {
 		chain.ProcessFilter(req, resp)
+		return
 	}
+
+	decodedMeta, err := base64.StdEncoding.DecodeString(encodedMeta)
+	if err != nil {
+		errors.HandleError(req, resp, fmt.Errorf("decode meta error: %s", err.Error()))
+		return
+	}
+
+	meta := &Meta{}
+	if err = json.Unmarshal(decodedMeta, meta); err != nil {
+		errors.HandleError(req, resp, fmt.Errorf("decode meta error: %s", err.Error()))
+		return
+	}
+
+	ctx := req.Request.Context()
+	req.Request = req.Request.WithContext(meta.WithContext(ctx))
+
+	chain.ProcessFilter(req, resp)
 }
