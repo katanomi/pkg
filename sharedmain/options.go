@@ -14,18 +14,16 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package restclient
+package sharedmain
 
 import (
-	"github.com/go-resty/resty/v2"
-	kerrors "github.com/katanomi/pkg/errors"
+	"k8s.io/apimachinery/pkg/runtime"
+	ctrlcluster "sigs.k8s.io/controller-runtime/pkg/cluster"
 )
 
-// GetErrorFromResponse returns an error based on the response. Will do the best effort to convert
-// error responses into apimachinery errors
-func GetErrorFromResponse(resp *resty.Response, err error) error {
-	if resp.IsError() {
-		return kerrors.AsStatusError(resp)
+// WithScheme adds a scheme to cluster.Options
+func WithScheme(scheme *runtime.Scheme) ctrlcluster.Option {
+	return func(opts *ctrlcluster.Options) {
+		opts.Scheme = scheme
 	}
-	return nil
 }

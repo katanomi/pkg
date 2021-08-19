@@ -27,6 +27,9 @@ import (
 	"k8s.io/apimachinery/pkg/runtime/schema"
 )
 
+// RESTClientGroupResource fake GroupResource to use errors api
+var RESTClientGroupResource = schema.GroupResource{Group: "katanomi.dev", Resource: "RESTfulClient"}
+
 //AsAPIError returns an error as a apimachinary api error
 func AsAPIError(err error) error {
 	reason := errors.ReasonForError(err)
@@ -45,11 +48,17 @@ func AsStatusCode(err error) int {
 }
 
 // AsStatusError transform resty response to status error
-func AsStatusError(response *resty.Response) error {
+func AsStatusError(response *resty.Response, grs ...schema.GroupResource) error {
+	// adding GroupResource as a "optional" parameter only
+	// should never provide more than one
+	gr := RESTClientGroupResource
+	if len(grs) > 0 {
+		gr = grs[0]
+	}
 	statusError := errors.NewGenericServerResponse(
 		response.StatusCode(),
 		response.Request.Method,
-		schema.GroupResource{},
+		gr,
 		response.Request.URL,
 		response.String(),
 		0,

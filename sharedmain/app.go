@@ -49,6 +49,7 @@ import (
 	"knative.dev/pkg/profiling"
 	"knative.dev/pkg/system"
 	ctrl "sigs.k8s.io/controller-runtime"
+	ctrlclient "sigs.k8s.io/controller-runtime/pkg/client"
 	ctrlcluster "sigs.k8s.io/controller-runtime/pkg/cluster"
 	"sigs.k8s.io/controller-runtime/pkg/healthz"
 	ctrllog "sigs.k8s.io/controller-runtime/pkg/log"
@@ -94,6 +95,8 @@ type AppBuilder struct {
 	filters   []restful.FilterFunction
 
 	startFunc []func(context.Context) error
+
+	initClientOnce sync.Once
 }
 
 // App main constructor entrypoint for AppBuilder
@@ -124,6 +127,22 @@ func (a *AppBuilder) Scheme(scheme *runtime.Scheme) *AppBuilder {
 	return a
 }
 
+func (a *AppBuilder) initClient(clientVar ctrlclient.Client) {
+	a.initClientOnce.Do(func() {
+		if clientVar == nil {
+			cluster, err := ctrlcluster.New(a.Config, WithScheme(a.scheme))
+			if err != nil {
+				a.Logger.Fatalw("cluster client setup error", "err", err)
+			}
+			clientVar = cluster.GetClient()
+			a.startFunc = append(a.startFunc, func(ctx context.Context) error {
+				return cluster.Start(ctx)
+			})
+		}
+		a.Context = kclient.WithClient(a.Context, clientVar)
+	})
+}
+
 // Log adds logging and logger to the app
 func (a *AppBuilder) Log() *AppBuilder {
 	a.init()
@@ -141,6 +160,13 @@ func (a *AppBuilder) Log() *AppBuilder {
 
 	a.Logger, _ = SetupLoggerOrDie(a.Context, a.Name)
 	a.Context = logging.WithLogger(a.Context, a.Logger)
+
+	// this logger will not respect the automatic level update feature
+	// and should not be used
+	// its main purpose is to provide a logger to controller-runtime
+	zaplogger := zapr.NewLogger(a.Logger.Desugar())
+	ctrl.SetLogger(zaplogger)
+	a.Context = ctrllog.IntoContext(a.Context, zaplogger)
 
 	// watches logging config changes and reset the level manager
 	WatchLoggingConfigOrDie(a.Context, a.ConfigMapWatcher, a.Logger, a.LevelManager)
@@ -187,13 +213,6 @@ func (a *AppBuilder) Controllers(ctors ...Controller) *AppBuilder {
 	}
 	options.Scheme = a.scheme
 
-	// this logger will not respect the automatic level update feature
-	// and should not be used
-	// its main purpose is to provide a logger to controller-runtime
-	zaplogger := zapr.NewLogger(a.Logger.Desugar())
-	ctrl.SetLogger(zaplogger)
-	a.Context = ctrllog.IntoContext(a.Context, zaplogger)
-
 	a.Manager, err = ctrl.NewManager(a.Config, options)
 	if err != nil {
 		a.Logger.Fatalw("unable to start manager", "err", err)
@@ -206,7 +225,7 @@ func (a *AppBuilder) Controllers(ctors ...Controller) *AppBuilder {
 	}
 
 	a.Context = kmanager.WithManager(a.Context, a.Manager)
-	a.Context = kclient.WithClient(a.Context, a.Manager.GetClient())
+	a.initClient(a.Manager.GetClient())
 
 	for _, controller := range ctors {
 		name := controller.Name()
@@ -277,11 +296,6 @@ func (a *AppBuilder) Filters(filters ...restful.FilterFunction) *AppBuilder {
 	return a
 }
 
-//func (a *AppBuilder) ClientManager(mgr *kclient.Manager) *AppBuilder {
-//	a.Context = kclient.WithManager(a.Context, mgr)
-//	return a
-//}
-
 // Container adds a containers
 func (a *AppBuilder) Container(container *restful.Container) *AppBuilder {
 	a.container = container
@@ -289,22 +303,8 @@ func (a *AppBuilder) Container(container *restful.Container) *AppBuilder {
 }
 
 func (a *AppBuilder) Webservices(webServices ...WebService) *AppBuilder {
-
-	cluster, err := ctrlcluster.New(a.Config)
-	if err != nil {
-		a.Logger.Fatalw("cluster setup error", "err", err)
-	}
-	a.Context = kclient.WithClient(a.Context, cluster.GetClient())
-	a.startFunc = append(a.startFunc, func(ctx context.Context) error {
-		go func() {
-			err := cluster.Start(ctx)
-			if err != nil {
-				a.Logger.Fatalw("cluster start error", "err", err)
-			}
-		}()
-
-		return nil
-	})
+	// will init a client if not already initiated
+	a.initClient(nil)
 
 	for _, item := range webServices {
 		name := item.Name()

@@ -35,7 +35,6 @@ import (
 )
 
 func main() {
-
 	sharedmain.App("sample-api").
 		Scheme(scheme.Scheme).
 		Log().
