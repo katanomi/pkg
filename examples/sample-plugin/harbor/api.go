@@ -68,7 +68,7 @@ func (h *harbor) ListProjects(ctx context.Context, option metav1alpha1.ListOptio
 func (h *harbor) CreateProject(ctx context.Context, project *metav1alpha1.Project) (*metav1alpha1.Project, error) {
 	auth := client.ExtractAuth(ctx)
 
-	oauth2, err := auth.Oauth2()
+	oauth2, err := auth.OAuth2()
 	if err != nil {
 		h.Infof("get oauth2 auth error: %s", err.Error())
 		return nil, err
