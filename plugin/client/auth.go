@@ -24,24 +24,20 @@ import (
 
 	"github.com/emicklei/go-restful/v3"
 	"github.com/go-resty/resty/v2"
+	"github.com/katanomi/pkg/apis/meta/v1alpha1"
 	"github.com/katanomi/pkg/errors"
 
 	corev1 "k8s.io/api/core/v1"
 )
 
-type AuthType string
-
 const (
-	AuthTypeBasic  = AuthType(corev1.SecretTypeBasicAuth)
-	AuthTypeOauth2 = AuthType("katanomi.dev/oauth2")
+	AuthKeyToken = "token"
 )
 
 // Auth plugin auth
-// Method auth method, such as basic, oauth2
-// Secret a base64 encoded json object, with auth field included
 type Auth struct {
 	// Type secret type as in kubernetes secret.type
-	Type AuthType `json:"type"`
+	Type v1alpha1.AuthType `json:"type"`
 	// Secret 's data value extracted from kubernetes
 	Secret map[string][]byte `json:"data"`
 }
@@ -60,12 +56,14 @@ func (a *Auth) ToRequest(request *resty.Request) error {
 
 func (a *Auth) authMethod() (AuthMethod, error) {
 	switch a.Type {
-	case AuthTypeBasic:
+	case v1alpha1.AuthTypeBasic:
 		return a.Basic()
-	case AuthTypeOauth2:
+	case v1alpha1.AuthTypeOauth2:
 		return a.Oauth2()
+	case v1alpha1.AuthTypePersonalToken:
+		return a.PersonalToken()
 	default:
-		return nil, fmt.Errorf("no auth method matched for %s", a.Type)
+		return &authEmpty{}, nil
 	}
 }
 
@@ -96,15 +94,32 @@ func (a *Auth) Basic() (*AuthBasic, error) {
 
 // Oauth2 return an Oauth2 struct
 func (a *Auth) Oauth2() (*AuthOauth2, error) {
-	oauth2 := &AuthOauth2{}
 	// TODO: needs to add specific const keys to do conversion here
 
+	oauth2 := &AuthOauth2{
+		Token: string(a.Secret[AuthKeyToken]),
+	}
+
 	return oauth2, nil
+}
+
+func (a *Auth) PersonalToken() (*PersonalToken, error) {
+	personalToken := &PersonalToken{
+		Token: string(a.Secret[AuthKeyToken]),
+	}
+
+	return personalToken, nil
 }
 
 // AuthMethod set request header for resty.Request
 type AuthMethod interface {
 	ToRequest(request *resty.Request)
+}
+
+type authEmpty struct{}
+
+func (a *authEmpty) ToRequest(request *resty.Request) {
+	fmt.Print("empty method, please check secret type when calling plugin")
 }
 
 type AuthBasic struct {
@@ -125,6 +140,14 @@ type AuthOauth2 struct {
 
 func (a *AuthOauth2) ToRequest(request *resty.Request) {
 	//TODO: check token expired and refresh
+	request.Header.Set("Authorization", "Bearer "+a.Token)
+}
+
+type PersonalToken struct {
+	Token string
+}
+
+func (a *PersonalToken) ToRequest(request *resty.Request) {
 	request.Header.Set("Authorization", "Bearer "+a.Token)
 }
 
@@ -158,7 +181,7 @@ func AuthFilter(req *restful.Request, resp *restful.Response, chain *restful.Fil
 	}
 
 	auth := Auth{
-		Type:   AuthType(method),
+		Type:   v1alpha1.AuthType(method),
 		Secret: data,
 	}
 
