@@ -17,17 +17,28 @@ limitations under the License.
 package v1alpha1
 
 import (
+	kvalidation "github.com/katanomi/pkg/apis/validation"
 	corev1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/util/validation/field"
 	"knative.dev/pkg/apis"
 )
 
 // ResourceURI stores a resource URI together with secret references
 // for usage
 type ResourceURI struct {
-	// URI stores the resource unique identifier
-	URI apis.URL `json:"uri"`
+	// Unique resource identification for webhook resource, i.e
+	// a code repository uri: https://github.com/katanomi/core
+	URI *apis.URL `json:"uri"`
 
 	// SecretRef stores a reference to a secret object
 	// that contain authentication data for the described resource
 	SecretRef *corev1.ObjectReference `json:"secretRef"`
+}
+
+// Validate basic validation for ResourceURI
+func (r *ResourceURI) Validate(path *field.Path) field.ErrorList {
+	errs := field.ErrorList{}
+	errs = append(errs, kvalidation.ValidateURL(r.URI, path.Child("uri"))...)
+	errs = append(errs, kvalidation.ValidateObjectReference(r.SecretRef, false, false, path.Child("secretRef"))...)
+	return errs
 }
