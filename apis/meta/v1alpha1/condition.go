@@ -17,8 +17,13 @@ limitations under the License.
 package v1alpha1
 
 import (
+	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"knative.dev/pkg/apis"
+)
+
+const (
+	ConditionReasonNotSet = "NotSet"
 )
 
 // ReasonForError returns a string for Reason from an error. If the error is a apimachinery.StatusError
@@ -35,5 +40,24 @@ func SetConditionByError(conditionManager apis.ConditionManager, condition apis.
 		conditionManager.MarkTrue(condition)
 	} else {
 		conditionManager.MarkFalse(condition, ReasonForError(err), err.Error())
+	}
+}
+
+// PropagateCondition propagates a condition based on an external conditions
+// used mainly when a resource depends on another and its conditions needs to be synced
+func PropagateCondition(conditionManager apis.ConditionManager, conditionType apis.ConditionType, condition *apis.Condition) {
+	if condition == nil {
+		conditionManager.MarkUnknown(conditionType, ConditionReasonNotSet, "condition is empty")
+		return
+	}
+	switch condition.Status {
+	case corev1.ConditionUnknown:
+		conditionManager.MarkUnknown(conditionType, condition.Reason, condition.Message)
+	case corev1.ConditionTrue:
+		conditionManager.MarkTrueWithReason(conditionType, condition.Reason, condition.Message)
+	case corev1.ConditionFalse:
+		conditionManager.MarkFalse(conditionType, condition.Reason, condition.Message)
+	default:
+		conditionManager.MarkUnknown(conditionType, condition.Reason, condition.Message)
 	}
 }
