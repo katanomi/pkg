@@ -24,6 +24,7 @@ import (
 	"log"
 	"net/http"
 	"sync"
+	"time"
 
 	"github.com/emicklei/go-restful/v3"
 	"github.com/go-logr/zapr"
@@ -109,6 +110,8 @@ func (a *AppBuilder) init() {
 		a.Context = ctrl.SetupSignalHandler()
 		a.Context, a.Config = GetConfigOrDie(a.Context)
 		a.Context, a.startInformers = injection.EnableInjectionOrDie(a.Context, a.Config)
+		a.Context = restclient.WithRESTClient(a.Context, resty.New().SetTimeout(time.Second*10))
+
 		a.ConfigMapWatcher = sharedmain.SetupConfigMapWatchOrDie(a.Context, a.Logger)
 		a.startFunc = append(a.startFunc, func(ctx context.Context) error {
 			return a.ConfigMapWatcher.Start(ctx.Done())
