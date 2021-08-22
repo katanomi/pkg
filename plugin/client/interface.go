@@ -26,11 +26,13 @@ import (
 	duckv1 "knative.dev/pkg/apis/duck/v1"
 
 	cloudevent "github.com/cloudevents/sdk-go/v2"
+	"go.uber.org/zap"
 )
 
 // Interface base interface for plugins
 type Interface interface {
 	Path() string
+	Setup(context.Context, *zap.SugaredLogger) error
 }
 
 // PluginRegister plugin registration methods to update IntegationClass status
