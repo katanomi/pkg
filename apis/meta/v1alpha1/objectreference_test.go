@@ -19,6 +19,7 @@ package v1alpha1
 import (
 	"testing"
 
+	"github.com/google/go-cmp/cmp"
 	. "github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -108,4 +109,32 @@ func TestGetObjectReferenceFromObject(t *testing.T) {
 	g.Expect(ref.APIVersion).To(Equal("v1"))
 	g.Expect(ref.Kind).To(Equal("Pod"))
 	g.Expect(ref.UID).To(Equal(types.UID("abc")))
+}
+
+func TestGetNamespacedNameFromRef(t *testing.T) {
+	table := map[string]struct {
+		Object *corev1.ObjectReference
+		Result types.NamespacedName
+	}{
+		"Simple secret object": {
+			Object: &corev1.ObjectReference{Name: "secret", Namespace: "default"},
+			Result: types.NamespacedName{Name: "secret", Namespace: "default"},
+		},
+		"Nil object": {
+			Object: nil,
+			Result: types.NamespacedName{},
+		},
+	}
+
+	for name, item := range table {
+		test := item
+		t.Run(name, func(t *testing.T) {
+			g := NewGomegaWithT(t)
+
+			result := GetNamespacedNameFromRef(test.Object)
+			diff := cmp.Diff(test.Result, result)
+
+			g.Expect(diff).To(BeEmpty())
+		})
+	}
 }

@@ -20,6 +20,7 @@ import (
 	"net/url"
 
 	"k8s.io/apimachinery/pkg/util/validation/field"
+	"knative.dev/pkg/apis"
 	duckv1 "knative.dev/pkg/apis/duck/v1"
 )
 
@@ -27,12 +28,23 @@ import (
 func ValidateAddressable(addr duckv1.Addressable, optional bool, fld *field.Path) field.ErrorList {
 	errs := field.ErrorList{}
 
-	if (addr.URL == nil || addr.URL.String() == "") && !optional {
-		errs = append(errs, field.Required(fld.Child("url"), "url is required"))
-	} else if addr.URL != nil && !optional {
-		if _, err := url.ParseRequestURI(addr.URL.String()); err != nil {
-			errs = append(errs, field.Invalid(fld.Child("url"), addr.URL.String(), err.Error()))
+	if !optional || (optional && addr.URL != nil) {
+		errs = append(errs, ValidateURL(addr.URL, fld.Child("url"))...)
+	}
+	return errs
+}
+
+// ValidateURL validates if a specific URL is valid
+func ValidateURL(uri *apis.URL, path *field.Path) field.ErrorList {
+	errs := field.ErrorList{}
+
+	if uri == nil || uri.String() == "" {
+		errs = append(errs, field.Required(path, "value is required"))
+	} else {
+		if _, err := url.ParseRequestURI(uri.String()); err != nil {
+			errs = append(errs, field.Invalid(path, uri.String(), err.Error()))
 		}
 	}
+
 	return errs
 }

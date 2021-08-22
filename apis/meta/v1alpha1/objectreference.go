@@ -20,6 +20,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/types"
 )
 
 // IsTheSameObjRef compares two corev1.ObjectReference comparing:
@@ -44,6 +45,15 @@ func GetObjectReferenceFromObject(obj metav1.Object, opts ...ObjectRefOptionsFun
 	ref.Name = obj.GetName()
 	for _, o := range opts {
 		o(obj, &ref)
+	}
+	return
+}
+
+// GetNamespacedNameFromRef returns a types.NamespacedName from an object reference
+func GetNamespacedNameFromRef(ref *corev1.ObjectReference) (named types.NamespacedName) {
+	if ref != nil {
+		named.Name = ref.Name
+		named.Namespace = ref.Namespace
 	}
 	return
 }
