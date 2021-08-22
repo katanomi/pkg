@@ -20,10 +20,13 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"strings"
 
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
+	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/runtime/serializer"
 	utilyaml "k8s.io/apimachinery/pkg/util/yaml"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"yunion.io/x/pkg/errors"
@@ -89,4 +92,46 @@ func DeleteResources(file string, clt client.Client) (err error) {
 		}
 	}
 	return errors.NewAggregate(errs)
+}
+
+// RuntimeObjectFromUnstructured converts an unstructured to a runtime object
+func RuntimeObjectFromUnstructured(scheme *runtime.Scheme, u *unstructured.Unstructured) (runtime.Object, error) {
+	gvk := u.GroupVersionKind()
+	codecs := serializer.NewCodecFactory(scheme)
+	decoder := codecs.UniversalDecoder(gvk.GroupVersion())
+
+	b, err := u.MarshalJSON()
+	if err != nil {
+		return nil, fmt.Errorf("error running MarshalJSON on unstructured object: %v", err)
+	}
+	ro, _, err := decoder.Decode(b, &gvk, nil)
+	if err != nil {
+		return nil, fmt.Errorf("failed to decode json data with gvk(%v): %v", gvk.String(), err)
+	}
+	return ro, nil
+}
+
+func LoadResourcesFromFile(scheme *runtime.Scheme, path string) (objs []runtime.Object, err error) {
+	us, err := LoadKubeResourcesAsUnstructured(path)
+	if err != nil {
+		return nil, err
+	}
+	errs := []error{}
+	for _, u := range us {
+		var obj runtime.Object
+		if obj, err = RuntimeObjectFromUnstructured(scheme, &u); err != nil {
+			errs = append(errs, err)
+			continue
+		}
+		objs = append(objs, obj)
+	}
+	return objs, errors.NewAggregate(errs)
+}
+
+func LoadResourceFromFile(scheme *runtime.Scheme, path string) (obj runtime.Object, err error) {
+	objs, err := LoadResourcesFromFile(scheme, path)
+	if err != nil || len(objs) == 0 {
+		return nil, err
+	}
+	return objs[0], nil
 }
