@@ -76,5 +76,5 @@ func AsStatusError(response *resty.Response, grs ...schema.GroupResource) error 
 func HandleError(req *restful.Request, resp *restful.Response, err error) {
 	err = AsAPIError(err)
 	status := AsStatusCode(err)
-	resp.WriteError(status, err)
+	resp.WriteHeaderAndEntity(status, err)
 }

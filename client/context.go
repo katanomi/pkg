@@ -23,6 +23,7 @@ import (
 	"k8s.io/client-go/dynamic"
 
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/cluster"
 )
 
 type clientCtxKey struct{}
@@ -72,4 +73,20 @@ func DynamicClient(ctx context.Context) (dynamic.Interface, error) {
 	}
 
 	return val.(dynamic.Interface), nil
+}
+
+type clusterCtxKey struct{}
+
+// WithCluster sets a cluster.Cluster instance into a context
+func WithCluster(ctx context.Context, client cluster.Cluster) context.Context {
+	return context.WithValue(ctx, clusterCtxKey{}, client)
+}
+
+// Cluster returns a cluster.Cluster, returns nil if not found
+func Cluster(ctx context.Context) cluster.Cluster {
+	val := ctx.Value(clusterCtxKey{})
+	if val == nil {
+		return nil
+	}
+	return val.(cluster.Cluster)
 }
