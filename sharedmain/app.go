@@ -327,10 +327,15 @@ func (a *AppBuilder) Webservices(webServices ...WebService) *AppBuilder {
 
 // Plugins adds plugins to this app
 func (a *AppBuilder) Plugins(plugins ...client.Interface) *AppBuilder {
+	// will init a client if not already initiated
+	a.initClient(nil)
 	a.plugins = plugins
 	a.filters = append(a.filters, client.MetaFilter, client.AuthFilter)
 
 	for _, plugin := range a.plugins {
+		if err := plugin.Setup(a.Context, a.Logger); err != nil {
+			a.Logger.Fatalw("plugin could not be setup correctly", "err", err, "plugin", plugin.Path())
+		}
 		ws, err := route.NewService(plugin, a.filters...)
 		if err != nil {
 			a.Logger.Fatalw("plugin could not start correctly", "err", err, "plugin", plugin.Path())

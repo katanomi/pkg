@@ -18,14 +18,15 @@ package harbor
 
 import (
 	"context"
-	"fmt"
 	"os"
 
 	metav1alpha1 "github.com/katanomi/pkg/apis/meta/v1alpha1"
 	"github.com/katanomi/pkg/plugin/client"
+	"go.uber.org/zap"
 )
 
 type harbor struct {
+	*zap.SugaredLogger
 }
 
 func New() *harbor {
@@ -40,18 +41,26 @@ func (h *harbor) Path() string {
 	return "harbor"
 }
 
+func (h *harbor) Setup(ctx context.Context, logger *zap.SugaredLogger) error {
+	// fetch any necessary data from here
+	// client := client.Client(ctx)
+	h.SugaredLogger = logger
+	return nil
+}
+
 func (h *harbor) ListProjects(ctx context.Context, option metav1alpha1.ListOptions) (*metav1alpha1.ProjectList, error) {
 	auth := client.ExtractAuth(ctx)
 
 	basic, err := auth.Basic()
 	if err != nil {
-		fmt.Println("get basic auth error: ", err.Error())
+		h.Infof("get basic auth error: %s", err.Error())
 		return nil, err
 	}
 
 	// list project with harbor api
-
-	fmt.Printf("basic auth: %v", basic)
+	if basic != nil {
+		h.Infof("has basic auth")
+	}
 
 	return nil, nil
 }
@@ -61,13 +70,14 @@ func (h *harbor) CreateProject(ctx context.Context, project *metav1alpha1.Projec
 
 	oauth2, err := auth.Oauth2()
 	if err != nil {
-		fmt.Println("get basic auth error: ", err.Error())
+		h.Infof("get oauth2 auth error: %s", err.Error())
 		return nil, err
 	}
 
 	// create project with harbor api
-
-	fmt.Printf("basic auth: %v", oauth2)
+	if oauth2 != nil {
+		h.Infof("has oauth2 auth")
+	}
 
 	return &metav1alpha1.Project{}, nil
 }
@@ -77,7 +87,7 @@ func (h *harbor) ListResources(ctx context.Context, option metav1alpha1.ListOpti
 
 	// list resource with harbor api
 
-	fmt.Printf("basic auth: %v", meta)
+	h.Infof("meta: %v", meta)
 
 	return nil, nil
 }

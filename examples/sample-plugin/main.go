@@ -24,16 +24,6 @@ import (
 )
 
 func main() {
-	/*
-		err := plugin.NewPlugin().WithClient(
-			harbor.New(),
-		).Run()
-
-		if err != nil {
-			fmt.Printf("plugin run err: %s, exit\n", err.Error())
-			os.Exit(1)
-		}
-	*/
 	sharedmain.App("harbor-example").
 		Log().
 		Tracing(nil).

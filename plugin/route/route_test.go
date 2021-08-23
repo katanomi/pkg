@@ -29,6 +29,7 @@ import (
 	metav1alpha1 "github.com/katanomi/pkg/apis/meta/v1alpha1"
 	"github.com/katanomi/pkg/plugin/client"
 	. "github.com/onsi/gomega"
+	"go.uber.org/zap"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -238,6 +239,10 @@ func (t *TestProjectList) Path() string {
 	return "test-1"
 }
 
+func (t *TestProjectList) Setup(_ context.Context, _ *zap.SugaredLogger) error {
+	return nil
+}
+
 func (t *TestProjectList) ListProjects(ctx context.Context, option metav1alpha1.ListOptions) (*metav1alpha1.ProjectList, error) {
 	return &metav1alpha1.ProjectList{
 		Items: []metav1alpha1.Project{
@@ -262,6 +267,10 @@ func (t *TestProjectCreate) Path() string {
 	return "test-2"
 }
 
+func (t *TestProjectCreate) Setup(_ context.Context, _ *zap.SugaredLogger) error {
+	return nil
+}
+
 func (t *TestProjectCreate) CreateProject(ctx context.Context, project *metav1alpha1.Project) (*metav1alpha1.Project, error) {
 	return &metav1alpha1.Project{}, nil
 }
@@ -281,6 +290,10 @@ func (t *TestResourceList) Path() string {
 	return "test-3"
 }
 
+func (t *TestResourceList) Setup(_ context.Context, _ *zap.SugaredLogger) error {
+	return nil
+}
+
 func (t *TestResourceList) ListResources(ctx context.Context, option metav1alpha1.ListOptions) (*metav1alpha1.ResourceList, error) {
 	return &metav1alpha1.ResourceList{}, nil
 }
@@ -290,6 +303,10 @@ type TestProjectListCreate struct {
 
 func (t *TestProjectListCreate) Path() string {
 	return "test-4"
+}
+
+func (t *TestProjectListCreate) Setup(_ context.Context, _ *zap.SugaredLogger) error {
+	return nil
 }
 
 func (t *TestProjectListCreate) ListProjects(ctx context.Context, option metav1alpha1.ListOptions) (*metav1alpha1.ProjectList, error) {
