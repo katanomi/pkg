@@ -141,6 +141,7 @@ func (a *AppBuilder) initClient(clientVar ctrlclient.Client) {
 			a.startFunc = append(a.startFunc, func(ctx context.Context) error {
 				return cluster.Start(ctx)
 			})
+			a.Context = kclient.WithCluster(a.Context, cluster)
 		}
 		a.Context = kclient.WithClient(a.Context, clientVar)
 	})
@@ -228,6 +229,8 @@ func (a *AppBuilder) Controllers(ctors ...Controller) *AppBuilder {
 	}
 
 	a.Context = kmanager.WithManager(a.Context, a.Manager)
+	// a manager implements all cluster.Cluster methods
+	a.Context = kclient.WithCluster(a.Context, a.Manager)
 	a.initClient(a.Manager.GetClient())
 
 	for _, controller := range ctors {
