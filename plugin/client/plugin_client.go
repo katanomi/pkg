@@ -183,3 +183,23 @@ func (p *PluginClient) HandleError(response *resty.Response, err error) error {
 func (p *PluginClient) Project(meta Meta, secret corev1.Secret) ClientProject {
 	return newProject(p, meta, secret)
 }
+
+// GitBranch get branch client
+func (p *PluginClient) GitBranch(meta Meta, secret corev1.Secret) ClientGitBranch {
+	return newGitBranch(p, meta, secret)
+}
+
+// GitContent get content client
+func (p *PluginClient) GitContent(meta Meta, secret corev1.Secret) ClientGitContent {
+	return newGitContent(p, meta, secret)
+}
+
+// GitPullRequest get pr client
+func (p *PluginClient) GitPullRequest(meta Meta, secret corev1.Secret) ClientGitPullRequest {
+	return newGitPullRequest(p, meta, secret)
+}
+
+// GitPullRequest get pr client
+func (p *PluginClient) GitCommit(meta Meta, secret corev1.Secret) ClientGitCommit {
+	return newGitCommit(p, meta, secret)
+}
