@@ -61,3 +61,17 @@ func PropagateCondition(conditionManager apis.ConditionManager, conditionType ap
 		conditionManager.MarkUnknown(conditionType, condition.Reason, condition.Message)
 	}
 }
+
+// IsConditionChanged given two condition accessors and a condition type will check if conditions changed
+func IsConditionChanged(current, old apis.ConditionAccessor, conditionType apis.ConditionType) bool {
+	currentCondition := current.GetCondition(conditionType)
+	oldCondition := old.GetCondition(conditionType)
+	if (currentCondition == nil && oldCondition != nil) ||
+		(currentCondition != nil && oldCondition == nil) {
+		return true
+	}
+	if currentCondition == nil {
+		return false
+	}
+	return (currentCondition.Status != oldCondition.Status)
+}
