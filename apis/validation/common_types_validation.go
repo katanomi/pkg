@@ -89,5 +89,4 @@ func ReturnInvalidError(gk schema.GroupKind, name string, errs field.ErrorList) 
 		return nil
 	}
 	return errors.NewInvalid(gk, name, errs)
-
 }

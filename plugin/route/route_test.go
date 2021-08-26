@@ -151,7 +151,7 @@ func TestNewService(t *testing.T) {
 			ws, err := NewService(c)
 
 			g.Expect(err).To(BeNil())
-			g.Expect(ws.RootPath()).To(Equal("/" + c.Path()))
+			g.Expect(ws.RootPath()).To(Equal("/plugins/v1alpha1/" + c.Path()))
 		})
 	}
 }
@@ -165,7 +165,7 @@ func TestProjectListNoMeta(t *testing.T) {
 	container := restful.NewContainer()
 	container.Add(ws)
 
-	httpRequest, _ := http.NewRequest("GET", "/test-1/projects", nil)
+	httpRequest, _ := http.NewRequest("GET", "/plugins/v1alpha1/test-1/projects", nil)
 	httpRequest.Header.Set("Accept", "*/*")
 	httpWriter := httptest.NewRecorder()
 
@@ -184,7 +184,7 @@ func TestProjectListWithMeta(t *testing.T) {
 
 	container.Add(ws)
 
-	httpRequest, _ := http.NewRequest("GET", "/test-1/projects", nil)
+	httpRequest, _ := http.NewRequest("GET", "/plugins/v1alpha1/test-1/projects", nil)
 	httpRequest.Header.Set("Accept", "application/json")
 
 	metaData := client.Meta{BaseURL: "http://api.test", Version: "v1"}
@@ -213,7 +213,7 @@ func TestProjectGet(t *testing.T) {
 
 	container.Add(ws)
 
-	httpRequest, _ := http.NewRequest("GET", "/test-2/projects/1", nil)
+	httpRequest, _ := http.NewRequest("GET", "/plugins/v1alpha1/test-2/projects/1", nil)
 	httpRequest.Header.Set("Accept", "application/json")
 
 	metaData := client.Meta{BaseURL: "http://api.test", Version: "v1"}
