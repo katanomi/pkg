@@ -17,8 +17,8 @@ limitations under the License.
 package v1alpha1
 
 const (
-	IntegrationLabel        = "katanomi.dev/integration"
-	ClusterIntegrationLabel = "katanomi.dev/clusterintegration"
-	ProjectLabel            = "katanomi.dev/project"
-	RepositoryLabel         = "katanomi.dev/repository"
+	IntegrationLabel        = IntegrationLabelKey
+	ClusterIntegrationLabel = ClusterIntegrationLabelKey
+	ProjectLabel            = ProjectLabelKey
+	RepositoryLabel         = RepositoryLabelKey
 )

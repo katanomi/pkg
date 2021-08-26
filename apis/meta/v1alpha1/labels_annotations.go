@@ -16,6 +16,34 @@ limitations under the License.
 
 package v1alpha1
 
+// Common labels
+const (
+	// SecretLabelKey secret resource name
+	SecretLabelKey = "core.kubernetes.io/secret" //nolint:gosec
+	// NamespaceLabelKey namespace of a resource
+	NamespaceLabelKey = "core.kubernetes.io/namespace"
+
+	// ClusterIntegrationLabelKey for cluster integration resources
+	ClusterIntegrationLabelKey = "integrations.katanomi.dev/clusterIntegration"
+	// IntegrationLabelKey for integration resources
+	IntegrationLabelKey = "integrations.katanomi.dev/integration"
+	// ProjectLabelKey for integration resources
+	ProjectLabelKey = "integrations.katanomi.dev/project"
+	// RepositoryLabelKey for integration resources
+	RepositoryLabelKey = "integrations.katanomi.dev/repository"
+)
+
+// Common Annotations
+const (
+	// CreatedTimeAnnotationKey creation time for objects
+	CreatedTimeAnnotationKey = "katanomi.dev/creationTime"
+	// CrossClusterAnnotationKey annotates a cross cluster resource/action
+	CrossClusterAnnotationKey = "katanomi.dev/crossCluster"
+	// ReconcileTriggeredAnnotationKey annotation key to trigger reconcile of objects
+	ReconcileTriggeredAnnotationKey = "katanomi.dev/reconcileTriggeredOn"
+)
+
+// Attribute keys for Integrations
 const (
 	// Keys used in IntegrationClass.status.attributes
 	AuthAttributeKey                   = "auth"
