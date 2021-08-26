@@ -34,6 +34,11 @@ var DefaultFilters = []restful.FilterFunction{
 	client.MetaFilter,
 }
 
+// GetPluginWebPath returns a plugin
+func GetPluginWebPath(c client.Interface) string {
+	return fmt.Sprintf("/plugins/v1alpha1/%s", strings.TrimPrefix(c.Path(), "/"))
+}
+
 // Route a service should implement register func to register go restful webservice
 type Route interface {
 	Register(ws *restful.WebService)
@@ -129,8 +134,8 @@ func NewService(c client.Interface, filters ...restful.FilterFunction) (*restful
 	}
 
 	group := &restful.WebService{}
-	path := strings.TrimPrefix(c.Path(), "/")
-	group.Path("/" + path).Consumes(restful.MIME_JSON).Produces(restful.MIME_JSON)
+	// adds standard prefix for plugins
+	group.Path(GetPluginWebPath(c)).Consumes(restful.MIME_JSON).Produces(restful.MIME_JSON)
 
 	for _, filter := range filters {
 		group.Filter(filter)
