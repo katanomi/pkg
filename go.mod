@@ -26,9 +26,10 @@ require (
 	github.com/uber/jaeger-lib v2.4.1+incompatible
 	go.uber.org/zap v1.18.1
 	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c
-	golang.org/x/time v0.0.0-20210220033141-f8bda1e9f3ba // indirect
+	golang.org/x/time v0.0.0-20210220033141-f8bda1e9f3ba
 	k8s.io/api v0.20.7
 	k8s.io/apimachinery v0.20.7
+	k8s.io/apiserver v0.20.7
 	k8s.io/client-go v0.20.7
 	k8s.io/klog/v2 v2.5.0 // indirect
 	k8s.io/kube-openapi v0.0.0-20210113233702-8566a335510f // indirect
