@@ -24,50 +24,29 @@ import (
 
 	"github.com/emicklei/go-restful/v3"
 	"github.com/go-resty/resty/v2"
+	"github.com/katanomi/pkg/apis/meta/v1alpha1"
 	"github.com/katanomi/pkg/errors"
 
 	corev1 "k8s.io/api/core/v1"
 )
 
-type AuthType string
-
 const (
-	AuthTypeBasic  = AuthType(corev1.SecretTypeBasicAuth)
-	AuthTypeOauth2 = AuthType("katanomi.dev/oauth2")
+	OAuth2KeyAccessToken = "accessToken"
+
+	AuthHeaderAuthorization = "Authorization"
+
+	AuthPrefixBearer = "Bearer"
 )
 
 // Auth plugin auth
-// Method auth method, such as basic, oauth2
-// Secret a base64 encoded json object, with auth field included
 type Auth struct {
 	// Type secret type as in kubernetes secret.type
-	Type AuthType `json:"type"`
+	Type v1alpha1.AuthType `json:"type"`
 	// Secret 's data value extracted from kubernetes
 	Secret map[string][]byte `json:"data"`
 }
 
-// ToRequest set request header for resty.Request
-func (a *Auth) ToRequest(request *resty.Request) error {
-	method, err := a.authMethod()
-	if err != nil {
-		return err
-	}
-
-	method.ToRequest(request)
-
-	return nil
-}
-
-func (a *Auth) authMethod() (AuthMethod, error) {
-	switch a.Type {
-	case AuthTypeBasic:
-		return a.Basic()
-	case AuthTypeOauth2:
-		return a.Oauth2()
-	default:
-		return nil, fmt.Errorf("no auth method matched for %s", a.Type)
-	}
-}
+type AuthMethod func(request *resty.Request)
 
 type authContextKey struct{}
 
@@ -85,47 +64,107 @@ func (a *Auth) WithContext(ctx context.Context) context.Context {
 	return context.WithValue(ctx, authContextKey{}, a)
 }
 
-// Basic return a Basic auth struct
-func (a *Auth) Basic() (*AuthBasic, error) {
-	basic := &AuthBasic{
-		Username: string(a.Secret[corev1.BasicAuthUsernameKey]),
-		Password: string(a.Secret[corev1.BasicAuthPasswordKey]),
+// IsBasic check auth is basic
+func (a *Auth) IsBasic() bool {
+	return a.Type == v1alpha1.AuthTypeBasic
+}
+
+// IsOAuth2 check auth is oauth2
+func (a *Auth) IsOAuth2() bool {
+	return a.Type == v1alpha1.AuthTypeOAuth2
+}
+
+// GetBasicInfo get basic auth username and password
+func (a *Auth) GetBasicInfo() (userName string, password string, err error) {
+	u, err := a.Get(corev1.BasicAuthUsernameKey)
+	if err != nil {
+		return
 	}
-	return basic, nil
+
+	p, err := a.Get(corev1.BasicAuthPasswordKey)
+	if err != nil {
+		return
+	}
+
+	return u, p, nil
 }
 
-// Oauth2 return an Oauth2 struct
-func (a *Auth) Oauth2() (*AuthOauth2, error) {
-	oauth2 := &AuthOauth2{}
-	// TODO: needs to add specific const keys to do conversion here
-
-	return oauth2, nil
+// GetOAuth2Token get oauth2 access token
+func (a *Auth) GetOAuth2Token() (string, error) {
+	return a.Get(OAuth2KeyAccessToken)
 }
 
-// AuthMethod set request header for resty.Request
-type AuthMethod interface {
-	ToRequest(request *resty.Request)
+// Get get specific attribute from secret
+func (a *Auth) Get(attribute string) (string, error) {
+	v, ok := a.Secret[attribute]
+	if !ok {
+		return "", fmt.Errorf("attribute not found: %s", attribute)
+	}
+
+	return string(v), nil
 }
 
-type AuthBasic struct {
-	Username string
-	Password string
+// Basic return a Basic auth function
+func (a *Auth) Basic() (AuthMethod, error) {
+	if a.Type != v1alpha1.AuthTypeBasic {
+		return nil, fmt.Errorf("auth type not match, expected: %s, current: %s", v1alpha1.AuthTypeBasic, a.Type)
+	}
+
+	userName, password, err := a.GetBasicInfo()
+	if err != nil {
+		return nil, err
+	}
+
+	return func(request *resty.Request) {
+		request.SetBasicAuth(userName, password)
+	}, nil
 }
 
-func (a *AuthBasic) ToRequest(request *resty.Request) {
-	request.SetBasicAuth(a.Username, a.Password)
+// OAuth2 return an oauth2 auth method
+func (a *Auth) OAuth2() (AuthMethod, error) {
+	if a.Type != v1alpha1.AuthTypeOAuth2 {
+		return nil, fmt.Errorf("auth type not match, expected: %s, current: %s", v1alpha1.AuthTypeOAuth2, a.Type)
+	}
+
+	return a.BearerToken(OAuth2KeyAccessToken)
 }
 
-type AuthOauth2 struct {
-	Token        string
-	ClientID     string
-	ClientSecret string
-	RefreshToken string
+// BearerToken return an bearer token auth method
+func (a *Auth) BearerToken(attribute string) (AuthMethod, error) {
+	return a.HeaderWithPrefix(attribute, AuthHeaderAuthorization, AuthPrefixBearer)
 }
 
-func (a *AuthOauth2) ToRequest(request *resty.Request) {
-	//TODO: check token expired and refresh
-	request.Header.Set("Authorization", "Bearer "+a.Token)
+// Header return an auth method which could append to header with specific attribute
+func (a *Auth) Header(attribute string, header string) (AuthMethod, error) {
+	return a.HeaderWithPrefix(attribute, header, "")
+}
+
+// HeaderWithPrefix return an auth method which could append to header with specific attribute and prefix
+func (a *Auth) HeaderWithPrefix(attribute string, header string, prefix string) (AuthMethod, error) {
+	value, err := a.Get(attribute)
+	if err != nil {
+		return nil, err
+	}
+
+	return func(request *resty.Request) {
+		if prefix != "" {
+			prefix += " "
+		}
+
+		request.Header.Set(header, prefix+value)
+	}, nil
+}
+
+// Query return an auth method which could append to query with specific attribute
+func (a *Auth) Query(attribute string, query string) (AuthMethod, error) {
+	value, ok := a.Secret[attribute]
+	if !ok {
+		return nil, fmt.Errorf("attribute not found: %s", attribute)
+	}
+
+	return func(request *resty.Request) {
+		request.SetQueryParam(query, string(value))
+	}, nil
 }
 
 const (
@@ -158,7 +197,7 @@ func AuthFilter(req *restful.Request, resp *restful.Response, chain *restful.Fil
 	}
 
 	auth := Auth{
-		Type:   AuthType(method),
+		Type:   v1alpha1.AuthType(method),
 		Secret: data,
 	}
 

@@ -22,6 +22,8 @@ const (
 	SecretLabelKey = "core.kubernetes.io/secret" //nolint:gosec
 	// NamespaceLabelKey namespace of a resource
 	NamespaceLabelKey = "core.kubernetes.io/namespace"
+	// SecretTypeLabelKey secret type label for an existed secret with different type
+	SecretTypeLabelKey = "core.katanomi.dev/secretType" //nolint:gosec
 
 	// ClusterIntegrationLabelKey for cluster integration resources
 	ClusterIntegrationLabelKey = "integrations.katanomi.dev/clusterIntegration"
