@@ -73,5 +73,7 @@ func IsConditionChanged(current, old apis.ConditionAccessor, conditionType apis.
 	if currentCondition == nil {
 		return false
 	}
-	return (currentCondition.Status != oldCondition.Status)
+	return (currentCondition.Status != oldCondition.Status) ||
+		!currentCondition.LastTransitionTime.Inner.Equal(&oldCondition.LastTransitionTime.Inner) ||
+		currentCondition.Reason != oldCondition.Reason
 }

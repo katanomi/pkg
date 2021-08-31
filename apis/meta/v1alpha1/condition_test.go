@@ -18,11 +18,13 @@ package v1alpha1
 
 import (
 	"testing"
+	"time"
 
 	// ktesting "github.com/katanomi/pkg/testing"
 	. "github.com/onsi/gomega"
 	// corev1 "k8s.io/api/core/v1"
 	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"knative.dev/pkg/apis"
 	duckv1 "knative.dev/pkg/apis/duck/v1"
 )
@@ -44,6 +46,8 @@ func (s *StatusTest) GetCondition(t apis.ConditionType) *apis.Condition {
 }
 
 func TestIsConditionChanged(t *testing.T) {
+	now := metav1.Now()
+	oneSecondAgo := metav1.NewTime(now.Add(-time.Second))
 	table := map[string]struct {
 		current       apis.ConditionAccessor
 		old           apis.ConditionAccessor
@@ -80,6 +84,26 @@ func TestIsConditionChanged(t *testing.T) {
 			}}},
 			old: &StatusTest{duckv1.Status{Conditions: duckv1.Conditions{
 				apis.Condition{Type: SomeCondition, Status: corev1.ConditionFalse},
+			}}},
+			conditionType: SomeCondition,
+			expected:      true,
+		},
+		"Condition status is the same, last transition changed": {
+			current: &StatusTest{duckv1.Status{Conditions: duckv1.Conditions{
+				apis.Condition{Type: SomeCondition, Status: corev1.ConditionUnknown, LastTransitionTime: apis.VolatileTime{Inner: now}},
+			}}},
+			old: &StatusTest{duckv1.Status{Conditions: duckv1.Conditions{
+				apis.Condition{Type: SomeCondition, Status: corev1.ConditionUnknown, LastTransitionTime: apis.VolatileTime{Inner: oneSecondAgo}},
+			}}},
+			conditionType: SomeCondition,
+			expected:      true,
+		},
+		"Condition status is the same, last transition same, reason changed": {
+			current: &StatusTest{duckv1.Status{Conditions: duckv1.Conditions{
+				apis.Condition{Type: SomeCondition, Status: corev1.ConditionUnknown, LastTransitionTime: apis.VolatileTime{Inner: now}, Reason: "abc"},
+			}}},
+			old: &StatusTest{duckv1.Status{Conditions: duckv1.Conditions{
+				apis.Condition{Type: SomeCondition, Status: corev1.ConditionUnknown, LastTransitionTime: apis.VolatileTime{Inner: now}, Reason: "def"},
 			}}},
 			conditionType: SomeCondition,
 			expected:      true,
