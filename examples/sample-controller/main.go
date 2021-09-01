@@ -19,6 +19,7 @@ package main
 import (
 	"context"
 
+	"github.com/katanomi/pkg/multicluster"
 	"github.com/katanomi/pkg/sharedmain"
 	"go.uber.org/zap"
 	corev1 "k8s.io/api/core/v1"
@@ -31,6 +32,9 @@ func main() {
 
 	sharedmain.App("test").
 		Scheme(scheme.Scheme).
+		// Overrides a MultiClusterClient
+		// by default will load the multicluster.ClusterRegistryClient
+		// MultiClusterClient(Interface).
 		Log().
 		Profiling().
 		Controllers(&Controller{}, &Controller2{}).
@@ -40,6 +44,8 @@ func main() {
 
 type Controller struct {
 	*zap.SugaredLogger
+
+	MultiCluster multicluster.Interface
 }
 
 func (c *Controller) Name() string {
@@ -52,6 +58,7 @@ func (c *Controller) Setup(ctx context.Context, mgr manager.Manager, logger *zap
 	// logger.Infow("info msg", "hello", "001")
 	// logger.Debugw("debug msg", "hello", "001")
 	c.SugaredLogger = logger
+	c.MultiCluster = multicluster.MultiCluster(ctx)
 
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&corev1.ConfigMap{}).
@@ -59,10 +66,22 @@ func (c *Controller) Setup(ctx context.Context, mgr manager.Manager, logger *zap
 }
 
 func (c *Controller) Reconcile(ctx context.Context, req ctrl.Request) (result ctrl.Result, err error) {
-	// log := c.With("key", req)
+	log := c.With("key", req)
+
+	client, err := c.MultiCluster.GetClient(ctx, &corev1.ObjectReference{
+		Name:      "my-cluster",
+		Namespace: "default",
+	}, scheme.Scheme)
+	log.Infow("info msg", "client", client, "err", err)
+	if client != nil {
+		secretList := &corev1.SecretList{}
+		err = client.List(ctx, secretList)
+		log.Infow("secret list", "err", err, "list(len)", len(secretList.Items))
+	}
+
 	// log.Errorw("error msg", "hello", "001")
 	// log.Warnw("warn msg", "hello", "001")
-	// log.Infow("info msg", "hello", "001")
+
 	// log.Debugw("debug msg", "hello", "001")
 	return
 }

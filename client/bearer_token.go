@@ -44,7 +44,7 @@ func FromBearerToken(req *restful.Request, baseConfig GetBaseConfigFunc) (config
 		return
 	}
 	token := GetToken(req)
-	cmd := buildCmdConfig(&api.AuthInfo{Token: token}, config)
+	cmd := BuildCmdConfig(&api.AuthInfo{Token: token}, config)
 	config, err = cmd.ClientConfig()
 	return
 }
@@ -63,7 +63,7 @@ func GetToken(req *restful.Request) (token string) {
 	return
 }
 
-func buildCmdConfig(authInfo *api.AuthInfo, cfg *rest.Config) clientcmd.ClientConfig {
+func BuildCmdConfig(authInfo *api.AuthInfo, cfg *rest.Config) clientcmd.ClientConfig {
 	cmdCfg := api.NewConfig()
 	cmdCfg.Clusters[UserConfigName] = &api.Cluster{
 		Server:                   cfg.Host,
