@@ -64,6 +64,19 @@ func (a *Auth) WithContext(ctx context.Context) context.Context {
 	return context.WithValue(ctx, authContextKey{}, a)
 }
 
+// FromSecret generate auth from secret
+func FromSecret(secret corev1.Secret) *Auth {
+	secretType := string(secret.Type)
+	if v, exist := secret.Labels[v1alpha1.SecretTypeLabelKey]; exist && v != "" {
+		secretType = v
+	}
+
+	return &Auth{
+		Type:   v1alpha1.AuthType(secretType),
+		Secret: secret.Data,
+	}
+}
+
 // IsBasic check auth is basic
 func (a *Auth) IsBasic() bool {
 	return a.Type == v1alpha1.AuthTypeBasic

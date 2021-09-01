@@ -29,13 +29,10 @@ import (
 // SecretOpts provides a secret to be assigned to the request in the header
 func SecretOpts(secret corev1.Secret) OptionFunc {
 	return func(request *resty.Request) {
-		secretType := string(secret.Type)
-		if v, exist := secret.Labels[metav1alpha1.SecretTypeLabelKey]; exist && v != "" {
-			secretType = v
-		}
+		auth := FromSecret(secret)
 
-		request.SetHeader(PluginAuthHeader, secretType)
-		dataBytes, _ := json.Marshal(secret.Data)
+		request.SetHeader(PluginAuthHeader, string(auth.Type))
+		dataBytes, _ := json.Marshal(auth.Secret)
 		request.SetHeader(PluginSecretHeader, base64.StdEncoding.EncodeToString(dataBytes))
 	}
 }
