@@ -278,6 +278,16 @@ func (a *AppBuilder) Webhooks(objs ...runtime.Object) *AppBuilder {
 		if err != nil {
 			a.Logger.Fatalw("webhook setup error for obj", "obj", obj.GetObjectKind(), "err", err)
 		}
+
+		// if obj implements the register interface, call it
+		if setup, ok := obj.(WebhookRegisterSetup); ok {
+			name := setup.GetLoggerName()
+			controllerAtomicLevel := a.LevelManager.Get(name)
+			controllerLogger := a.Logger.Desugar().WithOptions(zap.UpdateCore(controllerAtomicLevel, *a.ZapConfig)).Named(name).Sugar()
+			controllerLogger.Infow("setup register webhook")
+			ctx := logging.WithLogger(a.Context, controllerLogger)
+			setup.SetupRegisterWithManager(ctx, a.Manager)
+		}
 	}
 	return a
 }
@@ -434,4 +444,10 @@ func (a *AppBuilder) Run() error {
 // WebhookSetup method to inject and setup webhooks using the object
 type WebhookSetup interface {
 	SetupWebhookWithManager(mgr ctrl.Manager) error
+}
+
+// WebhookRegisterSetup method to inject and setup webhook register using the object
+type WebhookRegisterSetup interface {
+	GetLoggerName() string
+	SetupRegisterWithManager(context.Context, ctrl.Manager)
 }
