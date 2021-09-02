@@ -45,6 +45,8 @@ const (
 	CrossClusterAnnotationKey = "katanomi.dev/crossCluster"
 	// ReconcileTriggeredAnnotationKey annotation key to trigger reconcile of objects
 	ReconcileTriggeredAnnotationKey = "katanomi.dev/reconcileTriggeredOn"
+	// NamespaceAnnotationKey namespace of objects
+	NamespaceAnnotationKey = "katanomi.dev/namespace"
 )
 
 // Attribute keys for Integrations
