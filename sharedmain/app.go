@@ -32,6 +32,7 @@ import (
 	kclient "github.com/katanomi/pkg/client"
 	klogging "github.com/katanomi/pkg/logging"
 	kmanager "github.com/katanomi/pkg/manager"
+	"github.com/katanomi/pkg/multicluster"
 	"github.com/katanomi/pkg/plugin/client"
 	"github.com/katanomi/pkg/plugin/component/tracing"
 	"github.com/katanomi/pkg/plugin/config"
@@ -117,6 +118,8 @@ func (a *AppBuilder) init() {
 			return a.ConfigMapWatcher.Start(ctx.Done())
 		})
 
+		a.Context = multicluster.WithMultiCluster(a.Context, multicluster.NewClusterRegistryClientOrDie(a.Config))
+
 		a.container = restful.NewContainer()
 		a.Context, a.ClientManager = GetClientManager(a.Context)
 		a.filters = []restful.FilterFunction{a.ClientManager.Filter()}
@@ -192,6 +195,12 @@ func (a *AppBuilder) Log() *AppBuilder {
 // RESTClient injects a RESTClient
 func (a *AppBuilder) RESTClient(client *resty.Client) *AppBuilder {
 	a.Context = restclient.WithRESTClient(a.Context, client)
+	return a
+}
+
+// MultiClusterClient injects a multi cluster client into the context
+func (a *AppBuilder) MultiClusterClient(client multicluster.Interface) *AppBuilder {
+	a.Context = multicluster.WithMultiCluster(a.Context, client)
 	return a
 }
 
