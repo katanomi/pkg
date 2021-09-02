@@ -38,6 +38,7 @@ import (
 	"github.com/katanomi/pkg/plugin/config"
 	"github.com/katanomi/pkg/plugin/route"
 	"github.com/katanomi/pkg/restclient"
+	kscheme "github.com/katanomi/pkg/scheme"
 	"go.uber.org/zap"
 	"golang.org/x/sync/errgroup"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -130,6 +131,7 @@ func (a *AppBuilder) init() {
 func (a *AppBuilder) Scheme(scheme *runtime.Scheme) *AppBuilder {
 	a.init()
 	a.scheme = scheme
+	a.Context = kscheme.WithScheme(a.Context, scheme)
 	return a
 }
 
