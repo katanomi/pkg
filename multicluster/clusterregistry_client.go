@@ -21,7 +21,6 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"errors"
-	"fmt"
 
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -175,7 +174,6 @@ func (m *ClusterRegistryClient) getConfigFromCluster(ctx context.Context, cluste
 			return
 		}
 		token, ok, secretErr := unstructured.NestedString(secretObj.Object, "data", "token")
-		fmt.Println("data.token", token, "ok", ok)
 		if secretErr != nil {
 			err = secretErr
 			return
