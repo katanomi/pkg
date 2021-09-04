@@ -20,10 +20,9 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	corev1 "k8s.io/api/core/v1"
 	"strconv"
 	"strings"
-
-	corev1 "k8s.io/api/core/v1"
 
 	duckv1 "knative.dev/pkg/apis/duck/v1"
 
@@ -55,6 +54,10 @@ func newGitPullRequest(client Client, meta Meta, secret corev1.Secret) ClientGit
 func (g *gitPullRequest) Create(ctx context.Context, baseURL *duckv1.Addressable, payload metav1alpha1.CreatePullRequestPayload, options ...OptionFunc) (*metav1alpha1.GitPullRequest, error) {
 	prObj := &metav1alpha1.GitPullRequest{}
 	options = append(options, MetaOpts(g.meta), SecretOpts(g.secret), BodyOpts(payload), ResultOpts(prObj))
+	// 这里获取 repository 的方式 可能需要调整
+	// 目前 payload.Source.project 和  payload.Source.repository 是分开的  比如 Project 是 yuzp1996 repository是 gitlabzpyu   对应的就是这个项目 https://gitlab.com/yuzp1996/gitlabzpyu
+	// 而且我那边只能获取到 https://gitlab.com/yuzp1996/gitlabzpyu 这个信息  我是拿不到 repoID 的   所以需要这边做一个转换
+
 	repoInfo := strings.Split(payload.Source.Repository, "/")
 	if len(repoInfo) != 2 {
 		return nil, errors.New("repo info should include project and repo name")

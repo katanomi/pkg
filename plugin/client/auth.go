@@ -21,6 +21,7 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"strings"
 
 	"github.com/emicklei/go-restful/v3"
 	"github.com/go-resty/resty/v2"
@@ -113,8 +114,7 @@ func (a *Auth) Get(attribute string) (string, error) {
 	if !ok {
 		return "", fmt.Errorf("attribute not found: %s", attribute)
 	}
-
-	return string(v), nil
+	return strings.TrimSpace(string(v)), nil
 }
 
 // Basic return a Basic auth function

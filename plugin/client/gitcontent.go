@@ -20,7 +20,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-
 	corev1 "k8s.io/api/core/v1"
 
 	metav1alpha1 "github.com/katanomi/pkg/apis/meta/v1alpha1"
@@ -67,7 +66,7 @@ func (g *gitContent) Create(ctx context.Context, baseURL *duckv1.Addressable, pa
 	if payload.Repository == "" {
 		return nil, errors.New("repo is empty string")
 	}
-	uri := fmt.Sprintf("projects/%s/coderepositories/%s/content", payload.Project, payload.Repository)
+	uri := fmt.Sprintf("projects/%s/coderepositories/%s/content/%s", payload.Project, payload.Repository, payload.FilePath)
 	if err := g.client.Post(ctx, baseURL, uri, options...); err != nil {
 		return nil, err
 	}
