@@ -29,11 +29,15 @@ import (
 // LoadYAML loads yaml
 func LoadYAML(file string, obj interface{}) (err error) {
 	var data []byte
-	if data, err = ioutil.ReadFile(file); err != nil {
+	if data, err = LoadFile(file); err != nil {
 		return
 	}
 	err = yaml.Unmarshal(data, obj)
 	return
+}
+
+func LoadFile(file string) (data []byte, err error) {
+	return ioutil.ReadFile(file)
 }
 
 // LoadObjectOrDie loads object from yaml and returns
