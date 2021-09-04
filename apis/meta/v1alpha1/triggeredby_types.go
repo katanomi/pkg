@@ -19,6 +19,7 @@ package v1alpha1
 import (
 	corev1 "k8s.io/api/core/v1"
 	rbacv1 "k8s.io/api/rbac/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 )
 
@@ -38,4 +39,9 @@ type TriggeredBy struct {
 	// Reference to another object that might have triggered this object
 	// +optional
 	Ref *corev1.ObjectReference `json:"ref,omitempty"`
+
+	// Date time of creation of triggered event. Will match a resource's metadata.creationTimestamp
+	// it is added here for convinience only
+	// +optional
+	TriggeredTimestamp *metav1.Time `json:"triggeredTimestamp,omitempty"`
 }
