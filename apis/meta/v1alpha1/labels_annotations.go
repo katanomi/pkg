@@ -47,6 +47,12 @@ const (
 	ReconcileTriggeredAnnotationKey = "katanomi.dev/reconcileTriggeredOn"
 	// NamespaceAnnotationKey namespace of objects
 	NamespaceAnnotationKey = "katanomi.dev/namespace"
+	// TriggeredByAnnotationKey annotation to store a TriggeredBy struct json
+	TriggeredByAnnotationKey = "katanomi.dev/triggeredBy"
+	// CreatedByAnnotationKey annotation key to store resource creation username
+	CreatedByAnnotationKey = "katanomi.dev/createdBy"
+	// CreatedByAnnotationKey annotation key to store resource update username
+	UpdatedByAnnotationKey = "katanomi.dev/updatedBy"
 )
 
 // Attribute keys for Integrations
