@@ -26,6 +26,8 @@ import (
 	"sync"
 	"time"
 
+	"k8s.io/client-go/dynamic"
+
 	"github.com/emicklei/go-restful/v3"
 	"github.com/go-logr/zapr"
 	"github.com/go-resty/resty/v2"
@@ -149,6 +151,11 @@ func (a *AppBuilder) initClient(clientVar ctrlclient.Client) {
 			a.Context = kclient.WithCluster(a.Context, cluster)
 		}
 		a.Context = kclient.WithClient(a.Context, clientVar)
+		dynamicClient, err := dynamic.NewForConfig(a.Config)
+		if err != nil {
+			a.Logger.Fatalw("dynamic client setup error", "err", err)
+		}
+		a.Context = kclient.WithDynamicClient(a.Context, dynamicClient)
 	})
 }
 

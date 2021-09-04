@@ -37,6 +37,14 @@ func (o ObjectCondition) IsTheSame(obj ObjectCondition) bool {
 	return IsTheSameObject(o.ObjectReference, obj.ObjectReference)
 }
 
+func (o *ObjectCondition) FromTopLevelConditionObject(obj TopLevelConditionObject) *ObjectCondition {
+	o.Condition = *obj.GetTopLevelCondition()
+	o.Annotations = obj.GetAnnotations()
+	o.ObjectReference = GetObjectReferenceFromObject(obj, ObjectRefWithTypeMeta(), ObjectRefWithNamespace(), ObjectRefWithUID())
+
+	return o
+}
+
 // ObjectConditions collection of object conditions
 // useful to store and iterate over different object conditions in the status of an object
 type ObjectConditions []ObjectCondition

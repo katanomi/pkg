@@ -17,10 +17,11 @@ limitations under the License.
 package v1alpha1
 
 import (
+	"encoding/json"
+
 	corev1 "k8s.io/api/core/v1"
 	rbacv1 "k8s.io/api/rbac/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/runtime"
 )
 
 // Stores a list of triggered information such as: Entity that triggered,
@@ -31,10 +32,8 @@ type TriggeredBy struct {
 	User *rbacv1.Subject `json:"user,omitempty"`
 
 	// Cloud Event data for the event that triggered.
-	// +kubebuilder:pruning:PreserveUnknownFields
-	// +kubebuilder:validation:nullable
 	// +optional
-	CloudEvent *runtime.RawExtension `json:"cloudEvent,omitempty"`
+	CloudEvent *CloudEvent `json:"cloudEvent,omitempty"`
 
 	// Reference to another object that might have triggered this object
 	// +optional
@@ -44,4 +43,42 @@ type TriggeredBy struct {
 	// it is added here for convinience only
 	// +optional
 	TriggeredTimestamp *metav1.Time `json:"triggeredTimestamp,omitempty"`
+}
+
+// FromAnnotation will set `by` from annotations
+// it will find TriggeredByAnnotationKey and unmarshl content into struct type *TriggeredBy
+// if not found TriggeredByAnnotationKey, error would be nil, and *TriggeredBy would be nil also.
+// if some errors happened, error will not be nil and *TriggerreBy will be nil
+func (by *TriggeredBy) FromAnnotation(annotations map[string]string) (*TriggeredBy, error) {
+	jsonStr, ok := annotations[TriggeredByAnnotationKey]
+	if !ok {
+		return nil, nil
+	}
+
+	if by == nil {
+		by = &TriggeredBy{}
+	}
+
+	err := json.Unmarshal([]byte(jsonStr), by)
+	if err != nil {
+		return nil, err
+	}
+
+	return by, nil
+}
+
+// SetIntoAnnotation will set TriggeredBy into annotations
+// return annotations that with triggeredby.
+func (by TriggeredBy) SetIntoAnnotation(annotations map[string]string) (map[string]string, error) {
+	if by.CloudEvent != nil {
+		// clean cloudevent data, it is so big limitted in annotations
+		by.CloudEvent.Data = ""
+	}
+
+	jsonStr, err := json.Marshal(by)
+	if err != nil {
+		return annotations, err
+	}
+	annotations[TriggeredByAnnotationKey] = string(jsonStr)
+	return annotations, nil
 }
