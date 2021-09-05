@@ -83,6 +83,38 @@ func match(c client.Interface) []Route {
 		routes = append(routes, NewScanImage(v))
 	}
 
+	if v, ok := c.(client.GitRepoFileGetter); ok {
+		routes = append(routes, NewGitRepoFileGetter(v))
+	}
+
+	if v, ok := c.(client.GitRepoFileCreator); ok {
+		routes = append(routes, NewGitRepoFileCreator(v))
+	}
+
+	if v, ok := c.(client.GitBranchLister); ok {
+		routes = append(routes, NewGitBranchLister(v))
+	}
+
+	if v, ok := c.(client.GitBranchCreator); ok {
+		routes = append(routes, NewGitBranchCreator(v))
+	}
+
+	if v, ok := c.(client.GitCommitGetter); ok {
+		routes = append(routes, NewGitCommitGetter(v))
+	}
+
+	if v, ok := c.(client.GitPullRequestHandler); ok {
+		routes = append(routes, NewGitPullRequestLister(v))
+	}
+
+	if v, ok := c.(client.GitPullRequestCommentCreator); ok {
+		routes = append(routes, NewGitPullRequestNoteCreator(v))
+	}
+
+	if v, ok := c.(client.GitRepositoryLister); ok {
+		routes = append(routes, NewGitRepositoryLister(v))
+	}
+
 	return routes
 }
 
@@ -122,6 +154,30 @@ func GetMethods(c client.Interface) []string {
 	}
 	if _, ok := c.(client.WebhookReceiver); ok {
 		methods = append(methods, "ReceiveWebhook")
+	}
+	if _, ok := c.(client.GitRepoFileGetter); ok {
+		methods = append(methods, "GetGitRepoFile")
+	}
+	if _, ok := c.(client.GitRepoFileCreator); ok {
+		methods = append(methods, "CreateGitRepoFile")
+	}
+	if _, ok := c.(client.GitBranchLister); ok {
+		methods = append(methods, "ListGitBranch")
+	}
+	if _, ok := c.(client.GitBranchCreator); ok {
+		methods = append(methods, "CreateGitBranch")
+	}
+	if _, ok := c.(client.GitCommitGetter); ok {
+		methods = append(methods, "GetGitCommit")
+	}
+	if _, ok := c.(client.GitPullRequestHandler); ok {
+		methods = append(methods, "ListGitPullRequest", "GetGitPullRequest", "CreatePullRequest")
+	}
+	if _, ok := c.(client.GitPullRequestCommentCreator); ok {
+		methods = append(methods, "CreatePullRequestComment")
+	}
+	if _, ok := c.(client.GitRepositoryLister); ok {
+		methods = append(methods, "ListGitRepository")
 	}
 	return methods
 }

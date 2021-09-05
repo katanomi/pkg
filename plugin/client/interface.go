@@ -132,6 +132,56 @@ type WebhookReceiver interface {
 	ReceiveWebhook(ctx context.Context, req *restful.Request, secret string) (cloudevent.Event, error)
 }
 
+// GitPullRequestCommentCreator create pull request comment functions
+type GitPullRequestCommentCreator interface {
+	Interface
+	CreatePullRequestComment(ctx context.Context, option metav1alpha1.CreatePullRequestCommentPayload) (metav1alpha1.GitPullRequestNote, error)
+}
+
+// GitPullRequestHandler list, get and create pr function
+type GitPullRequestHandler interface {
+	Interface
+	ListGitPullRequest(ctx context.Context, option metav1alpha1.GitRepo, listOption metav1alpha1.ListOptions) (metav1alpha1.GitPullRequestList, error)
+	GetGitPullRequest(ctx context.Context, option metav1alpha1.GitPullRequestOption) (metav1alpha1.GitPullRequest, error)
+	CreatePullRequest(ctx context.Context, payload metav1alpha1.CreatePullRequestPayload) (metav1alpha1.GitPullRequest, error)
+}
+
+// GitCommitGetter get git commit
+type GitCommitGetter interface {
+	Interface
+	GetGitCommit(ctx context.Context, option metav1alpha1.GitCommitOption) (metav1alpha1.GitCommit, error)
+}
+
+// GitBranchLister List git branch
+type GitBranchLister interface {
+	Interface
+	ListGitBranch(ctx context.Context, repoOption metav1alpha1.GitRepo, option metav1alpha1.ListOptions) (metav1alpha1.GitBranchList, error)
+}
+
+// GitBranchCreator create git branch,github, gogs don't support create branch
+type GitBranchCreator interface {
+	Interface
+	CreateGitBranch(ctx context.Context, payload metav1alpha1.CreateBranchPayload) (metav1alpha1.GitBranch, error)
+}
+
+// GitRepoFileGetter used to get a file content
+type GitRepoFileGetter interface {
+	Interface
+	GetGitRepoFile(ctx context.Context, option metav1alpha1.GitRepoFileOption) (metav1alpha1.GitRepoFile, error)
+}
+
+// GitRepoFileCreator used to create a file, gogs don't support
+type GitRepoFileCreator interface {
+	Interface
+	CreateGitRepoFile(ctx context.Context, payload metav1alpha1.CreateRepoFilePayload) (metav1alpha1.GitCommit, error)
+}
+
+// GitRepositoryLister list git repository
+type GitRepositoryLister interface {
+	Interface
+	ListGitRepository(ctx context.Context, id, keyword string, listOption metav1alpha1.ListOptions) (metav1alpha1.GitRepositoryList, error)
+}
+
 // Client inteface for PluginClient, client code shoud use the interface
 // as dependency
 type Client interface {
