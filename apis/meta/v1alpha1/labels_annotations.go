@@ -35,6 +35,8 @@ const (
 	ProjectLabelKey = "integrations.katanomi.dev/project"
 	// RepositoryLabelKey for integration resources
 	RepositoryLabelKey = "integrations.katanomi.dev/repository"
+	// IntegrationEnableLabelKey indicate integrationclass status
+	IntegrationEnableLabelKey = "integrations.katanomi.dev/enable"
 )
 
 // Common Annotations
