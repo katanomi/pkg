@@ -117,6 +117,27 @@ type WebhookRegister interface {
 	DeleteWebhook(ctx context.Context, spec metav1alpha1.WebhookRegisterSpec, secret corev1.Secret) error
 }
 
+// GitTriggerRegister used to register GitTrigger
+// TODO: need refactor: maybe integration plugin should decided how to generate cloudevents filters
+// up to now, it is not a better solution that relying on plugins to give some events type to GitTriggerReconcile.
+//
+//   PullRequestCloudEventFilter() CloudEventFilters
+//   BranchCloudEventFilter() CloudEventFilters
+//   TagCloudEventFilter() CloudEventFilters
+//   WebHook() WebHook
+type GitTriggerRegister interface {
+	GetIntegrationClassName() string
+
+	// cloud event type of pull request hook that will match
+	PullRequestEventType() string
+
+	// cloud event type of push hook that will match
+	PushEventType() string
+
+	// cloud event type of push hook that will match
+	TagEventType() string
+}
+
 // WebhookResourceDiffer used to compare different webhook resources in order to provide
 // a way to merge webhook registration requests. If not provided, the resource's URI will be directly compared
 type WebhookResourceDiffer interface {

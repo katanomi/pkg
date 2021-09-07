@@ -19,6 +19,7 @@ package v1alpha1
 import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
+	"knative.dev/pkg/apis"
 )
 
 // GetNamespacedNameFromObject returns a types.NamespacedName from an object
@@ -28,4 +29,12 @@ func GetNamespacedNameFromObject(obj metav1.Object) (named types.NamespacedName)
 		named.Namespace = obj.GetNamespace()
 	}
 	return
+}
+
+// TopLevelConditionObject shoule be an metav1.Object that implement func GetTopLevelCondition() *apis.Condition
+// +k8s:deepcopy-gen=false
+type TopLevelConditionObject interface {
+	metav1.Object
+	// GetTopLevelCondition finds and returns the top level Condition (happy Condition).
+	GetTopLevelCondition() *apis.Condition
 }
