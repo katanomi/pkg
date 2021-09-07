@@ -182,6 +182,30 @@ type GitRepositoryLister interface {
 	ListGitRepository(ctx context.Context, id, keyword string, listOption metav1alpha1.ListOptions) (metav1alpha1.GitRepositoryList, error)
 }
 
+// GitCommitStatusLister list git commit status
+type GitCommitStatusLister interface {
+	Interface
+	ListGitCommitStatus(ctx context.Context, option metav1alpha1.GitCommitOption, listOption metav1alpha1.ListOptions) (metav1alpha1.GitCommitStatusList, error)
+}
+
+// GitCommitStatusCreator create git commit status
+type GitCommitStatusCreator interface {
+	Interface
+	CreateGitCommitStatus(ctx context.Context, payload metav1alpha1.CreateCommitStatusPayload) (metav1alpha1.GitCommitStatus, error)
+}
+
+// GitRepositoryLister list git commit comment
+type GitCommitCommentLister interface {
+	Interface
+	ListGitCommitComment(ctx context.Context, option metav1alpha1.GitCommitOption, listOption metav1alpha1.ListOptions) (metav1alpha1.GitCommitCommentList, error)
+}
+
+// GitRepositoryLister create git commit comment
+type GitCommitCommentCreator interface {
+	Interface
+	CreateGitCommitComment(ctx context.Context, payload metav1alpha1.CreateCommitCommentPayload) (metav1alpha1.GitCommitComment, error)
+}
+
 // Client inteface for PluginClient, client code shoud use the interface
 // as dependency
 type Client interface {

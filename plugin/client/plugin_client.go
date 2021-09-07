@@ -208,3 +208,13 @@ func (p *PluginClient) GitCommit(meta Meta, secret corev1.Secret) ClientGitCommi
 func (p *PluginClient) GitRepository(meta Meta, secret corev1.Secret) ClientGitRepository {
 	return newGitRepository(p, meta, secret)
 }
+
+// GitCommitComment get commit comment client
+func (p *PluginClient) GitCommitComment(meta Meta, secret corev1.Secret) ClientGitCommitComment {
+	return newGitCommitComment(p, meta, secret)
+}
+
+// GitCommitStatus get commit comment client
+func (p *PluginClient) GitCommitStatus(meta Meta, secret corev1.Secret) ClientGitCommitStatus {
+	return newGitCommitStatus(p, meta, secret)
+}

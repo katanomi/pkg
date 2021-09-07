@@ -66,3 +66,37 @@ type CreatePullRequestCommentPayload struct {
 type CreatePullRequestCommentParam struct {
 	Body string `json:"body"`
 }
+
+// CreateCommitCommentParam param for create commit's comment
+type CreateCommitCommentParam struct {
+	Note     *string `json:"note,omitempty"`
+	Path     *string `json:"path"`
+	Line     *int    `json:"line"`
+	LineType *string `json:"lineType"`
+}
+
+// CreateCommitCommentPayload payload for create commit's Comment
+type CreateCommitCommentPayload struct {
+	GitRepo
+	GitCommitBasicInfo
+	CreateCommitCommentParam
+}
+
+// CreateCommitStatusParam param for create commit's status
+type CreateCommitStatusParam struct {
+	State       string   `json:"state"`
+	Ref         *string  `json:"ref,omitempty"`
+	Name        *string  `json:"name,omitempty"`
+	Context     *string  `json:"context,omitempty"`
+	TargetURL   *string  `json:"targetUrl,omitempty"`
+	Description *string  `json:"description,omitempty"`
+	Coverage    *float64 `json:"coverage,omitempty"`
+	PipelineID  *int     `json:"pipelineId,omitempty"`
+}
+
+// CreateCommitStatusPayload payload for create commit's status
+type CreateCommitStatusPayload struct {
+	GitRepo
+	GitCommitBasicInfo
+	CreateCommitStatusParam
+}

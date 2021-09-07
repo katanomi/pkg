@@ -57,7 +57,8 @@ func (g *gitCommit) Get(ctx context.Context, baseURL *duckv1.Addressable, option
 	} else if *option.SHA == "" {
 		return nil, errors.New("sha is empty string")
 	}
-	uri := fmt.Sprintf("projects/%s/coderepositories/%s/commit/%s", option.Project, option.Repository, *option.SHA)
+	sha := *option.SHA
+	uri := fmt.Sprintf("projects/%s/coderepositories/%s/commit/%s", option.Project, option.Repository, sha)
 	if err := g.client.Get(ctx, baseURL, uri, options...); err != nil {
 		return nil, err
 	}

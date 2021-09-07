@@ -115,6 +115,22 @@ func match(c client.Interface) []Route {
 		routes = append(routes, NewGitRepositoryLister(v))
 	}
 
+	if v, ok := c.(client.GitCommitCommentLister); ok {
+		routes = append(routes, NewGitCommitCommentLister(v))
+	}
+
+	if v, ok := c.(client.GitCommitCommentCreator); ok {
+		routes = append(routes, NewGitCommitCommentCreator(v))
+	}
+
+	if v, ok := c.(client.GitCommitStatusLister); ok {
+		routes = append(routes, NewGitCommitStatusLister(v))
+	}
+
+	if v, ok := c.(client.GitCommitStatusCreator); ok {
+		routes = append(routes, NewGitCommitStatusCreator(v))
+	}
+
 	return routes
 }
 
@@ -178,6 +194,18 @@ func GetMethods(c client.Interface) []string {
 	}
 	if _, ok := c.(client.GitRepositoryLister); ok {
 		methods = append(methods, "ListGitRepository")
+	}
+	if _, ok := c.(client.GitCommitCommentLister); ok {
+		methods = append(methods, "ListGitCommitComment")
+	}
+	if _, ok := c.(client.GitCommitCommentCreator); ok {
+		methods = append(methods, "CreateGitCommitComment")
+	}
+	if _, ok := c.(client.GitCommitStatusLister); ok {
+		methods = append(methods, "ListGitCommitStatus")
+	}
+	if _, ok := c.(client.GitCommitStatusCreator); ok {
+		methods = append(methods, "CreateGitCommitStatus")
 	}
 	return methods
 }
