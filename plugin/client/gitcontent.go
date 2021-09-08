@@ -17,9 +17,13 @@ limitations under the License.
 package client
 
 import (
+	"bytes"
 	"context"
+	"encoding/base64"
 	"errors"
 	"fmt"
+	"net/url"
+	"strings"
 
 	corev1 "k8s.io/api/core/v1"
 
@@ -54,6 +58,7 @@ func (g *gitContent) Get(ctx context.Context, baseURL *duckv1.Addressable, optio
 	} else if option.Path == "" {
 		return nil, errors.New("file path is empty string")
 	}
+	option.Path = strings.Replace(url.PathEscape(option.Path), ".", "%2E", -1)
 	uri := fmt.Sprintf("projects/%s/coderepositories/%s/content/%s", option.Project, option.Repository, option.Path)
 	if err := g.client.Get(ctx, baseURL, uri, options...); err != nil {
 		return nil, err
@@ -63,10 +68,20 @@ func (g *gitContent) Get(ctx context.Context, baseURL *duckv1.Addressable, optio
 
 func (g *gitContent) Create(ctx context.Context, baseURL *duckv1.Addressable, payload metav1alpha1.CreateRepoFilePayload, options ...OptionFunc) (*metav1alpha1.GitCommit, error) {
 	commitInfo := &metav1alpha1.GitCommit{}
+	var b bytes.Buffer
+	w := base64.NewEncoder(base64.URLEncoding, &b)
+	_, err := w.Write(payload.Content)
+	if err != nil {
+		return nil, err
+	}
+	w.Close()
+	payload.Content = b.Bytes()
 	options = append(options, MetaOpts(g.meta), SecretOpts(g.secret), BodyOpts(payload.CreateRepoFileParams), ResultOpts(commitInfo))
 	if payload.Repository == "" {
 		return nil, errors.New("repo is empty string")
 	}
+	payload.FilePath = strings.Replace(url.PathEscape(payload.FilePath), ".", "%2E", -1)
+
 	uri := fmt.Sprintf("projects/%s/coderepositories/%s/content/%s", payload.Project, payload.Repository, payload.FilePath)
 	if err := g.client.Post(ctx, baseURL, uri, options...); err != nil {
 		return nil, err

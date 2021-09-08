@@ -111,6 +111,10 @@ func match(c client.Interface) []Route {
 		routes = append(routes, NewGitPullRequestNoteCreator(v))
 	}
 
+	if v, ok := c.(client.GitPullRequestCommentLister); ok {
+		routes = append(routes, NewGitPullRequestCommentLister(v))
+	}
+
 	if v, ok := c.(client.GitRepositoryLister); ok {
 		routes = append(routes, NewGitRepositoryLister(v))
 	}
@@ -191,6 +195,9 @@ func GetMethods(c client.Interface) []string {
 	}
 	if _, ok := c.(client.GitPullRequestCommentCreator); ok {
 		methods = append(methods, "CreatePullRequestComment")
+	}
+	if _, ok := c.(client.GitPullRequestCommentLister); ok {
+		methods = append(methods, "ListPullRequestComment")
 	}
 	if _, ok := c.(client.GitRepositoryLister); ok {
 		methods = append(methods, "ListGitRepository")

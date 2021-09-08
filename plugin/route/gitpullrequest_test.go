@@ -60,7 +60,7 @@ func TestAboutGitPullRequest(t *testing.T) {
 	prList := metav1alpha1.GitPullRequestList{}
 	err = json.Unmarshal(httpWriter.Body.Bytes(), &prList)
 	g.Expect(err).To(BeNil())
-	g.Expect(prList.Kind).To(Equal(metav1alpha1.GitPullrequestsListGVK.Kind))
+	g.Expect(prList.Kind).To(Equal(metav1alpha1.GitPullRequestsListGVK.Kind))
 
 	httpWriter2 := httptest.NewRecorder()
 	httpRequest2, _ := http.NewRequest("GET", "/plugins/v1alpha1/test-9/projects/1/coderepositories/1/pulls/1", nil)
@@ -107,7 +107,7 @@ func (t *TestGitPullRequestHandler) Setup(_ context.Context, _ *zap.SugaredLogge
 func (t *TestGitPullRequestHandler) ListGitPullRequest(ctx context.Context, option metav1alpha1.GitRepo, listOption metav1alpha1.ListOptions) (metav1alpha1.GitPullRequestList, error) {
 	return metav1alpha1.GitPullRequestList{
 		TypeMeta: metav1.TypeMeta{
-			Kind: metav1alpha1.GitPullrequestsListGVK.Kind,
+			Kind: metav1alpha1.GitPullRequestsListGVK.Kind,
 		},
 	}, nil
 }
@@ -128,6 +128,61 @@ func (t *TestGitPullRequestHandler) CreatePullRequest(ctx context.Context, paylo
 			Source: metav1alpha1.GitBranchBaseInfo{
 				Name: payload.Source.Name,
 			},
+		},
+	}, nil
+}
+
+func TestAboutGitPullRequestNote(t *testing.T) {
+	g := NewGomegaWithT(t)
+
+	ws, err := NewService(&TestGitPullRequestNoteLister{}, client.MetaFilter)
+	g.Expect(err).To(BeNil())
+
+	container := restful.NewContainer()
+
+	container.Add(ws)
+	metaData := client.Meta{BaseURL: "http://api.test", Version: "v1"}
+	data, _ := json.Marshal(metaData)
+	meta := base64.StdEncoding.EncodeToString(data)
+
+	httpWriter := httptest.NewRecorder()
+
+	httpRequest1, _ := http.NewRequest("GET", "/plugins/v1alpha1/test-z/projects/1/coderepositories/1/pulls/1/note", nil)
+	httpRequest1.Header.Set("Accept", "application/json")
+	httpRequest1.Header.Set(client.PluginMetaHeader, meta)
+
+	container.Dispatch(httpWriter, httpRequest1)
+	g.Expect(httpWriter.Code).To(Equal(http.StatusOK))
+	prNoteList := metav1alpha1.GitPullRequestNoteList{}
+	err = json.Unmarshal(httpWriter.Body.Bytes(), &prNoteList)
+	g.Expect(err).To(BeNil())
+	g.Expect(prNoteList.Kind).To(Equal(metav1alpha1.GitPullRequestNoteListGVK.Kind))
+
+}
+
+type TestGitPullRequestNoteLister struct {
+}
+
+func (t *TestGitPullRequestNoteLister) Path() string {
+	return "test-z"
+}
+
+func (t *TestGitPullRequestNoteLister) Setup(_ context.Context, _ *zap.SugaredLogger) error {
+	return nil
+}
+
+func (t *TestGitPullRequestNoteLister) ListPullRequestComment(ctx context.Context, option metav1alpha1.GitPullRequestOption, listOption metav1alpha1.ListOptions) (metav1alpha1.GitPullRequestNoteList, error) {
+	return metav1alpha1.GitPullRequestNoteList{
+		TypeMeta: metav1.TypeMeta{
+			Kind: metav1alpha1.GitPullRequestNoteListGVK.Kind,
+		},
+	}, nil
+}
+
+func (t *TestGitPullRequestNoteLister) CreatePullRequestComment(ctx context.Context, option metav1alpha1.CreatePullRequestCommentPayload) (metav1alpha1.GitPullRequestNote, error) {
+	return metav1alpha1.GitPullRequestNote{
+		TypeMeta: metav1.TypeMeta{
+			Kind: metav1alpha1.GitPullRequestNotesGVK.Kind,
 		},
 	}, nil
 }

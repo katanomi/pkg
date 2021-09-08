@@ -22,9 +22,10 @@ import (
 )
 
 var (
-	GitPullRequestsGVK     = GroupVersion.WithKind("GitPullRequest")
-	GitPullrequestsListGVK = GroupVersion.WithKind("GitPullRequestList")
-	GitPullRequestNotesGVK = GroupVersion.WithKind("GitPullRequestNote")
+	GitPullRequestsGVK        = GroupVersion.WithKind("GitPullRequest")
+	GitPullRequestsListGVK    = GroupVersion.WithKind("GitPullRequestList")
+	GitPullRequestNotesGVK    = GroupVersion.WithKind("GitPullRequestNote")
+	GitPullRequestNoteListGVK = GroupVersion.WithKind("GitPullRequestNoteList")
 )
 
 // GitPullRequest object for plugins
@@ -88,4 +89,12 @@ type GitPullRequestNoteSpec struct {
 	// Body note content
 	Body       string                `json:"body"`
 	Properties *runtime.RawExtension `json:"properties,omitempty"`
+}
+
+// GitPullRequestNoteList note list for pr
+type GitPullRequestNoteList struct {
+	metav1.TypeMeta `json:",inline"`
+	ListMeta        `json:"metadata,omitempty"`
+
+	Items []GitPullRequestNote `json:"items"`
 }

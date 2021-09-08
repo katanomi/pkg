@@ -18,6 +18,8 @@ package route
 
 import (
 	"net/http"
+	"net/url"
+	"strings"
 
 	kerrors "github.com/katanomi/pkg/errors"
 
@@ -58,10 +60,18 @@ func (a *gitRepoFileGetter) Register(ws *restful.WebService) {
 func (a *gitRepoFileGetter) GetGitRepoFile(request *restful.Request, response *restful.Response) {
 	repo := request.PathParameter("repository")
 	project := request.PathParameter("project")
+	filePath := request.PathParameter("path")
+	var err error
+	filePath, err = url.PathUnescape(filePath)
+	if err != nil {
+		kerrors.HandleError(request, response, err)
+		return
+	}
+	filePath = strings.Replace(filePath, "%2E", ".", -1)
 	gitRepoFileParams := metav1alpha1.GitRepoFileOption{
 		GitRepo: metav1alpha1.GitRepo{Repository: repo, Project: project},
 		Ref:     request.QueryParameter("ref"),
-		Path:    request.PathParameter("path"),
+		Path:    filePath,
 	}
 	fileInfo, err := a.impl.GetGitRepoFile(request.Request.Context(), gitRepoFileParams)
 	if err != nil {
@@ -101,7 +111,14 @@ func (a *gitRepoFileCreator) Register(ws *restful.WebService) {
 func (a *gitRepoFileCreator) CreateGitRepoFile(request *restful.Request, response *restful.Response) {
 	repo := request.PathParameter("repository")
 	project := request.PathParameter("project")
-	filepath := request.PathParameter("filepath")
+	filePath := request.PathParameter("path")
+	var err error
+	filePath, err = url.PathUnescape(filePath)
+	if err != nil {
+		kerrors.HandleError(request, response, err)
+		return
+	}
+	filePath = strings.Replace(filePath, "%2E", ".", -1)
 	var params metav1alpha1.CreateRepoFileParams
 	if err := request.ReadEntity(&params); err != nil {
 		kerrors.HandleError(request, response, err)
@@ -110,7 +127,7 @@ func (a *gitRepoFileCreator) CreateGitRepoFile(request *restful.Request, respons
 	payload := metav1alpha1.CreateRepoFilePayload{
 		GitRepo:              metav1alpha1.GitRepo{Repository: repo, Project: project},
 		CreateRepoFileParams: params,
-		FilePath:             filepath,
+		FilePath:             filePath,
 	}
 	commitObject, err := a.impl.CreateGitRepoFile(request.Request.Context(), payload)
 	if err != nil {
