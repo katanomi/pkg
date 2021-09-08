@@ -65,6 +65,13 @@ func (c *Controller) Setup(ctx context.Context, mgr manager.Manager, logger *zap
 		Complete(c)
 }
 
+// CheckSetup make possible to lazy load controllers when dependencies are not installed yet
+// in this example a simple list secrets is used to check
+func (c *Controller) CheckSetup(ctx context.Context, mgr manager.Manager, _ *zap.SugaredLogger) error {
+	secretList := &corev1.SecretList{}
+	return mgr.GetClient().List(ctx, secretList)
+}
+
 func (c *Controller) Reconcile(ctx context.Context, req ctrl.Request) (result ctrl.Result, err error) {
 	log := c.With("key", req)
 
@@ -98,5 +105,10 @@ func (c *Controller2) Setup(ctx context.Context, mgr manager.Manager, logger *za
 	// logger.Warnw("warn msg", "hello", "002")
 	// logger.Infow("info msg", "hello", "002")
 	// logger.Debugw("debug msg", "hello", "002")
+	return nil
+}
+
+// CheckSetup does nothing so just return nil
+func (c *Controller2) CheckSetup(ctx context.Context, mgr manager.Manager, _ *zap.SugaredLogger) error {
 	return nil
 }

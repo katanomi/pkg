@@ -32,6 +32,7 @@ import (
 	"github.com/go-logr/zapr"
 	"github.com/go-resty/resty/v2"
 	kclient "github.com/katanomi/pkg/client"
+	"github.com/katanomi/pkg/controllers"
 	klogging "github.com/katanomi/pkg/logging"
 	kmanager "github.com/katanomi/pkg/manager"
 	"github.com/katanomi/pkg/multicluster"
@@ -214,7 +215,7 @@ func (a *AppBuilder) MultiClusterClient(client multicluster.Interface) *AppBuild
 }
 
 // Controllers adds controllers to the app, will start a manager under the hood
-func (a *AppBuilder) Controllers(ctors ...Controller) *AppBuilder {
+func (a *AppBuilder) Controllers(ctors ...controllers.SetupChecker) *AppBuilder {
 	a.init()
 
 	var configFile string
@@ -251,17 +252,26 @@ func (a *AppBuilder) Controllers(ctors ...Controller) *AppBuilder {
 	a.Context = kclient.WithCluster(a.Context, a.Manager)
 	a.initClient(a.Manager.GetClient())
 
-	for _, controller := range ctors {
+	// TODO: make this interval setup configurable
+	lazyLoader := controllers.NewLazyLoader(a.Context, time.Minute)
+
+	for i := range ctors {
+		controller := ctors[i]
 		name := controller.Name()
 		controllerAtomicLevel := a.LevelManager.Get(name)
 		controllerLogger := a.Logger.Desugar().WithOptions(zap.UpdateCore(controllerAtomicLevel, *a.ZapConfig)).Named(name).Sugar()
-		if err := controller.Setup(a.Context, a.Manager, controllerLogger); err != nil {
+
+		if err := lazyLoader.LazyLoad(a.Context, a.Manager, controllerLogger, controller); err != nil {
 			a.Logger.Fatalw("controller setup error", "ctrl", name, "err", err)
 		}
 	}
 
 	a.startFunc = append(a.startFunc, func(ctx context.Context) error {
 		return a.Manager.Start(ctx)
+	})
+
+	a.startFunc = append(a.startFunc, func(ctx context.Context) error {
+		return lazyLoader.Start(ctx)
 	})
 
 	return a
