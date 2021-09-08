@@ -38,7 +38,9 @@ func (o ObjectCondition) IsTheSame(obj ObjectCondition) bool {
 }
 
 func (o *ObjectCondition) FromTopLevelConditionObject(obj TopLevelConditionObject) *ObjectCondition {
-	o.Condition = *obj.GetTopLevelCondition()
+	if obj.GetTopLevelCondition() != nil {
+		o.Condition = *obj.GetTopLevelCondition()
+	}
 	o.Annotations = obj.GetAnnotations()
 	o.ObjectReference = GetObjectReferenceFromObject(obj, ObjectRefWithTypeMeta(), ObjectRefWithNamespace(), ObjectRefWithUID())
 

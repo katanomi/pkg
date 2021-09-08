@@ -79,6 +79,9 @@ func (by TriggeredBy) SetIntoAnnotation(annotations map[string]string) (map[stri
 	if err != nil {
 		return annotations, err
 	}
+	if annotations == nil {
+		annotations = map[string]string{}
+	}
 	annotations[TriggeredByAnnotationKey] = string(jsonStr)
 	return annotations, nil
 }
