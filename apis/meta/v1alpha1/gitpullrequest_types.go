@@ -61,6 +61,8 @@ type GitPullRequestSpec struct {
 	// MergeLog pr merge info(user and time)
 	MergeLog   *GitOperateLogBaseInfo `json:"mergeLog,omitempty"`
 	Properties *runtime.RawExtension  `json:"properties,omitempty"`
+	// HasConflicts means source and target branch has conflict change
+	HasConflicts bool `json:"hasConflicts,omitempty"`
 }
 
 // GitPullRequestList list of pr
