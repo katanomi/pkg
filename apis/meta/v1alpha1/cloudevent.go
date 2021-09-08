@@ -58,3 +58,50 @@ func (evt *CloudEvent) From(event cloudevents.Event) *CloudEvent {
 	}
 	return evt
 }
+
+const (
+	CloudEventPrefix               = "dev.katanomi.cloudevents"
+	CloudEventExtGitReference      = "reference"
+	CloudEventExtGitBranch         = "branch"
+	CloudEventExtGitCommitMessage  = "commitmessage"
+	CloudEventExtGitCommitID       = "commit"
+	CloudEventExtGitSourceBranch   = "sourcebranch"
+	CloudEventExtGitTargetBranch   = "targetbranch"
+	CloudEventExtGitTag            = "tag"
+	CloudEventExtAction            = "action"
+	CloudEventExtSender            = "sender"
+	CloudEventExtPullRequestNumber = "number"
+	CloudEventExtCodeRepository    = "repository"
+
+	// Triggered when a pull request's head branch is updated.
+	// For example, when the head branch is updated from the base branch, when new commits are pushed to the head branch, or when the base branch is changed.
+	// Used for matching events in trigger filter
+	CloudEventExtPullRequestActionSynchronize = "synchronize"
+	// pull request title changed or description changed.
+	// Used for matching events in trigger filter
+	CloudEventExtPullRequestActionEdited = "edited"
+	// Triggered when a pull request is closed
+	// Used for matching events in trigger filter
+	CloudEventExtPullRequestActionClosed = "closed"
+	// Triggered when a pull request is merged
+	// Used for matching events in trigger filter
+	CloudEventExtPullRequestActionMerged = "merged"
+	// event type of open pull request
+	CloudEventExtPullRequestActionOpened = "opened"
+	// event type of reopen pull request
+	CloudEventExtPullRequestActionReOpened = "reopened"
+
+	// action of create branch
+	// Used for matching events in trigger filter
+	CloudEventExtBranchActionCreate = "create"
+	// action of delete branch
+	// Used for matching events in trigger filter
+	CloudEventExtBranchActionDelete = "delete"
+
+	// action of create tag
+	// Used for matching events in trigger filter
+	CloudEventExtTagActionCreate = "create"
+	// action of delete tag
+	// Used for matching events in trigger filter
+	CloudEventExtTagActionDelete = "delete"
+)
