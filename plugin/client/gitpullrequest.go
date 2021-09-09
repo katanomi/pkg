@@ -33,6 +33,7 @@ type ClientGitPullRequest interface {
 	Create(ctx context.Context, baseURL *duckv1.Addressable, payload metav1alpha1.CreatePullRequestPayload, options ...OptionFunc) (*metav1alpha1.GitPullRequest, error)
 	CreateNote(ctx context.Context, baseURL *duckv1.Addressable, payload metav1alpha1.CreatePullRequestCommentPayload, options ...OptionFunc) (*metav1alpha1.GitPullRequestNote, error)
 	List(ctx context.Context, baseURL *duckv1.Addressable, option metav1alpha1.GitRepo, options ...OptionFunc) (*metav1alpha1.GitPullRequestList, error)
+	ListNote(ctx context.Context, baseURL *duckv1.Addressable, option metav1alpha1.GitPullRequestOption, options ...OptionFunc) (*metav1alpha1.GitPullRequestNoteList, error)
 	Get(ctx context.Context, baseURL *duckv1.Addressable, option metav1alpha1.GitPullRequestOption, options ...OptionFunc) (*metav1alpha1.GitPullRequest, error)
 }
 
@@ -104,9 +105,27 @@ func (g *gitPullRequest) CreateNote(ctx context.Context, baseURL *duckv1.Address
 		return nil, errors.New("pr's index is unknown")
 	}
 	index := strconv.Itoa(payload.Index)
-	uri := fmt.Sprintf("projects/%s/coderepositories/%s/pulls/%s", payload.Project, payload.Repository, index)
+	uri := fmt.Sprintf("projects/%s/coderepositories/%s/pulls/%s/note", payload.Project, payload.Repository, index)
 	if err := g.client.Post(ctx, baseURL, uri, options...); err != nil {
 		return nil, err
 	}
 	return noteObj, nil
+}
+
+// ListNote list pr note
+func (g *gitPullRequest) ListNote(ctx context.Context, baseURL *duckv1.Addressable, option metav1alpha1.GitPullRequestOption, options ...OptionFunc) (*metav1alpha1.GitPullRequestNoteList, error) {
+	noteList := &metav1alpha1.GitPullRequestNoteList{}
+	options = append(options, MetaOpts(g.meta), SecretOpts(g.secret), ResultOpts(noteList))
+	if option.Repository == "" {
+		return nil, errors.New("repo is empty string")
+	}
+	if option.Index < 1 {
+		return nil, errors.New("pr's index is unknown")
+	}
+	index := strconv.Itoa(option.Index)
+	uri := fmt.Sprintf("projects/%s/coderepositories/%s/pulls/%s/note", option.Project, option.Repository, index)
+	if err := g.client.Get(ctx, baseURL, uri, options...); err != nil {
+		return nil, err
+	}
+	return noteList, nil
 }

@@ -159,6 +159,12 @@ type GitPullRequestCommentCreator interface {
 	CreatePullRequestComment(ctx context.Context, option metav1alpha1.CreatePullRequestCommentPayload) (metav1alpha1.GitPullRequestNote, error)
 }
 
+// GitPullRequestCommentLister list pull request comment functions
+type GitPullRequestCommentLister interface {
+	Interface
+	ListPullRequestComment(ctx context.Context, option metav1alpha1.GitPullRequestOption, listOption metav1alpha1.ListOptions) (metav1alpha1.GitPullRequestNoteList, error)
+}
+
 // GitPullRequestHandler list, get and create pr function
 type GitPullRequestHandler interface {
 	Interface
