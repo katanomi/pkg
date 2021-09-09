@@ -111,7 +111,7 @@ func (a *gitRepoFileCreator) Register(ws *restful.WebService) {
 func (a *gitRepoFileCreator) CreateGitRepoFile(request *restful.Request, response *restful.Response) {
 	repo := request.PathParameter("repository")
 	project := request.PathParameter("project")
-	filePath := request.PathParameter("path")
+	filePath := request.PathParameter("filepath")
 	var err error
 	filePath, err = url.PathUnescape(filePath)
 	if err != nil {
@@ -119,6 +119,7 @@ func (a *gitRepoFileCreator) CreateGitRepoFile(request *restful.Request, respons
 		return
 	}
 	filePath = strings.Replace(filePath, "%2E", ".", -1)
+
 	var params metav1alpha1.CreateRepoFileParams
 	if err := request.ReadEntity(&params); err != nil {
 		kerrors.HandleError(request, response, err)

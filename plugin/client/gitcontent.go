@@ -83,6 +83,7 @@ func (g *gitContent) Create(ctx context.Context, baseURL *duckv1.Addressable, pa
 	payload.FilePath = strings.Replace(url.PathEscape(payload.FilePath), ".", "%2E", -1)
 
 	uri := fmt.Sprintf("projects/%s/coderepositories/%s/content/%s", payload.Project, payload.Repository, payload.FilePath)
+
 	if err := g.client.Post(ctx, baseURL, uri, options...); err != nil {
 		return nil, err
 	}
