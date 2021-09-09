@@ -108,7 +108,7 @@ type projectGet struct {
 	tags []string
 }
 
-// NewProjectCreate create a create project route with plugin client
+// NewProjectGet create a get project route with plugin client
 func NewProjectGet(impl client.ProjectGetter) Route {
 	return &projectGet{
 		tags: []string{"projects"},
@@ -126,7 +126,7 @@ func (p *projectGet) Register(ws *restful.WebService) {
 		Returns(http.StatusOK, "Get Project Succeeded", metav1alpha1.Project{}))
 }
 
-// CreateProject http handler for create project
+// GetProject http handler for get project
 func (p *projectGet) GetProject(request *restful.Request, response *restful.Response) {
 	id := request.PathParameter("project-id")
 
