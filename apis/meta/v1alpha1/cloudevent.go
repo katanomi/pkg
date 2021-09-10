@@ -61,7 +61,7 @@ func (evt *CloudEvent) From(event cloudevents.Event) *CloudEvent {
 		case int, int8, int16, int32, int64:
 			str = fmt.Sprintf("%d", v)
 		case time.Time:
-			str = time.Time(v).String()
+			str = v.String()
 		case float32, float64:
 			str = fmt.Sprintf("%d", v)
 		case bool:
