@@ -16,7 +16,7 @@ endif
 SHELL = /usr/bin/env bash -o pipefail
 .SHELLFLAGS = -ec
 
-all: test
+all: lint test
 
 ##@ General
 
