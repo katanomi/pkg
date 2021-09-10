@@ -115,7 +115,9 @@ func (a *AppBuilder) init() {
 		a.Context = ctrl.SetupSignalHandler()
 		a.Context, a.Config = GetConfigOrDie(a.Context)
 		a.Context, a.startInformers = injection.EnableInjectionOrDie(a.Context, a.Config)
-		a.Context = restclient.WithRESTClient(a.Context, resty.New().SetTimeout(time.Second*10))
+
+		restyClient := resty.NewWithClient(http.DefaultClient).SetTimeout(time.Second * 10)
+		a.Context = restclient.WithRESTClient(a.Context, restyClient)
 
 		a.ConfigMapWatcher = sharedmain.SetupConfigMapWatchOrDie(a.Context, a.Logger)
 		a.startFunc = append(a.startFunc, func(ctx context.Context) error {

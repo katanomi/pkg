@@ -19,6 +19,7 @@ package client
 import (
 	"context"
 	"fmt"
+	"net/http"
 	"strings"
 
 	"github.com/go-resty/resty/v2"
@@ -48,7 +49,7 @@ type BuildOptions func(client *PluginClient)
 // NewPluginClient creates a new plugin client
 func NewPluginClient(opts ...BuildOptions) *PluginClient {
 	pluginClient := &PluginClient{
-		client: resty.New(),
+		client: resty.NewWithClient(http.DefaultClient),
 	}
 
 	for _, op := range opts {
