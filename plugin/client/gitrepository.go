@@ -49,7 +49,7 @@ func newGitRepository(client Client, meta Meta, secret corev1.Secret) ClientGitR
 func (g *gitRepository) List(ctx context.Context, baseURL *duckv1.Addressable, project, keyword string, options ...OptionFunc) (*metav1alpha1.GitRepositoryList, error) {
 	list := &metav1alpha1.GitRepositoryList{}
 	options = append(options, MetaOpts(g.meta), SecretOpts(g.secret), QueryOpts(map[string]string{"keyword": keyword}), ResultOpts(list))
-	if keyword == "" {
+	if project == "" {
 		return nil, errors.New("project is empty string")
 	}
 	uri := fmt.Sprintf("projects/%s/coderepositories", project)
