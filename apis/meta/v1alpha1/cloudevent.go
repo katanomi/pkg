@@ -18,10 +18,11 @@ package v1alpha1
 
 import (
 	"encoding/json"
+	"fmt"
+	"time"
 
 	cloudevents "github.com/cloudevents/sdk-go/v2"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/runtime"
 )
 
 type CloudEvent struct {
@@ -31,11 +32,11 @@ type CloudEvent struct {
 	// Type of event
 	Type string `json:"type,omitempty"`
 	// Data event payload
-	Data            string                          `json:"data,omitempty"`
-	Time            metav1.Time                     `json:"time,omitempty"`
-	SpecVersion     string                          `json:"specversion,omitempty"`
-	DataContentType string                          `json:"datacontenttype,omitempty"`
-	Extensions      map[string]runtime.RawExtension `json:"extensions,omitempty"`
+	Data            string            `json:"data,omitempty"`
+	Time            metav1.Time       `json:"time,omitempty"`
+	SpecVersion     string            `json:"specversion,omitempty"`
+	DataContentType string            `json:"datacontenttype,omitempty"`
+	Extensions      map[string]string `json:"extensions,omitempty"`
 }
 
 func (evt *CloudEvent) From(event cloudevents.Event) *CloudEvent {
@@ -49,12 +50,27 @@ func (evt *CloudEvent) From(event cloudevents.Event) *CloudEvent {
 	evt.Time = metav1.NewTime(event.Time())
 	for key, val := range event.Extensions() {
 		if evt.Extensions == nil {
-			evt.Extensions = map[string]runtime.RawExtension{}
+			evt.Extensions = map[string]string{}
 		}
-		bts, _ := json.Marshal(val)
-		evt.Extensions[key] = runtime.RawExtension{
-			Raw: bts,
+
+		var str string
+
+		switch v := val.(type) {
+		case string:
+			str = v
+		case int, int8, int16, int32, int64:
+			str = fmt.Sprintf("%d", v)
+		case time.Time:
+			str = v.String()
+		case float32, float64:
+			str = fmt.Sprintf("%d", v)
+		case bool:
+			str = fmt.Sprintf("%t", v)
+		default:
+			bts, _ := json.Marshal(v)
+			str = string(bts)
 		}
+		evt.Extensions[key] = str
 	}
 	return evt
 }
