@@ -234,7 +234,7 @@ func GetLoggingConfig(ctx context.Context) (*logging.Config, error) {
 	// e.g. istio sidecar needs a few seconds to configure the pod network.
 	var lastErr error
 	if err := wait.PollImmediate(1*time.Second, 5*time.Second, func() (bool, error) {
-		lastErr := directClt.Get(ctx, key, loggingConfigMap)
+		lastErr = directClt.Get(ctx, key, loggingConfigMap)
 		return lastErr == nil || apierrors.IsNotFound(lastErr), nil
 	}); err != nil {
 		return nil, fmt.Errorf("timed out waiting for the condition: %w", lastErr)
