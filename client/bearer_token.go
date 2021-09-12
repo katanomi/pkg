@@ -20,6 +20,7 @@ import (
 	"strings"
 
 	"github.com/emicklei/go-restful/v3"
+	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
 	"k8s.io/client-go/tools/clientcmd/api"
@@ -44,6 +45,10 @@ func FromBearerToken(req *restful.Request, baseConfig GetBaseConfigFunc) (config
 		return
 	}
 	token := GetToken(req)
+	if strings.TrimSpace(token) == "" {
+		err = errors.NewUnauthorized("a Bearer token must be provided")
+		return
+	}
 	cmd := BuildCmdConfig(&api.AuthInfo{Token: token}, config)
 	config, err = cmd.ClientConfig()
 	return

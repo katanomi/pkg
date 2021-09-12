@@ -18,7 +18,6 @@ package client
 
 import (
 	"context"
-	"fmt"
 
 	"k8s.io/client-go/dynamic"
 
@@ -59,16 +58,17 @@ func NewManager(ctx context.Context, get GetConfigFunc, baseConfig GetBaseConfig
 }
 
 // Filter returns a filter to be used in
-func (m *Manager) Filter() restful.FilterFunction {
-	return ManagerFilter(m)
+func (m *Manager) Filter(ctx context.Context) restful.FilterFunction {
+	return ManagerFilter(ctx, m)
 }
 
 // ManagerFilter generates filter based on a manager to create a config based in a request and injects into context
-func ManagerFilter(mgr *Manager) restful.FilterFunction {
+func ManagerFilter(ctx context.Context, mgr *Manager) restful.FilterFunction {
+	log := logging.FromContext(ctx).Named("manager-filter")
 	return func(req *restful.Request, resp *restful.Response, chain *restful.FilterChain) {
 		config, err := mgr.GetConfig(req, mgr.GetBasicConfig)
 		if err != nil {
-			fmt.Println("err", err)
+			log.Debugw("manager filter config get error", "err", err)
 			err = kerrors.AsAPIError(err)
 			resp.WriteHeaderAndJson(kerrors.AsStatusCode(err), err, restful.MIME_JSON)
 			return
@@ -78,7 +78,7 @@ func ManagerFilter(mgr *Manager) restful.FilterFunction {
 
 		dynamicClient, err := dynamic.NewForConfig(config)
 		if err != nil {
-			fmt.Println("err", err)
+			log.Debugw("manager filter dynamic client create error", "err", err)
 			err = kerrors.AsAPIError(err)
 			resp.WriteHeaderAndJson(kerrors.AsStatusCode(err), err, restful.MIME_JSON)
 			return

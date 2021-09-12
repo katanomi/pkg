@@ -128,7 +128,7 @@ func (a *AppBuilder) init() {
 
 		a.container = restful.NewContainer()
 		a.Context, a.ClientManager = GetClientManager(a.Context)
-		a.filters = []restful.FilterFunction{a.ClientManager.Filter()}
+		a.filters = []restful.FilterFunction{}
 	})
 }
 

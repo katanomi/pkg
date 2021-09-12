@@ -49,7 +49,7 @@ func TestManagerFilter(t *testing.T) {
 		req.Request = req.Request.WithContext(ctx)
 		resp := restful.NewResponse(httptest.NewRecorder())
 
-		ManagerFilter(mgr)(req, resp, chain)
+		ManagerFilter(ctx, mgr)(req, resp, chain)
 
 		config := injection.GetConfig(req.Request.Context())
 		g.Expect(config).ToNot(BeNil())
@@ -67,8 +67,8 @@ func TestManagerFilter(t *testing.T) {
 		req := restful.NewRequest(httptest.NewRequest(http.MethodGet, "http://example.com", nil))
 		req.Request = req.Request.WithContext(ctx)
 		resp := restful.NewResponse(httptest.NewRecorder())
-		ManagerFilter(mgr)(req, resp, chain)
-		g.Expect(resp.StatusCode()).To(Equal(http.StatusInternalServerError))
+		ManagerFilter(ctx, mgr)(req, resp, chain)
+		g.Expect(resp.StatusCode()).To(Equal(http.StatusUnauthorized))
 		config := injection.GetConfig(req.Request.Context())
 		g.Expect(config).To(BeNil())
 	})
