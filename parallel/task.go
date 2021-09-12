@@ -198,14 +198,14 @@ func (p *ParallelTasks) Do() *ParallelTasks {
 			defer func() {
 				p.wg.Done()
 				p.releaseThreshold()
-				log.Debugf("task: completed \n", "task-index", index+1)
+				log.Debugw("task: completed", "task-index", index+1)
 			}()
 
 			result, err := t()
 			if err != nil {
-				log.Errorf("task: error  to got result \n", "task-index", index, "result", result, "err", err.Error())
+				log.Errorw("task: error  to got result", "task-index", index, "result", result, "err", err.Error())
 			} else {
-				log.Debugw("task: got result \n", "task-index", index, "result", result)
+				log.Debugw("task: got result", "task-index", index, "result", result)
 			}
 
 			// error is not nil, we should save error
@@ -214,7 +214,7 @@ func (p *ParallelTasks) Do() *ParallelTasks {
 				defer p.errLock.Unlock()
 				p.errs = append(p.errs, err)
 				if p.Options.FailFast {
-					log.Debugw("fail fast, will cancel\n", "task-index", index, "result", result)
+					log.Debugw("fail fast, will cancel", "task-index", index, "result", result)
 					p.Cancel(err)
 				}
 				return

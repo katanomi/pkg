@@ -19,6 +19,8 @@ package multicluster
 import (
 	"context"
 
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
+
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/dynamic"
@@ -33,7 +35,8 @@ type Interface interface {
 	GetConfig(ctx context.Context, clusterRef *corev1.ObjectReference) (config *rest.Config, err error)
 	GetClient(ctx context.Context, clusterRef *corev1.ObjectReference, scheme *runtime.Scheme) (clt client.Client, err error)
 	GetDynamic(ctx context.Context, clusterRef *corev1.ObjectReference) (dyn dynamic.Interface, err error)
+	GetConfigFromCluster(ctx context.Context, cluster *unstructured.Unstructured) (config *rest.Config, err error)
 
 	// TODO: add this method to the interface and implementation
-	// ListClustersNamespaces(ctx context.Context, namespace string) (clusterNamespaces map[*corev1.ObjectReference][]corev1.Namespace , err error)
+	ListClustersNamespaces(ctx context.Context, namespace string) (clusterNamespaces map[*corev1.ObjectReference][]corev1.Namespace, err error)
 }

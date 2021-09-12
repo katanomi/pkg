@@ -78,7 +78,7 @@ func (m *ClusterRegistryClient) GetConfig(ctx context.Context, clusterRef *corev
 	if cluster, err = m.getClusterByRef(ctx, clusterRef); err != nil {
 		return
 	}
-	config, err = m.getConfigFromCluster(ctx, cluster)
+	config, err = m.GetConfigFromCluster(ctx, cluster)
 	return
 }
 
@@ -127,7 +127,7 @@ func (m *ClusterRegistryClient) getClusterByRef(ctx context.Context, clusterRef 
 	return
 }
 
-func (m *ClusterRegistryClient) getConfigFromCluster(ctx context.Context, cluster *unstructured.Unstructured) (config *rest.Config, err error) {
+func (m *ClusterRegistryClient) GetConfigFromCluster(ctx context.Context, cluster *unstructured.Unstructured) (config *rest.Config, err error) {
 	if cluster == nil {
 		err = ErrNilReference
 		return
@@ -189,4 +189,8 @@ func (m *ClusterRegistryClient) getConfigFromCluster(ctx context.Context, cluste
 		config.BearerToken = string(tokenBytes)
 	}
 	return
+}
+
+func (m *ClusterRegistryClient) ListClustersNamespaces(ctx context.Context, namespace string) (clusterNamespaces map[*corev1.ObjectReference][]corev1.Namespace, err error) {
+	return map[*corev1.ObjectReference][]corev1.Namespace{}, err
 }
