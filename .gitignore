@@ -21,3 +21,4 @@ bin
 
 .DS_Store
 
+*.xml
