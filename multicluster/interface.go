@@ -28,7 +28,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
-//go:generate mockgen -package=multicluster -destination=../testing/mock/github.com/katanomi/pkg/multicluster/interface.go  github.com/katanomi/pkg/multicluster Interface
+//go:generate ../bin/mockgen -package=multicluster -destination=../testing/mock/github.com/katanomi/pkg/multicluster/interface.go  github.com/katanomi/pkg/multicluster Interface
 
 // Interface interface for a multi-cluster functionality
 type Interface interface {

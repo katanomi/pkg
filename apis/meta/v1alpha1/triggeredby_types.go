@@ -45,6 +45,14 @@ type TriggeredBy struct {
 	TriggeredTimestamp *metav1.Time `json:"triggeredTimestamp,omitempty"`
 }
 
+// IsZero basic function returns true when all attributes of the object are empty
+func (by TriggeredBy) IsZero() bool {
+	return by.User == nil &&
+		by.CloudEvent == nil &&
+		by.Ref == nil &&
+		by.TriggeredTimestamp == nil
+}
+
 // FromAnnotation will set `by` from annotations
 // it will find TriggeredByAnnotationKey and unmarshl content into struct type *TriggeredBy
 // if not found TriggeredByAnnotationKey, error would be nil, and *TriggeredBy would be nil also.
