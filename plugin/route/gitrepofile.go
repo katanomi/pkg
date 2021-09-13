@@ -68,6 +68,7 @@ func (a *gitRepoFileGetter) GetGitRepoFile(request *restful.Request, response *r
 		return
 	}
 	filePath = strings.Replace(filePath, "%2E", ".", -1)
+	filePath = strings.Replace(filePath, "%2F", "/", -1)
 	gitRepoFileParams := metav1alpha1.GitRepoFileOption{
 		GitRepo: metav1alpha1.GitRepo{Repository: repo, Project: project},
 		Ref:     request.QueryParameter("ref"),
@@ -119,7 +120,7 @@ func (a *gitRepoFileCreator) CreateGitRepoFile(request *restful.Request, respons
 		return
 	}
 	filePath = strings.Replace(filePath, "%2E", ".", -1)
-
+	filePath = strings.Replace(filePath, "%2F", "/", -1)
 	var params metav1alpha1.CreateRepoFileParams
 	if err := request.ReadEntity(&params); err != nil {
 		kerrors.HandleError(request, response, err)

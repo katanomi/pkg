@@ -58,7 +58,9 @@ func (g *gitContent) Get(ctx context.Context, baseURL *duckv1.Addressable, optio
 	} else if option.Path == "" {
 		return nil, errors.New("file path is empty string")
 	}
-	option.Path = strings.Replace(url.PathEscape(option.Path), ".", "%2E", -1)
+	option.Path = strings.Replace(option.Path, "/", "%2F", -1)
+	option.Path = strings.Replace(option.Path, ".", "%2E", -1)
+	option.Path = url.PathEscape(option.Path)
 	uri := fmt.Sprintf("projects/%s/coderepositories/%s/content/%s", option.Project, option.Repository, option.Path)
 	if err := g.client.Get(ctx, baseURL, uri, options...); err != nil {
 		return nil, err
@@ -80,7 +82,9 @@ func (g *gitContent) Create(ctx context.Context, baseURL *duckv1.Addressable, pa
 	if payload.Repository == "" {
 		return nil, errors.New("repo is empty string")
 	}
-	payload.FilePath = strings.Replace(url.PathEscape(payload.FilePath), ".", "%2E", -1)
+	payload.FilePath = strings.Replace(payload.FilePath, "/", "%2F", -1)
+	payload.FilePath = strings.Replace(payload.FilePath, ".", "%2E", -1)
+	payload.FilePath = url.PathEscape(payload.FilePath)
 
 	uri := fmt.Sprintf("projects/%s/coderepositories/%s/content/%s", payload.Project, payload.Repository, payload.FilePath)
 

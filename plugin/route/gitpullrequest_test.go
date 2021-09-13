@@ -21,6 +21,7 @@ import (
 	"context"
 	"encoding/base64"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"strconv"
@@ -52,6 +53,7 @@ func TestAboutGitPullRequest(t *testing.T) {
 	httpWriter := httptest.NewRecorder()
 
 	httpRequest1, _ := http.NewRequest("GET", "/plugins/v1alpha1/test-9/projects/1/coderepositories/1/pulls", nil)
+	fmt.Println(httpRequest1.Host)
 	httpRequest1.Header.Set("Accept", "application/json")
 	httpRequest1.Header.Set(client.PluginMetaHeader, meta)
 
