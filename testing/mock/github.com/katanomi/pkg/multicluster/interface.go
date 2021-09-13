@@ -10,6 +10,7 @@ import (
 
 	gomock "github.com/golang/mock/gomock"
 	v1 "k8s.io/api/core/v1"
+	unstructured "k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	runtime "k8s.io/apimachinery/pkg/runtime"
 	dynamic "k8s.io/client-go/dynamic"
 	rest "k8s.io/client-go/rest"
@@ -69,6 +70,21 @@ func (mr *MockInterfaceMockRecorder) GetConfig(arg0, arg1 interface{}) *gomock.C
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetConfig", reflect.TypeOf((*MockInterface)(nil).GetConfig), arg0, arg1)
 }
 
+// GetConfigFromCluster mocks base method.
+func (m *MockInterface) GetConfigFromCluster(arg0 context.Context, arg1 *unstructured.Unstructured) (*rest.Config, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetConfigFromCluster", arg0, arg1)
+	ret0, _ := ret[0].(*rest.Config)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetConfigFromCluster indicates an expected call of GetConfigFromCluster.
+func (mr *MockInterfaceMockRecorder) GetConfigFromCluster(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetConfigFromCluster", reflect.TypeOf((*MockInterface)(nil).GetConfigFromCluster), arg0, arg1)
+}
+
 // GetDynamic mocks base method.
 func (m *MockInterface) GetDynamic(arg0 context.Context, arg1 *v1.ObjectReference) (dynamic.Interface, error) {
 	m.ctrl.T.Helper()
@@ -82,4 +98,19 @@ func (m *MockInterface) GetDynamic(arg0 context.Context, arg1 *v1.ObjectReferenc
 func (mr *MockInterfaceMockRecorder) GetDynamic(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetDynamic", reflect.TypeOf((*MockInterface)(nil).GetDynamic), arg0, arg1)
+}
+
+// ListClustersNamespaces mocks base method.
+func (m *MockInterface) ListClustersNamespaces(arg0 context.Context, arg1 string) (map[*v1.ObjectReference][]v1.Namespace, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ListClustersNamespaces", arg0, arg1)
+	ret0, _ := ret[0].(map[*v1.ObjectReference][]v1.Namespace)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ListClustersNamespaces indicates an expected call of ListClustersNamespaces.
+func (mr *MockInterfaceMockRecorder) ListClustersNamespaces(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListClustersNamespaces", reflect.TypeOf((*MockInterface)(nil).ListClustersNamespaces), arg0, arg1)
 }
