@@ -61,6 +61,12 @@ import (
 	ctrllog "sigs.k8s.io/controller-runtime/pkg/log"
 )
 
+var (
+	DefaultTimeout         = 10 * time.Second
+	DefaultQPS     float32 = 50.0
+	DefaultBurst           = 60
+)
+
 // AppBuilder builds an app using multiple configuration options
 type AppBuilder struct {
 	// Basic options
@@ -111,12 +117,22 @@ func App(name string) *AppBuilder {
 }
 
 func (a *AppBuilder) init() {
+
 	a.Once.Do(func() {
 		a.Context = ctrl.SetupSignalHandler()
 		a.Context, a.Config = GetConfigOrDie(a.Context)
+		if a.Config.Timeout == 0 {
+			a.Config.Timeout = DefaultTimeout
+		}
+		if a.Config.QPS < DefaultQPS {
+			a.Config.QPS = DefaultQPS
+		}
+		if a.Config.Burst < DefaultBurst {
+			a.Config.Burst = DefaultBurst
+		}
 		a.Context, a.startInformers = injection.EnableInjectionOrDie(a.Context, a.Config)
 
-		restyClient := resty.NewWithClient(http.DefaultClient).SetTimeout(time.Second * 10)
+		restyClient := resty.NewWithClient(http.DefaultClient).SetTimeout(DefaultTimeout)
 		a.Context = restclient.WithRESTClient(a.Context, restyClient)
 
 		a.ConfigMapWatcher = sharedmain.SetupConfigMapWatchOrDie(a.Context, a.Logger)
@@ -149,7 +165,11 @@ func (a *AppBuilder) initClient(clientVar ctrlclient.Client) {
 			}
 			clientVar = cluster.GetClient()
 			a.startFunc = append(a.startFunc, func(ctx context.Context) error {
-				return cluster.Start(ctx)
+				err := cluster.Start(ctx)
+				if err != nil {
+					a.Logger.Errorw("cluster start error", "err", err)
+				}
+				return err
 			})
 			a.Context = kclient.WithCluster(a.Context, cluster)
 		}
@@ -412,6 +432,11 @@ func (a *AppBuilder) Profiling() *AppBuilder {
 
 // Run starts all
 func (a *AppBuilder) Run() error {
+	defer func() {
+		if a.Logger != nil {
+			a.Logger.Sync()
+		}
+	}()
 
 	// adds a http server if there are any endpoints registered
 	if a.container != nil {
@@ -440,21 +465,24 @@ func (a *AppBuilder) Run() error {
 	a.startInformers()
 
 	eg, egCtx := errgroup.WithContext(a.Context)
-	for _, st := range a.startFunc {
+	for i, st := range a.startFunc {
+		var index = i
 		startFunc := st
 		eg.Go(func() error {
-			return startFunc(egCtx)
+			err := startFunc(egCtx)
+			// TODO: Fatal here, because not all startFunc have completed cancel mechanism by ctx, this will cause eg.Wait() handled and never stopped even some errors happened.
+			// it is not a good solution, we should change it soon.
+			if err != nil {
+				a.Logger.Fatalw("error to start func", "index", index, "err", err)
+			}
+			return nil
 		})
 	}
 
-	// waituntil all are done
+	// wait until all are done
 	err := eg.Wait()
 	if err != nil && !errors.Is(err, http.ErrServerClosed) {
 		a.Logger.Errorw("Error while running server", zap.Error(err))
-	}
-
-	if a.Logger != nil {
-		a.Logger.Sync()
 	}
 
 	return nil
