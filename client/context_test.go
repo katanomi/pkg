@@ -37,6 +37,21 @@ func TestClientContext(t *testing.T) {
 	fakeClt := fake.NewClientBuilder().Build()
 	ctx = WithClient(ctx, fakeClt)
 	g.Expect(Client(ctx)).To(Equal(fakeClt))
+	g.Expect(DirectClient(ctx)).To(BeNil())
+}
+
+func TestDirectClientContext(t *testing.T) {
+	g := NewGomegaWithT(t)
+
+	ctx := context.TODO()
+
+	clt := DirectClient(ctx)
+	g.Expect(clt).To(BeNil())
+
+	fakeClt := fake.NewClientBuilder().Build()
+	ctx = WithDirectClient(ctx, fakeClt)
+	g.Expect(DirectClient(ctx)).To(Equal(fakeClt))
+	g.Expect(Client(ctx)).To(BeNil())
 }
 
 func TestManagerContext(t *testing.T) {

@@ -42,6 +42,22 @@ func Client(ctx context.Context) client.Client {
 	return val.(client.Client)
 }
 
+type directClientCtxKey struct{}
+
+// WithDirectClient sets a client instance into a context
+func WithDirectClient(ctx context.Context, clt client.Client) context.Context {
+	return context.WithValue(ctx, directClientCtxKey{}, clt)
+}
+
+// DirectClient returns a client.Client in a given context. Returns nil if not found
+func DirectClient(ctx context.Context) client.Client {
+	val := ctx.Value(directClientCtxKey{})
+	if val == nil {
+		return nil
+	}
+	return val.(client.Client)
+}
+
 type clientmanagerCtxKey struct{}
 
 //WithManager sets a manager instance into a context

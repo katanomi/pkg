@@ -50,3 +50,21 @@ func CopyMapStringString(object, dest map[string]string) map[string]string {
 	}
 	return dest
 }
+
+// HasAnnotation returns true if the object has the annotation and the values matches
+func HasAnnotation(obj metav1.Object, key, value string) bool {
+	return MapContainsKeyValue(obj.GetAnnotations(), key, value)
+}
+
+// HasLabel returns true if the object has the label and the values matches
+func HasLabel(obj metav1.Object, key, value string) bool {
+	return MapContainsKeyValue(obj.GetLabels(), key, value)
+}
+
+// MapContainsKeyValue checks if a map[string]string has a key with a specific value
+func MapContainsKeyValue(mapObj map[string]string, key, value string) bool {
+	if mapObj == nil {
+		return false
+	}
+	return mapObj[key] == value
+}
