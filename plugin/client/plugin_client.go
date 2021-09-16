@@ -18,7 +18,6 @@ package client
 
 import (
 	"context"
-	"crypto/tls"
 	"fmt"
 	"net"
 	"net/http"
@@ -82,8 +81,6 @@ func GetDefaultTransport() http.RoundTripper {
 		IdleConnTimeout:       90 * time.Second,
 		TLSHandshakeTimeout:   10 * time.Second,
 		ExpectContinueTimeout: 1 * time.Second,
-		// #nosec
-		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
 	}
 }
 
