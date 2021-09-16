@@ -69,3 +69,31 @@ func TestCopyLabelsAnnotations(t *testing.T) {
 		g.Expect(right.Annotations).To(Equal(map[string]string{"cxz": "dsa"}))
 	})
 }
+
+func TestHasValueLabelsAnnotations(t *testing.T) {
+
+	t.Run("HasAnnotations", func(t *testing.T) {
+		g := NewGomegaWithT(t)
+
+		obj := &corev1.Secret{}
+		g.Expect(HasAnnotation(obj, "abc", "def")).To(BeFalse())
+
+		obj.SetAnnotations(map[string]string{"abc": "def"})
+
+		g.Expect(HasAnnotation(obj, "abc", "def")).To(BeTrue())
+		g.Expect(HasAnnotation(obj, "xyz", "qwe")).To(BeFalse())
+	})
+
+	t.Run("HasLabels", func(t *testing.T) {
+		g := NewGomegaWithT(t)
+
+		obj := &corev1.Secret{}
+		g.Expect(HasLabel(obj, "abc", "def")).To(BeFalse())
+
+		obj.SetLabels(map[string]string{"abc": "def"})
+
+		g.Expect(HasLabel(obj, "abc", "def")).To(BeTrue())
+		g.Expect(HasLabel(obj, "xyz", "qwe")).To(BeFalse())
+	})
+
+}
