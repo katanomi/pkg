@@ -32,6 +32,7 @@ import (
 	"github.com/katanomi/pkg/sharedmain"
 	"go.uber.org/zap"
 	"k8s.io/client-go/kubernetes/scheme"
+	ctrlclient "sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 func main() {
@@ -78,6 +79,11 @@ func (s *Sample) Setup(ctx context.Context, add sharedmain.AddToRestContainer, l
 		)
 
 		add(ws)
+
+		directClient := client.DirectClient(ctx)
+		list := &corev1.ConfigMapList{}
+		err := directClient.List(ctx, list, ctrlclient.InNamespace("default"))
+		logger.Infow("cm list len", "len", len(list.Items), "err", err)
 	})
 
 	return nil

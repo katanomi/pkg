@@ -154,6 +154,13 @@ func (a *AppBuilder) initClient(clientVar ctrlclient.Client) {
 			a.Context = kclient.WithCluster(a.Context, cluster)
 		}
 		a.Context = kclient.WithClient(a.Context, clientVar)
+
+		directClient, err := ctrlclient.New(a.Config, ctrlclient.Options{Scheme: a.scheme})
+		if err != nil {
+			a.Logger.Fatalw("direct client setup error", "err", err)
+		}
+		a.Context = kclient.WithDirectClient(a.Context, directClient)
+
 		dynamicClient, err := dynamic.NewForConfig(a.Config)
 		if err != nil {
 			a.Logger.Fatalw("dynamic client setup error", "err", err)
