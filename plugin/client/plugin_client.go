@@ -18,9 +18,12 @@ package client
 
 import (
 	"context"
+	"crypto/tls"
 	"fmt"
+	"net"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/go-resty/resty/v2"
 	perrors "github.com/katanomi/pkg/errors"
@@ -49,13 +52,39 @@ type BuildOptions func(client *PluginClient)
 // NewPluginClient creates a new plugin client
 func NewPluginClient(opts ...BuildOptions) *PluginClient {
 	pluginClient := &PluginClient{
-		client: resty.NewWithClient(http.DefaultClient),
+		client: resty.NewWithClient(NewHTTPClient()),
 	}
 
 	for _, op := range opts {
 		op(pluginClient)
 	}
 	return pluginClient
+}
+
+func NewHTTPClient() *http.Client {
+
+	client := &http.Client{
+		Transport: GetDefaultTransport(),
+		Timeout:   30 * time.Second,
+	}
+
+	return client
+}
+
+func GetDefaultTransport() http.RoundTripper {
+	return &http.Transport{
+		Proxy: http.ProxyFromEnvironment,
+		DialContext: (&net.Dialer{
+			Timeout:   10 * time.Second,
+			KeepAlive: 30 * time.Second,
+		}).DialContext,
+		MaxIdleConns:          100,
+		IdleConnTimeout:       90 * time.Second,
+		TLSHandshakeTimeout:   10 * time.Second,
+		ExpectContinueTimeout: 1 * time.Second,
+		// #nosec
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+	}
 }
 
 // ClientOpts adds a custom client build options for plugin client
