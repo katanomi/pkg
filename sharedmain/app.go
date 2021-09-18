@@ -349,6 +349,8 @@ func (a *AppBuilder) Container(container *restful.Container) *AppBuilder {
 }
 
 func (a *AppBuilder) Webservices(webServices ...WebService) *AppBuilder {
+	a.init()
+
 	// will init a client if not already initiated
 	a.initClient(nil)
 
@@ -370,6 +372,8 @@ func (a *AppBuilder) Webservices(webServices ...WebService) *AppBuilder {
 
 // Plugins adds plugins to this app
 func (a *AppBuilder) Plugins(plugins ...client.Interface) *AppBuilder {
+	a.init()
+
 	// will init a client if not already initiated
 	a.initClient(nil)
 	a.plugins = plugins
