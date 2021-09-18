@@ -17,6 +17,7 @@ limitations under the License.
 package v1alpha1
 
 import (
+	authv1 "k8s.io/api/authorization/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	duckv1 "knative.dev/pkg/apis/duck/v1"
@@ -65,4 +66,14 @@ type ArtifactList struct {
 	ListMeta        `json:"metadata,omitempty"`
 
 	Items []Artifact `json:"items"`
+}
+
+// ArtifactResourceAttributes returns a ResourceAttribute object to be used in a filter
+func ArtifactResourceAttributes(verb string) authv1.ResourceAttributes {
+	return authv1.ResourceAttributes{
+		Group:    GroupVersion.Group,
+		Version:  GroupVersion.Version,
+		Resource: "artifacts",
+		Verb:     verb,
+	}
 }

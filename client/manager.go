@@ -23,10 +23,12 @@ import (
 
 	"github.com/emicklei/go-restful/v3"
 	kerrors "github.com/katanomi/pkg/errors"
+	kscheme "github.com/katanomi/pkg/scheme"
 	"go.uber.org/zap"
 	"k8s.io/client-go/rest"
 	"knative.dev/pkg/injection"
 	"knative.dev/pkg/logging"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/client/config"
 )
 
@@ -65,6 +67,7 @@ func (m *Manager) Filter(ctx context.Context) restful.FilterFunction {
 // ManagerFilter generates filter based on a manager to create a config based in a request and injects into context
 func ManagerFilter(ctx context.Context, mgr *Manager) restful.FilterFunction {
 	log := logging.FromContext(ctx).Named("manager-filter")
+	scheme := kscheme.Scheme(ctx)
 	return func(req *restful.Request, resp *restful.Response, chain *restful.FilterChain) {
 		config, err := mgr.GetConfig(req, mgr.GetBasicConfig)
 		if err != nil {
@@ -73,8 +76,23 @@ func ManagerFilter(ctx context.Context, mgr *Manager) restful.FilterFunction {
 			resp.WriteHeaderAndJson(kerrors.AsStatusCode(err), err, restful.MIME_JSON)
 			return
 		}
+
 		ctx := req.Request.Context()
+
+		// setting defaults to the config
+		config.Burst = DefaultBurst
+		config.QPS = DefaultQPS
+		config.Timeout = DefaultTimeout
 		ctx = injection.WithConfig(ctx, config)
+
+		directClient, err := client.New(config, client.Options{Scheme: scheme})
+		if err != nil {
+			log.Debugw("manager filter direct client create error", "err", err)
+			err = kerrors.AsAPIError(err)
+			resp.WriteHeaderAndJson(kerrors.AsStatusCode(err), err, restful.MIME_JSON)
+			return
+		}
+		ctx = WithClient(ctx, directClient)
 
 		dynamicClient, err := dynamic.NewForConfig(config)
 		if err != nil {
@@ -86,6 +104,8 @@ func ManagerFilter(ctx context.Context, mgr *Manager) restful.FilterFunction {
 		ctx = WithDynamicClient(ctx, dynamicClient)
 
 		req.Request = req.Request.WithContext(ctx)
+
+		log.Debugw("config,client,dynamicclient context done")
 		chain.ProcessFilter(req, resp)
 	}
 }
