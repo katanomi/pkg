@@ -26,7 +26,19 @@ import (
 func Filter(logger *zap.SugaredLogger) func(req *restful.Request, resp *restful.Response, chain *restful.FilterChain) {
 	return func(req *restful.Request, resp *restful.Response, chain *restful.FilterChain) {
 		// injects logger into context
-		req.Request = req.Request.WithContext(logging.WithLogger(req.Request.Context(), logger))
+
+		log := logger.With("verb", req.Request.Method, "path", req.Request.URL.Path)
+		if notHealthz(req.Request.URL.Path) {
+			log.Debugw("==> received request")
+		}
+		req.Request = req.Request.WithContext(logging.WithLogger(req.Request.Context(), log))
 		chain.ProcessFilter(req, resp)
+		if notHealthz(req.Request.URL.Path) {
+			log.Debugw("<== returned a response")
+		}
 	}
+}
+
+func notHealthz(path string) bool {
+	return path != "/healthz" && path != "/readyz"
 }

@@ -20,6 +20,8 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	duckv1 "knative.dev/pkg/apis/duck/v1"
+
+	authv1 "k8s.io/api/authorization/v1"
 )
 
 var RepositoryGVK = GroupVersion.WithKind("Repository")
@@ -62,4 +64,14 @@ type RepositoryList struct {
 	ListMeta        `json:"metadata,omitempty"`
 
 	Items []Repository `json:"items"`
+}
+
+// RepositoryResourceAttributes returns a ResourceAttribute object to be used in a filter
+func RepositoryResourceAttributes(verb string) authv1.ResourceAttributes {
+	return authv1.ResourceAttributes{
+		Group:    GroupVersion.Group,
+		Version:  GroupVersion.Version,
+		Resource: "repositories",
+		Verb:     verb,
+	}
 }

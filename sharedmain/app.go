@@ -62,9 +62,9 @@ import (
 )
 
 var (
-	DefaultTimeout         = 10 * time.Second
-	DefaultQPS     float32 = 50.0
-	DefaultBurst           = 60
+	DefaultTimeout = kclient.DefaultTimeout
+	DefaultQPS     = kclient.DefaultQPS
+	DefaultBurst   = kclient.DefaultBurst
 )
 
 // AppBuilder builds an app using multiple configuration options
