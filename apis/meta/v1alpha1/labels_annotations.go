@@ -35,6 +35,9 @@ const (
 	ProjectLabelKey = "integrations.katanomi.dev/project"
 	// RepositoryLabelKey for integration resources
 	RepositoryLabelKey = "integrations.katanomi.dev/repository"
+
+	// IntegrationAddressAnnotation annotation key to store integration server address
+	IntegrationAddressAnnotation = "integrations.katanomi.dev/integration.address"
 )
 
 // Common Annotations
