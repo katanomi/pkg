@@ -25,12 +25,13 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/client-go/kubernetes/scheme"
 	ctrl "sigs.k8s.io/controller-runtime"
+	ctrlclient "sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 )
 
 func main() {
 
-	sharedmain.App("test").
+	sharedmain.App("controller").
 		Scheme(scheme.Scheme).
 		// Overrides a MultiClusterClient
 		// by default will load the multicluster.ClusterRegistryClient
@@ -45,6 +46,8 @@ func main() {
 type Controller struct {
 	*zap.SugaredLogger
 
+	ctrlclient.Client
+
 	MultiCluster multicluster.Interface
 }
 
@@ -53,11 +56,12 @@ func (c *Controller) Name() string {
 }
 
 func (c *Controller) Setup(ctx context.Context, mgr manager.Manager, logger *zap.SugaredLogger) error {
-	// logger.Errorw("error msg", "hello", "001")
-	// logger.Warnw("warn msg", "hello", "001")
-	// logger.Infow("info msg", "hello", "001")
-	// logger.Debugw("debug msg", "hello", "001")
+	logger.Debugw("setup.debug", "ctrl", c.Name())
+	logger.Infow("setup.info", "ctrl", c.Name())
+	logger.Warnw("setup.warn", "ctrl", c.Name())
+	logger.Errorw("setup.error", "ctrl", c.Name())
 	c.SugaredLogger = logger
+	c.Client = mgr.GetClient()
 	c.MultiCluster = multicluster.MultiCluster(ctx)
 
 	return ctrl.NewControllerManagedBy(mgr).
@@ -68,32 +72,27 @@ func (c *Controller) Setup(ctx context.Context, mgr manager.Manager, logger *zap
 // CheckSetup make possible to lazy load controllers when dependencies are not installed yet
 // in this example a simple list secrets is used to check
 func (c *Controller) CheckSetup(ctx context.Context, mgr manager.Manager, _ *zap.SugaredLogger) error {
-	secretList := &corev1.SecretList{}
-	return mgr.GetClient().List(ctx, secretList)
+	return mgr.GetClient().List(ctx, &corev1.SecretList{})
 }
 
 func (c *Controller) Reconcile(ctx context.Context, req ctrl.Request) (result ctrl.Result, err error) {
 	log := c.With("key", req)
 
-	client, err := c.MultiCluster.GetClient(ctx, &corev1.ObjectReference{
-		Name:      "my-cluster",
-		Namespace: "default",
-	}, scheme.Scheme)
-	log.Infow("info msg", "client", client, "err", err)
-	if client != nil {
-		secretList := &corev1.SecretList{}
-		err = client.List(ctx, secretList)
-		log.Infow("secret list", "err", err, "list(len)", len(secretList.Items))
+	obj := &corev1.ConfigMap{}
+	if err = c.Get(ctx, req.NamespacedName, obj); err != nil {
+		log.Errorw("error getting configmap", "err", err)
+		err = nil // no point in retrying
+		return
 	}
 
-	// log.Errorw("error msg", "hello", "001")
-	// log.Warnw("warn msg", "hello", "001")
-
-	// log.Debugw("debug msg", "hello", "001")
+	log.Infow("got configmap", "len(data)", len(obj.Data))
+	log.Debugw("configmap data", "data", obj.Data)
 	return
 }
 
 type Controller2 struct {
+	ctrlclient.Client
+	*zap.SugaredLogger
 }
 
 func (c *Controller2) Name() string {
@@ -101,14 +100,34 @@ func (c *Controller2) Name() string {
 }
 
 func (c *Controller2) Setup(ctx context.Context, mgr manager.Manager, logger *zap.SugaredLogger) error {
-	// logger.Errorw("error msg", "hello", "002")
-	// logger.Warnw("warn msg", "hello", "002")
-	// logger.Infow("info msg", "hello", "002")
-	// logger.Debugw("debug msg", "hello", "002")
-	return nil
+	logger.Debugw("setup.debug", "ctrl", c.Name())
+	logger.Infow("setup.info", "ctrl", c.Name())
+	logger.Warnw("setup.warn", "ctrl", c.Name())
+	logger.Errorw("setup.error", "ctrl", c.Name())
+	c.Client = mgr.GetClient()
+	c.SugaredLogger = logger
+
+	return ctrl.NewControllerManagedBy(mgr).
+		For(&corev1.Secret{}).
+		Complete(c)
 }
 
 // CheckSetup does nothing so just return nil
 func (c *Controller2) CheckSetup(ctx context.Context, mgr manager.Manager, _ *zap.SugaredLogger) error {
 	return nil
+}
+
+func (c *Controller2) Reconcile(ctx context.Context, req ctrl.Request) (result ctrl.Result, err error) {
+	log := c.With("key", req)
+
+	obj := &corev1.Secret{}
+	if err = c.Get(ctx, req.NamespacedName, obj); err != nil {
+		log.Errorw("error getting secret", "err", err)
+		err = nil // no point in retrying
+		return
+	}
+
+	log.Infow("got secret", "len(data)", len(obj.Data), "type", obj.Type)
+	log.Debugw("secret data", "data", obj.Data)
+	return
 }

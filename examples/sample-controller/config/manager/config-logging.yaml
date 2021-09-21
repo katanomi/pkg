@@ -1,14 +1,19 @@
 apiVersion: v1
 data:
   loglevel.controller: info
-  loglevel.webhook: info
+  loglevel.controller-test: warn
+  ## once started if a name is not present will
+  ## inherit the log level with the app's name
+  ## adding a new level to this configmap will only
+  ## take effect when restarting the pod
+  # loglevel.controller-test-bak: warn
   zap-logger-config: |
     {
       "level": "info",
       "development": false,
       "outputPaths": ["stdout"],
       "errorOutputPaths": ["stderr"],
-      "encoding": "json",
+      "encoding": "console",
       "encoderConfig": {
         "timeKey": "ts",
         "levelKey": "level",

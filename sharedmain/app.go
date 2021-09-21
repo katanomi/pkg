@@ -52,7 +52,8 @@ import (
 	"knative.dev/pkg/injection"
 	"knative.dev/pkg/injection/sharedmain"
 	"knative.dev/pkg/logging"
-	"knative.dev/pkg/profiling"
+
+	// "knative.dev/pkg/profiling"
 	"knative.dev/pkg/system"
 	ctrl "sigs.k8s.io/controller-runtime"
 	ctrlclient "sigs.k8s.io/controller-runtime/pkg/client"
@@ -193,7 +194,7 @@ func (a *AppBuilder) initClient(clientVar ctrlclient.Client) {
 func (a *AppBuilder) Log() *AppBuilder {
 	a.init()
 
-	lvlMGR := klogging.NewLevelManager()
+	lvlMGR := klogging.NewLevelManager(a.Context, a.Name)
 	a.LevelManager = &lvlMGR
 	loggingConfig, err := GetLoggingConfig(a.Context)
 	if err != nil {
@@ -206,6 +207,7 @@ func (a *AppBuilder) Log() *AppBuilder {
 
 	a.Logger, _ = SetupLoggerOrDie(a.Context, a.Name)
 	a.Context = logging.WithLogger(a.Context, a.Logger)
+	lvlMGR.SetLogger(a.Logger)
 
 	// this logger will not respect the automatic level update feature
 	// and should not be used
@@ -429,14 +431,19 @@ func (a *AppBuilder) APIDocs() *AppBuilder {
 func (a *AppBuilder) Profiling() *AppBuilder {
 	a.init()
 
-	profilingHandler := profiling.NewHandler(a.Logger, false)
-	a.ProfilingServer = profiling.NewServer(profilingHandler)
+	// there is an issue when deploying together with
+	// other controllers like knative or tekton
+	// just ignore these for now and find a better way to do this
+	// TODO: find a better way to do profiling
+	// there is already pprof for webservices, maybe just need to solve
+	// how do controllers do metrics?
 
-	sharedmain.WatchObservabilityConfigOrDie(a.Context, a.ConfigMapWatcher, profilingHandler, a.Logger, a.Name)
-
-	a.startFunc = append(a.startFunc, func(ctx context.Context) error {
-		return a.ProfilingServer.ListenAndServe()
-	})
+	// profilingHandler := profiling.NewHandler(a.Logger, false)
+	// a.ProfilingServer = profiling.NewServer(profilingHandler)
+	// sharedmain.WatchObservabilityConfigOrDie(a.Context, a.ConfigMapWatcher, profilingHandler, a.Logger, a.Name)
+	// a.startFunc = append(a.startFunc, func(ctx context.Context) error {
+	// 	return a.ProfilingServer.ListenAndServe()
+	// })
 
 	return a
 }

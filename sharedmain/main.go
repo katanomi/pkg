@@ -18,11 +18,8 @@ package sharedmain
 
 import (
 	"context"
-	"errors"
-	"flag"
 	"fmt"
 	"log"
-	"net/http"
 	"os"
 	"time"
 
@@ -30,63 +27,25 @@ import (
 	cminformer "knative.dev/pkg/configmap/informer"
 
 	"go.uber.org/zap"
-	"golang.org/x/sync/errgroup"
 	corev1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
-	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/rest"
 	kubeclient "knative.dev/pkg/client/injection/kube/client"
 	"knative.dev/pkg/injection"
-	"knative.dev/pkg/injection/sharedmain"
 	"knative.dev/pkg/logging"
 	"knative.dev/pkg/logging/logkey"
-	"knative.dev/pkg/profiling"
 	"knative.dev/pkg/system"
 	"sigs.k8s.io/controller-runtime/pkg/client"
-	"sigs.k8s.io/controller-runtime/pkg/healthz"
-	ctrllog "sigs.k8s.io/controller-runtime/pkg/log"
 	"yunion.io/x/pkg/util/wait"
 
-	"github.com/go-logr/zapr"
 	kclient "github.com/katanomi/pkg/client"
 	klogging "github.com/katanomi/pkg/logging"
-	kmanager "github.com/katanomi/pkg/manager"
+
+	// kmanager "github.com/katanomi/pkg/manager"
 	kscheme "github.com/katanomi/pkg/scheme"
 	ctrl "sigs.k8s.io/controller-runtime"
 )
-
-// Main entrypoint for controllers basic main program
-// it will:
-// 1. load a config file given by the flag as the manager configuration
-// 2. setup signal handlers, client configuration, and will call MainWithConfig to bootstrap a controller-manager
-func Main(component string, scheme *runtime.Scheme, ctors ...Controller) {
-
-	var configFile string
-	flag.StringVar(&configFile, "config", "",
-		"The controller will load its initial configuration from this file. "+
-			"Omit this flag to use the default configuration values. "+
-			"Command-line flags override configuration from this file.")
-
-	flag.Parse()
-
-	var err error
-	options := ctrl.Options{Scheme: scheme}
-	if configFile != "" {
-		options, err = options.AndFrom(ctrl.ConfigFile().AtPath(configFile))
-		if err != nil {
-			fmt.Println(err, "unable to load the config file")
-			os.Exit(1)
-		}
-	}
-
-	ctx := ctrl.SetupSignalHandler()
-
-	var config *rest.Config
-	ctx, config = GetConfigOrDie(ctx)
-
-	MainWithConfig(ctx, component, config, options, ctors...)
-}
 
 func GetClientManager(ctx context.Context) (context.Context, *kclient.Manager) {
 	clientManager := kclient.ManagerCtx(ctx)
@@ -104,101 +63,6 @@ func GetConfigOrDie(ctx context.Context) (context.Context, *rest.Config) {
 		ctx = injection.WithConfig(ctx, cfg)
 	}
 	return ctx, cfg
-}
-
-// MainWithConfig runs the generic main flow for controllers
-// with the given config.
-// TODO: needs to add support to webhooks and custom configuration
-func MainWithConfig(ctx context.Context, component string, cfg *rest.Config, opts ctrl.Options, ctors ...Controller) {
-	lvlMGR := klogging.NewLevelManager()
-	ctx, startInformers := injection.EnableInjectionOrDie(ctx, cfg)
-	loggingConfig, err := GetLoggingConfig(ctx)
-	if err != nil {
-		log.Fatal("Error reading/parsing logging configuration: ", err)
-	}
-	zapConfig, err := klogging.ZapConfigFromJSON(loggingConfig.LoggingConfig)
-	if err != nil {
-		log.Fatal("Error parsing logging zapConfig: ", err)
-	}
-
-	//logger, atomicLevel := SetupLoggerOrDie(ctx, component)
-	logger, _ := SetupLoggerOrDie(ctx, component)
-	defer flush(logger)
-	ctx = logging.WithLogger(ctx, logger)
-
-	// this logger will not respect the automatic level update feature
-	// and should not be used
-	zaplogger := zapr.NewLogger(logger.Desugar())
-	ctrl.SetLogger(zaplogger)
-	ctx = ctrllog.IntoContext(ctx, zaplogger)
-
-	mgr, err := ctrl.NewManager(cfg, opts)
-	if err != nil {
-		fmt.Println(err, "unable to start manager")
-		os.Exit(1)
-	}
-	if err := mgr.AddHealthzCheck("healthz", healthz.Ping); err != nil {
-		logger.Panic(err, "unable to set up health check")
-	}
-	if err := mgr.AddReadyzCheck("readyz", healthz.Ping); err != nil {
-		logger.Panic(err, "unable to set up ready check")
-	}
-
-	ctx = kmanager.WithManager(ctx, mgr)
-	ctx = kclient.WithClient(ctx, mgr.GetClient())
-
-	// copy from main, lets test
-	cmw := sharedmain.SetupConfigMapWatchOrDie(ctx, logger)
-
-	profilingHandler := profiling.NewHandler(logger, false)
-	profilingServer := profiling.NewServer(profilingHandler)
-
-	sharedmain.WatchObservabilityConfigOrDie(ctx, cmw, profilingHandler, logger, component)
-
-	// TODO: add a logging config observer that:
-	// watches the logging configmap configuration while managing multiple atomicLevels
-	// uses the controller constructor below to provide a specific logger for each
-	// with the specified atomicLevel
-	//sharedmain.WatchLoggingConfigOrDie(ctx, cmw, logger, atomicLevel, component)
-	WatchLoggingConfigOrDie(ctx, cmw, logger, &lvlMGR)
-	// call constructors
-	systemConfigMap, err := kubeclient.Get(ctx).CoreV1().ConfigMaps(system.Namespace()).Get(ctx, logging.ConfigMapName(),
-		metav1.GetOptions{})
-	if err != nil {
-		logger.Panic(err, "read logging configmap error")
-	}
-	cmw.OnChange(systemConfigMap)
-	for _, controller := range ctors {
-		name := controller.Name()
-		controllerAtomicLevel := lvlMGR.Get(name)
-		controllerLogger := logger.Desugar().WithOptions(zap.UpdateCore(controllerAtomicLevel, *zapConfig)).Named(name).Sugar()
-		if err := controller.Setup(ctx, mgr, controllerLogger); err != nil {
-			logger.Fatalw("controller setup error", "ctrl", name, "err", err)
-		}
-	}
-
-	eg, egCtx := errgroup.WithContext(ctx)
-	eg.Go(profilingServer.ListenAndServe)
-
-	logger.Info("Starting configuration manager...")
-	if err := cmw.Start(ctx.Done()); err != nil {
-		logger.Fatalw("Failed to start configuration manager", zap.Error(err))
-	}
-
-	// start informers for config loader
-	startInformers()
-
-	// This will block until either a signal arrives or one of the grouped functions
-	// returns an error.
-	if err := mgr.Start(egCtx); err != nil {
-		logger.Errorw("problem running manager", "err", err)
-	}
-
-	profilingServer.Shutdown(context.Background())
-	// Don't forward ErrServerClosed as that indicates we're already shutting down.
-	if err := eg.Wait(); err != nil && !errors.Is(err, http.ErrServerClosed) {
-		logger.Errorw("Error while running server", zap.Error(err))
-	}
 }
 
 // SetupLoggerOrDie sets up the logger using the config from the given context
@@ -245,10 +109,6 @@ func GetLoggingConfig(ctx context.Context) (*logging.Config, error) {
 		return logging.NewConfigFromMap(nil)
 	}
 	return logging.NewConfigFromConfigMap(loggingConfigMap)
-}
-
-func flush(logger *zap.SugaredLogger) {
-	logger.Sync()
 }
 
 // WatchLoggingConfigOrDie establishes a watch of the logging config or dies by
