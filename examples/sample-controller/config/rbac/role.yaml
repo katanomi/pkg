@@ -7,28 +7,15 @@ metadata:
   name: manager-role
 rules:
 - apiGroups:
-  - core.katanomi.dev
+  - ""
   resources:
-  - triggers
+  - secrets
+  - configmaps
   verbs:
-  - create
-  - delete
   - get
   - list
-  - patch
-  - update
   - watch
-- apiGroups:
-  - core.katanomi.dev
-  resources:
-  - triggers/finalizers
-  verbs:
+  - create
   - update
-- apiGroups:
-  - core.katanomi.dev
-  resources:
-  - triggers/status
-  verbs:
-  - get
   - patch
-  - update
+  - delete

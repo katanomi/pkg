@@ -110,7 +110,7 @@ func GetConfigOrDie(ctx context.Context) (context.Context, *rest.Config) {
 // with the given config.
 // TODO: needs to add support to webhooks and custom configuration
 func MainWithConfig(ctx context.Context, component string, cfg *rest.Config, opts ctrl.Options, ctors ...Controller) {
-	lvlMGR := klogging.NewLevelManager()
+	lvlMGR := klogging.NewLevelManager(ctx, component)
 	ctx, startInformers := injection.EnableInjectionOrDie(ctx, cfg)
 	loggingConfig, err := GetLoggingConfig(ctx)
 	if err != nil {

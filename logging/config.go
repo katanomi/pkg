@@ -17,6 +17,7 @@ limitations under the License.
 package logging
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"sync"
@@ -46,14 +47,22 @@ type LevelManager struct {
 	BaseLevel          zap.AtomicLevel
 	ControllerLevelMap map[string]ControllerLevel
 	Locker             *sync.Mutex
+	Name               string
+
+	*zap.SugaredLogger
 }
 
 // NewLevelManager create a new levelManager object
-func NewLevelManager() LevelManager {
+func NewLevelManager(ctx context.Context, name string) LevelManager {
 	return LevelManager{
 		BaseLevel:          zap.NewAtomicLevel(),
 		ControllerLevelMap: map[string]ControllerLevel{},
 		Locker:             &sync.Mutex{},
+		Name:               name,
+		// most probably will init with a fallback logger
+		// which is production configuration
+		// so it is recommended to change the logger once started
+		SugaredLogger: logging.FromContext(ctx),
 	}
 }
 
@@ -75,15 +84,21 @@ func ZapConfigFromJSON(configJSON string) (*zap.Config, error) {
 	return &loggingCfg, nil
 }
 
+// SetLogger overwrites the previous logger
+func (l *LevelManager) SetLogger(logger *zap.SugaredLogger) {
+	l.SugaredLogger = logger
+}
+
 // Update read a configmap to update LevelManager. Set BaseLevel with zap.Config, set ControllerLevels with LoggingLevel
 func (l *LevelManager) Update() func(configMap *corev1.ConfigMap) {
 	return func(configMap *corev1.ConfigMap) {
 		l.Locker.Lock()
 		defer l.Locker.Unlock()
-		logger := zap.NewExample()
+		l.Infow("reloading log configuration after change")
+
 		config, err := logging.NewConfigFromConfigMap(configMap)
 		if err != nil {
-			logger.Error("Failed to parse the logging configmap. Previous config map will be used.", zap.Error(err))
+			l.Error("Failed to parse the logging configmap. Previous config map will be used.", "err", err)
 			return
 		}
 		loggingCfg, err := ZapConfigFromJSON(config.LoggingConfig)
@@ -92,18 +107,33 @@ func (l *LevelManager) Update() func(configMap *corev1.ConfigMap) {
 		case errors.Is(err, errEmptyLoggerConfig):
 			level = zap.NewAtomicLevel().Level()
 		case err != nil:
-			logger.Error("Failed to parse logger configuration.", zap.Error(err))
+			l.Error("Failed to parse logger configuration.", "err", err)
 			return
 		default:
-			level = loggingCfg.Level.Level()
+			// the component name should be the base for all logs in the same
+			// component, and fallbacks to the level inside "zap-logger-config" if not existing
+			namedLevel, ok := config.LoggingLevel[l.Name]
+			if ok {
+				level = namedLevel
+			} else {
+				level = loggingCfg.Level.Level()
+			}
 		}
+		oldLevel := l.BaseLevel.Level().String()
 		l.BaseLevel.SetLevel(level)
+		if oldLevel != level.String() {
+			l.Infow("logging base level changed", "old", oldLevel, "current", level)
+		}
 
 		for k, v := range config.LoggingLevel {
 			if controllerLevel, ok := l.ControllerLevelMap[k]; !ok {
+				l.Infow("adding new log level. Obs: This change only takes effect after restaring the pod", "name", k, "level", v)
 				l.ControllerLevelMap[k] = ControllerLevel{Inherit: false, Level: zap.NewAtomicLevelAt(v)}
 			} else {
 				controllerLevel.Inherit = false
+				if controllerLevel.Level.String() != v.String() {
+					l.Infow("updating log level", "name", k, "old", controllerLevel.Level, "current", v)
+				}
 				controllerLevel.Level.SetLevel(v)
 			}
 		}
