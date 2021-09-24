@@ -32,7 +32,7 @@ import (
 type ClientGitPullRequest interface {
 	Create(ctx context.Context, baseURL *duckv1.Addressable, payload metav1alpha1.CreatePullRequestPayload, options ...OptionFunc) (*metav1alpha1.GitPullRequest, error)
 	CreateNote(ctx context.Context, baseURL *duckv1.Addressable, payload metav1alpha1.CreatePullRequestCommentPayload, options ...OptionFunc) (*metav1alpha1.GitPullRequestNote, error)
-	List(ctx context.Context, baseURL *duckv1.Addressable, option metav1alpha1.GitRepo, options ...OptionFunc) (*metav1alpha1.GitPullRequestList, error)
+	List(ctx context.Context, baseURL *duckv1.Addressable, option metav1alpha1.GitPullRequestListOption, options ...OptionFunc) (*metav1alpha1.GitPullRequestList, error)
 	ListNote(ctx context.Context, baseURL *duckv1.Addressable, option metav1alpha1.GitPullRequestOption, options ...OptionFunc) (*metav1alpha1.GitPullRequestNoteList, error)
 	Get(ctx context.Context, baseURL *duckv1.Addressable, option metav1alpha1.GitPullRequestOption, options ...OptionFunc) (*metav1alpha1.GitPullRequest, error)
 }
@@ -63,9 +63,14 @@ func (g *gitPullRequest) Create(ctx context.Context, baseURL *duckv1.Addressable
 }
 
 // List pr
-func (g *gitPullRequest) List(ctx context.Context, baseURL *duckv1.Addressable, option metav1alpha1.GitRepo, options ...OptionFunc) (*metav1alpha1.GitPullRequestList, error) {
+func (g *gitPullRequest) List(ctx context.Context, baseURL *duckv1.Addressable, option metav1alpha1.GitPullRequestListOption, options ...OptionFunc) (*metav1alpha1.GitPullRequestList, error) {
 	prList := &metav1alpha1.GitPullRequestList{}
 	options = append(options, MetaOpts(g.meta), SecretOpts(g.secret), ResultOpts(prList))
+	if option.State != nil {
+		stateFilter := make(map[string]string)
+		stateFilter["state"] = (string)(*option.State)
+		options = append(options, QueryOpts(stateFilter))
+	}
 	if option.Repository == "" {
 		return nil, errors.New("repo is empty string")
 	}
