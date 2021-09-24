@@ -106,7 +106,7 @@ func (t *TestGitPullRequestHandler) Setup(_ context.Context, _ *zap.SugaredLogge
 	return nil
 }
 
-func (t *TestGitPullRequestHandler) ListGitPullRequest(ctx context.Context, option metav1alpha1.GitRepo, listOption metav1alpha1.ListOptions) (metav1alpha1.GitPullRequestList, error) {
+func (t *TestGitPullRequestHandler) ListGitPullRequest(ctx context.Context, option metav1alpha1.GitPullRequestListOption, listOption metav1alpha1.ListOptions) (metav1alpha1.GitPullRequestList, error) {
 	return metav1alpha1.GitPullRequestList{
 		TypeMeta: metav1.TypeMeta{
 			Kind: metav1alpha1.GitPullRequestsListGVK.Kind,

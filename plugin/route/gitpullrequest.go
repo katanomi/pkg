@@ -71,7 +71,13 @@ func (a *gitPullRequestHandler) Register(ws *restful.WebService) {
 func (a *gitPullRequestHandler) ListGitPullRequest(request *restful.Request, response *restful.Response) {
 	repo := request.PathParameter("repository")
 	project := request.PathParameter("project")
-	option := metav1alpha1.GitRepo{Repository: repo, Project: project}
+	_state := request.QueryParameter("state")
+	state := metav1alpha1.String2PullRequestState(_state)
+
+	option := metav1alpha1.GitPullRequestListOption{
+		GitRepo: metav1alpha1.GitRepo{Repository: repo, Project: project},
+		State:   state,
+	}
 	listOption := GetListOptionsFromRequest(request)
 	prList, err := a.impl.ListGitPullRequest(request.Request.Context(), option, listOption)
 	if err != nil {

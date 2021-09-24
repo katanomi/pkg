@@ -35,3 +35,24 @@ type GitPullRequestOption struct {
 	GitRepo
 	Index int `json:"Index"`
 }
+
+type PullRequestState string
+
+const (
+	PullRequestOpenedState PullRequestState = "opened"
+	PullRequestClosedState PullRequestState = "closed"
+	PullRequestMergedState PullRequestState = "merged"
+	PullRequestAllState    PullRequestState = "all"
+)
+
+type GitPullRequestListOption struct {
+	GitRepo
+	State *PullRequestState `json:"state,omitempty"`
+}
+
+func String2PullRequestState(state string) *PullRequestState {
+	if state == "" {
+		return nil
+	}
+	return (*PullRequestState)(&state)
+}
