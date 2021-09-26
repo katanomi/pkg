@@ -71,7 +71,7 @@ func (g *gitContent) Get(ctx context.Context, baseURL *duckv1.Addressable, optio
 func (g *gitContent) Create(ctx context.Context, baseURL *duckv1.Addressable, payload metav1alpha1.CreateRepoFilePayload, options ...OptionFunc) (*metav1alpha1.GitCommit, error) {
 	commitInfo := &metav1alpha1.GitCommit{}
 	var b bytes.Buffer
-	w := base64.NewEncoder(base64.URLEncoding, &b)
+	w := base64.NewEncoder(base64.StdEncoding, &b)
 	_, err := w.Write(payload.Content)
 	if err != nil {
 		return nil, err
