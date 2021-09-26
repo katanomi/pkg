@@ -37,6 +37,27 @@ const (
 	AuthHeaderAuthorization = "Authorization"
 
 	AuthPrefixBearer = "Bearer"
+
+	// OAuth2ClientIDKey is the key of the clientID for AuthTypeOAuth2 secrets
+	OAuth2ClientIDKey = "clientID"
+	// OAuth2ClientSecretKey is the key of the clientSecret for AuthTypeOAuth2 secrets
+	OAuth2ClientSecretKey = "clientSecret"
+	// OAuth2CodeKey is the key of the code for AuthTypeOAuth2 secrets
+	OAuth2CodeKey = "code"
+	// OAuth2AccessTokenKeyKey is the key of the accessTokenKey for AuthTypeOAuth2 secrets
+	OAuth2AccessTokenKeyKey = "accessTokenKey"
+	// OAuth2AccessTokenKey is the key of the accessToken for AuthTypeOAuth2 secrets
+	OAuth2AccessTokenKey = "accessToken"
+	// OAuth2ScopeKey is the key of the scope for AuthTypeOAuth2 secrets
+	OAuth2ScopeKey = "scope"
+	// OAuth2RefreshTokenKey is the key of the refreshToken for AuthTypeOAuth2 secrets
+	OAuth2RefreshTokenKey = "refreshToken"
+	// OAuth2ExpiresInKey is the key of the expiresIn for AuthTypeOAuth2 secrets
+	OAuth2CreatedAtKey = "createdAt"
+	// OAuth2ExpiresInKey is the key of the expiresIn for AuthTypeOAuth2 secrets
+	OAuth2ExpiresInKey = "expiresIn"
+	// OAuth2RedirectURLKey is the key of the redirectURL for AuthTypeOAuth2 secrets
+	OAuth2RedirectURLKey = "redirectURL"
 )
 
 // Auth plugin auth
