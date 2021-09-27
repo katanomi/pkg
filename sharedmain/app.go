@@ -26,6 +26,8 @@ import (
 	"sync"
 	"time"
 
+	"github.com/katanomi/pkg/redirect"
+
 	"k8s.io/client-go/dynamic"
 
 	"github.com/emicklei/go-restful/v3"
@@ -141,6 +143,7 @@ func (a *AppBuilder) init() {
 			return a.ConfigMapWatcher.Start(ctx.Done())
 		})
 
+		a.Context = redirect.WithRedirecter(a.Context, redirect.Default())
 		a.Context = multicluster.WithMultiCluster(a.Context, multicluster.NewClusterRegistryClientOrDie(a.Config))
 
 		a.container = restful.NewContainer()
@@ -242,6 +245,12 @@ func (a *AppBuilder) RESTClient(client *resty.Client) *AppBuilder {
 // MultiClusterClient injects a multi cluster client into the context
 func (a *AppBuilder) MultiClusterClient(client multicluster.Interface) *AppBuilder {
 	a.Context = multicluster.WithMultiCluster(a.Context, client)
+	return a
+}
+
+// Redirecter injects a redirecter into the context
+func (a *AppBuilder) Redirecter(redi redirect.Interface) *AppBuilder {
+	a.Context = redirect.WithRedirecter(a.Context, redi)
 	return a
 }
 
