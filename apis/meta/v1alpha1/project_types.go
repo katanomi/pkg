@@ -23,6 +23,35 @@ import (
 	duckv1 "knative.dev/pkg/apis/duck/v1"
 )
 
+// ProjectSubType stores a specific project subtype
+type ProjectSubType string
+
+func (r ProjectSubType) String() string {
+	return string(r)
+}
+
+const (
+	// DefaultProjectSubType default project subtype
+	DefaultProjectSubType ProjectSubType = "Project"
+
+	// ImageRegistryProjectSubType image registry project subtype
+	ImageRegistryProjectSubType ProjectSubType = "ImageRegistry"
+
+	// GitUserProjectSubType git user project subtype
+	GitUserProjectSubType ProjectSubType = "GitUser"
+
+	// GitGroupProjectSubType git group project subtype
+	GitGroupProjectSubType ProjectSubType = "GitGroup"
+
+	// RawRepositoryProjectSubType raw repository project subtype
+	RawRepositoryProjectSubType ProjectSubType = "RawRepository"
+
+	// MavenRepositoryProjectSubType maven repository project subtype
+	MavenRepositoryProjectSubType ProjectSubType = "MavenRepository"
+
+	// TODO: add more subtypes
+)
+
 var ProjectGVK = GroupVersion.WithKind("Project")
 var ProjectListGVK = GroupVersion.WithKind("ProjectList")
 
@@ -49,8 +78,8 @@ type ProjectSpec struct {
 	Access *duckv1.Addressable `json:"access,omitempty"`
 
 	// project subtype
-	// +optional
-	SubType string `json:"subType"`
+	// +kubebuilder:default="Project"
+	SubType ProjectSubType `json:"subType"`
 
 	// NamespaceRefs for which this project is already bound to
 	// +optional

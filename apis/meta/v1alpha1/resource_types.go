@@ -22,13 +22,24 @@ import (
 	duckv1 "knative.dev/pkg/apis/duck/v1"
 )
 
+// ResourceSubType stores a specific resource subtype
 type ResourceSubType string
 
+func (r ResourceSubType) String() string {
+	return string(r)
+}
+
 const (
-	// OCI artifact registry project
-	ResourceSubTypeImageRegistry ResourceSubType = "ImageRegistry"
-	// Code repository project
-	ResourceSubTypeCodeRepository ResourceSubType = "CodeRepository"
+	// DefaultResourceSubType default resource subtype
+	DefaultResourceSubType ResourceSubType = "Resource"
+
+	// ImageRepositoryResourceSubType OCI artifact registry resource
+	ImageRepositoryResourceSubType ResourceSubType = "ImageRepository"
+
+	// CodeRepositoryResourceSubType Code repository resource
+	CodeRepositoryResourceSubType ResourceSubType = "CodeRepository"
+
+	// TODO: add more subtypes
 )
 
 var ResourceGVK = GroupVersion.WithKind("Resource")
@@ -56,7 +67,8 @@ type ResourceSpec struct {
 	Type string `json:"type"`
 
 	// SubType of resource
-	SubType string `json:"subType"`
+	// +kubebuilder:default="Resource"
+	SubType ResourceSubType `json:"subType"`
 
 	// Version of specified resource
 	// +optional

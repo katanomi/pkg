@@ -89,7 +89,7 @@ func (a *Auth) WithContext(ctx context.Context) context.Context {
 // FromSecret generate auth from secret
 func FromSecret(secret corev1.Secret) *Auth {
 	secretType := string(secret.Type)
-	if v, exist := secret.Labels[v1alpha1.SecretTypeLabelKey]; exist && v != "" {
+	if v, exist := secret.Annotations[v1alpha1.SecretTypeAnnotationKey]; exist && v != "" {
 		secretType = v
 	}
 
