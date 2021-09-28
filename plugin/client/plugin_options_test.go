@@ -60,8 +60,8 @@ func TestSecretOptsWithLabel(t *testing.T) {
 	secret := v1.Secret{
 		TypeMeta: metav1.TypeMeta{},
 		ObjectMeta: metav1.ObjectMeta{
-			Labels: map[string]string{
-				metav1alpha1.SecretTypeLabelKey: string(metav1alpha1.AuthTypeOAuth2),
+			Annotations: map[string]string{
+				metav1alpha1.SecretTypeAnnotationKey: string(metav1alpha1.AuthTypeOAuth2),
 			},
 		},
 		Type: v1.SecretType("unknown"),

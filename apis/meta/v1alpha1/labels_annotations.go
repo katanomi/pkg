@@ -22,8 +22,6 @@ const (
 	SecretLabelKey = "core.kubernetes.io/secret" //nolint:gosec
 	// NamespaceLabelKey namespace of a resource
 	NamespaceLabelKey = "core.kubernetes.io/namespace"
-	// SecretTypeLabelKey secret type label for an existed secret with different type
-	SecretTypeLabelKey = "core.katanomi.dev/secretType" //nolint:gosec
 	// IntegrationClassLabelKey for integrationclass resource
 	IntegrationClassLabelKey = "core.katanomi.dev/integrationClass"
 
@@ -54,8 +52,10 @@ const (
 	TriggeredByAnnotationKey = "katanomi.dev/triggeredBy"
 	// CreatedByAnnotationKey annotation key to store resource creation username
 	CreatedByAnnotationKey = "katanomi.dev/createdBy"
-	// CreatedByAnnotationKey annotation key to store resource update username
+	// UpdatedByAnnotationKey annotation key to store resource update username
 	UpdatedByAnnotationKey = "katanomi.dev/updatedBy"
+	// SecretTypeAnnotationKey annotation key for an existed secret with a different type
+	SecretTypeAnnotationKey = "katanomi.dev/secretType" //nolint:gosec
 )
 
 // Attribute keys for Integrations
