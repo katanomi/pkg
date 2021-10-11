@@ -99,6 +99,10 @@ func match(c client.Interface) []Route {
 		routes = append(routes, NewGitBranchCreator(v))
 	}
 
+	if v, ok := c.(client.GitBranchGetter); ok {
+		routes = append(routes, NewGitBranchGetter(v))
+	}
+
 	if v, ok := c.(client.GitCommitGetter); ok {
 		routes = append(routes, NewGitCommitGetter(v))
 	}
@@ -117,6 +121,10 @@ func match(c client.Interface) []Route {
 
 	if v, ok := c.(client.GitRepositoryLister); ok {
 		routes = append(routes, NewGitRepositoryLister(v))
+	}
+
+	if v, ok := c.(client.GitRepositoryGetter); ok {
+		routes = append(routes, NewGitRepositoryGetter(v))
 	}
 
 	if v, ok := c.(client.GitCommitCommentLister); ok {
@@ -184,6 +192,9 @@ func GetMethods(c client.Interface) []string {
 	if _, ok := c.(client.GitBranchLister); ok {
 		methods = append(methods, "ListGitBranch")
 	}
+	if _, ok := c.(client.GitBranchGetter); ok {
+		methods = append(methods, "GetGitBranch")
+	}
 	if _, ok := c.(client.GitBranchCreator); ok {
 		methods = append(methods, "CreateGitBranch")
 	}
@@ -201,6 +212,9 @@ func GetMethods(c client.Interface) []string {
 	}
 	if _, ok := c.(client.GitRepositoryLister); ok {
 		methods = append(methods, "ListGitRepository")
+	}
+	if _, ok := c.(client.GitRepositoryGetter); ok {
+		methods = append(methods, "GetGitRepository")
 	}
 	if _, ok := c.(client.GitCommitCommentLister); ok {
 		methods = append(methods, "ListGitCommitComment")

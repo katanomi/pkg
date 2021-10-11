@@ -30,6 +30,7 @@ import (
 // ClientGitRepository client for repo
 type ClientGitRepository interface {
 	List(ctx context.Context, baseURL *duckv1.Addressable, project, keyword string, options ...OptionFunc) (*metav1alpha1.GitRepositoryList, error)
+	Get(ctx context.Context, baseURL *duckv1.Addressable, project, repo string, options ...OptionFunc) (*metav1alpha1.GitRepository, error)
 }
 
 type gitRepository struct {
@@ -57,4 +58,20 @@ func (g *gitRepository) List(ctx context.Context, baseURL *duckv1.Addressable, p
 		return nil, err
 	}
 	return list, nil
+}
+
+func (g *gitRepository) Get(ctx context.Context, baseURL *duckv1.Addressable, project, repo string, options ...OptionFunc) (*metav1alpha1.GitRepository, error) {
+	repoObj := &metav1alpha1.GitRepository{}
+	options = append(options, MetaOpts(g.meta), SecretOpts(g.secret), ResultOpts(repoObj))
+	if project == "" {
+		return nil, errors.New("project is empty string")
+	}
+	if repo == "" {
+		return nil, errors.New("repo is empty string")
+	}
+	uri := fmt.Sprintf("projects/%s/coderepositories/%s", project, repo)
+	if err := g.client.Get(ctx, baseURL, uri, options...); err != nil {
+		return nil, err
+	}
+	return repoObj, nil
 }

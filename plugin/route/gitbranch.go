@@ -107,3 +107,42 @@ func (a *gitBranchCreator) CreateBranch(request *restful.Request, response *rest
 	}
 	response.WriteHeaderAndEntity(http.StatusOK, gitBranchObj)
 }
+
+type gitBranchGetter struct {
+	impl client.GitBranchGetter
+	tags []string
+}
+
+// NewGitBranchGetter create a git branch getter route with plugin client
+func NewGitBranchGetter(impl client.GitBranchGetter) Route {
+	return &gitBranchGetter{
+		tags: []string{"git", "repositories", "branch"},
+		impl: impl,
+	}
+}
+
+// Register route
+func (a *gitBranchGetter) Register(ws *restful.WebService) {
+	branchParam := ws.PathParameter("branch", "branch name")
+	repositoryParam := ws.PathParameter("repository", "branch belong to repository")
+	projectParam := ws.PathParameter("project", "repository belong to project")
+	ws.Route(
+		ws.GET("/projects/{project}/coderepositories/{repository}/branches/{branch}").To(a.GetGitBranch).
+			Doc("ListBranch").Param(projectParam).Param(repositoryParam).Param(branchParam).
+			Metadata(restfulspec.KeyOpenAPITags, a.tags).
+			Returns(http.StatusOK, "OK", metav1alpha1.GitBranch{}),
+	)
+}
+
+// ListBranch list branch by repo
+func (a *gitBranchGetter) GetGitBranch(request *restful.Request, response *restful.Response) {
+	repo := request.PathParameter("repository")
+	project := request.PathParameter("project")
+	branch := request.PathParameter("branch")
+	branchObj, err := a.impl.GetGitBranch(request.Request.Context(), metav1alpha1.GitRepo{Repository: repo, Project: project}, branch)
+	if err != nil {
+		kerrors.HandleError(request, response, err)
+		return
+	}
+	response.WriteHeaderAndEntity(http.StatusOK, branchObj)
+}
