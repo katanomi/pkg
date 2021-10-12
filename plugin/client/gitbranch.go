@@ -31,6 +31,7 @@ import (
 type ClientGitBranch interface {
 	List(ctx context.Context, baseURL *duckv1.Addressable, repo metav1alpha1.GitRepo, options ...OptionFunc) (*metav1alpha1.GitBranchList, error)
 	Create(ctx context.Context, baseURL *duckv1.Addressable, payload metav1alpha1.CreateBranchPayload, options ...OptionFunc) (*metav1alpha1.GitBranch, error)
+	Get(ctx context.Context, baseURL *duckv1.Addressable, repo metav1alpha1.GitRepo, branch string, options ...OptionFunc) (*metav1alpha1.GitBranch, error)
 }
 
 type gitBranch struct {
@@ -70,6 +71,21 @@ func (g *gitBranch) Create(ctx context.Context, baseURL *duckv1.Addressable, pay
 	}
 	uri := fmt.Sprintf("projects/%s/coderepositories/%s/branches", payload.Project, payload.Repository)
 	if err := g.client.Post(ctx, baseURL, uri, options...); err != nil {
+		return nil, err
+	}
+
+	return branchObj, nil
+}
+
+// Get branch info
+func (g *gitBranch) Get(ctx context.Context, baseURL *duckv1.Addressable, repo metav1alpha1.GitRepo, branch string, options ...OptionFunc) (*metav1alpha1.GitBranch, error) {
+	branchObj := &metav1alpha1.GitBranch{}
+	options = append(options, MetaOpts(g.meta), SecretOpts(g.secret), ResultOpts(branchObj))
+	if repo.Repository == "" {
+		return nil, errors.New("repo is empty string")
+	}
+	uri := fmt.Sprintf("projects/%s/coderepositories/%s/branches/%s", repo.Project, repo.Repository, branch)
+	if err := g.client.Get(ctx, baseURL, uri, options...); err != nil {
 		return nil, err
 	}
 

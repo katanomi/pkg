@@ -19,6 +19,8 @@ package route
 import (
 	"net/http"
 
+	"k8s.io/apimachinery/pkg/api/errors"
+
 	kerrors "github.com/katanomi/pkg/errors"
 
 	restfulspec "github.com/emicklei/go-restful-openapi/v2"
@@ -46,7 +48,7 @@ func (a *gitRepositoryLister) Register(ws *restful.WebService) {
 	keywordParam := ws.QueryParameter("keyword", "keyword for search repository")
 	ws.Route(
 		ws.GET("/projects/{project}/coderepositories").To(a.ListGitRepository).
-			Doc("GetGitPullRequest").Param(projectParam).Param(keywordParam).
+			Doc("GetGitRepoList").Param(projectParam).Param(keywordParam).
 			Metadata(restfulspec.KeyOpenAPITags, a.tags).
 			Returns(http.StatusOK, "OK", metav1alpha1.GitRepositoryList{}),
 	)
@@ -63,4 +65,45 @@ func (a *gitRepositoryLister) ListGitRepository(request *restful.Request, respon
 		return
 	}
 	response.WriteHeaderAndEntity(http.StatusOK, repoList)
+}
+
+type gitRepositoryGetter struct {
+	impl client.GitRepositoryGetter
+	tags []string
+}
+
+// NewGitRepositoryGetter get a git repo route with plugin client
+func NewGitRepositoryGetter(impl client.GitRepositoryGetter) Route {
+	return &gitRepositoryGetter{
+		tags: []string{"git", "repositories"},
+		impl: impl,
+	}
+}
+
+// Register route
+func (a *gitRepositoryGetter) Register(ws *restful.WebService) {
+	repositoryParam := ws.PathParameter("repository", "repository name")
+	projectParam := ws.PathParameter("project", "repository belong to project")
+	ws.Route(
+		ws.GET("/projects/{project}/coderepositories/{repository}").To(a.GetGitRepository).
+			Doc("GetGitRepo").Param(projectParam).Param(repositoryParam).
+			Metadata(restfulspec.KeyOpenAPITags, a.tags).
+			Returns(http.StatusOK, "OK", metav1alpha1.GitRepository{}),
+	)
+}
+
+// GetGitRepository get repo info
+func (a *gitRepositoryGetter) GetGitRepository(request *restful.Request, response *restful.Response) {
+	project := request.PathParameter("project")
+	repo := request.PathParameter("repository")
+	repoInfo, err := a.impl.GetGitRepository(request.Request.Context(), metav1alpha1.GitRepo{Repository: repo, Project: project})
+	if err != nil {
+		if errors.IsNotFound(err) {
+			response.WriteError(http.StatusNotFound, err)
+			return
+		}
+		kerrors.HandleError(request, response, err)
+		return
+	}
+	response.WriteHeaderAndEntity(http.StatusOK, repoInfo)
 }

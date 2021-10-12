@@ -185,6 +185,12 @@ type GitBranchLister interface {
 	ListGitBranch(ctx context.Context, repoOption metav1alpha1.GitRepo, option metav1alpha1.ListOptions) (metav1alpha1.GitBranchList, error)
 }
 
+// GitBranchGetter get git branch
+type GitBranchGetter interface {
+	Interface
+	GetGitBranch(ctx context.Context, repoOption metav1alpha1.GitRepo, branch string) (metav1alpha1.GitBranch, error)
+}
+
 // GitBranchCreator create git branch,github, gogs don't support create branch
 type GitBranchCreator interface {
 	Interface
@@ -207,6 +213,12 @@ type GitRepoFileCreator interface {
 type GitRepositoryLister interface {
 	Interface
 	ListGitRepository(ctx context.Context, id, keyword string, listOption metav1alpha1.ListOptions) (metav1alpha1.GitRepositoryList, error)
+}
+
+// GitRepositoryGetter get git repository
+type GitRepositoryGetter interface {
+	Interface
+	GetGitRepository(ctx context.Context, repoOption metav1alpha1.GitRepo) (metav1alpha1.GitRepository, error)
 }
 
 // GitCommitStatusLister list git commit status
