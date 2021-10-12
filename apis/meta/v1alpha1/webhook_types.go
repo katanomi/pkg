@@ -43,6 +43,9 @@ type WebhookRegisterStatus struct {
 	// WebhookID will return the registered webhook id during create
 	WebhookID string `json:"webhookID"`
 
+	// Address stores the target address for the webhook
+	Address apis.URL `json:"addressURL"`
+
 	// StatusCode for the API request
 	// +optional
 	StatusCode int `json:"statusCode"`
