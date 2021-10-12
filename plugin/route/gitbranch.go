@@ -55,7 +55,11 @@ func (a *gitBranchLister) Register(ws *restful.WebService) {
 // ListBranch list branch by repo
 func (a *gitBranchLister) ListBranch(request *restful.Request, response *restful.Response) {
 	option := GetListOptionsFromRequest(request)
-	repo := request.PathParameter("repository")
+	repo, err := handlePathParamHasSlash(request.PathParameter("repository"))
+	if err != nil {
+		kerrors.HandleError(request, response, err)
+		return
+	}
 	project := request.PathParameter("project")
 	branchList, err := a.impl.ListGitBranch(request.Request.Context(), metav1alpha1.GitRepo{Repository: repo, Project: project}, option)
 	if err != nil {
@@ -92,7 +96,11 @@ func (a *gitBranchCreator) Register(ws *restful.WebService) {
 
 // CreateBranch create branch
 func (a *gitBranchCreator) CreateBranch(request *restful.Request, response *restful.Response) {
-	repo := request.PathParameter("repository")
+	repo, err := handlePathParamHasSlash(request.PathParameter("repository"))
+	if err != nil {
+		kerrors.HandleError(request, response, err)
+		return
+	}
 	project := request.PathParameter("project")
 	var params metav1alpha1.CreateBranchParams
 	if err := request.ReadEntity(&params); err != nil {
@@ -136,9 +144,17 @@ func (a *gitBranchGetter) Register(ws *restful.WebService) {
 
 // ListBranch list branch by repo
 func (a *gitBranchGetter) GetGitBranch(request *restful.Request, response *restful.Response) {
-	repo := request.PathParameter("repository")
+	repo, err := handlePathParamHasSlash(request.PathParameter("repository"))
+	if err != nil {
+		kerrors.HandleError(request, response, err)
+		return
+	}
 	project := request.PathParameter("project")
-	branch := request.PathParameter("branch")
+	branch, err := handlePathParamHasSlash(request.PathParameter("branch"))
+	if err != nil {
+		kerrors.HandleError(request, response, err)
+		return
+	}
 	branchObj, err := a.impl.GetGitBranch(request.Request.Context(), metav1alpha1.GitRepo{Repository: repo, Project: project}, branch)
 	if err != nil {
 		kerrors.HandleError(request, response, err)

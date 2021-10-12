@@ -18,12 +18,11 @@ package client
 
 import (
 	"context"
-	"errors"
 	"fmt"
 
-	corev1 "k8s.io/api/core/v1"
-
 	metav1alpha1 "github.com/katanomi/pkg/apis/meta/v1alpha1"
+	corev1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/api/errors"
 	duckv1 "knative.dev/pkg/apis/duck/v1"
 )
 
@@ -50,14 +49,14 @@ func (g *gitCommitComment) List(ctx context.Context, baseURL *duckv1.Addressable
 	commitCommentList := &metav1alpha1.GitCommitCommentList{}
 	options = append(options, MetaOpts(g.meta), SecretOpts(g.secret), ResultOpts(commitCommentList))
 	if option.Repository == "" {
-		return nil, errors.New("repo is empty string")
+		return nil, errors.NewBadRequest("repo is empty string")
 	} else if option.Project == "" {
-		return nil, errors.New("project is empty string")
+		return nil, errors.NewBadRequest("project is empty string")
 	} else if option.SHA == nil {
-		return nil, errors.New("unknown sha for commit")
+		return nil, errors.NewBadRequest("unknown sha for commit")
 	}
 	sha := *option.SHA
-	uri := fmt.Sprintf("/projects/%s/coderepositories/%s/commit/%s/comments", option.Project, option.Repository, sha)
+	uri := fmt.Sprintf("/projects/%s/coderepositories/%s/commit/%s/comments", option.Project, handlePathParamHasSlash(option.Repository), sha)
 	if err := g.client.Get(ctx, baseURL, uri, options...); err != nil {
 		return nil, err
 	}
@@ -68,14 +67,14 @@ func (g *gitCommitComment) Create(ctx context.Context, baseURL *duckv1.Addressab
 	commentInfo := &metav1alpha1.GitCommitComment{}
 	options = append(options, MetaOpts(g.meta), SecretOpts(g.secret), BodyOpts(payload.CreateCommitCommentParam), ResultOpts(commentInfo))
 	if payload.Repository == "" {
-		return nil, errors.New("repo is empty string")
+		return nil, errors.NewBadRequest("repo is empty string")
 	} else if payload.Project == "" {
-		return nil, errors.New("project is empty string")
+		return nil, errors.NewBadRequest("project is empty string")
 	} else if payload.SHA == nil {
-		return nil, errors.New("unknown sha for commit")
+		return nil, errors.NewBadRequest("unknown sha for commit")
 	}
 	sha := *payload.SHA
-	uri := fmt.Sprintf("/projects/%s/coderepositories/%s/commit/%s/comments", payload.Project, payload.Repository, sha)
+	uri := fmt.Sprintf("/projects/%s/coderepositories/%s/commit/%s/comments", payload.Project, handlePathParamHasSlash(payload.Repository), sha)
 	if err := g.client.Post(ctx, baseURL, uri, options...); err != nil {
 		return nil, err
 	}

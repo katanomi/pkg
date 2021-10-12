@@ -18,15 +18,13 @@ package client
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"strconv"
 
-	corev1 "k8s.io/api/core/v1"
-
-	duckv1 "knative.dev/pkg/apis/duck/v1"
-
 	metav1alpha1 "github.com/katanomi/pkg/apis/meta/v1alpha1"
+	corev1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/api/errors"
+	duckv1 "knative.dev/pkg/apis/duck/v1"
 )
 
 type ClientGitPullRequest interface {
@@ -55,7 +53,7 @@ func newGitPullRequest(client Client, meta Meta, secret corev1.Secret) ClientGit
 func (g *gitPullRequest) Create(ctx context.Context, baseURL *duckv1.Addressable, payload metav1alpha1.CreatePullRequestPayload, options ...OptionFunc) (*metav1alpha1.GitPullRequest, error) {
 	prObj := &metav1alpha1.GitPullRequest{}
 	options = append(options, MetaOpts(g.meta), SecretOpts(g.secret), BodyOpts(payload), ResultOpts(prObj))
-	uri := fmt.Sprintf("projects/%s/coderepositories/%s/pulls", payload.Source.Project, payload.Source.Repository)
+	uri := fmt.Sprintf("projects/%s/coderepositories/%s/pulls", payload.Source.Project, handlePathParamHasSlash(payload.Source.Repository))
 	if err := g.client.Post(ctx, baseURL, uri, options...); err != nil {
 		return nil, err
 	}
@@ -72,9 +70,9 @@ func (g *gitPullRequest) List(ctx context.Context, baseURL *duckv1.Addressable, 
 		options = append(options, QueryOpts(stateFilter))
 	}
 	if option.Repository == "" {
-		return nil, errors.New("repo is empty string")
+		return nil, errors.NewBadRequest("repo is empty string")
 	}
-	uri := fmt.Sprintf("projects/%s/coderepositories/%s/pulls", option.Project, option.Repository)
+	uri := fmt.Sprintf("projects/%s/coderepositories/%s/pulls", option.Project, handlePathParamHasSlash(option.Repository))
 	if err := g.client.Get(ctx, baseURL, uri, options...); err != nil {
 		return nil, err
 	}
@@ -86,13 +84,13 @@ func (g *gitPullRequest) Get(ctx context.Context, baseURL *duckv1.Addressable, o
 	prObj := &metav1alpha1.GitPullRequest{}
 	options = append(options, MetaOpts(g.meta), SecretOpts(g.secret), ResultOpts(prObj))
 	if option.Repository == "" {
-		return nil, errors.New("repo is empty string")
+		return nil, errors.NewBadRequest("repo is empty string")
 	}
 	if option.Index < 1 {
-		return nil, errors.New("pr's index is unknown")
+		return nil, errors.NewBadRequest("pr's index is unknown")
 	}
 	index := strconv.Itoa(option.Index)
-	uri := fmt.Sprintf("projects/%s/coderepositories/%s/pulls/%s", option.Project, option.Repository, index)
+	uri := fmt.Sprintf("projects/%s/coderepositories/%s/pulls/%s", option.Project, handlePathParamHasSlash(option.Repository), index)
 	if err := g.client.Get(ctx, baseURL, uri, options...); err != nil {
 		return nil, err
 	}
@@ -104,13 +102,13 @@ func (g *gitPullRequest) CreateNote(ctx context.Context, baseURL *duckv1.Address
 	noteObj := &metav1alpha1.GitPullRequestNote{}
 	options = append(options, MetaOpts(g.meta), SecretOpts(g.secret), BodyOpts(payload.CreatePullRequestCommentParam), ResultOpts(noteObj))
 	if payload.Repository == "" {
-		return nil, errors.New("repo is empty string")
+		return nil, errors.NewBadRequest("repo is empty string")
 	}
 	if payload.Index < 1 {
-		return nil, errors.New("pr's index is unknown")
+		return nil, errors.NewBadRequest("pr's index is unknown")
 	}
 	index := strconv.Itoa(payload.Index)
-	uri := fmt.Sprintf("projects/%s/coderepositories/%s/pulls/%s/note", payload.Project, payload.Repository, index)
+	uri := fmt.Sprintf("projects/%s/coderepositories/%s/pulls/%s/note", payload.Project, handlePathParamHasSlash(payload.Repository), index)
 	if err := g.client.Post(ctx, baseURL, uri, options...); err != nil {
 		return nil, err
 	}
@@ -122,13 +120,13 @@ func (g *gitPullRequest) ListNote(ctx context.Context, baseURL *duckv1.Addressab
 	noteList := &metav1alpha1.GitPullRequestNoteList{}
 	options = append(options, MetaOpts(g.meta), SecretOpts(g.secret), ResultOpts(noteList))
 	if option.Repository == "" {
-		return nil, errors.New("repo is empty string")
+		return nil, errors.NewBadRequest("repo is empty string")
 	}
 	if option.Index < 1 {
-		return nil, errors.New("pr's index is unknown")
+		return nil, errors.NewBadRequest("pr's index is unknown")
 	}
 	index := strconv.Itoa(option.Index)
-	uri := fmt.Sprintf("projects/%s/coderepositories/%s/pulls/%s/note", option.Project, option.Repository, index)
+	uri := fmt.Sprintf("projects/%s/coderepositories/%s/pulls/%s/note", option.Project, handlePathParamHasSlash(option.Repository), index)
 	if err := g.client.Get(ctx, baseURL, uri, options...); err != nil {
 		return nil, err
 	}
