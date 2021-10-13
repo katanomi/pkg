@@ -18,12 +18,11 @@ package client
 
 import (
 	"context"
-	"errors"
 	"fmt"
 
-	corev1 "k8s.io/api/core/v1"
-
 	metav1alpha1 "github.com/katanomi/pkg/apis/meta/v1alpha1"
+	corev1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/api/errors"
 	duckv1 "knative.dev/pkg/apis/duck/v1"
 )
 
@@ -53,9 +52,9 @@ func (g *gitBranch) List(ctx context.Context, baseURL *duckv1.Addressable, repo 
 	list := &metav1alpha1.GitBranchList{}
 	options = append(options, MetaOpts(g.meta), SecretOpts(g.secret), ResultOpts(list))
 	if repo.Repository == "" {
-		return nil, errors.New("repo is empty string")
+		return nil, errors.NewBadRequest("repo is empty string")
 	}
-	uri := fmt.Sprintf("projects/%s/coderepositories/%s/branches", repo.Project, repo.Repository)
+	uri := fmt.Sprintf("projects/%s/coderepositories/%s/branches", repo.Project, handlePathParamHasSlash(repo.Repository))
 	if err := g.client.Get(ctx, baseURL, uri, options...); err != nil {
 		return nil, err
 	}
@@ -67,9 +66,9 @@ func (g *gitBranch) Create(ctx context.Context, baseURL *duckv1.Addressable, pay
 	branchObj := &metav1alpha1.GitBranch{}
 	options = append(options, MetaOpts(g.meta), SecretOpts(g.secret), BodyOpts(payload.CreateBranchParams), ResultOpts(branchObj))
 	if payload.Repository == "" {
-		return nil, errors.New("repo is empty string")
+		return nil, errors.NewBadRequest("repo is empty string")
 	}
-	uri := fmt.Sprintf("projects/%s/coderepositories/%s/branches", payload.Project, payload.Repository)
+	uri := fmt.Sprintf("projects/%s/coderepositories/%s/branches", payload.Project, handlePathParamHasSlash(payload.Repository))
 	if err := g.client.Post(ctx, baseURL, uri, options...); err != nil {
 		return nil, err
 	}
@@ -82,9 +81,9 @@ func (g *gitBranch) Get(ctx context.Context, baseURL *duckv1.Addressable, repo m
 	branchObj := &metav1alpha1.GitBranch{}
 	options = append(options, MetaOpts(g.meta), SecretOpts(g.secret), ResultOpts(branchObj))
 	if repo.Repository == "" {
-		return nil, errors.New("repo is empty string")
+		return nil, errors.NewBadRequest("repo is empty string")
 	}
-	uri := fmt.Sprintf("projects/%s/coderepositories/%s/branches/%s", repo.Project, repo.Repository, branch)
+	uri := fmt.Sprintf("projects/%s/coderepositories/%s/branches/%s", repo.Project, handlePathParamHasSlash(repo.Repository), handlePathParamHasSlash(branch))
 	if err := g.client.Get(ctx, baseURL, uri, options...); err != nil {
 		return nil, err
 	}

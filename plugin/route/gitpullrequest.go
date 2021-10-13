@@ -69,7 +69,11 @@ func (a *gitPullRequestHandler) Register(ws *restful.WebService) {
 
 // ListGitPullRequest list pr info
 func (a *gitPullRequestHandler) ListGitPullRequest(request *restful.Request, response *restful.Response) {
-	repo := request.PathParameter("repository")
+	repo, err := handlePathParamHasSlash(request.PathParameter("repository"))
+	if err != nil {
+		kerrors.HandleError(request, response, err)
+		return
+	}
 	project := request.PathParameter("project")
 	_state := request.QueryParameter("state")
 	state := metav1alpha1.String2PullRequestState(_state)
@@ -95,7 +99,11 @@ func (a *gitPullRequestHandler) GetGitPullRequest(request *restful.Request, resp
 		kerrors.HandleError(request, response, err)
 		return
 	}
-	repo := request.PathParameter("repository")
+	repo, err := handlePathParamHasSlash(request.PathParameter("repository"))
+	if err != nil {
+		kerrors.HandleError(request, response, err)
+		return
+	}
 	project := request.PathParameter("project")
 	option := metav1alpha1.GitPullRequestOption{
 		GitRepo: metav1alpha1.GitRepo{Repository: repo, Project: project},
@@ -111,7 +119,11 @@ func (a *gitPullRequestHandler) GetGitPullRequest(request *restful.Request, resp
 
 // CreateGitPullRequest create a pr
 func (a *gitPullRequestHandler) CreateGitPullRequest(request *restful.Request, response *restful.Response) {
-	repo := request.PathParameter("repository")
+	repo, err := handlePathParamHasSlash(request.PathParameter("repository"))
+	if err != nil {
+		kerrors.HandleError(request, response, err)
+		return
+	}
 	project := request.PathParameter("project")
 	var params metav1alpha1.CreatePullRequestPayload
 	if err := request.ReadEntity(&params); err != nil {
@@ -155,7 +167,11 @@ func (a *gitPullRequestNoteCreator) Register(ws *restful.WebService) {
 
 // CreateGitPullRequestNote create pr note
 func (a *gitPullRequestNoteCreator) CreateGitPullRequestNote(request *restful.Request, response *restful.Response) {
-	repo := request.PathParameter("repository")
+	repo, err := handlePathParamHasSlash(request.PathParameter("repository"))
+	if err != nil {
+		kerrors.HandleError(request, response, err)
+		return
+	}
 	project := request.PathParameter("project")
 	indexStr := request.PathParameter("index")
 	index, err := strconv.Atoi(indexStr)
@@ -208,7 +224,11 @@ func (a *gitPullRequestCommentLister) Register(ws *restful.WebService) {
 
 // ListGitPullRequestNote List pr note
 func (a *gitPullRequestCommentLister) ListPullRequestComment(request *restful.Request, response *restful.Response) {
-	repo := request.PathParameter("repository")
+	repo, err := handlePathParamHasSlash(request.PathParameter("repository"))
+	if err != nil {
+		kerrors.HandleError(request, response, err)
+		return
+	}
 	project := request.PathParameter("project")
 	indexStr := request.PathParameter("index")
 	index, err := strconv.Atoi(indexStr)

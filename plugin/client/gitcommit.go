@@ -18,12 +18,11 @@ package client
 
 import (
 	"context"
-	"errors"
 	"fmt"
 
-	corev1 "k8s.io/api/core/v1"
-
 	metav1alpha1 "github.com/katanomi/pkg/apis/meta/v1alpha1"
+	corev1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/api/errors"
 	duckv1 "knative.dev/pkg/apis/duck/v1"
 )
 
@@ -51,14 +50,14 @@ func (g *gitCommit) Get(ctx context.Context, baseURL *duckv1.Addressable, option
 	commitObj := &metav1alpha1.GitCommit{}
 	options = append(options, MetaOpts(g.meta), SecretOpts(g.secret), ResultOpts(commitObj))
 	if option.Repository == "" {
-		return nil, errors.New("repo is empty string")
+		return nil, errors.NewBadRequest("repo is empty string")
 	} else if option.SHA == nil {
-		return nil, errors.New("sha is null")
+		return nil, errors.NewBadRequest("sha is null")
 	} else if *option.SHA == "" {
-		return nil, errors.New("sha is empty string")
+		return nil, errors.NewBadRequest("sha is empty string")
 	}
 	sha := *option.SHA
-	uri := fmt.Sprintf("projects/%s/coderepositories/%s/commit/%s", option.Project, option.Repository, sha)
+	uri := fmt.Sprintf("projects/%s/coderepositories/%s/commit/%s", option.Project, handlePathParamHasSlash(option.Repository), sha)
 	if err := g.client.Get(ctx, baseURL, uri, options...); err != nil {
 		return nil, err
 	}

@@ -18,12 +18,11 @@ package client
 
 import (
 	"context"
-	"errors"
 	"fmt"
 
-	corev1 "k8s.io/api/core/v1"
-
 	metav1alpha1 "github.com/katanomi/pkg/apis/meta/v1alpha1"
+	corev1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/api/errors"
 	duckv1 "knative.dev/pkg/apis/duck/v1"
 )
 
@@ -51,7 +50,7 @@ func (g *gitRepository) List(ctx context.Context, baseURL *duckv1.Addressable, p
 	list := &metav1alpha1.GitRepositoryList{}
 	options = append(options, MetaOpts(g.meta), SecretOpts(g.secret), QueryOpts(map[string]string{"keyword": keyword}), ResultOpts(list))
 	if project == "" {
-		return nil, errors.New("project is empty string")
+		return nil, errors.NewBadRequest("project is empty string")
 	}
 	uri := fmt.Sprintf("projects/%s/coderepositories", project)
 	if err := g.client.Get(ctx, baseURL, uri, options...); err != nil {
@@ -64,12 +63,12 @@ func (g *gitRepository) Get(ctx context.Context, baseURL *duckv1.Addressable, pr
 	repoObj := &metav1alpha1.GitRepository{}
 	options = append(options, MetaOpts(g.meta), SecretOpts(g.secret), ResultOpts(repoObj))
 	if project == "" {
-		return nil, errors.New("project is empty string")
+		return nil, errors.NewBadRequest("project is empty string")
 	}
 	if repo == "" {
-		return nil, errors.New("repo is empty string")
+		return nil, errors.NewBadRequest("repo is empty string")
 	}
-	uri := fmt.Sprintf("projects/%s/coderepositories/%s", project, repo)
+	uri := fmt.Sprintf("projects/%s/coderepositories/%s", project, handlePathParamHasSlash(repo))
 	if err := g.client.Get(ctx, baseURL, uri, options...); err != nil {
 		return nil, err
 	}
