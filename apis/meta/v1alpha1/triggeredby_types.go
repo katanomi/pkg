@@ -24,6 +24,24 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
+type DefinitionTriggeredType string
+
+func (triggeredType DefinitionTriggeredType) String() string {
+	return string(triggeredType)
+}
+
+type definitionTriggeredTypeValuesType struct {
+	Manual    DefinitionTriggeredType
+	Automated DefinitionTriggeredType
+}
+
+var DefinitionTriggeredTypeValues = definitionTriggeredTypeValuesType{
+	// Indicates triggered manually
+	Manual: "Manual",
+	// Indicates triggered automatically
+	Automated: "Automated",
+}
+
 // Stores a list of triggered information such as: Entity that triggered,
 // reference of an object that could have triggered, and event that triggered.
 type TriggeredBy struct {
@@ -43,6 +61,10 @@ type TriggeredBy struct {
 	// it is added here for convinience only
 	// +optional
 	TriggeredTimestamp *metav1.Time `json:"triggeredTimestamp,omitempty"`
+
+	// Indicates trigger type, such as Manual Automated.
+	// +optional
+	TriggeredType DefinitionTriggeredType `json:"triggeredType,omitempty"`
 }
 
 // IsZero basic function returns true when all attributes of the object are empty
@@ -50,7 +72,8 @@ func (by TriggeredBy) IsZero() bool {
 	return by.User == nil &&
 		by.CloudEvent == nil &&
 		by.Ref == nil &&
-		by.TriggeredTimestamp == nil
+		by.TriggeredTimestamp == nil &&
+		by.TriggeredType.String() == ""
 }
 
 // FromAnnotation will set `by` from annotations
