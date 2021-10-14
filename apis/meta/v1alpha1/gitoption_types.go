@@ -30,6 +30,12 @@ type GitCommitOption struct {
 	GitCommitBasicInfo
 }
 
+// GitBranchOption option for list branch
+type GitBranchOption struct {
+	GitRepo
+	Keyword string `json:"keyword"`
+}
+
 // GitPullRequestOption option for one pr by id
 type GitPullRequestOption struct {
 	GitRepo

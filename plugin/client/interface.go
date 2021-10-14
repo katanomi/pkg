@@ -183,7 +183,7 @@ type GitCommitGetter interface {
 // GitBranchLister List git branch
 type GitBranchLister interface {
 	Interface
-	ListGitBranch(ctx context.Context, repoOption metav1alpha1.GitRepo, option metav1alpha1.ListOptions) (metav1alpha1.GitBranchList, error)
+	ListGitBranch(ctx context.Context, branchOption metav1alpha1.GitBranchOption, option metav1alpha1.ListOptions) (metav1alpha1.GitBranchList, error)
 }
 
 // GitBranchGetter get git branch
