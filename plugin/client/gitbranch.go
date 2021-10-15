@@ -28,7 +28,7 @@ import (
 
 // ClientGitBranch client for branch
 type ClientGitBranch interface {
-	List(ctx context.Context, baseURL *duckv1.Addressable, repo metav1alpha1.GitRepo, options ...OptionFunc) (*metav1alpha1.GitBranchList, error)
+	List(ctx context.Context, baseURL *duckv1.Addressable, repo metav1alpha1.GitBranchOption, options ...OptionFunc) (*metav1alpha1.GitBranchList, error)
 	Create(ctx context.Context, baseURL *duckv1.Addressable, payload metav1alpha1.CreateBranchPayload, options ...OptionFunc) (*metav1alpha1.GitBranch, error)
 	Get(ctx context.Context, baseURL *duckv1.Addressable, repo metav1alpha1.GitRepo, branch string, options ...OptionFunc) (*metav1alpha1.GitBranch, error)
 }
@@ -48,7 +48,7 @@ func newGitBranch(client Client, meta Meta, secret corev1.Secret) ClientGitBranc
 }
 
 // List list branch
-func (g *gitBranch) List(ctx context.Context, baseURL *duckv1.Addressable, repo metav1alpha1.GitRepo, options ...OptionFunc) (*metav1alpha1.GitBranchList, error) {
+func (g *gitBranch) List(ctx context.Context, baseURL *duckv1.Addressable, repo metav1alpha1.GitBranchOption, options ...OptionFunc) (*metav1alpha1.GitBranchList, error) {
 	list := &metav1alpha1.GitBranchList{}
 	options = append(options, MetaOpts(g.meta), SecretOpts(g.secret), ResultOpts(list))
 	if repo.Repository == "" {

@@ -73,7 +73,7 @@ func (t *TestGitBranchLister) Setup(_ context.Context, _ *zap.SugaredLogger) err
 	return nil
 }
 
-func (t *TestGitBranchLister) ListGitBranch(ctx context.Context, repoOption metav1alpha1.GitRepo, option metav1alpha1.ListOptions) (metav1alpha1.GitBranchList, error) {
+func (t *TestGitBranchLister) ListGitBranch(ctx context.Context, repoOption metav1alpha1.GitBranchOption, option metav1alpha1.ListOptions) (metav1alpha1.GitBranchList, error) {
 	return metav1alpha1.GitBranchList{
 		TypeMeta: metav1.TypeMeta{
 			Kind: metav1alpha1.GitBranchListGVK.Kind,

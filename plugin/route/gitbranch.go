@@ -44,9 +44,10 @@ func NewGitBranchLister(impl client.GitBranchLister) Route {
 func (a *gitBranchLister) Register(ws *restful.WebService) {
 	repositoryParam := ws.PathParameter("repository", "branch belong to repository")
 	projectParam := ws.PathParameter("project", "repository belong to project")
+	keywordParam := ws.QueryParameter("keyword", "keyword")
 	ws.Route(
 		ws.GET("/projects/{project}/coderepositories/{repository}/branches").To(a.ListBranch).
-			Doc("ListBranch").Param(projectParam).Param(repositoryParam).
+			Doc("ListBranch").Param(projectParam).Param(repositoryParam).Param(keywordParam).
 			Metadata(restfulspec.KeyOpenAPITags, a.tags).
 			Returns(http.StatusOK, "OK", metav1alpha1.GitBranchList{}),
 	)
@@ -61,7 +62,10 @@ func (a *gitBranchLister) ListBranch(request *restful.Request, response *restful
 		return
 	}
 	project := request.PathParameter("project")
-	branchList, err := a.impl.ListGitBranch(request.Request.Context(), metav1alpha1.GitRepo{Repository: repo, Project: project}, option)
+	keyword := request.QueryParameter("keyword")
+	branchList, err := a.impl.ListGitBranch(
+		request.Request.Context(),
+		metav1alpha1.GitBranchOption{GitRepo: metav1alpha1.GitRepo{Repository: repo, Project: project}, Keyword: keyword}, option)
 	if err != nil {
 		kerrors.HandleError(request, response, err)
 		return
