@@ -57,11 +57,7 @@ func (a *gitCommitStatusLister) Register(ws *restful.WebService) {
 func (a *gitCommitStatusLister) ListGitCommitStatus(request *restful.Request, response *restful.Response) {
 	option := GetListOptionsFromRequest(request)
 	sha := request.PathParameter("sha")
-	repo, err := handlePathParamHasSlash(request.PathParameter("repository"))
-	if err != nil {
-		kerrors.HandleError(request, response, err)
-		return
-	}
+	repo := handlePathParamHasSlash(request.PathParameter("repository"))
 	project := request.PathParameter("project")
 	commitOption := metav1alpha1.GitCommitOption{
 		GitRepo:            metav1alpha1.GitRepo{Repository: repo, Project: project},
@@ -104,11 +100,7 @@ func (a *gitCommitStatusCreator) Register(ws *restful.WebService) {
 // CreateGitCommitStatus create commit status
 func (a *gitCommitStatusCreator) CreateGitCommitStatus(request *restful.Request, response *restful.Response) {
 	sha := request.PathParameter("sha")
-	repo, err := handlePathParamHasSlash(request.PathParameter("repository"))
-	if err != nil {
-		kerrors.HandleError(request, response, err)
-		return
-	}
+	repo := handlePathParamHasSlash(request.PathParameter("repository"))
 	project := request.PathParameter("project")
 	var params metav1alpha1.CreateCommitStatusParam
 	if err := request.ReadEntity(&params); err != nil {

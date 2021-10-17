@@ -18,7 +18,6 @@ package route
 
 import (
 	"net/http"
-	"net/url"
 	"strings"
 
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -31,13 +30,9 @@ import (
 	"github.com/katanomi/pkg/plugin/client"
 )
 
-func handlePathParamHasSlash(param string) (result string, err error) {
-	result, err = url.PathUnescape(param)
-	if err != nil {
-		return "", err
-	}
-	result = strings.Replace(result, "%2F", "/", -1)
-	return result, nil
+func handlePathParamHasSlash(param string) (result string) {
+	result = strings.Replace(param, "%2F", "/", -1)
+	return result
 }
 
 type gitRepositoryLister struct {
@@ -106,11 +101,7 @@ func (a *gitRepositoryGetter) Register(ws *restful.WebService) {
 // GetGitRepository get repo info
 func (a *gitRepositoryGetter) GetGitRepository(request *restful.Request, response *restful.Response) {
 	project := request.PathParameter("project")
-	repo, err := handlePathParamHasSlash(request.PathParameter("repository"))
-	if err != nil {
-		kerrors.HandleError(request, response, err)
-		return
-	}
+	repo := handlePathParamHasSlash(request.PathParameter("repository"))
 	repoInfo, err := a.impl.GetGitRepository(request.Request.Context(), metav1alpha1.GitRepo{Repository: repo, Project: project})
 	if err != nil {
 		if errors.IsNotFound(err) {
