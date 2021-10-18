@@ -56,11 +56,7 @@ func (a *gitCommitGetter) Register(ws *restful.WebService) {
 // GitCommit get commit info
 func (a *gitCommitGetter) GetCommit(request *restful.Request, response *restful.Response) {
 	sha := request.PathParameter("sha")
-	repo, err := handlePathParamHasSlash(request.PathParameter("repository"))
-	if err != nil {
-		kerrors.HandleError(request, response, err)
-		return
-	}
+	repo := handlePathParamHasSlash(request.PathParameter("repository"))
 	project := request.PathParameter("project")
 	commitOption := metav1alpha1.GitCommitOption{
 		GitRepo:            metav1alpha1.GitRepo{Repository: repo, Project: project},

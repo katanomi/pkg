@@ -58,14 +58,9 @@ func (a *gitRepoFileGetter) Register(ws *restful.WebService) {
 
 // GetGitRepoFile get repo file
 func (a *gitRepoFileGetter) GetGitRepoFile(request *restful.Request, response *restful.Response) {
-	repo, err := handlePathParamHasSlash(request.PathParameter("repository"))
-	if err != nil {
-		kerrors.HandleError(request, response, err)
-		return
-	}
+	repo := handlePathParamHasSlash(request.PathParameter("repository"))
 	project := request.PathParameter("project")
-	filePath := request.PathParameter("path")
-	filePath, err = url.PathUnescape(filePath)
+	filePath, err := url.PathUnescape(request.PathParameter("path"))
 	if err != nil {
 		kerrors.HandleError(request, response, err)
 		return
@@ -113,14 +108,9 @@ func (a *gitRepoFileCreator) Register(ws *restful.WebService) {
 
 // CreateGitRepoFile create file in repo's one branch
 func (a *gitRepoFileCreator) CreateGitRepoFile(request *restful.Request, response *restful.Response) {
-	repo, err := handlePathParamHasSlash(request.PathParameter("repository"))
-	if err != nil {
-		kerrors.HandleError(request, response, err)
-		return
-	}
+	repo := handlePathParamHasSlash(request.PathParameter("repository"))
 	project := request.PathParameter("project")
-	filePath := request.PathParameter("filepath")
-	filePath, err = url.PathUnescape(filePath)
+	filePath, err := url.PathUnescape(request.PathParameter("filepath"))
 	if err != nil {
 		kerrors.HandleError(request, response, err)
 		return
