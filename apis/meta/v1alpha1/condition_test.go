@@ -17,17 +17,24 @@ limitations under the License.
 package v1alpha1
 
 import (
+	"fmt"
 	"testing"
 	"time"
+
+	"k8s.io/apimachinery/pkg/api/errors"
 
 	// ktesting "github.com/katanomi/pkg/testing"
 	. "github.com/onsi/gomega"
 	// corev1 "k8s.io/api/core/v1"
+	"github.com/golang/mock/gomock"
+	apismock "github.com/katanomi/pkg/testing/mock/knative.dev/pkg/apis"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"knative.dev/pkg/apis"
 	duckv1 "knative.dev/pkg/apis/duck/v1"
 )
+
+//go:generate ../../../bin/mockgen -package=apis -destination=../../../testing/mock/knative.dev/pkg/apis/condition_manager.go  knative.dev/pkg/apis ConditionManager
 
 const (
 	SomeCondition apis.ConditionType = "SomeCondition"
@@ -118,4 +125,129 @@ func TestIsConditionChanged(t *testing.T) {
 		})
 	}
 
+}
+
+func TestSetConditonByError(t *testing.T) {
+
+	t.Run("Explicit reason error case", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+
+		conditionManager := apismock.NewMockConditionManager(ctrl)
+
+		err := errors.NewBadRequest("some reason")
+
+		conditionManager.EXPECT().
+			MarkFalse(apis.ConditionReady, string(metav1.StatusReasonBadRequest), err.Error()).
+			Times(1)
+
+		SetConditionByError(conditionManager, apis.ConditionReady, err)
+	})
+
+	t.Run("random error case", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+
+		conditionManager := apismock.NewMockConditionManager(ctrl)
+
+		err := fmt.Errorf("some random error")
+
+		conditionManager.EXPECT().
+			MarkFalse(apis.ConditionSucceeded, "", err.Error()).
+			Times(1)
+
+		SetConditionByError(conditionManager, apis.ConditionSucceeded, err)
+	})
+
+	t.Run("successful case", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+
+		conditionManager := apismock.NewMockConditionManager(ctrl)
+
+		conditionManager.EXPECT().
+			MarkTrue(apis.ConditionSucceeded).
+			Times(1)
+
+		SetConditionByError(conditionManager, apis.ConditionSucceeded, nil)
+	})
+
+}
+
+func TestPropagateCondition(t *testing.T) {
+
+	condType := apis.ConditionReady
+
+	t.Run("Explicit reason error case", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+
+		conditionManager := apismock.NewMockConditionManager(ctrl)
+
+		condition := &apis.Condition{
+			Type:    condType,
+			Reason:  "SomeReason",
+			Status:  corev1.ConditionFalse,
+			Message: "some message",
+		}
+
+		conditionManager.EXPECT().
+			MarkFalse(condType, "SomeReason", "some message").
+			Times(1)
+
+		PropagateCondition(conditionManager, condType, condition)
+	})
+
+	t.Run("nil condition", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+
+		conditionManager := apismock.NewMockConditionManager(ctrl)
+
+		conditionManager.EXPECT().
+			MarkUnknown(condType, ConditionReasonNotSet, "condition is empty").
+			Times(1)
+
+		PropagateCondition(conditionManager, condType, nil)
+	})
+
+	t.Run("condition is unknown", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+
+		conditionManager := apismock.NewMockConditionManager(ctrl)
+
+		condition := &apis.Condition{
+			Type:    condType,
+			Reason:  "abc",
+			Status:  corev1.ConditionUnknown,
+			Message: "msg",
+		}
+
+		conditionManager.EXPECT().
+			MarkUnknown(condType, "abc", "msg").
+			Times(1)
+
+		PropagateCondition(conditionManager, condType, condition)
+	})
+
+	t.Run("condition is true", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+
+		conditionManager := apismock.NewMockConditionManager(ctrl)
+
+		condition := &apis.Condition{
+			Type:    condType,
+			Reason:  "abc",
+			Status:  corev1.ConditionTrue,
+			Message: "msg",
+		}
+
+		conditionManager.EXPECT().
+			MarkTrueWithReason(condType, "abc", "msg").
+			Times(1)
+
+		PropagateCondition(conditionManager, condType, condition)
+	})
 }

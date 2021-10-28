@@ -51,12 +51,12 @@ func PropagateCondition(conditionManager apis.ConditionManager, conditionType ap
 		return
 	}
 	switch condition.Status {
-	case corev1.ConditionUnknown:
-		conditionManager.MarkUnknown(conditionType, condition.Reason, condition.Message)
 	case corev1.ConditionTrue:
 		conditionManager.MarkTrueWithReason(conditionType, condition.Reason, condition.Message)
 	case corev1.ConditionFalse:
 		conditionManager.MarkFalse(conditionType, condition.Reason, condition.Message)
+	case corev1.ConditionUnknown:
+		fallthrough
 	default:
 		conditionManager.MarkUnknown(conditionType, condition.Reason, condition.Message)
 	}
