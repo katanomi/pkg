@@ -26,6 +26,9 @@ import (
 // GetGenerateName used to generate child object names with a "-" suffix
 func GetGenerateName(object metav1.Object) string {
 	name := object.GetName()
+	if name == "" {
+		name = object.GetGenerateName()
+	}
 
 	return fmt.Sprintf("%s-", name)
 }
