@@ -16,7 +16,7 @@ limitations under the License.
 
 package manager
 
-//go:generate mockgen -package=manager -destination=../testing/mock/sigs.k8s.io/controller-runtime/pkg/manager/manager.go  sigs.k8s.io/controller-runtime/pkg/manager Manager
+//go:generate ../bin/mockgen -package=manager -destination=../testing/mock/sigs.k8s.io/controller-runtime/pkg/manager/manager.go  sigs.k8s.io/controller-runtime/pkg/manager Manager
 
 import (
 	"context"
