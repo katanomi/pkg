@@ -20,6 +20,8 @@ package v1alpha1
 type CreateRepoFileParams struct {
 	// Branch target branch to create file
 	Branch string `json:"branch"`
+	// Name of the branch to start the new branch from
+	StartBranch string `json:"startBranch"`
 	// Message commit message for create the file
 	Message string `json:"message"`
 	// Content must be base64 encoded
