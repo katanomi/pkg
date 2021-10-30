@@ -106,10 +106,8 @@ func (by TriggeredBy) SetIntoAnnotation(annotations map[string]string) (map[stri
 		by.CloudEvent.Data = ""
 	}
 
-	jsonStr, err := json.Marshal(by)
-	if err != nil {
-		return annotations, err
-	}
+	// this error is ignored because it will never happen
+	jsonStr, _ := json.Marshal(by)
 	if annotations == nil {
 		annotations = map[string]string{}
 	}

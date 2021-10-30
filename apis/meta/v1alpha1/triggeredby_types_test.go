@@ -26,9 +26,9 @@ import (
 )
 
 func TestFromAnnotation(t *testing.T) {
-	g := NewGomegaWithT(t)
-
 	t.Run("annotations has no triggeredby key", func(t *testing.T) {
+		g := NewGomegaWithT(t)
+
 		annotations := map[string]string{}
 		by, err := (&TriggeredBy{}).FromAnnotation(annotations)
 		g.Expect(err).Should(BeNil())
@@ -36,6 +36,8 @@ func TestFromAnnotation(t *testing.T) {
 	})
 
 	t.Run("annotations has triggededby key with invalid json", func(t *testing.T) {
+		g := NewGomegaWithT(t)
+
 		annotations := map[string]string{
 			TriggeredByAnnotationKey: "{",
 		}
@@ -45,6 +47,8 @@ func TestFromAnnotation(t *testing.T) {
 	})
 
 	t.Run("annotations has triggeredby key with valid json", func(t *testing.T) {
+		g := NewGomegaWithT(t)
+
 		annotations := map[string]string{
 			TriggeredByAnnotationKey: `{
 	"ref": { "kind": "Trigger", "apiVersion": "core.katanomi.dev/v1alpha1", "name": "git-trigger", "namespace": "default"},
@@ -59,12 +63,33 @@ func TestFromAnnotation(t *testing.T) {
 		g.Expect(by.CloudEvent.Source).Should(BeEquivalentTo("https://example.com/demo/demo"))
 		g.Expect(by.Ref.Kind).Should(BeEquivalentTo("Trigger"))
 	})
+
+	t.Run("by is nil", func(t *testing.T) {
+		g := NewGomegaWithT(t)
+
+		var by *TriggeredBy = nil
+		annotations := map[string]string{
+			TriggeredByAnnotationKey: `{
+	"ref": { "kind": "Trigger", "apiVersion": "core.katanomi.dev/v1alpha1", "name": "git-trigger", "namespace": "default"},
+	"cloudEvent": {"id":"11", "type":"Tag Hook", "source": "https://example.com/demo/demo"}
+}`,
+		}
+
+		by, err := by.FromAnnotation(annotations)
+		g.Expect(err).Should(BeNil())
+		g.Expect(by).ShouldNot(BeNil())
+		g.Expect(by.CloudEvent.Type).Should(BeEquivalentTo("Tag Hook"))
+		g.Expect(by.CloudEvent.ID).Should(BeEquivalentTo("11"))
+		g.Expect(by.CloudEvent.Source).Should(BeEquivalentTo("https://example.com/demo/demo"))
+		g.Expect(by.Ref.Kind).Should(BeEquivalentTo("Trigger"))
+
+	})
 }
 
 func TestSetIntoAnnotation(t *testing.T) {
-	g := NewGomegaWithT(t)
-
 	t.Run("triggeredBy is ok", func(t *testing.T) {
+		g := NewGomegaWithT(t)
+
 		evt := &CloudEvent{
 			ID:          "11",
 			Source:      "https://example.com/demo/demo",
@@ -93,5 +118,22 @@ func TestSetIntoAnnotation(t *testing.T) {
 		g.Expect(by.Ref.Name).Should(BeEquivalentTo("push-trigger"))
 		g.Expect(by.CloudEvent.Source).Should(BeEquivalentTo("https://example.com/demo/demo"))
 		g.Expect(by.CloudEvent.Data).Should(BeEmpty())
+	})
+
+	t.Run("nil annotations", func(t *testing.T) {
+		g := NewGomegaWithT(t)
+
+		by := &TriggeredBy{
+			Ref: &corev1.ObjectReference{
+				Kind:      "Trigger",
+				Namespace: "default",
+				Name:      "push-trigger",
+			},
+			CloudEvent: nil,
+		}
+		var annotations map[string]string
+		annotations, err := by.SetIntoAnnotation(annotations)
+		g.Expect(err).Should(BeNil())
+		g.Expect(len(annotations)).ShouldNot(BeZero())
 	})
 }
