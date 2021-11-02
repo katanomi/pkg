@@ -79,7 +79,7 @@ func (by TriggeredBy) IsZero() bool {
 // FromAnnotation will set `by` from annotations
 // it will find TriggeredByAnnotationKey and unmarshl content into struct type *TriggeredBy
 // if not found TriggeredByAnnotationKey, error would be nil, and *TriggeredBy would be nil also.
-// if some errors happened, error will not be nil and *TriggerreBy will be nil
+// if some errors happened, error will not be nil and *TriggeredBy will be nil
 func (by *TriggeredBy) FromAnnotation(annotations map[string]string) (*TriggeredBy, error) {
 	jsonStr, ok := annotations[TriggeredByAnnotationKey]
 	if !ok {

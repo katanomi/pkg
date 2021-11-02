@@ -37,7 +37,6 @@ func SubjectFromRequest(req admission.Request) *rbacv1.Subject {
 	} else {
 		// all non-service accounts are treated as users
 		sub.Kind = rbacv1.UserKind
-
 	}
 	sub.Name = req.UserInfo.Username
 	return sub
