@@ -246,6 +246,11 @@ type GitCommitCommentCreator interface {
 	CreateGitCommitComment(ctx context.Context, payload metav1alpha1.CreateCommitCommentPayload) (metav1alpha1.GitCommitComment, error)
 }
 
+type CodeQualityGetter interface {
+	Interface
+	GetCodeQuality(ctx context.Context, projectKey string) (*metav1alpha1.CodeQuality, error)
+}
+
 // Client inteface for PluginClient, client code shoud use the interface
 // as dependency
 type Client interface {
