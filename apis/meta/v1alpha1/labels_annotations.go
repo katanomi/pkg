@@ -18,6 +18,9 @@ package v1alpha1
 
 // Common labels
 const (
+	// SourceLabelKey indicates the source of the resource
+	SourceLabelKey = "katanomi.dev/source"
+
 	// SecretLabelKey secret resource name
 	SecretLabelKey = "core.kubernetes.io/secret" //nolint:gosec
 	// NamespaceLabelKey namespace of a resource
@@ -65,4 +68,10 @@ const (
 	ReplicationPolicyTypesAttributeKey = "replicationPolicyTypes"
 	ResourceTypesAttributeKey          = "resourceTypes"
 	MethodsAttributeKey                = "methods"
+)
+
+// Attribute values for label source
+const (
+	LabelSourceSystem = "system"
+	LabelSourceUser   = "user"
 )
