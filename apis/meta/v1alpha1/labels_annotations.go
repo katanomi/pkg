@@ -38,9 +38,6 @@ const (
 	ProjectLabelKey = "integrations.katanomi.dev/project"
 	// RepositoryLabelKey for integration resources
 	RepositoryLabelKey = "integrations.katanomi.dev/repository"
-
-	// IntegrationAddressAnnotation annotation key to store integration server address
-	IntegrationAddressAnnotation = "integrations.katanomi.dev/integration.address"
 )
 
 // Common Annotations
@@ -57,8 +54,16 @@ const (
 	TriggeredByAnnotationKey = "katanomi.dev/triggeredBy"
 	// CreatedByAnnotationKey annotation key to store resource creation username
 	CreatedByAnnotationKey = "katanomi.dev/createdBy"
-	// CreatedByAnnotationKey annotation key to store resource update username
+	// UpdatedByAnnotationKey annotation key to store resource update username
 	UpdatedByAnnotationKey = "katanomi.dev/updatedBy"
+	// DisplayNameAnnotationKey annotation key for store a display name
+	DisplayNameAnnotationKey = "katanomi.dev/displayName"
+
+	// IntegrationAddressAnnotation annotation key to store integration server address
+	IntegrationAddressAnnotation = "integrations.katanomi.dev/integration.address"
+
+	// IntegrationClassDisplayNameAnnotationKey for integrationclass display
+	IntegrationClassDisplayNameAnnotationKey = "core.katanomi.dev/integrationClassDisplayName"
 )
 
 // Attribute keys for Integrations
