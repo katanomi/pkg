@@ -42,7 +42,7 @@ func TestListGitRepository(t *testing.T) {
 
 	container.Add(ws)
 
-	httpRequest, _ := http.NewRequest("GET", "/plugins/v1alpha1/test-a/projects/1/coderepositories", nil)
+	httpRequest, _ := http.NewRequest("GET", "/plugins/v1alpha1/test-a/projects/1/coderepositories?subtype=GitUser", nil)
 	httpRequest.Header.Set("Accept", "application/json")
 
 	metaData := client.Meta{BaseURL: "http://api.test", Version: "v1"}
@@ -72,7 +72,7 @@ func (t *TestGitRepositoryLister) Setup(_ context.Context, _ *zap.SugaredLogger)
 	return nil
 }
 
-func (t *TestGitRepositoryLister) ListGitRepository(ctx context.Context, id, keyword string, listOption metav1alpha1.ListOptions) (metav1alpha1.GitRepositoryList, error) {
+func (t *TestGitRepositoryLister) ListGitRepository(ctx context.Context, id, keyword string, subtype metav1alpha1.ProjectSubType, listOption metav1alpha1.ListOptions) (metav1alpha1.GitRepositoryList, error) {
 	return metav1alpha1.GitRepositoryList{
 		TypeMeta: metav1.TypeMeta{
 			Kind: metav1alpha1.GitRepoListGVK.Kind,

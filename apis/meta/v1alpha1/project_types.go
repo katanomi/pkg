@@ -20,6 +20,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/util/validation/field"
 	duckv1 "knative.dev/pkg/apis/duck/v1"
 )
 
@@ -28,6 +29,26 @@ type ProjectSubType string
 
 func (r ProjectSubType) String() string {
 	return string(r)
+}
+
+// Validate if is known types
+func (r ProjectSubType) Validate(fld *field.Path) field.ErrorList {
+	errs := field.ErrorList{}
+
+	supportedTypes := map[ProjectSubType]struct{}{
+		DefaultProjectSubType:         {},
+		ImageRegistryProjectSubType:   {},
+		GitUserProjectSubType:         {},
+		GitGroupProjectSubType:        {},
+		MavenRepositoryProjectSubType: {},
+		RawRepositoryProjectSubType:   {},
+	}
+
+	if _, exist := supportedTypes[r]; !exist {
+		errs = append(errs, field.Invalid(fld, r, "resource subtype is invalid"))
+	}
+
+	return errs
 }
 
 const (

@@ -213,7 +213,7 @@ type GitRepoFileCreator interface {
 // GitRepositoryLister list git repository
 type GitRepositoryLister interface {
 	Interface
-	ListGitRepository(ctx context.Context, id, keyword string, listOption metav1alpha1.ListOptions) (metav1alpha1.GitRepositoryList, error)
+	ListGitRepository(ctx context.Context, id, keyword string, subtype metav1alpha1.ProjectSubType, listOption metav1alpha1.ListOptions) (metav1alpha1.GitRepositoryList, error)
 }
 
 // GitRepositoryGetter get git repository

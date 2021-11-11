@@ -28,7 +28,7 @@ import (
 
 // ClientGitRepository client for repo
 type ClientGitRepository interface {
-	List(ctx context.Context, baseURL *duckv1.Addressable, project, keyword string, options ...OptionFunc) (*metav1alpha1.GitRepositoryList, error)
+	List(ctx context.Context, baseURL *duckv1.Addressable, project, keyword string, subtype metav1alpha1.ProjectSubType, options ...OptionFunc) (*metav1alpha1.GitRepositoryList, error)
 	Get(ctx context.Context, baseURL *duckv1.Addressable, project, repo string, options ...OptionFunc) (*metav1alpha1.GitRepository, error)
 }
 
@@ -46,9 +46,9 @@ func newGitRepository(client Client, meta Meta, secret corev1.Secret) ClientGitR
 	}
 }
 
-func (g *gitRepository) List(ctx context.Context, baseURL *duckv1.Addressable, project, keyword string, options ...OptionFunc) (*metav1alpha1.GitRepositoryList, error) {
+func (g *gitRepository) List(ctx context.Context, baseURL *duckv1.Addressable, project, keyword string, subtype metav1alpha1.ProjectSubType, options ...OptionFunc) (*metav1alpha1.GitRepositoryList, error) {
 	list := &metav1alpha1.GitRepositoryList{}
-	options = append(options, MetaOpts(g.meta), SecretOpts(g.secret), QueryOpts(map[string]string{"keyword": keyword}), ResultOpts(list))
+	options = append(options, MetaOpts(g.meta), SecretOpts(g.secret), QueryOpts(map[string]string{"keyword": keyword, "subtype": subtype.String()}), ResultOpts(list))
 	if project == "" {
 		return nil, errors.NewBadRequest("project is empty string")
 	}
