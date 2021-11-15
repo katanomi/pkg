@@ -134,6 +134,7 @@ func (a *AppBuilder) init() {
 		a.Context, a.startInformers = injection.EnableInjectionOrDie(a.Context, a.Config)
 
 		restyClient := resty.NewWithClient(http.DefaultClient).SetTimeout(DefaultTimeout)
+		restyClient.SetDisableWarn(true)
 		a.Context = restclient.WithRESTClient(a.Context, restyClient)
 
 		a.ConfigMapWatcher = sharedmain.SetupConfigMapWatchOrDie(a.Context, a.Logger)
