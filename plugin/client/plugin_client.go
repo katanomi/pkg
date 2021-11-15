@@ -50,8 +50,11 @@ type BuildOptions func(client *PluginClient)
 
 // NewPluginClient creates a new plugin client
 func NewPluginClient(opts ...BuildOptions) *PluginClient {
+	restyClient := resty.NewWithClient(NewHTTPClient())
+	restyClient.SetDisableWarn(true)
+
 	pluginClient := &PluginClient{
-		client: resty.NewWithClient(NewHTTPClient()),
+		client: restyClient,
 	}
 
 	for _, op := range opts {
