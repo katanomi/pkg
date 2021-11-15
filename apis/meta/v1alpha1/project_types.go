@@ -20,7 +20,57 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/util/validation/field"
 	duckv1 "knative.dev/pkg/apis/duck/v1"
+)
+
+// ProjectSubType stores a specific project subtype
+type ProjectSubType string
+
+func (r ProjectSubType) String() string {
+	return string(r)
+}
+
+// Validate if is known types
+func (r ProjectSubType) Validate(fld *field.Path) field.ErrorList {
+	errs := field.ErrorList{}
+
+	supportedTypes := map[ProjectSubType]struct{}{
+		DefaultProjectSubType:         {},
+		ImageRegistryProjectSubType:   {},
+		GitUserProjectSubType:         {},
+		GitGroupProjectSubType:        {},
+		MavenRepositoryProjectSubType: {},
+		RawRepositoryProjectSubType:   {},
+	}
+
+	if _, exist := supportedTypes[r]; !exist {
+		errs = append(errs, field.Invalid(fld, r, "resource subtype is invalid"))
+	}
+
+	return errs
+}
+
+const (
+	// DefaultProjectSubType default project subtype
+	DefaultProjectSubType ProjectSubType = "Project"
+
+	// ImageRegistryProjectSubType image registry project subtype
+	ImageRegistryProjectSubType ProjectSubType = "ImageRegistry"
+
+	// GitUserProjectSubType git user project subtype
+	GitUserProjectSubType ProjectSubType = "GitUser"
+
+	// GitGroupProjectSubType git group project subtype
+	GitGroupProjectSubType ProjectSubType = "GitGroup"
+
+	// RawRepositoryProjectSubType raw repository project subtype
+	RawRepositoryProjectSubType ProjectSubType = "RawRepository"
+
+	// MavenRepositoryProjectSubType maven repository project subtype
+	MavenRepositoryProjectSubType ProjectSubType = "MavenRepository"
+
+	// TODO: add more subtypes
 )
 
 var ProjectGVK = GroupVersion.WithKind("Project")
@@ -49,8 +99,8 @@ type ProjectSpec struct {
 	Access *duckv1.Addressable `json:"access,omitempty"`
 
 	// project subtype
-	// +optional
-	SubType string `json:"subType"`
+	// +kubebuilder:default="Project"
+	SubType ProjectSubType `json:"subType"`
 
 	// NamespaceRefs for which this project is already bound to
 	// +optional

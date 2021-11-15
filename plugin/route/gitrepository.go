@@ -52,9 +52,10 @@ func NewGitRepositoryLister(impl client.GitRepositoryLister) Route {
 func (a *gitRepositoryLister) Register(ws *restful.WebService) {
 	projectParam := ws.PathParameter("project", "repository belong to project")
 	keywordParam := ws.QueryParameter("keyword", "keyword for search repository")
+	subtypeParam := ws.QueryParameter("subtype", "subtype for search repository")
 	ws.Route(
 		ws.GET("/projects/{project}/coderepositories").To(a.ListGitRepository).
-			Doc("GetGitRepoList").Param(projectParam).Param(keywordParam).
+			Doc("GetGitRepoList").Param(projectParam).Param(keywordParam).Param(subtypeParam).
 			Metadata(restfulspec.KeyOpenAPITags, a.tags).
 			Returns(http.StatusOK, "OK", metav1alpha1.GitRepositoryList{}),
 	)
@@ -64,8 +65,14 @@ func (a *gitRepositoryLister) Register(ws *restful.WebService) {
 func (a *gitRepositoryLister) ListGitRepository(request *restful.Request, response *restful.Response) {
 	project := request.PathParameter("project")
 	keyword := request.QueryParameter("keyword")
+	subtype := request.QueryParameter("subtype")
+	kind := metav1alpha1.ProjectSubType(subtype)
+	if kind != metav1alpha1.GitUserProjectSubType && kind != metav1alpha1.GitGroupProjectSubType && kind != "CodeRepository" {
+		kerrors.HandleError(request, response, errors.NewBadRequest("no git source subtype"))
+		return
+	}
 	listOption := GetListOptionsFromRequest(request)
-	repoList, err := a.impl.ListGitRepository(request.Request.Context(), project, keyword, listOption)
+	repoList, err := a.impl.ListGitRepository(request.Request.Context(), project, keyword, kind, listOption)
 	if err != nil {
 		kerrors.HandleError(request, response, err)
 		return
