@@ -82,7 +82,7 @@ func (h *harbor) CreateProject(ctx context.Context, project *metav1alpha1.Projec
 	return &metav1alpha1.Project{}, nil
 }
 
-func (h *harbor) ListResources(ctx context.Context, option metav1alpha1.ListOptions) (*metav1alpha1.ResourceList, error) {
+func (h *harbor) ListRepositories(ctx context.Context, option metav1alpha1.ListOptions) (*metav1alpha1.RepositoryList, error) {
 	meta := client.ExtraMeta(ctx)
 
 	// list resource with harbor api

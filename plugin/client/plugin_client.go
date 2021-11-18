@@ -214,6 +214,11 @@ func (p *PluginClient) Project(meta Meta, secret corev1.Secret) ClientProject {
 	return newProject(p, meta, secret)
 }
 
+// Repository get Repository client
+func (p *PluginClient) Repository(meta Meta, secret corev1.Secret) ClientRepository {
+	return newRepository(p, meta, secret)
+}
+
 // GitBranch get branch client
 func (p *PluginClient) GitBranch(meta Meta, secret corev1.Secret) ClientGitBranch {
 	return newGitBranch(p, meta, secret)
