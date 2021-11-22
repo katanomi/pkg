@@ -59,10 +59,6 @@ func match(c client.Interface) []Route {
 		routes = append(routes, NewProjectGet(v))
 	}
 
-	if v, ok := c.(client.ResourceLister); ok {
-		routes = append(routes, NewResourceList(v))
-	}
-
 	if v, ok := c.(client.RepositoryLister); ok {
 		routes = append(routes, NewRepositoryList(v))
 	}
@@ -159,9 +155,6 @@ func GetMethods(c client.Interface) []string {
 	}
 	if _, ok := c.(client.ProjectCreator); ok {
 		methods = append(methods, "CreateProject")
-	}
-	if _, ok := c.(client.ResourceLister); ok {
-		methods = append(methods, "ListResources")
 	}
 	if _, ok := c.(client.RepositoryLister); ok {
 		methods = append(methods, "ListRepositories")

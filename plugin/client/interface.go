@@ -73,12 +73,6 @@ type ProjectCreator interface {
 	CreateProject(ctx context.Context, project *metav1alpha1.Project) (*metav1alpha1.Project, error)
 }
 
-// ResourceLister list resource api
-type ResourceLister interface {
-	Interface
-	ListResources(ctx context.Context, option metav1alpha1.ListOptions) (*metav1alpha1.ResourceList, error)
-}
-
 // RepositoryLister list repository
 type RepositoryLister interface {
 	Interface

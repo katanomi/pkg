@@ -47,7 +47,7 @@ func TestMatch(t *testing.T) {
 			len: 2,
 		},
 		{
-			c:   &TestResourceList{},
+			c:   &TestRepositoryList{},
 			len: 1,
 		},
 		{
@@ -80,8 +80,8 @@ func TestGetMethods(t *testing.T) {
 			methods: []string{"CreateProject"},
 		},
 		{
-			c:       &TestResourceList{},
-			methods: []string{"ListResources"},
+			c:       &TestRepositoryList{},
+			methods: []string{"ListRepositories"},
 		},
 		{
 			c:       &TestProjectListCreate{},
@@ -113,8 +113,8 @@ func TestRegister(t *testing.T) {
 			path: "/projects",
 		},
 		{
-			c:    &TestResourceList{},
-			path: "/resources",
+			c:    &TestRepositoryList{},
+			path: "/projects/{project}/repositories",
 		},
 		{
 			c:    &TestProjectListCreate{},
@@ -140,7 +140,7 @@ func TestNewService(t *testing.T) {
 	testCases := []client.Interface{
 		&TestProjectList{},
 		&TestProjectCreate{},
-		&TestResourceList{},
+		&TestRepositoryList{},
 		&TestProjectListCreate{},
 	}
 
@@ -283,19 +283,19 @@ func (t *TestProjectCreate) GetProject(ctx context.Context, id string) (*metav1a
 	}, nil
 }
 
-type TestResourceList struct {
+type TestRepositoryList struct {
 }
 
-func (t *TestResourceList) Path() string {
+func (t *TestRepositoryList) Path() string {
 	return "test-3"
 }
 
-func (t *TestResourceList) Setup(_ context.Context, _ *zap.SugaredLogger) error {
+func (t *TestRepositoryList) Setup(_ context.Context, _ *zap.SugaredLogger) error {
 	return nil
 }
 
-func (t *TestResourceList) ListResources(ctx context.Context, option metav1alpha1.ListOptions) (*metav1alpha1.ResourceList, error) {
-	return &metav1alpha1.ResourceList{}, nil
+func (t *TestRepositoryList) ListRepositories(ctx context.Context, params metav1alpha1.RepositoryOptions, option metav1alpha1.ListOptions) (*metav1alpha1.RepositoryList, error) {
+	return &metav1alpha1.RepositoryList{}, nil
 }
 
 type TestProjectListCreate struct {

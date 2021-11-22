@@ -17,11 +17,32 @@ limitations under the License.
 package v1alpha1
 
 import (
+	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	duckv1 "knative.dev/pkg/apis/duck/v1"
 
 	authv1 "k8s.io/api/authorization/v1"
+)
+
+// RepositorySubType stores a specific repository subtype
+type RepositorySubType string
+
+func (r RepositorySubType) String() string {
+	return string(r)
+}
+
+const (
+	// DefaultRepositorySubType default repository subtype
+	DefaultRepositorySubType RepositorySubType = "Repository"
+
+	// ImageRepositorySubType OCI artifact repository subtype
+	ImageRepositorySubType RepositorySubType = "ImageRepository"
+
+	// CodeRepositorySubType Code repository subtype
+	CodeRepositorySubType RepositorySubType = "CodeRepository"
+
+	// TODO: add more subtypes
 )
 
 var RepositoryGVK = GroupVersion.WithKind("Repository")
@@ -47,7 +68,11 @@ type RepositorySpec struct {
 	Access *duckv1.Addressable `json:"access,omitempty"`
 
 	// Type of repository content
-	Type string `json:"type"`
+	Type RepositorySubType `json:"type"`
+
+	// NamespaceRefs for which this project is already bound to
+	// +optional
+	NamespaceRefs []corev1.ObjectReference `json:"namespaceRefs,omitempty"`
 
 	// UpdatedTime updated time for repository
 	// +optional
