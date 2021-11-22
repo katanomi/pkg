@@ -143,6 +143,10 @@ func match(c client.Interface) []Route {
 		routes = append(routes, NewGitCommitStatusCreator(v))
 	}
 
+	if v, ok := c.(client.CodeQualityGetter); ok {
+		routes = append(routes, NewCodeQualityGetter(v))
+	}
+
 	return routes
 }
 
@@ -227,6 +231,9 @@ func GetMethods(c client.Interface) []string {
 	}
 	if _, ok := c.(client.GitCommitStatusCreator); ok {
 		methods = append(methods, "CreateGitCommitStatus")
+	}
+	if _, ok := c.(client.CodeQualityGetter); ok {
+		methods = append(methods, "GetCodeQuality")
 	}
 	return methods
 }
