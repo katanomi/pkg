@@ -53,8 +53,10 @@ type GitBranchSpec struct {
 	// DevelopersCanMerge developer can merge to this branch
 	DevelopersCanMerge *bool `json:"developersCanMerge,omitempty" yaml:"developersCanMerge,omitempty"`
 	// Commit latest commit's sha in this branch
-	Commit     GitCommitBasicInfo    `json:"commit"`
-	Properties *runtime.RawExtension `json:"properties,omitempty"`
+	Commit      GitCommitInfo         `json:"commit"`
+	WebURL      string                `json:"webURL"`
+	DownloadURL DownloadURL           `json:"downloadURL"`
+	Properties  *runtime.RawExtension `json:"properties,omitempty"`
 }
 
 // GitBranchList list of branch

@@ -38,3 +38,10 @@ type GitOperateLogBaseInfo struct {
 	User *GitUserBaseInfo `json:"user,omitempty"`
 	Time *metav1.Time     `json:"time,omitempty"`
 }
+
+type DownloadURL struct {
+	Zip    string  `json:"zip"`
+	TarGz  *string `json:"tar.gz"`
+	TarBa2 *string `json:"tar.ba2"`
+	Tar    *string `json:"tar"`
+}

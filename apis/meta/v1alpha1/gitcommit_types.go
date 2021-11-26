@@ -40,6 +40,13 @@ type GitCommitBasicInfo struct {
 	SHA *string `json:"sha,omitempty"`
 }
 
+// GitCommitInfo github support field is SHA & web_URL
+type GitCommitInfo struct {
+	// SHA commit's sha
+	SHA      *string     `json:"sha,omitempty"`
+	CreateAt metav1.Time `json:"createAt"`
+}
+
 // GitCommitSpec spec for commit
 type GitCommitSpec struct {
 	GitCommitBasicInfo
