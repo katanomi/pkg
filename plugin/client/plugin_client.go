@@ -253,3 +253,8 @@ func (p *PluginClient) GitCommitComment(meta Meta, secret corev1.Secret) ClientG
 func (p *PluginClient) GitCommitStatus(meta Meta, secret corev1.Secret) ClientGitCommitStatus {
 	return newGitCommitStatus(p, meta, secret)
 }
+
+// GitCommitStatus get commit comment client
+func (p *PluginClient) CodeQuality(meta Meta, secret corev1.Secret) ClientCodeQuality {
+	return newCodeQuality(p, meta, secret)
+}
