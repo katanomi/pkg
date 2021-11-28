@@ -16,7 +16,11 @@ limitations under the License.
 
 package v1alpha1
 
-import metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+import (
+	"time"
+
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+)
 
 var CodeQualityGVK = GroupVersion.WithKind("CodeQuality")
 
@@ -38,4 +42,31 @@ type CodeQualityBranch struct {
 	QualityGateStatus string            `json:"qualityGateStatus"`
 	AnalysisDate      metav1.Time       `json:"analysisDate"`
 	Metrics           map[string]string `json:"metrics"`
+}
+
+var CodeQualityLineChartGVK = GroupVersion.WithKind("CodeQualityLineChart")
+
+// CodeQualityLineChart object for plugin
+type CodeQualityLineChart struct {
+	metav1.TypeMeta   `json:",inline"`
+	metav1.ObjectMeta `json:"metadata,omitempty"`
+
+	Spec CodeQualityLineChartSpec `json:"spec"`
+}
+
+type CodeQualityLineChartSpec struct {
+	Index   []string            `json:"index"`
+	Metrics map[string][]string `json:"metrics"`
+}
+
+type CodeQualityBaseOption struct {
+	ProjectKey string `json:"projectKey"`
+	BranchKey  string `json:"branchKey"`
+}
+
+type CodeQualityLineChartOption struct {
+	CodeQualityBaseOption
+	StartTime      *time.Time `json:"startTime"`
+	CompletionTime *time.Time `json:"completionTime"`
+	Metrics        string     `json:"metrics"`
 }
