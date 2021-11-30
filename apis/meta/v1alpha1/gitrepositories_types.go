@@ -49,6 +49,8 @@ type GitRepositorySpec struct {
 	DefaultBranch string `json:"defaultBranch"`
 	// CreatedAt repo create time
 	CreatedAt metav1.Time `json:"createdAt"`
+	// UpdatedAt repo last update time
+	UpdatedAt metav1.Time `json:"updatedAt"`
 	// Owner repo owner
 	Owner      GitUserBaseInfo       `json:"owner"`
 	Properties *runtime.RawExtension `json:"properties,omitempty"`
