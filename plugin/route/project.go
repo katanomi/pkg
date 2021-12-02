@@ -17,6 +17,7 @@ limitations under the License.
 package route
 
 import (
+	"context"
 	"net/http"
 
 	restfulspec "github.com/emicklei/go-restful-openapi/v2"
@@ -119,6 +120,7 @@ func NewProjectGet(impl client.ProjectGetter) Route {
 func (p *projectGet) Register(ws *restful.WebService) {
 	ws.Route(ws.GET("/projects/{project-id}").To(p.GetProject).
 		Param(ws.PathParameter("project-id", "identifier of the project").DataType("string")).
+		Param(ws.QueryParameter("type", "subtype of the project").DataType("string")).
 		// docs
 		Doc("GetProject").
 		Metadata(restfulspec.KeyOpenAPITags, p.tags).
@@ -129,8 +131,10 @@ func (p *projectGet) Register(ws *restful.WebService) {
 // GetProject http handler for get project
 func (p *projectGet) GetProject(request *restful.Request, response *restful.Response) {
 	id := request.PathParameter("project-id")
+	projectSubtype := request.QueryParameter("type")
 
-	resp, err := p.impl.GetProject(request.Request.Context(), id)
+	ctx := context.WithValue(request.Request.Context(), metav1alpha1.KeyForSubType, projectSubtype)
+	resp, err := p.impl.GetProject(ctx, id)
 	if err != nil {
 		kerrors.HandleError(request, response, err)
 		return
