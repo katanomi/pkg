@@ -61,6 +61,12 @@ type ProjectLister interface {
 	ListProjects(ctx context.Context, option metav1alpha1.ListOptions) (*metav1alpha1.ProjectList, error)
 }
 
+type PluginAttributes interface {
+	SetAttribute(k string, values ...string)
+	GetAttribute(k string) []string
+	Attributes() map[string][]string
+}
+
 // ProjectGetter list project api
 type ProjectGetter interface {
 	Interface
