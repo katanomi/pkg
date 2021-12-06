@@ -24,6 +24,17 @@ import (
 	duckv1 "knative.dev/pkg/apis/duck/v1"
 )
 
+type ContextKey string
+
+func (c ContextKey) String() string {
+	return string(c)
+}
+
+const (
+	// KeyForSubType subtype key in context
+	KeyForSubType ContextKey = "subtype"
+)
+
 // ProjectSubType stores a specific project subtype
 type ProjectSubType string
 
