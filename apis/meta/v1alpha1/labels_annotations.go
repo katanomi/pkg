@@ -68,6 +68,7 @@ const (
 	ReplicationPolicyTypesAttributeKey = "replicationPolicyTypes"
 	ResourceTypesAttributeKey          = "resourceTypes"
 	MethodsAttributeKey                = "methods"
+	AllowEmptySecretAttributeKey       = "allowEmptySecret"
 )
 
 // Attribute values for label source

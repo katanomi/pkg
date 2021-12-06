@@ -44,7 +44,8 @@ type ListOptions struct {
 // RepositoryOptions list repositroy path params
 type RepositoryOptions struct {
 	// project name
-	Project string `json:"project"`
+	Project string         `json:"project"`
+	SubType ProjectSubType `json:"subType"`
 }
 
 // ArtifactOptions path params

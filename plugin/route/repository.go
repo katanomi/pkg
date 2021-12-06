@@ -55,8 +55,12 @@ func (r *repositoryList) Register(ws *restful.WebService) {
 // ListRepositories http handler for list repository
 func (r *repositoryList) ListRepositories(request *restful.Request, response *restful.Response) {
 	option := GetListOptionsFromRequest(request)
+
+	subType := request.QueryParameter("subType")
+
 	pathParams := metav1alpha1.RepositoryOptions{
 		Project: request.PathParameter("project"),
+		SubType: metav1alpha1.ProjectSubType(subType),
 	}
 	repositories, err := r.impl.ListRepositories(request.Request.Context(), pathParams, option)
 	if err != nil {

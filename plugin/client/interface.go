@@ -35,24 +35,26 @@ type Interface interface {
 	Setup(context.Context, *zap.SugaredLogger) error
 }
 
-// PluginRegister plugin registration methods to update IntegationClass status
+// PluginRegister plugin registration methods to update IntegrationClass status
 type PluginRegister interface {
 	Interface
 	GetIntegrationClassName() string
-	// Returns its own plugin access URL
+	// GetAddressURL Returns its own plugin access URL
 	GetAddressURL() *apis.URL
-	// Returns a Webhook accessible URL for external tools
+	// GetWebhookURL Returns a Webhook accessible URL for external tools
 	// If not supported return nil, false
 	GetWebhookURL() (*apis.URL, bool)
-	// Returns a list of supported versions by the plugin
+	// GetSupportedVersions Returns a list of supported versions by the plugin
 	// For SaaS platform plugins use a "online" version.
 	GetSupportedVersions() []string
-	// Returns all secret types supported by the plugin
+	// GetSecretTypes Returns all secret types supported by the plugin
 	GetSecretTypes() []string
 	// GetReplicationPolicyTypes return replication policy types for ClusterIntegration
 	GetReplicationPolicyTypes() []string
-	// Returns a list of Resource types that can be used in ClusterIntegration and Integration
+	// GetResourceTypes Returns a list of Resource types that can be used in ClusterIntegration and Integration
 	GetResourceTypes() []string
+	// GetAllowEmptySecret Returns if an empty secret is allowed with IntegrationClass
+	GetAllowEmptySecret() []string
 }
 
 // ProjectLister list project api
