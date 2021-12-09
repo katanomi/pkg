@@ -18,12 +18,14 @@ package route
 
 import (
 	"net/http"
+	"time"
 
 	restfulspec "github.com/emicklei/go-restful-openapi/v2"
 	"github.com/emicklei/go-restful/v3"
 	metav1alpha1 "github.com/katanomi/pkg/apis/meta/v1alpha1"
 	kerrors "github.com/katanomi/pkg/errors"
 	"github.com/katanomi/pkg/plugin/client"
+	"k8s.io/apimachinery/pkg/api/errors"
 )
 
 type codeQualityGetter struct {
@@ -47,8 +49,25 @@ func (c *codeQualityGetter) Register(ws *restful.WebService) {
 				// docs
 				Doc("GetCodeQuality").
 				Metadata(restfulspec.KeyOpenAPITags, c.tags).
-				Returns(http.StatusOK, "OK", metav1alpha1.ProjectList{}),
+				Returns(http.StatusOK, "OK", metav1alpha1.CodeQuality{}),
 		),
+	)
+	ws.Route(
+		ws.GET("/codeQuality/{project-key}/branches/{branch}").To(c.GetCodeQualityOverviewByBranch).
+			Param(ws.PathParameter("project-id", "identifier of the project").DataType("string")).
+			Param(ws.PathParameter("branch", "branch name").DataType("string")).
+			Doc("GetCodeQualityOverviewByBranch").
+			Metadata(restfulspec.KeyOpenAPITags, c.tags).
+			Returns(http.StatusOK, "OK", metav1alpha1.CodeQuality{}),
+	)
+	ws.Route(
+		ws.GET("/codeQuality/{project-key}/branches/{branch}/lineCharts").To(c.GetCodeQualityLineCharts).
+			Param(ws.PathParameter("project-id", "identifier of the project").DataType("string")).
+			Param(ws.PathParameter("branch", "branch name").DataType("string")).
+			Param(ws.QueryParameter("metricKeys", "metric keys").DataType("string")).
+			Doc("GetCodeQualityLineCharts").
+			Metadata(restfulspec.KeyOpenAPITags, c.tags).
+			Returns(http.StatusOK, "OK", metav1alpha1.CodeQualityLineChart{}),
 	)
 }
 
@@ -56,6 +75,60 @@ func (c *codeQualityGetter) Register(ws *restful.WebService) {
 func (c *codeQualityGetter) GetCodeQuality(request *restful.Request, response *restful.Response) {
 	projectKey := request.PathParameter("project-key")
 	codeQuality, err := c.impl.GetCodeQuality(request.Request.Context(), projectKey)
+	if err != nil {
+		kerrors.HandleError(request, response, err)
+		return
+	}
+
+	response.WriteHeaderAndEntity(http.StatusOK, codeQuality)
+}
+
+// GetCodeQuality http handler for get code quality
+func (c *codeQualityGetter) GetCodeQualityOverviewByBranch(request *restful.Request, response *restful.Response) {
+	projectKey := request.PathParameter("project-key")
+	branchKey := request.PathParameter("branch")
+	codeQuality, err := c.impl.GetCodeQualityOverviewByBranch(request.Request.Context(), metav1alpha1.CodeQualityBaseOption{ProjectKey: projectKey, BranchKey: branchKey})
+	if err != nil {
+		kerrors.HandleError(request, response, err)
+		return
+	}
+
+	response.WriteHeaderAndEntity(http.StatusOK, codeQuality)
+}
+
+// GetCodeQuality http handler for get code quality
+func (c *codeQualityGetter) GetCodeQualityLineCharts(request *restful.Request, response *restful.Response) {
+	projectKey := request.PathParameter("project-key")
+	branchKey := request.PathParameter("branch")
+	metricKeys := request.QueryParameter("metricKeys")
+	startTime := request.QueryParameter("startTime")
+	endTime := request.QueryParameter("completionTime")
+	param := metav1alpha1.CodeQualityLineChartOption{
+		CodeQualityBaseOption: metav1alpha1.CodeQualityBaseOption{
+			ProjectKey: projectKey,
+			BranchKey:  branchKey,
+		},
+		Metrics:        metricKeys,
+		StartTime:      nil,
+		CompletionTime: nil,
+	}
+	if startTime != "" {
+		start, err := time.Parse(time.RFC3339, startTime)
+		if err != nil {
+			kerrors.HandleError(request, response, errors.NewBadRequest(err.Error()))
+			return
+		}
+		param.StartTime = &start
+	}
+	if endTime != "" {
+		end, err := time.Parse(time.RFC3339, endTime)
+		if err != nil {
+			kerrors.HandleError(request, response, errors.NewBadRequest(err.Error()))
+			return
+		}
+		param.CompletionTime = &end
+	}
+	codeQuality, err := c.impl.GetCodeQualityLineCharts(request.Request.Context(), param)
 	if err != nil {
 		kerrors.HandleError(request, response, err)
 		return

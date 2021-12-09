@@ -251,6 +251,8 @@ type GitCommitCommentCreator interface {
 type CodeQualityGetter interface {
 	Interface
 	GetCodeQuality(ctx context.Context, projectKey string) (*metav1alpha1.CodeQuality, error)
+	GetCodeQualityOverviewByBranch(ctx context.Context, opt metav1alpha1.CodeQualityBaseOption) (*metav1alpha1.CodeQuality, error)
+	GetCodeQualityLineCharts(ctx context.Context, opt metav1alpha1.CodeQualityLineChartOption) (*metav1alpha1.CodeQualityLineChart, error)
 }
 
 // Client inteface for PluginClient, client code shoud use the interface
