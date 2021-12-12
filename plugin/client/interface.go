@@ -255,6 +255,11 @@ type CodeQualityGetter interface {
 	GetCodeQualityLineCharts(ctx context.Context, opt metav1alpha1.CodeQualityLineChartOption) (*metav1alpha1.CodeQualityLineChart, error)
 }
 
+type BlobStoreLister interface {
+	Interface
+	ListBlobStores(ctx context.Context, listOption metav1alpha1.ListOptions) (*metav1alpha1.BlobStoreList, error)
+}
+
 // Client inteface for PluginClient, client code shoud use the interface
 // as dependency
 type Client interface {
