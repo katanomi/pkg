@@ -230,7 +230,7 @@ func GetMethods(c client.Interface) []string {
 		methods = append(methods, "CreateGitCommitStatus")
 	}
 	if _, ok := c.(client.CodeQualityGetter); ok {
-		methods = append(methods, "GetCodeQuality", "GetCodeQualityOverviewByBranch", "GetCodeQualityLineCharts")
+		methods = append(methods, "GetCodeQuality", "GetCodeQualityOverviewByBranch", "GetCodeQualityLineCharts", "GetOverview")
 	}
 	if _, ok := c.(client.BlobStoreLister); ok {
 		methods = append(methods, "ListBlobStores")

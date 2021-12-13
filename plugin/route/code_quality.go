@@ -69,6 +69,12 @@ func (c *codeQualityGetter) Register(ws *restful.WebService) {
 			Metadata(restfulspec.KeyOpenAPITags, c.tags).
 			Returns(http.StatusOK, "OK", metav1alpha1.CodeQualityLineChart{}),
 	)
+	ws.Route(
+		ws.GET("/codeQuality").To(c.GetOverview).
+			Doc("GetOverview").
+			Metadata(restfulspec.KeyOpenAPITags, c.tags).
+			Returns(http.StatusOK, "OK", metav1alpha1.CodeQualityProjectOverview{}),
+	)
 }
 
 // GetCodeQuality http handler for get code quality
@@ -135,4 +141,13 @@ func (c *codeQualityGetter) GetCodeQualityLineCharts(request *restful.Request, r
 	}
 
 	response.WriteHeaderAndEntity(http.StatusOK, codeQuality)
+}
+
+func (c *codeQualityGetter) GetOverview(request *restful.Request, response *restful.Response) {
+	result, err := c.impl.GetOverview(request.Request.Context())
+	if err != nil {
+		kerrors.HandleError(request, response, err)
+		return
+	}
+	response.WriteHeaderAndEntity(http.StatusOK, result)
 }
