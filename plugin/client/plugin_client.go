@@ -234,7 +234,7 @@ func (p *PluginClient) GitPullRequest(meta Meta, secret corev1.Secret) ClientGit
 	return newGitPullRequest(p, meta, secret)
 }
 
-// GitPullRequest get pr client
+// GitCommit get pr client
 func (p *PluginClient) GitCommit(meta Meta, secret corev1.Secret) ClientGitCommit {
 	return newGitCommit(p, meta, secret)
 }
@@ -254,7 +254,12 @@ func (p *PluginClient) GitCommitStatus(meta Meta, secret corev1.Secret) ClientGi
 	return newGitCommitStatus(p, meta, secret)
 }
 
-// GitCommitStatus get commit comment client
+// CodeQuality get code quality client
 func (p *PluginClient) CodeQuality(meta Meta, secret corev1.Secret) ClientCodeQuality {
 	return newCodeQuality(p, meta, secret)
+}
+
+// BlobStore get blob store client
+func (p *PluginClient) BlobStore(meta Meta, secret corev1.Secret) ClientBlobStore {
+	return newBlobStore(p, meta, secret)
 }
