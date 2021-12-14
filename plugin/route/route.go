@@ -143,6 +143,10 @@ func match(c client.Interface) []Route {
 		routes = append(routes, NewCodeQualityGetter(v))
 	}
 
+	if v, ok := c.(client.BlobStoreLister); ok {
+		routes = append(routes, NewBlobStoreLister(v))
+	}
+
 	return routes
 }
 
@@ -227,6 +231,9 @@ func GetMethods(c client.Interface) []string {
 	}
 	if _, ok := c.(client.CodeQualityGetter); ok {
 		methods = append(methods, "GetCodeQuality", "GetCodeQualityOverviewByBranch", "GetCodeQualityLineCharts")
+	}
+	if _, ok := c.(client.BlobStoreLister); ok {
+		methods = append(methods, "ListBlobStores")
 	}
 	return methods
 }
