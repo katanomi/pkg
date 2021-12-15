@@ -39,6 +39,9 @@ const (
 
 	// IntegrationAddressAnnotation annotation key to store integration server address
 	IntegrationAddressAnnotation = "integrations.katanomi.dev/integration.address"
+
+	// IntegrationResourceScope annotation key to store integration resource scope
+	IntegrationResourceScope = "integrations.katanomi.dev/integration.resourceScope"
 )
 
 // Common Annotations
