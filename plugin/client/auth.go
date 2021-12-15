@@ -58,6 +58,8 @@ const (
 	OAuth2ExpiresInKey = "expiresIn"
 	// OAuth2RedirectURLKey is the key of the redirectURL for AuthTypeOAuth2 secrets
 	OAuth2RedirectURLKey = "redirectURL"
+	// OAuth2BaseURLKey is the key of the baseURL for AuthTypeOAuth2 secrets
+	OAuth2BaseURLKey = "baseURL"
 )
 
 // Auth plugin auth

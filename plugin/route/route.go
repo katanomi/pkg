@@ -47,6 +47,7 @@ type Route interface {
 // match math route with plugin client
 func match(c client.Interface) []Route {
 	routes := make([]Route, 0)
+
 	if v, ok := c.(client.ProjectLister); ok {
 		routes = append(routes, NewProjectList(v))
 	}
@@ -147,6 +148,18 @@ func match(c client.Interface) []Route {
 		routes = append(routes, NewBlobStoreLister(v))
 	}
 
+	authCheck, ok := c.(client.AuthChecker)
+	// uses a default implementation that returns an Unknown allowed result
+	// with an NotImplemented reason
+	if !ok {
+		authCheck = NewDefaultAuthCheckImplementation()
+	}
+	routes = append(routes, NewAuthCheck(authCheck))
+
+	if v, ok := c.(client.AuthTokenGenerator); ok {
+		routes = append(routes, NewAuthToken(v))
+	}
+
 	return routes
 }
 
@@ -234,6 +247,9 @@ func GetMethods(c client.Interface) []string {
 	}
 	if _, ok := c.(client.BlobStoreLister); ok {
 		methods = append(methods, "ListBlobStores")
+	}
+	if _, ok := c.(client.AuthChecker); ok {
+		methods = append(methods, "AuthCheck")
 	}
 	return methods
 }
