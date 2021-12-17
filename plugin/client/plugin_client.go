@@ -209,6 +209,11 @@ func (p *PluginClient) HandleError(response *resty.Response, err error) error {
 	return nil
 }
 
+// Auth provides an auth methods for clients
+func (p *PluginClient) Auth(meta Meta, secret corev1.Secret) ClientAuth {
+	return newAuthClient(p, meta, secret)
+}
+
 // Project get project client
 func (p *PluginClient) Project(meta Meta, secret corev1.Secret) ClientProject {
 	return newProject(p, meta, secret)

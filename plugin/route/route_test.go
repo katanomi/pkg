@@ -40,19 +40,19 @@ func TestMatch(t *testing.T) {
 	}{
 		{
 			c:   &TestProjectList{},
-			len: 1,
+			len: 2,
 		},
 		{
 			c:   &TestProjectCreate{},
-			len: 2,
+			len: 3,
 		},
 		{
 			c:   &TestRepositoryList{},
-			len: 1,
+			len: 2,
 		},
 		{
 			c:   &TestProjectListCreate{},
-			len: 2,
+			len: 3,
 		},
 	}
 

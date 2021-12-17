@@ -57,6 +57,16 @@ type PluginRegister interface {
 	GetAllowEmptySecret() []string
 }
 
+// AuthCheck implements an authorization check method for plugins
+type AuthChecker interface {
+	AuthCheck(ctx context.Context, option metav1alpha1.AuthCheckOptions) (*metav1alpha1.AuthCheck, error)
+}
+
+// AuthTokenGenerator implements token generation/refresh API method
+type AuthTokenGenerator interface {
+	AuthToken(ctx context.Context) (*metav1alpha1.AuthToken, error)
+}
+
 // ProjectLister list project api
 type ProjectLister interface {
 	Interface
