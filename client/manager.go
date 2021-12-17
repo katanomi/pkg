@@ -18,6 +18,7 @@ package client
 
 import (
 	"context"
+	"time"
 
 	"k8s.io/client-go/dynamic"
 
@@ -68,8 +69,14 @@ func (m *Manager) Filter(ctx context.Context) restful.FilterFunction {
 func ManagerFilter(ctx context.Context, mgr *Manager) restful.FilterFunction {
 	log := logging.FromContext(ctx).Named("manager-filter")
 	scheme := kscheme.Scheme(ctx)
+	serviceAccountClient := Client(ctx)
+
 	return func(req *restful.Request, resp *restful.Response, chain *restful.FilterChain) {
+		start := time.Now()
+
 		config, err := mgr.GetConfig(req, mgr.GetBasicConfig)
+		log.Debugw("ManagerFilter, got config", "totalElapsed", time.Since(start).String())
+		step := time.Now()
 		if err != nil {
 			log.Debugw("manager filter config get error", "err", err)
 			err = kerrors.AsAPIError(err)
@@ -85,7 +92,9 @@ func ManagerFilter(ctx context.Context, mgr *Manager) restful.FilterFunction {
 		config.Timeout = DefaultTimeout
 		ctx = injection.WithConfig(ctx, config)
 
-		directClient, err := client.New(config, client.Options{Scheme: scheme})
+		directClient, err := client.New(config, client.Options{Scheme: scheme, Mapper: serviceAccountClient.RESTMapper()})
+		log.Debugw("ManagerFilter, got direct client", "totalElapsed", time.Since(start).String(), "elapsed", time.Since(step).String())
+		step = time.Now()
 		if err != nil {
 			log.Debugw("manager filter direct client create error", "err", err)
 			err = kerrors.AsAPIError(err)
@@ -95,6 +104,7 @@ func ManagerFilter(ctx context.Context, mgr *Manager) restful.FilterFunction {
 		ctx = WithClient(ctx, directClient)
 
 		dynamicClient, err := dynamic.NewForConfig(config)
+		log.Debugw("ManagerFilter, got dynamic client", "totalElapsed", time.Since(start).String(), "elapsed", time.Since(step).String())
 		if err != nil {
 			log.Debugw("manager filter dynamic client create error", "err", err)
 			err = kerrors.AsAPIError(err)
@@ -105,7 +115,7 @@ func ManagerFilter(ctx context.Context, mgr *Manager) restful.FilterFunction {
 
 		req.Request = req.Request.WithContext(ctx)
 
-		log.Debugw("config,client,dynamicclient context done")
+		log.Debugw("config,client,dynamicclient context done", "totalElapsed", time.Since(start).String())
 		chain.ProcessFilter(req, resp)
 	}
 }
