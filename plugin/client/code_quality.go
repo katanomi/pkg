@@ -29,6 +29,7 @@ import (
 
 type ClientCodeQuality interface {
 	Get(ctx context.Context, baseURL *duckv1.Addressable, projectKey string, options ...OptionFunc) (*metav1alpha1.CodeQuality, error)
+	GetOverview(ctx context.Context, baseURL *duckv1.Addressable, options ...OptionFunc) (*metav1alpha1.CodeQualityProjectOverview, error)
 	GetByBranch(ctx context.Context, baseURL *duckv1.Addressable, opt metav1alpha1.CodeQualityBaseOption, options ...OptionFunc) (*metav1alpha1.CodeQuality, error)
 	GetLineCharts(ctx context.Context, baseURL *duckv1.Addressable, opt metav1alpha1.CodeQualityLineChartOption, options ...OptionFunc) (*metav1alpha1.CodeQualityLineChart, error)
 }
@@ -84,4 +85,13 @@ func (c *codeQuality) GetLineCharts(ctx context.Context, baseURL *duckv1.Address
 		return nil, err
 	}
 	return lineChartResult, nil
+}
+
+func (c *codeQuality) GetOverview(ctx context.Context, baseURL *duckv1.Addressable, options ...OptionFunc) (*metav1alpha1.CodeQualityProjectOverview, error) {
+	overview := &metav1alpha1.CodeQualityProjectOverview{}
+	options = append(options, MetaOpts(c.meta), SecretOpts(c.secret), ResultOpts(overview))
+	if err := c.client.Get(ctx, baseURL, "/codeQuality", options...); err != nil {
+		return nil, err
+	}
+	return overview, nil
 }
