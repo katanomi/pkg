@@ -145,6 +145,7 @@ func (a *AppBuilder) init() {
 		a.Context = multicluster.WithMultiCluster(a.Context, multicluster.NewClusterRegistryClientOrDie(a.Config))
 
 		a.container = restful.NewContainer()
+		a.container.Router(restful.RouterJSR311{})
 		a.Context, a.ClientManager = GetClientManager(a.Context)
 		a.filters = []restful.FilterFunction{}
 	})
