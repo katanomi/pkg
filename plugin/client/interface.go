@@ -283,3 +283,11 @@ type Client interface {
 type ClientProjectGetter interface {
 	Project(meta Meta, secret corev1.Secret) ClientProject
 }
+
+// ArtifactTriggerRegister used to register ArtifactTrigger
+type ArtifactTriggerRegister interface {
+	GetIntegrationClassName() string
+
+	// cloud event type of push hook that will match
+	PushEventType() string
+}

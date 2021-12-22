@@ -74,6 +74,7 @@ type CodeQualityBaseOption struct {
 	BranchKey  string `json:"branchKey"`
 }
 
+// +k8s:deepcopy-gen=false
 type CodeQualityLineChartOption struct {
 	CodeQualityBaseOption
 	StartTime      *time.Time `json:"startTime"`
