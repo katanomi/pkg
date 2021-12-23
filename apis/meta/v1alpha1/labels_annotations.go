@@ -72,6 +72,7 @@ const (
 	ResourceTypesAttributeKey          = "resourceTypes"
 	MethodsAttributeKey                = "methods"
 	AllowEmptySecretAttributeKey       = "allowEmptySecret"
+	DefaultProjectTypeAttributeKey     = "defaultProjectSubType"
 )
 
 // Attribute values for label source
