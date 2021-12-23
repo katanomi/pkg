@@ -29,6 +29,11 @@ import (
 const (
 	// PluginMetaHeader header to store metadata for the plugin
 	PluginMetaHeader = "X-Plugin-Meta"
+
+	// PluginSubresourcesHeader subresources header parameter
+	// used as a header to avoid overloading the url query parameters
+	// and any url length limits
+	PluginSubresourcesHeader = "X-Subresources"
 )
 
 type metaContextKey struct{}
