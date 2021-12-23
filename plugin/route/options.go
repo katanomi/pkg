@@ -18,9 +18,11 @@ package route
 
 import (
 	"strconv"
+	"strings"
 
 	"github.com/emicklei/go-restful/v3"
 	metav1alpha1 "github.com/katanomi/pkg/apis/meta/v1alpha1"
+	pclient "github.com/katanomi/pkg/plugin/client"
 )
 
 // GetListOptionsFromRequest returns ListOptions based on a request
@@ -37,11 +39,17 @@ func GetListOptionsFromRequest(req *restful.Request) (opts metav1alpha1.ListOpti
 	opts.Search = req.Request.URL.Query()
 	delete(opts.Search, "page")
 	delete(opts.Search, "itemsPerPage")
+
+	subResourcesHeader := req.HeaderParameter(pclient.PluginSubresourcesHeader)
+	if strings.TrimSpace(subResourcesHeader) != "" {
+		opts.SubResources = strings.Split(subResourcesHeader, ",")
+	}
 	return
 }
 
 // ListOptionsDocs adds list options query parameters to the documentation
 func ListOptionsDocs(bldr *restful.RouteBuilder) *restful.RouteBuilder {
 	// TODO: adds parameters to lists here
-	return bldr
+	return bldr.Param(restful.QueryParameter("itemsPerPage", "items to be returned in a page")).
+		Param(restful.QueryParameter("page", "page to be returned"))
 }

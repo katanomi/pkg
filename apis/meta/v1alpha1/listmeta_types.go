@@ -39,6 +39,12 @@ type ListOptions struct {
 	// Custom search options
 	// +optional
 	Search map[string][]string `json:",inline"`
+
+	// Subresoures for listing
+	// will only work for lists that support this feature
+	// when not supported, this values will be ignored
+	// +optional
+	SubResources []string `json:"subResources"`
 }
 
 // RepositoryOptions list repositroy path params
