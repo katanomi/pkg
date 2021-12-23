@@ -20,6 +20,7 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"strconv"
+	"strings"
 
 	"github.com/go-resty/resty/v2"
 	metav1alpha1 "github.com/katanomi/pkg/apis/meta/v1alpha1"
@@ -57,6 +58,10 @@ func ListOpts(opts metav1alpha1.ListOptions) OptionFunc {
 		}
 		request.SetQueryParam("page", strconv.Itoa(opts.Page))
 		request.SetQueryParam("itemsPerPage", strconv.Itoa(opts.ItemsPerPage))
+
+		if len(opts.SubResources) > 0 {
+			request.SetHeader(PluginSubresourcesHeader, strings.Join(opts.SubResources, ","))
+		}
 	}
 }
 
