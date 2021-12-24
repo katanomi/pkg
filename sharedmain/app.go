@@ -66,6 +66,9 @@ var (
 	DefaultTimeout = kclient.DefaultTimeout
 	DefaultQPS     = kclient.DefaultQPS
 	DefaultBurst   = kclient.DefaultBurst
+	Burst          int
+	QPS            float64
+	ConfigFile     string
 )
 
 // AppBuilder builds an app using multiple configuration options
@@ -112,24 +115,39 @@ type AppBuilder struct {
 	initClientOnce sync.Once
 }
 
+// ParseFlag parse flag needed for App
+func ParseFlag() {
+	flag.Float64Var(&QPS, "kube-api-qps", float64(DefaultQPS),
+		"qps indicates the maximum QPS to the master from this client."+
+			"If it's zero, the created RESTClient will use DefaultQPS: 50")
+	flag.IntVar(&Burst, "kube-api-burst", DefaultBurst,
+		"Maximum burst for throttle."+
+			"If it's zero, the created RESTClient will use DefaultBurst: 60.")
+	flag.StringVar(&ConfigFile, "config", "",
+		"The controller will load its initial configuration from this file. "+
+			"Omit this flag to use the default configuration values. "+
+			"Command-line flags override configuration from this file.")
+	flag.Parse()
+}
+
 // App main constructor entrypoint for AppBuilder
 func App(name string) *AppBuilder {
 	return &AppBuilder{Name: name, startFunc: []func(context.Context) error{}}
 }
 
 func (a *AppBuilder) init() {
-
 	a.Once.Do(func() {
+		ParseFlag()
 		a.Context = ctrl.SetupSignalHandler()
 		a.Context, a.Config = GetConfigOrDie(a.Context)
 		if a.Config.Timeout == 0 {
 			a.Config.Timeout = DefaultTimeout
 		}
-		if a.Config.QPS < DefaultQPS {
-			a.Config.QPS = DefaultQPS
+		if a.Config.QPS < float32(QPS) {
+			a.Config.QPS = float32(QPS)
 		}
-		if a.Config.Burst < DefaultBurst {
-			a.Config.Burst = DefaultBurst
+		if a.Config.Burst < Burst {
+			a.Config.Burst = Burst
 		}
 		a.Context, a.startInformers = injection.EnableInjectionOrDie(a.Context, a.Config)
 
@@ -251,18 +269,10 @@ func (a *AppBuilder) MultiClusterClient(client multicluster.Interface) *AppBuild
 func (a *AppBuilder) Controllers(ctors ...controllers.SetupChecker) *AppBuilder {
 	a.init()
 
-	var configFile string
-	flag.StringVar(&configFile, "config", "",
-		"The controller will load its initial configuration from this file. "+
-			"Omit this flag to use the default configuration values. "+
-			"Command-line flags override configuration from this file.")
-
-	flag.Parse()
-
 	var err error
 	options := ctrl.Options{Scheme: a.scheme}
-	if configFile != "" {
-		options, err = options.AndFrom(ctrl.ConfigFile().AtPath(configFile))
+	if ConfigFile != "" {
+		options, err = options.AndFrom(ctrl.ConfigFile().AtPath(ConfigFile))
 		if err != nil {
 			a.Logger.Fatalw("unable to load the config file", "err", err)
 		}
