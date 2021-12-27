@@ -88,6 +88,8 @@ type AuthToken struct {
 
 // AuthTokenStatus access token request response status
 type AuthTokenStatus struct {
+	// AccessTokenKey store the key for accessToken it is mainly for git clone as userName
+	AccessTokenKey string `json:"accessTokenKey"`
 	// AccessToken access token used for oAuth2
 	AccessToken string `json:"accessToken"`
 	// RefreshToken to renew access token when expired
