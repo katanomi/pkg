@@ -19,7 +19,11 @@ package client
 import (
 	"encoding/base64"
 	"encoding/json"
+	"io/ioutil"
+	"path/filepath"
 	"testing"
+
+	"sigs.k8s.io/yaml"
 
 	"github.com/go-resty/resty/v2"
 	metav1alpha1 "github.com/katanomi/pkg/apis/meta/v1alpha1"
@@ -77,4 +81,39 @@ func TestSecretOptsWithLabel(t *testing.T) {
 	dataBytes, _ := json.Marshal(secret.Data)
 
 	g.Expect(request.Header.Get(PluginSecretHeader)).To(Equal(base64.StdEncoding.EncodeToString(dataBytes)))
+}
+
+func TestSecretOptsWithRealFile(t *testing.T) {
+
+	secret := parseSecret("testdata/secret.yaml")
+	opt := SecretOpts(secret)
+	request := resty.New().R()
+	opt(request)
+
+	g := NewGomegaWithT(t)
+	g.Expect(request.Header.Get(PluginAuthHeader)).To(Equal(string(metav1alpha1.AuthTypeOAuth2)))
+	dataBytes, _ := json.Marshal(secret.Data)
+
+	g.Expect(request.Header.Get(PluginSecretHeader)).To(Equal(base64.StdEncoding.EncodeToString(dataBytes)))
+}
+
+func parseSecret(path string) v1.Secret {
+	filename, err := filepath.Abs(path)
+	if err != nil {
+		panic(err)
+	}
+	yamlFile, err := ioutil.ReadFile(filename)
+
+	if err != nil {
+		panic(err)
+	}
+
+	secret := &v1.Secret{}
+
+	err = yaml.Unmarshal(yamlFile, &secret)
+	if err != nil {
+		panic(err)
+	}
+
+	return *secret
 }
