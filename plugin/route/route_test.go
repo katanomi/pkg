@@ -114,7 +114,7 @@ func TestRegister(t *testing.T) {
 		},
 		{
 			c:    &TestRepositoryList{},
-			path: "/projects/{project}/repositories",
+			path: "/projects/{project:*}/repositories",
 		},
 		{
 			c:    &TestProjectListCreate{},

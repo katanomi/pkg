@@ -43,7 +43,7 @@ func (r *repositoryList) Register(ws *restful.WebService) {
 	projectParam := ws.PathParameter("project", "repository belong to integraion")
 	ws.Route(
 		ListOptionsDocs(
-			ws.GET("/projects/{project}/repositories").To(r.ListRepositories).
+			ws.GET("/projects/{project:*}/repositories").To(r.ListRepositories).
 				// docs
 				Doc("ListRepositories").Param(projectParam).
 				Metadata(restfulspec.KeyOpenAPITags, r.tags).
