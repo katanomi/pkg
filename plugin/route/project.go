@@ -118,7 +118,7 @@ func NewProjectGet(impl client.ProjectGetter) Route {
 }
 
 func (p *projectGet) Register(ws *restful.WebService) {
-	ws.Route(ws.GET("/projects/{project-id}").To(p.GetProject).
+	ws.Route(ws.GET("/projects/{project-id:*}").To(p.GetProject).
 		Param(ws.PathParameter("project-id", "identifier of the project").DataType("string")).
 		Param(ws.QueryParameter("type", "subtype of the project").DataType("string")).
 		// docs
