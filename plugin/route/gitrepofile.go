@@ -49,7 +49,7 @@ func (a *gitRepoFileGetter) Register(ws *restful.WebService) {
 	pathParam := ws.PathParameter("path", "file path")
 	refParam := ws.QueryParameter("ref", "file belong to commit/branch/tag name")
 	ws.Route(
-		ws.GET("/projects/{project}/coderepositories/{repository}/content/{path}").To(a.GetGitRepoFile).
+		ws.GET("/projects/{project:*}/coderepositories/{repository}/content/{path}").To(a.GetGitRepoFile).
 			Doc("GetGitRepoFile").Param(projectParam).Param(repositoryParam).Param(pathParam).Param(refParam).
 			Metadata(restfulspec.KeyOpenAPITags, a.tags).
 			Returns(http.StatusOK, "OK", metav1alpha1.GitRepoFile{}),
@@ -99,7 +99,7 @@ func (a *gitRepoFileCreator) Register(ws *restful.WebService) {
 	projectParam := ws.PathParameter("project", "repository belong to project")
 	pathParam := ws.PathParameter("filepath", "file path")
 	ws.Route(
-		ws.POST("/projects/{project}/coderepositories/{repository}/content/{filepath}").To(a.CreateGitRepoFile).
+		ws.POST("/projects/{project:*}/coderepositories/{repository}/content/{filepath}").To(a.CreateGitRepoFile).
 			Doc("CreateBranch").Param(projectParam).Param(repositoryParam).Param(pathParam).
 			Metadata(restfulspec.KeyOpenAPITags, a.tags).
 			Returns(http.StatusOK, "OK", metav1alpha1.GitCommit{}),

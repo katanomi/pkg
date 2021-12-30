@@ -44,9 +44,9 @@ func NewGitCommitGetter(impl client.GitCommitGetter) Route {
 func (a *gitCommitGetter) Register(ws *restful.WebService) {
 	repositoryParam := ws.PathParameter("repository", "commit belong to repository")
 	shaParam := ws.PathParameter("sha", "commit sha")
-	projectParam := ws.PathParameter("project", "repository belong to project")
+	projectParam := ws.PathParameter("project", "repository belong to project").DataType("string")
 	ws.Route(
-		ws.GET("/projects/{project}/coderepositories/{repository}/commit/{sha}").To(a.GetCommit).
+		ws.GET("/projects/{project:*}/coderepositories/{repository}/commit/{sha}").To(a.GetCommit).
 			Doc("GetGitRepoFile").Param(projectParam).Param(repositoryParam).Param(shaParam).
 			Metadata(restfulspec.KeyOpenAPITags, a.tags).
 			Returns(http.StatusOK, "OK", metav1alpha1.GitCommit{}),

@@ -46,7 +46,7 @@ func (a *gitBranchLister) Register(ws *restful.WebService) {
 	projectParam := ws.PathParameter("project", "repository belong to project")
 	keywordParam := ws.QueryParameter("keyword", "keyword")
 	ws.Route(
-		ws.GET("/projects/{project}/coderepositories/{repository}/branches").To(a.ListBranch).
+		ws.GET("/projects/{project:*}/coderepositories/{repository}/branches").To(a.ListBranch).
 			Doc("ListBranch").Param(projectParam).Param(repositoryParam).Param(keywordParam).
 			Metadata(restfulspec.KeyOpenAPITags, a.tags).
 			Returns(http.StatusOK, "OK", metav1alpha1.GitBranchList{}),
@@ -87,7 +87,7 @@ func (a *gitBranchCreator) Register(ws *restful.WebService) {
 	repositoryParam := ws.PathParameter("repository", "branch belong to repository")
 	projectParam := ws.PathParameter("project", "repository belong to project")
 	ws.Route(
-		ws.POST("/projects/{project}/coderepositories/{repository}/branches").To(a.CreateBranch).
+		ws.POST("/projects/{project:*}/coderepositories/{repository}/branches").To(a.CreateBranch).
 			Doc("CreateBranch").Param(projectParam).Param(repositoryParam).
 			Metadata(restfulspec.KeyOpenAPITags, a.tags).
 			Returns(http.StatusOK, "OK", metav1alpha1.GitBranch{}),
@@ -131,7 +131,7 @@ func (a *gitBranchGetter) Register(ws *restful.WebService) {
 	repositoryParam := ws.PathParameter("repository", "branch belong to repository")
 	projectParam := ws.PathParameter("project", "repository belong to project")
 	ws.Route(
-		ws.GET("/projects/{project}/coderepositories/{repository}/branches/{branch}").To(a.GetGitBranch).
+		ws.GET("/projects/{project:*}/coderepositories/{repository}/branches/{branch}").To(a.GetGitBranch).
 			Doc("ListBranch").Param(projectParam).Param(repositoryParam).Param(branchParam).
 			Metadata(restfulspec.KeyOpenAPITags, a.tags).
 			Returns(http.StatusOK, "OK", metav1alpha1.GitBranch{}),

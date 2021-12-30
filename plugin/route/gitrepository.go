@@ -54,7 +54,7 @@ func (a *gitRepositoryLister) Register(ws *restful.WebService) {
 	keywordParam := ws.QueryParameter("keyword", "keyword for search repository")
 	subtypeParam := ws.QueryParameter("subtype", "subtype for search repository")
 	ws.Route(
-		ws.GET("/projects/{project}/coderepositories").To(a.ListGitRepository).
+		ws.GET("/projects/{project:*}/coderepositories").To(a.ListGitRepository).
 			Doc("GetGitRepoList").Param(projectParam).Param(keywordParam).Param(subtypeParam).
 			Metadata(restfulspec.KeyOpenAPITags, a.tags).
 			Returns(http.StatusOK, "OK", metav1alpha1.GitRepositoryList{}),
