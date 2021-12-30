@@ -48,19 +48,19 @@ func (a *gitPullRequestHandler) Register(ws *restful.WebService) {
 	projectParam := ws.PathParameter("project", "repository belong to project")
 	indexParam := ws.PathParameter("index", "pr index")
 	ws.Route(
-		ws.GET("/projects/{project}/coderepositories/{repository}/pulls").To(a.ListGitPullRequest).
+		ws.GET("/projects/{project:*}/coderepositories/{repository}/pulls").To(a.ListGitPullRequest).
 			Doc("GetGitPullRequest").Param(projectParam).Param(repositoryParam).
 			Metadata(restfulspec.KeyOpenAPITags, a.tags).
 			Returns(http.StatusOK, "OK", metav1alpha1.GitPullRequestList{}),
 	)
 	ws.Route(
-		ws.POST("/projects/{project}/coderepositories/{repository}/pulls").To(a.CreateGitPullRequest).
+		ws.POST("/projects/{project:*}/coderepositories/{repository}/pulls").To(a.CreateGitPullRequest).
 			Doc("GetGitPullRequest").Param(projectParam).Param(repositoryParam).
 			Metadata(restfulspec.KeyOpenAPITags, a.tags).
 			Returns(http.StatusOK, "OK", metav1alpha1.GitPullRequest{}),
 	)
 	ws.Route(
-		ws.GET("/projects/{project}/coderepositories/{repository}/pulls/{index}").To(a.GetGitPullRequest).
+		ws.GET("/projects/{project:*}/coderepositories/{repository}/pulls/{index}").To(a.GetGitPullRequest).
 			Doc("GetGitPullRequest").Param(projectParam).Param(repositoryParam).Param(indexParam).
 			Metadata(restfulspec.KeyOpenAPITags, a.tags).
 			Returns(http.StatusOK, "OK", metav1alpha1.GitPullRequest{}),
@@ -146,7 +146,7 @@ func (a *gitPullRequestNoteCreator) Register(ws *restful.WebService) {
 	projectParam := ws.PathParameter("project", "repository belong to project")
 	indexParam := ws.PathParameter("index", "note belong to index")
 	ws.Route(
-		ws.POST("/projects/{project}/coderepositories/{repository}/pulls/{index}/note").To(a.CreateGitPullRequestNote).
+		ws.POST("/projects/{project:*}/coderepositories/{repository}/pulls/{index}/note").To(a.CreateGitPullRequestNote).
 			Doc("CreateGitPullRequestNote").Param(projectParam).Param(repositoryParam).Param(indexParam).
 			Metadata(restfulspec.KeyOpenAPITags, a.tags).
 			Returns(http.StatusOK, "OK", metav1alpha1.GitPullRequestNote{}),
@@ -199,7 +199,7 @@ func (a *gitPullRequestCommentLister) Register(ws *restful.WebService) {
 	projectParam := ws.PathParameter("project", "repository belong to project")
 	indexParam := ws.PathParameter("index", "note belong to index")
 	ws.Route(
-		ws.GET("/projects/{project}/coderepositories/{repository}/pulls/{index}/note").To(a.ListPullRequestComment).
+		ws.GET("/projects/{project:*}/coderepositories/{repository}/pulls/{index}/note").To(a.ListPullRequestComment).
 			Doc("ListPullRequestComment").Param(projectParam).Param(repositoryParam).Param(indexParam).
 			Metadata(restfulspec.KeyOpenAPITags, a.tags).
 			Returns(http.StatusOK, "OK", metav1alpha1.GitPullRequestNoteList{}),

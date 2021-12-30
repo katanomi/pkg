@@ -21,6 +21,7 @@ import (
 	"context"
 	"encoding/base64"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -40,26 +41,35 @@ func TestListGitBranch(t *testing.T) {
 	g.Expect(err).To(BeNil())
 
 	container := restful.NewContainer()
+	container.Router(restful.RouterJSR311{})
 
 	container.Add(ws)
 
-	httpRequest, _ := http.NewRequest("GET", "/plugins/v1alpha1/test-6/projects/1/coderepositories/1/branches", nil)
-	httpRequest.Header.Set("Accept", "application/json")
+	var projects = []string{
+		"proj",
+		"proj%2Fsub",
+	}
 
-	metaData := client.Meta{BaseURL: "http://api.test", Version: "v1"}
-	data, _ := json.Marshal(metaData)
-	meta := base64.StdEncoding.EncodeToString(data)
-	httpRequest.Header.Set(client.PluginMetaHeader, meta)
+	for _, project := range projects {
+		path := fmt.Sprintf("/plugins/v1alpha1/test-6/projects/%s/coderepositories/1/branches", project)
+		httpRequest, _ := http.NewRequest("GET", path, nil)
+		httpRequest.Header.Set("Accept", "application/json")
 
-	httpWriter := httptest.NewRecorder()
+		metaData := client.Meta{BaseURL: "http://api.test", Version: "v1"}
+		data, _ := json.Marshal(metaData)
+		meta := base64.StdEncoding.EncodeToString(data)
+		httpRequest.Header.Set(client.PluginMetaHeader, meta)
 
-	container.Dispatch(httpWriter, httpRequest)
-	g.Expect(httpWriter.Code).To(Equal(http.StatusOK))
+		httpWriter := httptest.NewRecorder()
 
-	branchList := metav1alpha1.GitBranchList{}
-	err = json.Unmarshal(httpWriter.Body.Bytes(), &branchList)
-	g.Expect(err).To(BeNil())
-	g.Expect(branchList.Kind).To(Equal(metav1alpha1.GitBranchListGVK.Kind))
+		container.Dispatch(httpWriter, httpRequest)
+		g.Expect(httpWriter.Code).To(Equal(http.StatusOK))
+
+		branchList := metav1alpha1.GitBranchList{}
+		err = json.Unmarshal(httpWriter.Body.Bytes(), &branchList)
+		g.Expect(err).To(BeNil())
+		g.Expect(branchList.Kind).To(Equal(metav1alpha1.GitBranchListGVK.Kind))
+	}
 }
 
 type TestGitBranchLister struct {
