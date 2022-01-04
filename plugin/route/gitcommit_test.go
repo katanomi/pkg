@@ -39,26 +39,52 @@ func TestGetGitCommit(t *testing.T) {
 	g.Expect(err).To(BeNil())
 
 	container := restful.NewContainer()
+	container.Router(restful.RouterJSR311{})
 
 	container.Add(ws)
 
-	httpRequest, _ := http.NewRequest("GET", "/plugins/v1alpha1/test-5/projects/1/coderepositories/1/commit/aaaaaaa", nil)
-	httpRequest.Header.Set("Accept", "application/json")
+	data := []struct {
+		path    string
+		project string
+		repo    string
+		sha     string
+	}{
+		{
+			path:    "/plugins/v1alpha1/test-5/projects/proj/coderepositories/repo/commit/sha1",
+			project: "proj",
+			repo:    "repo",
+			sha:     "sha1",
+		},
+		{
+			path:    "/plugins/v1alpha1/test-5/projects/proj%2Fsub/coderepositories/repo/commit/sha1",
+			project: "proj/sub",
+			repo:    "repo",
+			sha:     "sha1",
+		},
+	}
 
-	metaData := client.Meta{BaseURL: "http://api.test", Version: "v1"}
-	data, _ := json.Marshal(metaData)
-	meta := base64.StdEncoding.EncodeToString(data)
-	httpRequest.Header.Set(client.PluginMetaHeader, meta)
+	for _, item := range data {
+		httpRequest, _ := http.NewRequest("GET", item.path, nil)
+		httpRequest.Header.Set("Accept", "application/json")
 
-	httpWriter := httptest.NewRecorder()
+		metaData := client.Meta{BaseURL: "http://api.test", Version: "v1"}
+		data, _ := json.Marshal(metaData)
+		meta := base64.StdEncoding.EncodeToString(data)
+		httpRequest.Header.Set(client.PluginMetaHeader, meta)
 
-	container.Dispatch(httpWriter, httpRequest)
-	g.Expect(httpWriter.Code).To(Equal(http.StatusOK))
+		httpWriter := httptest.NewRecorder()
 
-	commit := metav1alpha1.GitCommit{}
-	err = json.Unmarshal(httpWriter.Body.Bytes(), &commit)
-	g.Expect(err).To(BeNil())
-	g.Expect(commit.Name).To(Equal("aaaaaaa"))
+		container.Dispatch(httpWriter, httpRequest)
+		g.Expect(httpWriter.Code).To(Equal(http.StatusOK))
+
+		commit := metav1alpha1.GitCommit{}
+		err = json.Unmarshal(httpWriter.Body.Bytes(), &commit)
+		g.Expect(err).To(BeNil())
+		g.Expect(commit.Name).To(Equal("sha1"))
+		g.Expect(commit.Annotations["project"]).To(Equal(item.project))
+		g.Expect(commit.Annotations["repository"]).To(Equal(item.repo))
+	}
+
 }
 
 type TestCommitGetter struct {
@@ -75,6 +101,10 @@ func (t *TestCommitGetter) Setup(_ context.Context, _ *zap.SugaredLogger) error 
 func (t *TestCommitGetter) GetGitCommit(ctx context.Context, option metav1alpha1.GitCommitOption) (metav1alpha1.GitCommit, error) {
 	return metav1alpha1.GitCommit{
 		ObjectMeta: metav1.ObjectMeta{
+			Annotations: map[string]string{
+				"project":    option.Project,
+				"repository": option.Repository,
+			},
 			Name: *option.SHA,
 		},
 	}, nil

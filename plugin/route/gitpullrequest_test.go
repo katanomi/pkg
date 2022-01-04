@@ -43,6 +43,7 @@ func TestAboutGitPullRequest(t *testing.T) {
 	g.Expect(err).To(BeNil())
 
 	container := restful.NewContainer()
+	container.Router(restful.RouterJSR311{})
 
 	container.Add(ws)
 
@@ -50,49 +51,58 @@ func TestAboutGitPullRequest(t *testing.T) {
 	data, _ := json.Marshal(metaData)
 	meta := base64.StdEncoding.EncodeToString(data)
 
-	httpWriter := httptest.NewRecorder()
-
-	httpRequest1, _ := http.NewRequest("GET", "/plugins/v1alpha1/test-9/projects/1/coderepositories/1/pulls", nil)
-	fmt.Println(httpRequest1.Host)
-	httpRequest1.Header.Set("Accept", "application/json")
-	httpRequest1.Header.Set(client.PluginMetaHeader, meta)
-
-	container.Dispatch(httpWriter, httpRequest1)
-	g.Expect(httpWriter.Code).To(Equal(http.StatusOK))
-	prList := metav1alpha1.GitPullRequestList{}
-	err = json.Unmarshal(httpWriter.Body.Bytes(), &prList)
-	g.Expect(err).To(BeNil())
-	g.Expect(prList.Kind).To(Equal(metav1alpha1.GitPullRequestsListGVK.Kind))
-
-	httpWriter2 := httptest.NewRecorder()
-	httpRequest2, _ := http.NewRequest("GET", "/plugins/v1alpha1/test-9/projects/1/coderepositories/1/pulls/1", nil)
-	httpRequest2.Header.Set("Accept", "application/json")
-	httpRequest2.Header.Set(client.PluginMetaHeader, meta)
-	container.Dispatch(httpWriter2, httpRequest2)
-	g.Expect(httpWriter.Code).To(Equal(http.StatusOK))
-	prObj := metav1alpha1.GitPullRequest{}
-	err = json.Unmarshal(httpWriter2.Body.Bytes(), &prObj)
-	g.Expect(err).To(BeNil())
-	g.Expect(prObj.Name).To(Equal("1"))
-
-	httpWriter3 := httptest.NewRecorder()
-	prPayload := metav1alpha1.CreatePullRequestPayload{
-		Source:      metav1alpha1.GitBranchBaseInfo{Name: "dev"},
-		Target:      metav1alpha1.GitBranchBaseInfo{Name: "master"},
-		Title:       "pr",
-		Description: "describe",
+	var projects = []string{
+		"proj",
+		"proj%2Fsub",
 	}
-	content, _ := json.Marshal(prPayload)
-	httpRequest3, _ := http.NewRequest("POST", "/plugins/v1alpha1/test-9/projects/1/coderepositories/1/pulls", bytes.NewBuffer(content))
-	httpRequest3.Header.Set("Content-Type", "application/json")
-	httpRequest3.Header.Set(client.PluginMetaHeader, meta)
-	container.Dispatch(httpWriter3, httpRequest3)
-	g.Expect(httpWriter3.Code).To(Equal(http.StatusOK))
-	prObj2 := metav1alpha1.GitPullRequest{}
-	err = json.Unmarshal(httpWriter3.Body.Bytes(), &prObj2)
-	g.Expect(err).To(BeNil())
-	g.Expect(prObj2.Spec.Title).To(Equal("pr"))
 
+	for _, project := range projects {
+		httpWriter := httptest.NewRecorder()
+
+		path := fmt.Sprintf("/plugins/v1alpha1/test-9/projects/%s/coderepositories/1/pulls", project)
+		httpRequest1, _ := http.NewRequest("GET", path, nil)
+		fmt.Println(httpRequest1.Host)
+		httpRequest1.Header.Set("Accept", "application/json")
+		httpRequest1.Header.Set(client.PluginMetaHeader, meta)
+
+		container.Dispatch(httpWriter, httpRequest1)
+		g.Expect(httpWriter.Code).To(Equal(http.StatusOK))
+		prList := metav1alpha1.GitPullRequestList{}
+		err = json.Unmarshal(httpWriter.Body.Bytes(), &prList)
+		g.Expect(err).To(BeNil())
+		g.Expect(prList.Kind).To(Equal(metav1alpha1.GitPullRequestsListGVK.Kind))
+
+		httpWriter2 := httptest.NewRecorder()
+		path = fmt.Sprintf("/plugins/v1alpha1/test-9/projects/%s/coderepositories/1/pulls/1", project)
+		httpRequest2, _ := http.NewRequest("GET", path, nil)
+		httpRequest2.Header.Set("Accept", "application/json")
+		httpRequest2.Header.Set(client.PluginMetaHeader, meta)
+		container.Dispatch(httpWriter2, httpRequest2)
+		g.Expect(httpWriter.Code).To(Equal(http.StatusOK))
+		prObj := metav1alpha1.GitPullRequest{}
+		err = json.Unmarshal(httpWriter2.Body.Bytes(), &prObj)
+		g.Expect(err).To(BeNil())
+		g.Expect(prObj.Name).To(Equal("1"))
+
+		httpWriter3 := httptest.NewRecorder()
+		prPayload := metav1alpha1.CreatePullRequestPayload{
+			Source:      metav1alpha1.GitBranchBaseInfo{Name: "dev"},
+			Target:      metav1alpha1.GitBranchBaseInfo{Name: "master"},
+			Title:       "pr",
+			Description: "describe",
+		}
+		content, _ := json.Marshal(prPayload)
+		path = fmt.Sprintf("/plugins/v1alpha1/test-9/projects/%s/coderepositories/1/pulls", project)
+		httpRequest3, _ := http.NewRequest("POST", path, bytes.NewBuffer(content))
+		httpRequest3.Header.Set("Content-Type", "application/json")
+		httpRequest3.Header.Set(client.PluginMetaHeader, meta)
+		container.Dispatch(httpWriter3, httpRequest3)
+		g.Expect(httpWriter3.Code).To(Equal(http.StatusOK))
+		prObj2 := metav1alpha1.GitPullRequest{}
+		err = json.Unmarshal(httpWriter3.Body.Bytes(), &prObj2)
+		g.Expect(err).To(BeNil())
+		g.Expect(prObj2.Spec.Title).To(Equal("pr"))
+	}
 }
 
 type TestGitPullRequestHandler struct {
@@ -141,6 +151,7 @@ func TestAboutGitPullRequestNote(t *testing.T) {
 	g.Expect(err).To(BeNil())
 
 	container := restful.NewContainer()
+	container.Router(restful.RouterJSR311{})
 
 	container.Add(ws)
 	metaData := client.Meta{BaseURL: "http://api.test", Version: "v1"}

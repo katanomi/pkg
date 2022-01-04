@@ -46,7 +46,7 @@ func (a *gitCommitStatusLister) Register(ws *restful.WebService) {
 	shaParam := ws.PathParameter("sha", "commit sha")
 	projectParam := ws.PathParameter("project", "repository belong to project")
 	ws.Route(
-		ws.GET("/projects/{project}/coderepositories/{repository}/commit/{sha}/status").To(a.ListGitCommitStatus).
+		ws.GET("/projects/{project:*}/coderepositories/{repository}/commit/{sha}/status").To(a.ListGitCommitStatus).
 			Doc("ListGitCommitStatus").Param(projectParam).Param(repositoryParam).Param(shaParam).
 			Metadata(restfulspec.KeyOpenAPITags, a.tags).
 			Returns(http.StatusOK, "OK", metav1alpha1.GitCommitStatusList{}),
@@ -90,7 +90,7 @@ func (a *gitCommitStatusCreator) Register(ws *restful.WebService) {
 	shaParam := ws.PathParameter("sha", "commit sha")
 	projectParam := ws.PathParameter("project", "repository belong to project")
 	ws.Route(
-		ws.POST("/projects/{project}/coderepositories/{repository}/commit/{sha}/status").To(a.CreateGitCommitStatus).
+		ws.POST("/projects/{project:*}/coderepositories/{repository}/commit/{sha}/status").To(a.CreateGitCommitStatus).
 			Doc("CreateGitCommitStatus").Param(projectParam).Param(repositoryParam).Param(shaParam).
 			Metadata(restfulspec.KeyOpenAPITags, a.tags).
 			Returns(http.StatusOK, "OK", metav1alpha1.GitCommitStatus{}),
