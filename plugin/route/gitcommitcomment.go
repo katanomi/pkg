@@ -46,7 +46,7 @@ func (a *gitCommitCommentLister) Register(ws *restful.WebService) {
 	shaParam := ws.PathParameter("sha", "commit sha")
 	projectParam := ws.PathParameter("project", "repository belong to project")
 	ws.Route(
-		ws.GET("/projects/{project}/coderepositories/{repository}/commit/{sha}/comments").To(a.ListGitCommitComment).
+		ws.GET("/projects/{project:*}/coderepositories/{repository}/commit/{sha}/comments").To(a.ListGitCommitComment).
 			Doc("ListGitCommitComment").Param(projectParam).Param(repositoryParam).Param(shaParam).
 			Metadata(restfulspec.KeyOpenAPITags, a.tags).
 			Returns(http.StatusOK, "OK", metav1alpha1.GitCommitCommentList{}),
@@ -90,7 +90,7 @@ func (a *gitCommitCommentCreator) Register(ws *restful.WebService) {
 	shaParam := ws.PathParameter("sha", "commit sha")
 	projectParam := ws.PathParameter("project", "repository belong to project")
 	ws.Route(
-		ws.POST("/projects/{project}/coderepositories/{repository}/commit/{sha}/comments").To(a.CreateGitCommitComment).
+		ws.POST("/projects/{project:*}/coderepositories/{repository}/commit/{sha}/comments").To(a.CreateGitCommitComment).
 			Doc("CreateGitCommitComment").Param(projectParam).Param(repositoryParam).Param(shaParam).
 			Metadata(restfulspec.KeyOpenAPITags, a.tags).
 			Returns(http.StatusOK, "OK", metav1alpha1.GitCommitComment{}),
