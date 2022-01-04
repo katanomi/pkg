@@ -120,4 +120,21 @@ const (
 	// action of delete tag
 	// Used for matching events in trigger filter
 	CloudEventExtTagActionDelete = "delete"
+
+	CloudEventExtArtifactActionPush = "push"
+	// artifact type. eg. OCIHelmChart OCIContainerImage
+	CloudEventExtArtifactType = "artifacttype"
+	// resource URL. eg. katanomi/core:latest
+	CloudEventExtArtifactResourceURL = "resourceurl"
+	// is the digest of the manifest. eg. sha256:92d648...
+	CloudEventExtArtifactDigest = "digest"
+	// is the tag of the artifact. (if not assigned, the value same as digest)
+	CloudEventExtArtifactTag = "tag"
+	// username of user who pushed artifact
+	CloudEventExtArtifactOperator = "operator"
+	// push time timestamp
+	CloudEventExtArtifactOccurAt = "occurat"
+	// concat os-arch-variant and os-variant strings of all artifact, use # connect each string.
+	// eg. #linux-amd64-#linux-#linux-arm64-v8#linux-v8# (only supported when artifact_type is OCIContainerImage)
+	CloudEventExtArtifactPlatform = "platform"
 )

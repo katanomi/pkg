@@ -27,7 +27,7 @@ func Filter(logger *zap.SugaredLogger) func(req *restful.Request, resp *restful.
 	return func(req *restful.Request, resp *restful.Response, chain *restful.FilterChain) {
 		// injects logger into context
 
-		log := logger.With("verb", req.Request.Method, "path", req.Request.URL.Path)
+		log := logger.With("verb", req.Request.Method, "path", req.Request.URL.Path, "from", req.Request.RemoteAddr)
 		if notHealthz(req.Request.URL.Path) {
 			log.Debugw("==> received request")
 		}

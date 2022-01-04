@@ -18,6 +18,7 @@ package sharedmain
 
 import (
 	"context"
+	"crypto/tls"
 	"errors"
 	"flag"
 	"fmt"
@@ -69,6 +70,8 @@ var (
 	Burst          int
 	QPS            float64
 	ConfigFile     string
+
+	InsecureSkipVerify bool
 )
 
 // AppBuilder builds an app using multiple configuration options
@@ -127,6 +130,8 @@ func ParseFlag() {
 		"The controller will load its initial configuration from this file. "+
 			"Omit this flag to use the default configuration values. "+
 			"Command-line flags override configuration from this file.")
+	flag.BoolVar(&InsecureSkipVerify, "insecure-skip-tls-verify", false,
+		"skip TLS verification and disable cert checking (default: false)")
 	flag.Parse()
 }
 
@@ -153,6 +158,9 @@ func (a *AppBuilder) init() {
 
 		restyClient := resty.NewWithClient(http.DefaultClient).SetTimeout(DefaultTimeout)
 		restyClient.SetDisableWarn(true)
+		restyClient.SetTLSClientConfig(&tls.Config{
+			InsecureSkipVerify: InsecureSkipVerify, // nolint: gosec // G402: TLS InsecureSkipVerify set true.
+		})
 		a.Context = restclient.WithRESTClient(a.Context, restyClient)
 
 		a.ConfigMapWatcher = sharedmain.SetupConfigMapWatchOrDie(a.Context, a.Logger)
