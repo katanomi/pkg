@@ -20,6 +20,31 @@ import (
 	"knative.dev/pkg/apis"
 )
 
+// WebhookEventSupportType consists of event type and "Event"
+type WebhookEventSupportType string
+
+func (w WebhookEventSupportType) String() string {
+	return string(w)
+}
+
+const (
+	// https://github.com/katanomi/spec/pull/80
+	// key in integrationClass.status
+	// CodeRepositoryPushWebhookEvent event value for code repository's push webhook
+	CodeRepositoryPushWebhookEvent WebhookEventSupportType = "CodeRepositoryPushEvent"
+	// CodeRepositoryTagWebhookEvent event values for code repository's tag webhook
+	CodeRepositoryTagWebhookEvent WebhookEventSupportType = "CodeRepositoryTagEvent"
+	// CodeRepositoryPullRequestWebhookEvent event values for code repository's pr webhook
+	CodeRepositoryPullRequestWebhookEvent WebhookEventSupportType = "CodeRepositoryPullRequestEvent"
+	// ArtifactDeleteWebhookEvent event values for artifact's delete webhook
+	ArtifactDeleteWebhookEvent WebhookEventSupportType = "ArtifactDeleteEvent"
+	// ArtifactPushWebhookEvent event values for artifact's push webhook
+	ArtifactPushWebhookEvent WebhookEventSupportType = "ArtifactPushEvent"
+
+	// WebhookEventSuffix key's suffix in integrationClass.status
+	WebhookEventSuffix = "Event"
+)
+
 // WebhookRegisterSpec specifications to register a webhook
 type WebhookRegisterSpec struct {
 	// URI stores the Uniform Resource Identifier for webhook resource

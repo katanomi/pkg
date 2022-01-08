@@ -57,6 +57,11 @@ type PluginRegister interface {
 	GetAllowEmptySecret() []string
 }
 
+type AdditionalWebhookRegister interface {
+	// GetWebhookSupport get webhook support map
+	GetWebhookSupport() map[metav1alpha1.WebhookEventSupportType][]string
+}
+
 // AuthCheck implements an authorization check method for plugins
 type AuthChecker interface {
 	AuthCheck(ctx context.Context, option metav1alpha1.AuthCheckOptions) (*metav1alpha1.AuthCheck, error)
