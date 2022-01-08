@@ -20,6 +20,22 @@ import (
 	"knative.dev/pkg/apis"
 )
 
+// WebhookEventSupportType consists of event type and "Event"
+type WebhookEventSupportType string
+
+func (w WebhookEventSupportType) String() string {
+	return string(w)
+}
+
+const (
+	PushWebhookEvent        WebhookEventSupportType = "PushEvent"
+	TagWebhookEvent         WebhookEventSupportType = "TagEvent"
+	DeleteWebhookEvent      WebhookEventSupportType = "DeleteEvent"
+	PullRequestWebhookEvent WebhookEventSupportType = "PullRequestEvent"
+
+	WebhookEventSuffix = "Event"
+)
+
 // WebhookRegisterSpec specifications to register a webhook
 type WebhookRegisterSpec struct {
 	// URI stores the Uniform Resource Identifier for webhook resource

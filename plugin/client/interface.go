@@ -55,6 +55,8 @@ type PluginRegister interface {
 	GetResourceTypes() []string
 	// GetAllowEmptySecret Returns if an empty secret is allowed with IntegrationClass
 	GetAllowEmptySecret() []string
+	// GetWebhookSupport get webhook support map
+	GetWebhookSupport() map[metav1alpha1.WebhookEventSupportType][]string
 }
 
 // AuthCheck implements an authorization check method for plugins
