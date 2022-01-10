@@ -17,6 +17,7 @@ limitations under the License.
 package route
 
 import (
+	"fmt"
 	"net/http"
 
 	restfulspec "github.com/emicklei/go-restful-openapi/v2"
@@ -61,6 +62,7 @@ func (a *artifactList) ListArtifacts(request *restful.Request, response *restful
 		},
 		Repository: request.PathParameter("repository"),
 	}
+	fmt.Println("list artifact option", option)
 	artifacts, err := a.impl.ListArtifacts(request.Request.Context(), pathParams, option)
 	if err != nil {
 		kerrors.HandleError(request, response, err)
