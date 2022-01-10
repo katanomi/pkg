@@ -19,9 +19,12 @@ limitations under the License.
 package hash
 
 import (
+	"fmt"
 	"hash"
+	"hash/fnv"
 
 	"github.com/davecgh/go-spew/spew"
+	"k8s.io/apimachinery/pkg/util/rand"
 )
 
 // DeepHashObject writes specified object to hash using the spew library
@@ -36,4 +39,11 @@ func DeepHashObject(hasher hash.Hash, objectToWrite interface{}) {
 		SpewKeys:       true,
 	}
 	printer.Fprintf(hasher, "%#v", objectToWrite)
+}
+
+// ComputeHash computes hash value of a interface
+func ComputeHash(obj interface{}) string {
+	hasher := fnv.New32a()
+	DeepHashObject(hasher, obj)
+	return rand.SafeEncodeString(fmt.Sprint(hasher.Sum32()))
 }
