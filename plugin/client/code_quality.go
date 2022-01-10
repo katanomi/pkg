@@ -32,6 +32,7 @@ type ClientCodeQuality interface {
 	GetOverview(ctx context.Context, baseURL *duckv1.Addressable, options ...OptionFunc) (*metav1alpha1.CodeQualityProjectOverview, error)
 	GetByBranch(ctx context.Context, baseURL *duckv1.Addressable, opt metav1alpha1.CodeQualityBaseOption, options ...OptionFunc) (*metav1alpha1.CodeQuality, error)
 	GetLineCharts(ctx context.Context, baseURL *duckv1.Addressable, opt metav1alpha1.CodeQualityLineChartOption, options ...OptionFunc) (*metav1alpha1.CodeQualityLineChart, error)
+	GetMetricsByTaskID(ctx context.Context, baseURL *duckv1.Addressable, opt metav1alpha1.CodeQualityTaskOption, options ...OptionFunc) (*metav1alpha1.CodeQualityTaskMetrics, error)
 }
 
 type codeQuality struct {
@@ -94,4 +95,18 @@ func (c *codeQuality) GetOverview(ctx context.Context, baseURL *duckv1.Addressab
 		return nil, err
 	}
 	return overview, nil
+}
+
+func (c *codeQuality) GetMetricsByTaskID(ctx context.Context, baseURL *duckv1.Addressable, opt metav1alpha1.CodeQualityTaskOption, options ...OptionFunc) (*metav1alpha1.CodeQualityTaskMetrics, error) {
+	taskMetrics := &metav1alpha1.CodeQualityTaskMetrics{}
+	query := map[string]string{
+		"project-key": opt.ProjectKey,
+		"branch":      opt.Branch,
+		"pullRequest": opt.PullRequest,
+	}
+	options = append(options, MetaOpts(c.meta), SecretOpts(c.secret), ResultOpts(taskMetrics), QueryOpts(query))
+	if err := c.client.Get(ctx, baseURL, fmt.Sprintf("/codeQuality/task/%s/summary", opt.TaskID), options...); err != nil {
+		return nil, err
+	}
+	return taskMetrics, nil
 }
