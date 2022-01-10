@@ -17,8 +17,12 @@ limitations under the License.
 package route
 
 import (
+	"context"
+	"net/url"
 	"strconv"
 	"strings"
+
+	"knative.dev/pkg/logging"
 
 	"github.com/emicklei/go-restful/v3"
 	metav1alpha1 "github.com/katanomi/pkg/apis/meta/v1alpha1"
@@ -44,7 +48,38 @@ func GetListOptionsFromRequest(req *restful.Request) (opts metav1alpha1.ListOpti
 	if strings.TrimSpace(subResourcesHeader) != "" {
 		opts.SubResources = strings.Split(subResourcesHeader, ",")
 	}
+
+	sortBy := req.QueryParameter("sortBy")
+	if sortBy == "" {
+		return
+	}
+	opts.Sort = HandleSortQuery(req.Request.Context(), sortBy)
 	return
+}
+
+func HandleSortQuery(ctx context.Context, sortBy string) []metav1alpha1.SortOptions {
+	logger := logging.FromContext(ctx).Named("SortParamHandler")
+	sortList := []metav1alpha1.SortOptions{}
+	sortInfoList := strings.Split(sortBy, ",")
+	if len(sortInfoList)%2 != 0 {
+		logger.Errorw("It is singular after cutting, so it is impossible to obtain valid sorting conditions.Ignore sortBy!!!", "sortBy", url.QueryEscape(sortBy))
+		return sortList
+	}
+	for i, v := range sortInfoList {
+		if i%2 == 0 {
+			switch metav1alpha1.SortOrder(v) {
+			case metav1alpha1.OrderDesc, metav1alpha1.OrderAsc:
+				sortList = append(sortList, metav1alpha1.SortOptions{Order: metav1alpha1.SortOrder(v)})
+			default:
+				sortList = []metav1alpha1.SortOptions{}
+				logger.Errorw("unknown order type", "sortBy", url.QueryEscape(sortBy))
+				return sortList
+			}
+		} else {
+			sortList[len(sortList)-1].SortBy = metav1alpha1.SortBy(v)
+		}
+	}
+	return sortList
 }
 
 // ListOptionsDocs adds list options query parameters to the documentation
