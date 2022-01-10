@@ -74,6 +74,13 @@ type CodeQualityBaseOption struct {
 	BranchKey  string `json:"branchKey"`
 }
 
+type CodeQualityTaskOption struct {
+	TaskID      string `json:"taskID"`
+	ProjectKey  string `json:"projectKey"`
+	Branch      string `json:"branch"`
+	PullRequest string `json:"pullRequest"`
+}
+
 // +k8s:deepcopy-gen=false
 type CodeQualityLineChartOption struct {
 	CodeQualityBaseOption
