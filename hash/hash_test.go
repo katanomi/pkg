@@ -145,3 +145,43 @@ func TestDeepObjectPointer(t *testing.T) {
 		}
 	}
 }
+
+func TestComputeHash(t *testing.T) {
+	type args struct {
+		obj interface{}
+	}
+	tests := []struct {
+		name string
+		args args
+		want string
+	}{
+		{
+			name: "nil",
+			args: args{
+				obj: nil,
+			},
+			want: "99c9b8c64",
+		},
+		{
+			name: "empty string",
+			args: args{
+				obj: "",
+			},
+			want: "8857b86c7",
+		},
+		{
+			name: "number",
+			args: args{
+				obj: 1234,
+			},
+			want: "6ff6c884f5",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := ComputeHash(tt.args.obj); got != tt.want {
+				t.Errorf("ComputeHash() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
