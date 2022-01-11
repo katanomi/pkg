@@ -19,6 +19,9 @@ limitations under the License.
 package hash
 
 import (
+	"crypto/hmac"
+	"crypto/sha256"
+	"encoding/hex"
 	"fmt"
 	"hash"
 	"hash/fnv"
@@ -46,4 +49,20 @@ func ComputeHash(obj interface{}) string {
 	hasher := fnv.New32a()
 	DeepHashObject(hasher, obj)
 	return rand.SafeEncodeString(fmt.Sprint(hasher.Sum32()))
+}
+
+// HashSHA256 will generate a hash value using SHA-256.
+func HashSHA256(secretKey string, value []byte) (string, error) {
+	return hashString(sha256.New, secretKey, value)
+}
+
+func hashString(hashFunc func() hash.Hash, secretKey string, value []byte) (string, error) {
+	hasher := hmac.New(hashFunc, []byte(secretKey))
+	_, err := hasher.Write(value)
+	if err != nil {
+		return "", err
+	}
+
+	hashValue := hex.EncodeToString(hasher.Sum(nil))
+	return hashValue, nil
 }
