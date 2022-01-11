@@ -18,7 +18,6 @@ package route
 
 import (
 	"context"
-	"net/url"
 	"strconv"
 	"strings"
 
@@ -49,20 +48,19 @@ func GetListOptionsFromRequest(req *restful.Request) (opts metav1alpha1.ListOpti
 		opts.SubResources = strings.Split(subResourcesHeader, ",")
 	}
 
-	sortBy := req.QueryParameter("sortBy")
-	if sortBy == "" {
+	sortInfoList := req.QueryParameters("sortBy")
+	if len(sortInfoList) == 0 {
 		return
 	}
-	opts.Sort = HandleSortQuery(req.Request.Context(), sortBy)
+	opts.Sort = HandleSortQuery(req.Request.Context(), sortInfoList)
 	return
 }
 
-func HandleSortQuery(ctx context.Context, sortBy string) []metav1alpha1.SortOptions {
+func HandleSortQuery(ctx context.Context, sortInfoList []string) []metav1alpha1.SortOptions {
 	logger := logging.FromContext(ctx).Named("SortParamHandler")
 	sortList := []metav1alpha1.SortOptions{}
-	sortInfoList := strings.Split(sortBy, ",")
 	if len(sortInfoList)%2 != 0 {
-		logger.Errorw("It is singular after cutting, so it is impossible to obtain valid sorting conditions.Ignore sortBy!!!", "sortBy", url.QueryEscape(sortBy))
+		logger.Errorw("It is singular after cutting, so it is impossible to obtain valid sorting conditions.Ignore sortBy!!!", "sortBy", sortInfoList)
 		return sortList
 	}
 	for i, v := range sortInfoList {
@@ -72,7 +70,7 @@ func HandleSortQuery(ctx context.Context, sortBy string) []metav1alpha1.SortOpti
 				sortList = append(sortList, metav1alpha1.SortOptions{Order: metav1alpha1.SortOrder(v)})
 			default:
 				sortList = []metav1alpha1.SortOptions{}
-				logger.Errorw("unknown order type", "sortBy", url.QueryEscape(sortBy))
+				logger.Errorw("unknown order type", "sortBy", sortInfoList)
 				return sortList
 			}
 		} else {
