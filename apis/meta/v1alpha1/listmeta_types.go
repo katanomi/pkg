@@ -20,6 +20,21 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
+type SortBy string
+
+const (
+	NameSortKey        SortBy = "name"
+	UpdatedTimeSortKey SortBy = "updatedTime"
+	CreatedTimeSortKey SortBy = "createdTime"
+)
+
+type SortOrder string
+
+const (
+	OrderDesc SortOrder = "desc"
+	OrderAsc  SortOrder = "asc"
+)
+
 // ListMeta extension of the metav1.ListMeta with paging related data
 type ListMeta struct {
 	metav1.ListMeta `json:",inline"`
@@ -45,6 +60,18 @@ type ListOptions struct {
 	// when not supported, this values will be ignored
 	// +optional
 	SubResources []string `json:"subResources"`
+
+	// Sort for listing
+	Sort []SortOptions `json:"sort"`
+}
+
+// SortOptions options for sort
+type SortOptions struct {
+	// SortBy field
+	SortBy SortBy `json:"sortBy"`
+
+	// Order sorted is 'asc' or 'desc'
+	Order SortOrder `json:"order"`
 }
 
 // RepositoryOptions list repositroy path params
