@@ -30,8 +30,8 @@ type CreatedBy struct {
 }
 
 // IsZero basic function returns true when all attributes of the object are empty
-func (by CreatedBy) IsZero() bool {
-	return by.User == nil
+func (by *CreatedBy) IsZero() bool {
+	return by == nil || by.User == nil
 }
 
 // FromAnnotation will set `by` from annotations
@@ -58,7 +58,7 @@ func (by *CreatedBy) FromAnnotation(annotations map[string]string) (*CreatedBy, 
 
 // SetIntoAnnotation will set CreatedBy into annotations
 // return annotations that with CreatedBy.
-func (by CreatedBy) SetIntoAnnotation(annotations map[string]string) (map[string]string, error) {
+func (by *CreatedBy) SetIntoAnnotation(annotations map[string]string) (map[string]string, error) {
 	// this error is ignored because it will never happen
 	jsonStr, _ := json.Marshal(by)
 	if annotations == nil {
