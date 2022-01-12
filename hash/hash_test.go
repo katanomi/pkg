@@ -185,3 +185,65 @@ func TestComputeHash(t *testing.T) {
 		})
 	}
 }
+
+func TestHashSHA256(t *testing.T) {
+	type args struct {
+		secretKey string
+		value     []byte
+	}
+	tests := []struct {
+		name    string
+		args    args
+		want    string
+		wantErr bool
+	}{
+		{
+			name: "empty secretKey and empty value",
+			args: args{
+				secretKey: "",
+				value:     []byte{},
+			},
+			want:    "b613679a0814d9ec772f95d778c35fc5ff1697c493715653c6c712144292c5ad",
+			wantErr: false,
+		},
+		{
+			name: "empty secretKey",
+			args: args{
+				secretKey: "",
+				value:     []byte{'a', 'b', 'c', 'd'},
+			},
+			want:    "527ff4c28c22a090fe39908139363e81b8fb10d0695a135518006abfa21cf5a2",
+			wantErr: false,
+		},
+		{
+			name: "empty value",
+			args: args{
+				secretKey: "abcd",
+				value:     []byte{},
+			},
+			want:    "2722000cbc34892ac64a8fb9ef2b50fc824ea1984cb81e50d687648f2e88f724",
+			wantErr: false,
+		},
+		{
+			name: "non-empty secretKey and value",
+			args: args{
+				secretKey: "abcd",
+				value:     []byte{'a', 'b', 'c', 'd'},
+			},
+			want:    "e1a20dce13e4953e3d50e7f6651a0ce862a655fc84c35352447eff99a5a02852",
+			wantErr: false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := HashSHA256(tt.args.secretKey, tt.args.value)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("HashSHA256() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if got != tt.want {
+				t.Errorf("HashSHA256() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
