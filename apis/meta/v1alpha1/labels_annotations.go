@@ -80,3 +80,9 @@ const (
 	LabelSourceSystem = "system"
 	LabelSourceUser   = "user"
 )
+
+// Annotation keys for artifact parameter
+const (
+	// ArtifactAliasAnnotationKey indicates the alias of the artifact parameter in the delivery
+	ArtifactAliasAnnotationKey = "alias"
+)
