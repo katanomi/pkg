@@ -118,8 +118,8 @@ func NewProjectGet(impl client.ProjectGetter) Route {
 }
 
 func (p *projectGet) Register(ws *restful.WebService) {
-	ws.Route(ws.GET("/projects/{project-id:*}").To(p.GetProject).
-		Param(ws.PathParameter("project-id", "identifier of the project").DataType("string")).
+	ws.Route(ws.GET("/projects/{project:*}").To(p.GetProject).
+		Param(ws.PathParameter("project", "identifier of the project").DataType("string")).
 		Param(ws.QueryParameter("type", "subtype of the project").DataType("string")).
 		// docs
 		Doc("GetProject").
@@ -130,7 +130,7 @@ func (p *projectGet) Register(ws *restful.WebService) {
 
 // GetProject http handler for get project
 func (p *projectGet) GetProject(request *restful.Request, response *restful.Response) {
-	id := request.PathParameter("project-id")
+	id := request.PathParameter("project")
 	projectSubtype := request.QueryParameter("type")
 
 	ctx := context.WithValue(request.Request.Context(), metav1alpha1.KeyForSubType, projectSubtype)

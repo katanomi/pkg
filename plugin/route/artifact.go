@@ -44,7 +44,7 @@ func (a *artifactList) Register(ws *restful.WebService) {
 	repositoryParam := ws.PathParameter("repository", "artifact belong to repository")
 	ws.Route(
 		ListOptionsDocs(
-			ws.GET("/projects/{project}/repositories/{repository:*}/artifacts").To(a.ListArtifacts).
+			ws.GET("/projects/{project:*}/repositories/{repository:*}/artifacts").To(a.ListArtifacts).
 				// docs
 				Doc("ListArtifacts").Param(projectParam).Param(repositoryParam).
 				Metadata(restfulspec.KeyOpenAPITags, a.tags).
@@ -88,7 +88,7 @@ func (a *artifactGetter) Register(ws *restful.WebService) {
 	repositoryParam := ws.PathParameter("repository", "artifact belong to repository")
 	artifactParam := ws.PathParameter("artifact", "artifact name, maybe is version or tag")
 	ws.Route(
-		ws.GET("/projects/{project}/repositories/{repository:*}/artifacts/{artifact}").To(a.GetArtifact).
+		ws.GET("/projects/{project:*}/repositories/{repository:*}/artifacts/{artifact}").To(a.GetArtifact).
 			// docs
 			Doc("GetArtifact").Param(projectParam).Param(repositoryParam).Param(artifactParam).
 			Metadata(restfulspec.KeyOpenAPITags, a.tags).
@@ -132,7 +132,7 @@ func (a *artifactDeleter) Register(ws *restful.WebService) {
 	repositoryParam := ws.PathParameter("repository", "artifact belong to repository")
 	artifactParam := ws.PathParameter("artifact", "artifact name, maybe is version or tag")
 	ws.Route(
-		ws.DELETE("/projects/{project}/repositories/{repository:*}/artifacts/{artifact}").To(a.DeleteArtifact).
+		ws.DELETE("/projects/{project:*}/repositories/{repository:*}/artifacts/{artifact}").To(a.DeleteArtifact).
 			// docs
 			Doc("DeleteArtifact").Param(projectParam).Param(repositoryParam).Param(artifactParam).
 			Metadata(restfulspec.KeyOpenAPITags, a.tags).
@@ -176,7 +176,7 @@ func (s *scanImage) Register(ws *restful.WebService) {
 	repositoryParam := ws.PathParameter("repository", "artifact belong to repository")
 	artifactParam := ws.PathParameter("artifact", "artifact name, maybe is version or tag")
 	ws.Route(
-		ws.POST("/projects/{project}/repositories/{repository:*}/artifacts/{artifact}/scan").To(s.ScanImage).
+		ws.POST("/projects/{project:*}/repositories/{repository:*}/artifacts/{artifact}/scan").To(s.ScanImage).
 			// docs
 			Doc("ScanImage").Param(projectParam).Param(repositoryParam).Param(artifactParam).
 			Metadata(restfulspec.KeyOpenAPITags, s.tags).

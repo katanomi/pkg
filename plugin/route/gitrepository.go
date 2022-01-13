@@ -98,7 +98,7 @@ func (a *gitRepositoryGetter) Register(ws *restful.WebService) {
 	repositoryParam := ws.PathParameter("repository", "repository name")
 	projectParam := ws.PathParameter("project", "repository belong to project")
 	ws.Route(
-		ws.GET("/projects/{project}/coderepositories/{repository}").To(a.GetGitRepository).
+		ws.GET("/projects/{project:*}/coderepositories/{repository}").To(a.GetGitRepository).
 			Doc("GetGitRepo").Param(projectParam).Param(repositoryParam).
 			Metadata(restfulspec.KeyOpenAPITags, a.tags).
 			Returns(http.StatusOK, "OK", metav1alpha1.GitRepository{}),
