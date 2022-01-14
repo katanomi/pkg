@@ -24,8 +24,8 @@ import (
 // GetErrorFromResponse returns an error based on the response. Will do the best effort to convert
 // error responses into apimachinery errors
 func GetErrorFromResponse(resp *resty.Response, err error) error {
-	if resp.IsError() {
+	if resp != nil && resp.IsError() {
 		return kerrors.AsStatusError(resp)
 	}
-	return nil
+	return err
 }
