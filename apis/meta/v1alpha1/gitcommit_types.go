@@ -19,6 +19,7 @@ package v1alpha1
 import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
+	duckv1 "knative.dev/pkg/apis/duck/v1"
 )
 
 var (
@@ -43,13 +44,16 @@ type GitCommitBasicInfo struct {
 // GitCommitInfo github support field is SHA & web_URL
 type GitCommitInfo struct {
 	// SHA commit's sha
-	SHA      *string     `json:"sha,omitempty"`
-	CreateAt metav1.Time `json:"createAt"`
+	SHA *string `json:"sha,omitempty"`
+	// TODO remove this field, because is same as metadata.creationTimeStamp
+	CreatedAt metav1.Time `json:"createdAt"`
+	// Address for commit url for code repository web server
+	Address *duckv1.Addressable `json:"address,omitempty"`
 }
 
 // GitCommitSpec spec for commit
 type GitCommitSpec struct {
-	GitCommitBasicInfo
+	GitCommitInfo
 	// Coverage code coverage for test
 	Coverage *float64 `json:"coverage,omitempty"`
 	// Author commit author
