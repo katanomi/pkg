@@ -18,6 +18,11 @@ package route
 
 import (
 	"net/http"
+	"time"
+
+	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
+	"k8s.io/apimachinery/pkg/api/errors"
 
 	kerrors "github.com/katanomi/pkg/errors"
 
@@ -63,6 +68,75 @@ func (a *gitCommitGetter) GetCommit(request *restful.Request, response *restful.
 		GitCommitBasicInfo: metav1alpha1.GitCommitBasicInfo{SHA: &sha},
 	}
 	commitObject, err := a.impl.GetGitCommit(request.Request.Context(), commitOption)
+	if err != nil {
+		kerrors.HandleError(request, response, err)
+		return
+	}
+	response.WriteHeaderAndEntity(http.StatusOK, commitObject)
+}
+
+// HandleTimeParamInQuery Processing parameters related to time filtering in query
+func HandleTimeParamInQuery(param string) (res *v1.Time, err error) {
+	var timeObj time.Time
+	if param == "" {
+		return
+	}
+	timeObj, err = time.Parse(time.RFC3339, param)
+	if err != nil {
+		return
+	}
+	res = &v1.Time{Time: timeObj}
+	return
+}
+
+type gitCommitLister struct {
+	impl client.GitCommitLister
+	tags []string
+}
+
+// NewGitCommitLister get list git Commit route with plugin client
+func NewGitCommitLister(impl client.GitCommitLister) Route {
+	return &gitCommitLister{
+		tags: []string{"git", "repositories", "commit"},
+		impl: impl,
+	}
+}
+
+// Register route
+func (a *gitCommitLister) Register(ws *restful.WebService) {
+	repositoryParam := ws.PathParameter("repository", "commit belong to repository")
+	shaParam := ws.PathParameter("sha", "commit sha")
+	projectParam := ws.PathParameter("project", "repository belong to project").DataType("string")
+	ws.Route(
+		ws.GET("/projects/{project:*}/coderepositories/{repository}/commits").To(a.ListCommit).
+			Doc("ListCodeRepositoryCommit").Param(projectParam).Param(repositoryParam).Param(shaParam).
+			Metadata(restfulspec.KeyOpenAPITags, a.tags).
+			Returns(http.StatusOK, "OK", metav1alpha1.GitCommit{}),
+	)
+}
+
+// ListCommit get commit info
+func (a *gitCommitLister) ListCommit(request *restful.Request, response *restful.Response) {
+	repo := handlePathParamHasSlash(request.PathParameter("repository"))
+	project := request.PathParameter("project")
+	ref := request.QueryParameter("ref")
+	option := GetListOptionsFromRequest(request)
+	commitOption := metav1alpha1.GitCommitListOption{
+		GitRepo: metav1alpha1.GitRepo{Repository: repo, Project: project},
+		Ref:     ref,
+	}
+	var err error
+	commitOption.Since, err = HandleTimeParamInQuery(request.QueryParameter(SinceQueryKey))
+	if err != nil {
+		kerrors.HandleError(request, response, errors.NewBadRequest(err.Error()))
+		return
+	}
+	commitOption.Until, err = HandleTimeParamInQuery(request.QueryParameter(UntilQueryKey))
+	if err != nil {
+		kerrors.HandleError(request, response, errors.NewBadRequest(err.Error()))
+		return
+	}
+	commitObject, err := a.impl.ListGitCommit(request.Request.Context(), commitOption, option)
 	if err != nil {
 		kerrors.HandleError(request, response, err)
 		return

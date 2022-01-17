@@ -16,12 +16,27 @@ limitations under the License.
 
 package v1alpha1
 
+import (
+	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+)
+
 // GitRepoFileOption option for get repo's file
 type GitRepoFileOption struct {
 	GitRepo
 	// Ref commit/branch/tag name
 	Ref  string `json:"ref"`
 	Path string `json:"path"`
+}
+
+// GitCommitListOption option for list commit
+type GitCommitListOption struct {
+	GitRepo
+	// Ref source branch name
+	Ref string `json:"ref"`
+	// Since Time query parameter, the lower bound of the time range
+	Since *v1.Time `json:"since,omitempty"`
+	// Until Time query parameter, the upper limit of the time range
+	Until *v1.Time `json:"util,omitempty"`
 }
 
 // GitCommitOption option for get one commit by sha

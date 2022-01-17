@@ -19,6 +19,7 @@ package client
 import (
 	"context"
 	"fmt"
+	"time"
 
 	metav1alpha1 "github.com/katanomi/pkg/apis/meta/v1alpha1"
 	corev1 "k8s.io/api/core/v1"
@@ -29,6 +30,7 @@ import (
 // ClientGitCommit client for commit
 type ClientGitCommit interface {
 	Get(ctx context.Context, baseURL *duckv1.Addressable, option metav1alpha1.GitCommitOption, options ...OptionFunc) (*metav1alpha1.GitCommit, error)
+	List(ctx context.Context, baseURL *duckv1.Addressable, option metav1alpha1.GitCommitListOption, options ...OptionFunc) (*metav1alpha1.GitCommitList, error)
 }
 
 type gitCommit struct {
@@ -62,4 +64,26 @@ func (g *gitCommit) Get(ctx context.Context, baseURL *duckv1.Addressable, option
 		return nil, err
 	}
 	return commitObj, nil
+}
+
+// List commit info
+func (g *gitCommit) List(ctx context.Context, baseURL *duckv1.Addressable, option metav1alpha1.GitCommitListOption, options ...OptionFunc) (*metav1alpha1.GitCommitList, error) {
+	result := &metav1alpha1.GitCommitList{}
+	if option.Repository == "" {
+		return nil, errors.NewBadRequest("repo is empty string")
+	}
+	options = append(options, MetaOpts(g.meta), SecretOpts(g.secret), ResultOpts(result))
+	query := map[string]string{"ref": option.Ref}
+	if option.Since != nil {
+		query["since"] = option.Since.Format(time.RFC3339)
+	}
+	if option.Until != nil {
+		query["until"] = option.Until.Format(time.RFC3339)
+	}
+	options = append(options, QueryOpts(query))
+	uri := fmt.Sprintf("projects/%s/coderepositories/%s/commits", option.Project, option.Repository)
+	if err := g.client.Get(ctx, baseURL, uri, options...); err != nil {
+		return nil, err
+	}
+	return result, nil
 }
