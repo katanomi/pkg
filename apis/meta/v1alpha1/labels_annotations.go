@@ -58,7 +58,7 @@ const (
 	TriggeredByAnnotationKey = "katanomi.dev/triggeredBy"
 	// CreatedByAnnotationKey annotation key to store resource creation username
 	CreatedByAnnotationKey = "katanomi.dev/createdBy"
-	// UpdatedByAnnotationKey annotation key annotation key
+	// UpdatedByAnnotationKey annotation key to store resource update username
 	UpdatedByAnnotationKey = "katanomi.dev/updatedBy"
 	// SecretTypeAnnotationKey annotation key for an existed secret with a different type
 	SecretTypeAnnotationKey = "katanomi.dev/secretType" //nolint:gosec

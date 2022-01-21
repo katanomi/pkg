@@ -1,10 +1,22 @@
+/*
+Copyright 2021 The Katanomi Authors.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
+
 package v1alpha1
 
 import (
-	"encoding/json"
-	"strings"
-
-	"gomod.alauda.cn/log"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -29,10 +41,6 @@ type BuildMetaDataStatus struct {
 	// TriggeredBy is the reason for the event trigger
 	// +optional
 	TriggeredBy *TriggeredBy `json:"triggeredBy,omitempty"`
-
-	// CreatedBy stores a created information.
-	// +optional
-	CreatedBy *CreatedBy `json:"createdBy,omitempty"`
 }
 
 // BuildRunGitStatus represent code repository status
@@ -94,31 +102,4 @@ type BuildGitPullRequestStatus struct {
 	WebURL string `json:"webURL"`
 	// HasConflicts represent if has conflicts in pull request
 	HasConflicts bool `json:"hasConflicts"`
-}
-
-func (p *BuildMetaData) Deserialization() (string, error) {
-	objByte, err := json.Marshal(p)
-	if err != nil {
-		log.Infof("Deserialization failed. [%s]", err.Error())
-		return "", err
-	}
-
-	objStr := strings.ReplaceAll(string(objByte), "\\", "\\\\")
-	objStr = strings.ReplaceAll(objStr, "\"", "\\\"")
-	return objStr, nil
-}
-
-func (p *BuildMetaData) Serialization(s string, replace bool) error {
-	if replace {
-		s = strings.ReplaceAll(s, "\\\"", "\"")
-		s = strings.ReplaceAll(s, "\\\\", "\\")
-	}
-
-	err := json.Unmarshal([]byte(s), p)
-	if err != nil {
-		log.Infof("Serialization failed. [%s]\n err[%s]", s, err.Error())
-		return err
-	}
-
-	return nil
 }
