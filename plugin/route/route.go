@@ -48,6 +48,13 @@ type Route interface {
 func match(c client.Interface) []Route {
 	routes := make([]Route, 0)
 
+	defer func() {
+		// if routes length is 0, NewService will return an error.
+		if len(routes) != 0 {
+			routes = append(routes, NewPluginMethodUnsupport())
+		}
+	}()
+
 	if v, ok := c.(client.ProjectLister); ok {
 		routes = append(routes, NewProjectList(v))
 	}
