@@ -64,6 +64,19 @@ func TestFromAnnotation(t *testing.T) {
 		g.Expect(by.Ref.Kind).Should(BeEquivalentTo("Trigger"))
 	})
 
+	t.Run("annotations has triggeredby key with user and triggeredTimestamp", func(t *testing.T) {
+		g := NewGomegaWithT(t)
+
+		annotations := map[string]string{
+			TriggeredByAnnotationKey: `{"user":{"kind":"User","name":"admin"},"triggeredTimestamp":"2022-02-09T05:34:22Z"}`,
+		}
+		by, err := (&TriggeredBy{}).FromAnnotation(annotations)
+		g.Expect(err).Should(BeNil())
+		g.Expect(by).ShouldNot(BeNil())
+		g.Expect(by.User.Name).Should(BeEquivalentTo("admin"))
+		g.Expect(by.TriggeredTimestamp).ShouldNot(BeNil())
+	})
+
 	t.Run("by is nil", func(t *testing.T) {
 		g := NewGomegaWithT(t)
 

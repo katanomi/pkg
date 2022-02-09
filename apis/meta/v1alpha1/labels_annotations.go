@@ -62,8 +62,10 @@ const (
 	UpdatedByAnnotationKey = "katanomi.dev/updatedBy"
 	// SecretTypeAnnotationKey annotation key for an existed secret with a different type
 	SecretTypeAnnotationKey = "katanomi.dev/secretType" //nolint:gosec
-	//ClusterNameAnnotationKey annotation key to store resource cluster name
+	// ClusterNameAnnotationKey annotation key to store resource cluster name
 	ClusterNameAnnotationKey = "integrations.katanomi.dev/clusterName"
+	// TriggerNameAnnotationKey annotation key to store a friendly trigger name
+	TriggerNameAnnotationKey = "katanomi.dev/triggerName"
 )
 
 // Attribute keys for Integrations
