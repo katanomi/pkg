@@ -17,15 +17,19 @@ limitations under the License.
 package sharedmain
 
 import (
+	"bytes"
 	"context"
 	"crypto/tls"
 	"errors"
 	"flag"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"sync"
 	"time"
+
+	utilyaml "k8s.io/apimachinery/pkg/util/yaml"
 
 	"k8s.io/client-go/dynamic"
 
@@ -438,6 +442,27 @@ func (a *AppBuilder) Plugins(plugins ...client.Interface) *AppBuilder {
 		}
 		a.container.Add(ws)
 	}
+	return a
+}
+
+// PluginAttributes set plugin attributes from yaml file
+func (a *AppBuilder) PluginAttributes(plugin client.PluginAttributes, file string) *AppBuilder {
+	data, err := ioutil.ReadFile(file)
+	if err != nil {
+		a.Logger.Fatalw("read plugin attributes file error", "err", err, "file", file)
+	}
+
+	attributes := make(map[string][]string)
+	reader := bytes.NewReader(data)
+	err = utilyaml.NewYAMLOrJSONDecoder(reader, len(data)).Decode(&attributes)
+	if err != nil {
+		a.Logger.Fatalw("parse plugin attributes file error", "err", err, "file", file)
+	}
+
+	for key, value := range attributes {
+		plugin.SetAttribute(key, value...)
+	}
+
 	return a
 }
 
