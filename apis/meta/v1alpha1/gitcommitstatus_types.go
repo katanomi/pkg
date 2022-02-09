@@ -57,13 +57,20 @@ type GitCommitStatusInfo struct {
 	Properties *runtime.RawExtension `json:"properties,omitempty"`
 }
 
+type GitCommitStatusInfoList []GitCommitStatusInfo
+
+type GitCommitStatusStatus struct {
+	GitCommitStatusInfoList
+	*apis.Condition
+}
+
 // GitCommitStatus object for plugin
 type GitCommitStatus struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
 
 	Spec   GitCommitStatusSpec   `json:"spec"`
-	Status []GitCommitStatusInfo `json:"status"`
+	Status GitCommitStatusStatus `json:"status"`
 }
 
 type GitCommitStatusSpec struct {
