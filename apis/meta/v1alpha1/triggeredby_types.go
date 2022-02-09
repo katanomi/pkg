@@ -72,7 +72,7 @@ func (by TriggeredBy) IsZero() bool {
 	return by.User == nil &&
 		by.CloudEvent == nil &&
 		by.Ref == nil &&
-		by.TriggeredTimestamp == nil &&
+		by.TriggeredTimestamp.IsZero() &&
 		by.TriggeredType.String() == ""
 }
 

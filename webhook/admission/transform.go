@@ -58,8 +58,12 @@ func WithTriggeredBy() TransformFunc {
 		if triggeredBy.User == nil || triggeredBy.User.Name == "" {
 			triggeredBy.User = SubjectFromRequest(req)
 		}
-		if triggeredBy.TriggeredTimestamp == nil {
+		if triggeredBy.TriggeredTimestamp.IsZero() {
 			creation := metaobj.GetCreationTimestamp()
+			// if creation is not set, we set it to the current time.
+			if creation.IsZero() {
+				creation = metav1.Now()
+			}
 			triggeredBy.TriggeredTimestamp = &creation
 		}
 		annotations, err = triggeredBy.SetIntoAnnotation(annotations)
