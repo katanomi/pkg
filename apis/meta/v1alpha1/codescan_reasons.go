@@ -16,19 +16,19 @@ limitations under the License.
 
 package v1alpha1
 
-type CodeScanReason string
+type CodeScanReportSyncReason string
 
 const (
-	// code scan task succeeded
-	CodeScanTaskStatusSucceededReason CodeScanReason = SucceededReason
-	// code scan task cancelled
-	CodeScanTaskStatusCancelledReason CodeScanReason = CancelledReason
-	// code scan task pending
-	CodeScanTaskStatusPendingReason CodeScanReason = PendingReason
-	// code scan task in process
-	CodeScanTaskStatusRunningReason CodeScanReason = RunningReason
-	// code scan task fail
-	CodeScanTaskStatusFailedReason CodeScanReason = FailedReason
-	// code scan task error
-	CodeScanTaskStatusErrorReason CodeScanReason = ErrorReason
+	// Code scan task succeeded
+	CodeScanReportSyncSucceededReason CodeScanReportSyncReason = SucceededReason
+	// The code scan task was canceled
+	CodeScanTaskCancelled CodeScanReportSyncReason = "CodeScanTaskCancelled"
+	// Code scan task is waiting to start
+	CodeScanTaskPending CodeScanReportSyncReason = "CodeScanTaskPending"
+	// ode scan task in process
+	CodeScanTaskRunning CodeScanReportSyncReason = "CodeScanTaskRunning"
+	// Code scan task execution failed
+	CodeScanTaskFailedReason CodeScanReportSyncReason = "CodeScanTaskFailed"
+	// Error in sync report
+	CodeScanReportSyncErrorReason CodeScanReportSyncReason = "CodeScanSyncReportError"
 )
