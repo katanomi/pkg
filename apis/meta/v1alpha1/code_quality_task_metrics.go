@@ -58,15 +58,15 @@ type CodeQualityTaskMetricsSpecComponent struct {
 }
 
 type CodeQualityTaskMetricsSpecTask struct {
-	StartedAt       string         `json:"startedAt"`
-	CompletedAt     string         `json:"executedAt"`
-	ExecutionTimeMs string         `json:"executionTimeMs"`
-	ID              string         `json:"id"`
-	Status          CodeScanReason `json:"status"`
-	AnalysisId      string         `json:"analysisId"`
+	StartedAt       string                   `json:"startedAt"`
+	CompletedAt     string                   `json:"executedAt"`
+	ExecutionTimeMs string                   `json:"executionTimeMs"`
+	ID              string                   `json:"id"`
+	Status          CodeScanReportSyncReason `json:"status"`
+	AnalysisId      string                   `json:"analysisId"`
 }
 
 type CodeQualityTaskMetricsStatus struct {
-	Reason CodeScanReason         `json:"reason,omitempty"`
-	Status corev1.ConditionStatus `json:"status,omitempty"`
+	Reason CodeScanReportSyncReason `json:"reason,omitempty"`
+	Status corev1.ConditionStatus   `json:"status,omitempty"`
 }
