@@ -296,3 +296,9 @@ type ArtifactTriggerRegister interface {
 	// cloud event type of push hook that will match
 	PushEventType() string
 }
+
+// project management
+type IssueLister interface {
+	Interface
+	ListIssues(ctx context.Context, params metav1alpha1.IssueOptions, option metav1alpha1.ListOptions) (*metav1alpha1.IssueList, error)
+}
