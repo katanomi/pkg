@@ -91,3 +91,26 @@ type ArtifactOptions struct {
 	// artifact name
 	Artifact string `json:"artifact"`
 }
+
+// IssueOption path params
+type IssueOptions struct {
+	// Project identity name
+	Identity string `json:"identity"`
+
+	// Issue id
+	IssueId string `json:"issueId"`
+
+	// Issue branch
+	Branch string `json:"branch"`
+}
+
+type UserOptions struct {
+	// Project identity
+	Project string `json:"project"`
+
+	// Group identity
+	Group string `json:"group"`
+
+	// User indentity
+	UserId string `json:"userId"`
+}
