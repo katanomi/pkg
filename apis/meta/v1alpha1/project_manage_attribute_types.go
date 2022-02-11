@@ -45,6 +45,8 @@ type AttributeSpec struct {
 
 // AttributeStatus for issue status type
 type AttributeStatus struct {
+	// project attribute status id
+	ID string `json:"id"`
 	// project attribute status name
 	Name string `json:"name"`
 }
