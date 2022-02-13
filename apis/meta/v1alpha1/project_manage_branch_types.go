@@ -35,6 +35,9 @@ type Branch struct {
 
 // BranchSpec for branch
 type BranchSpec struct {
+	// issue info
+	Issue IssueInfo `json:"issue"`
+
 	// Branch author
 	Author Author `json:"author"`
 
@@ -45,14 +48,31 @@ type BranchSpec struct {
 	CodeInfo CodeInfo `json:"codeInfo"`
 }
 
+type IssueInfo struct {
+	// issue id
+	Id string `json:"id"`
+
+	// issue type
+	Type string `json:"type"`
+}
+
 type CodeInfo struct {
 	// Address stores the repo address
 	Address *duckv1.Addressable `json:"address"`
 
-	// Code repo branch
+	// code repo integration name
+	IntegrationName string `json:"integrationName"`
+
+	// code project name
+	Project string `json:"project"`
+
+	// code repo name
+	Repository string `json:"repository"`
+
+	// issue relate branch
 	Branch string `json:"branch"`
 
-	// Code repo base branch
+	// issue relate base branch
 	// +optional
 	BaseBranch string `json:"baseBranch"`
 }

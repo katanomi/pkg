@@ -50,6 +50,9 @@ type IssueSpec struct {
 	// Issue type
 	Type string `json:"type"`
 
+	// Issue subtype
+	SubType string `json:"subType"`
+
 	// Issue priority
 	Priority IssuePriority `json:"priority"`
 

@@ -17,6 +17,7 @@ limitations under the License.
 package route
 
 import (
+	"fmt"
 	"net/http"
 	"strconv"
 
@@ -45,8 +46,8 @@ func (b *branchList) Register(ws *restful.WebService) {
 	issueParam := ws.PathParameter("issue", "issue id")
 	ws.Route(
 		ListOptionsDocs(
-			ws.GET("/project/{project:*}/issues/{issue:*}/branches").To(b.ListIssueBranches).
-				Doc("GetIssues").Param(projectParam).Param(issueParam).
+			ws.GET("/projects/{project:*}/issues/{issue:*}/branches").To(b.ListIssueBranches).
+				Doc("ListIssurBranches").Param(projectParam).Param(issueParam).
 				Metadata(restfulspec.KeyOpenAPITags, b.tags).
 				Returns(http.StatusOK, "OK", metav1alpha1.BranchList{}),
 		),
@@ -54,12 +55,8 @@ func (b *branchList) Register(ws *restful.WebService) {
 }
 
 func (b *branchList) ListIssueBranches(request *restful.Request, response *restful.Response) {
+	fmt.Println("list issues branches request: ", request)
 	option := GetListOptionsFromRequest(request)
-	projectId, err := strconv.ParseInt(request.PathParameter("project"), 10, 64)
-	if err != nil {
-		kerrors.HandleError(request, response, err)
-		return
-	}
 	issueId, err := strconv.ParseInt(request.PathParameter("issue"), 10, 64)
 	if err != nil {
 		kerrors.HandleError(request, response, err)
@@ -67,10 +64,10 @@ func (b *branchList) ListIssueBranches(request *restful.Request, response *restf
 	}
 
 	pathParams := metav1alpha1.IssueOptions{
-		ProjectId: int(projectId),
-		IssueId:   int(issueId),
+		Identity: request.PathParameter("project"),
+		IssueId:  int(issueId),
 	}
-	branches, err := b.impl.ListBranches(request.Request.Context(), pathParams, option)
+	branches, err := b.impl.ListIssueBranches(request.Request.Context(), pathParams, option)
 	if err != nil {
 		kerrors.HandleError(request, response, err)
 		return
@@ -96,7 +93,7 @@ func (b *branchCreator) Register(ws *restful.WebService) {
 	projectParam := ws.PathParameter("project", "issue belong to integrate project")
 	issueParam := ws.PathParameter("issue", "issue id")
 	ws.Route(
-		ws.POST("/project/{project:*}/issues/{issue:*}/branches").To(b.CreateIssueBranch).
+		ws.POST("/projects/{project:*}/issues/{issue:*}/branches").To(b.CreateIssueBranch).
 			Doc("CreateIssueBranch").Param(projectParam).Param(issueParam).
 			Metadata(restfulspec.KeyOpenAPITags, b.tags).
 			Returns(http.StatusOK, "OK", metav1alpha1.Branch{}),
@@ -104,11 +101,7 @@ func (b *branchCreator) Register(ws *restful.WebService) {
 }
 
 func (b *branchCreator) CreateIssueBranch(request *restful.Request, response *restful.Response) {
-	projectId, err := strconv.ParseInt(request.PathParameter("project"), 10, 64)
-	if err != nil {
-		kerrors.HandleError(request, response, err)
-		return
-	}
+	fmt.Println("create issue branch request: ", request)
 	issueId, err := strconv.ParseInt(request.PathParameter("issue"), 10, 64)
 	if err != nil {
 		kerrors.HandleError(request, response, err)
@@ -116,13 +109,16 @@ func (b *branchCreator) CreateIssueBranch(request *restful.Request, response *re
 	}
 
 	pathParams := metav1alpha1.IssueOptions{
-		ProjectId: int(projectId),
-		IssueId:   int(issueId),
+		Identity: request.PathParameter("project"),
+		IssueId:  int(issueId),
 	}
 
-	// TODO: 补充branch信息，从request.body获取
-	payload := metav1alpha1.BranchPayload{}
-	branch, err := b.impl.CreateIssueBranch(request.Request.Context(), pathParams, payload)
+	payload := &metav1alpha1.Branch{}
+	if err := request.ReadEntity(payload); err != nil {
+		kerrors.HandleError(request, response, err)
+		return
+	}
+	branch, err := b.impl.CreateIssueBranch(request.Request.Context(), pathParams, *payload)
 	if err != nil {
 		kerrors.HandleError(request, response, err)
 		return
@@ -148,7 +144,7 @@ func (b *branchDeleter) Register(ws *restful.WebService) {
 	projectParam := ws.PathParameter("project", "issue belong to integrate project")
 	issueParam := ws.PathParameter("issue", "issue id")
 	ws.Route(
-		ws.DELETE("/project/{project:*}/issues/{issue:*}/branches").To(b.DeleteIssueBranch).
+		ws.DELETE("/projects/{project:*}/issues/{issue:*}/branches").To(b.DeleteIssueBranch).
 			Doc("DeleteIssueBranch").Param(projectParam).Param(issueParam).
 			Metadata(restfulspec.KeyOpenAPITags, b.tags).
 			Returns(http.StatusOK, "OK", nil),
@@ -156,11 +152,7 @@ func (b *branchDeleter) Register(ws *restful.WebService) {
 }
 
 func (b *branchDeleter) DeleteIssueBranch(request *restful.Request, response *restful.Response) {
-	projectId, err := strconv.ParseInt(request.PathParameter("project"), 10, 64)
-	if err != nil {
-		kerrors.HandleError(request, response, err)
-		return
-	}
+	fmt.Println("delete issue branch request: ", request)
 	issueId, err := strconv.ParseInt(request.PathParameter("issue"), 10, 64)
 	if err != nil {
 		kerrors.HandleError(request, response, err)
@@ -168,13 +160,16 @@ func (b *branchDeleter) DeleteIssueBranch(request *restful.Request, response *re
 	}
 
 	pathParams := metav1alpha1.IssueOptions{
-		ProjectId: int(projectId),
-		IssueId:   int(issueId),
+		Identity: request.PathParameter("project"),
+		IssueId:  int(issueId),
 	}
 
-	// TODO: 补充branch信息，从request.body获取
-	payload := metav1alpha1.BranchPayload{}
-	err = b.impl.DeleteIssueBranch(request.Request.Context(), pathParams, payload)
+	payload := &metav1alpha1.Branch{}
+	if err := request.ReadEntity(payload); err != nil {
+		kerrors.HandleError(request, response, err)
+		return
+	}
+	err = b.impl.DeleteIssueBranch(request.Request.Context(), pathParams, *payload)
 	if err != nil {
 		kerrors.HandleError(request, response, err)
 		return

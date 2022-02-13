@@ -167,6 +167,30 @@ func match(c client.Interface) []Route {
 		routes = append(routes, NewAuthToken(v))
 	}
 
+	if v, ok := c.(client.IssueLister); ok {
+		routes = append(routes, NewIssueList(v))
+	}
+
+	if v, ok := c.(client.IssueGetter); ok {
+		routes = append(routes, NewIssueGet(v))
+	}
+
+	if v, ok := c.(client.IssueAttributeGetter); ok {
+		routes = append(routes, NewIssueAttributeGet(v))
+	}
+
+	if v, ok := c.(client.IssueBranchLister); ok {
+		routes = append(routes, NewIssueBranchList(v))
+	}
+
+	if v, ok := c.(client.IssueBranchCreator); ok {
+		routes = append(routes, NewIssueBranchCreate(v))
+	}
+
+	if v, ok := c.(client.IssueBranchDeleter); ok {
+		routes = append(routes, NewIssueBranchDelete(v))
+	}
+
 	return routes
 }
 
@@ -257,6 +281,24 @@ func GetMethods(c client.Interface) []string {
 	}
 	if _, ok := c.(client.AuthChecker); ok {
 		methods = append(methods, "AuthCheck")
+	}
+	if _, ok := c.(client.IssueLister); ok {
+		methods = append(methods, "ListIssues")
+	}
+	if _, ok := c.(client.IssueGetter); ok {
+		methods = append(methods, "GetIssue")
+	}
+	if _, ok := c.(client.IssueAttributeGetter); ok {
+		methods = append(methods, "GetIssueAttribute")
+	}
+	if _, ok := c.(client.IssueBranchLister); ok {
+		methods = append(methods, "ListIssueBranches")
+	}
+	if _, ok := c.(client.IssueBranchCreator); ok {
+		methods = append(methods, "CreateIssueBranch")
+	}
+	if _, ok := c.(client.IssueBranchDeleter); ok {
+		methods = append(methods, "DeleteIssueBranch")
 	}
 	return methods
 }

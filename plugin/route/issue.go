@@ -17,6 +17,7 @@ limitations under the License.
 package route
 
 import (
+	"fmt"
 	"net/http"
 	"strconv"
 
@@ -44,7 +45,7 @@ func (i *issueList) Register(ws *restful.WebService) {
 	projectParam := ws.PathParameter("project", "issue belong to integrate project")
 	ws.Route(
 		ListOptionsDocs(
-			ws.GET("/project/{project:*}/issues").To(i.ListIssues).
+			ws.GET("/projects/{project:*}/issues").To(i.ListIssues).
 				Doc("ListIssues").Param(projectParam).
 				Metadata(restfulspec.KeyOpenAPITags, i.tags).
 				Returns(http.StatusOK, "OK", metav1alpha1.IssueList{}),
@@ -53,14 +54,10 @@ func (i *issueList) Register(ws *restful.WebService) {
 }
 
 func (i *issueList) ListIssues(request *restful.Request, response *restful.Response) {
+	fmt.Println("list issues request: ", request)
 	option := GetListOptionsFromRequest(request)
-	projectId, err := strconv.ParseInt(request.PathParameter("project"), 10, 64)
-	if err != nil {
-		kerrors.HandleError(request, response, err)
-		return
-	}
 	pathParams := metav1alpha1.IssueOptions{
-		ProjectId: int(projectId),
+		Identity: request.PathParameter("project"),
 	}
 	issues, err := i.impl.ListIssues(request.Request.Context(), pathParams, option)
 	if err != nil {
@@ -88,7 +85,7 @@ func (i *issueGetter) Register(ws *restful.WebService) {
 	projectParam := ws.PathParameter("project", "issue belong to integrate project")
 	issueParam := ws.PathParameter("issue", "issue id")
 	ws.Route(
-		ws.GET("/project/{project:*}/issues/{issue:*}").To(i.GetIssue).
+		ws.GET("/projects/{project:*}/issues/{issue}").To(i.GetIssue).
 			Doc("GetIssues").Param(projectParam).Param(issueParam).
 			Metadata(restfulspec.KeyOpenAPITags, i.tags).
 			Returns(http.StatusOK, "OK", metav1alpha1.Issue{}),
@@ -96,11 +93,8 @@ func (i *issueGetter) Register(ws *restful.WebService) {
 }
 
 func (i *issueGetter) GetIssue(request *restful.Request, response *restful.Response) {
-	projectId, err := strconv.ParseInt(request.PathParameter("project"), 10, 64)
-	if err != nil {
-		kerrors.HandleError(request, response, err)
-		return
-	}
+	fmt.Println("get issue request: ", request)
+	option := GetListOptionsFromRequest(request)
 	issueId, err := strconv.ParseInt(request.PathParameter("issue"), 10, 64)
 	if err != nil {
 		kerrors.HandleError(request, response, err)
@@ -108,10 +102,10 @@ func (i *issueGetter) GetIssue(request *restful.Request, response *restful.Respo
 	}
 
 	pathParams := metav1alpha1.IssueOptions{
-		ProjectId: int(projectId),
-		IssueId:   int(issueId),
+		Identity: request.PathParameter("project"),
+		IssueId:  int(issueId),
 	}
-	issue, err := i.impl.GetIssue(request.Request.Context(), pathParams)
+	issue, err := i.impl.GetIssue(request.Request.Context(), pathParams, option)
 	if err != nil {
 		kerrors.HandleError(request, response, err)
 		return
@@ -145,13 +139,8 @@ func (i *issueAttributeGetter) Register(ws *restful.WebService) {
 }
 
 func (i *issueAttributeGetter) GetAttributes(request *restful.Request, response *restful.Response) {
-	projectId, err := strconv.ParseInt(request.PathParameter("project"), 10, 64)
-	if err != nil {
-		kerrors.HandleError(request, response, err)
-		return
-	}
 	pathParams := metav1alpha1.IssueOptions{
-		ProjectId: int(projectId),
+		Identity: request.PathParameter("project"),
 	}
 	attribute, err := i.impl.GetIssueAttribute(request.Request.Context(), pathParams)
 	if err != nil {

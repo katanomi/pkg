@@ -94,8 +94,8 @@ type ArtifactOptions struct {
 
 // IssueOption path params
 type IssueOptions struct {
-	// Project id
-	ProjectId int `json:"projectId"`
+	// Project identity name
+	Identity string `json:"identity"`
 
 	// Issue id
 	IssueId int `json:"issueId"`
