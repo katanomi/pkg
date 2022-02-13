@@ -99,4 +99,7 @@ type IssueOptions struct {
 
 	// Issue id
 	IssueId int `json:"issueId"`
+
+	// Issue branch
+	Branch string `json:"branch"`
 }

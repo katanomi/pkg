@@ -302,3 +302,28 @@ type IssueLister interface {
 	Interface
 	ListIssues(ctx context.Context, params metav1alpha1.IssueOptions, option metav1alpha1.ListOptions) (*metav1alpha1.IssueList, error)
 }
+
+type IssueGetter interface {
+	Interface
+	GetIssue(ctx context.Context, params metav1alpha1.IssueOptions) (*metav1alpha1.Issue, error)
+}
+
+type IssueBranchLister interface {
+	Interface
+	ListBranches(ctx context.Context, params metav1alpha1.IssueOptions, option metav1alpha1.ListOptions) (*metav1alpha1.BranchList, error)
+}
+
+type IssueBranchCreator interface {
+	Interface
+	CreateIssueBranch(ctx context.Context, params metav1alpha1.IssueOptions, branch metav1alpha1.BranchPayload) (*metav1alpha1.Branch, error)
+}
+
+type IssueBranchDeleter interface {
+	Interface
+	DeleteIssueBranch(ctx context.Context, params metav1alpha1.IssueOptions, payload metav1alpha1.BranchPayload) error
+}
+
+type IssueAttributeGetter interface {
+	Interface
+	GetIssueAttribute(ctx context.Context, params metav1alpha1.IssueOptions) (*metav1alpha1.Attribute, error)
+}
