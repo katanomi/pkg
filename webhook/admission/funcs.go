@@ -24,8 +24,15 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/webhook/admission"
 )
 
+// below both methods comes from sigs.k8s.io/controller-runtime/pkg/builder/webhook.go
+
 func generateMutatePath(gvk schema.GroupVersionKind) string {
 	return "/mutate-" + strings.Replace(gvk.Group, ".", "-", -1) + "-" +
+		gvk.Version + "-" + strings.ToLower(gvk.Kind)
+}
+
+func generateValidatePath(gvk schema.GroupVersionKind) string {
+	return "/validate-" + strings.Replace(gvk.Group, ".", "-", -1) + "-" +
 		gvk.Version + "-" + strings.ToLower(gvk.Kind)
 }
 
