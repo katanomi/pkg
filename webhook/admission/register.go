@@ -36,3 +36,16 @@ func RegisterDefaultWebhookFor(ctx context.Context, mgr ctrl.Manager, defaulter 
 	)
 	return
 }
+
+// RegisterValidateWebhookFor registers a mutate webhook for the defaulter with transforms
+func RegisterValidateWebhookFor(ctx context.Context, mgr ctrl.Manager, validator Validator, validateCreateFuncs []ValidateCreateFunc, validateUpdateFuncs []ValidateUpdateFunc, validateDeleteFuncs []ValidateDeleteFunc) (err error) {
+	var gvk schema.GroupVersionKind
+	if gvk, err = apiutil.GVKForObject(validator, mgr.GetScheme()); err != nil {
+		return
+	}
+	mgr.GetWebhookServer().Register(
+		generateValidatePath(gvk),
+		ValidatingWebhookFor(ctx, validator, validateCreateFuncs, validateUpdateFuncs, validateDeleteFuncs),
+	)
+	return
+}

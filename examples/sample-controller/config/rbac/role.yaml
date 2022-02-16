@@ -1,4 +1,3 @@
-
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
@@ -9,13 +8,24 @@ rules:
 - apiGroups:
   - ""
   resources:
-  - secrets
   - configmaps
+  - namespaces
+  - secrets
   verbs:
   - get
   - list
-  - watch
-  - create
-  - update
   - patch
+  - update
+  - watch
+- apiGroups:
+  - test.katanomi.dev
+  resources:
+  - '*'
+  verbs:
+  - create
   - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch

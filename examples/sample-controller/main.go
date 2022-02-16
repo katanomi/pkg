@@ -18,29 +18,106 @@ package main
 
 import (
 	"context"
+	"fmt"
+	"strings"
+	"time"
+
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"knative.dev/pkg/logging"
 
 	"github.com/katanomi/pkg/multicluster"
 	"github.com/katanomi/pkg/sharedmain"
+	"github.com/katanomi/pkg/webhook/admission"
 	"go.uber.org/zap"
 	corev1 "k8s.io/api/core/v1"
-	"k8s.io/client-go/kubernetes/scheme"
+	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
 	ctrlclient "sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
+
+	testv1alpha1 "github.com/katanomi/pkg/examples/sample-controller/apis/test/v1alpha1"
+	testcontrollers "github.com/katanomi/pkg/examples/sample-controller/controllers/test"
+	"k8s.io/apimachinery/pkg/runtime"
+	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
+	"knative.dev/pkg/apis"
+	ctrladmission "sigs.k8s.io/controller-runtime/pkg/webhook/admission"
 )
+
+var (
+	scheme = runtime.NewScheme()
+)
+
+func init() {
+	utilruntime.Must(clientgoscheme.AddToScheme(scheme))
+
+	utilruntime.Must(testv1alpha1.AddToScheme(scheme))
+}
 
 func main() {
 
 	sharedmain.App("controller").
-		Scheme(scheme.Scheme).
+		Scheme(scheme).
 		// Overrides a MultiClusterClient
 		// by default will load the multicluster.ClusterRegistryClient
 		// MultiClusterClient(Interface).
 		Log().
 		Profiling().
-		Controllers(&Controller{}, &Controller2{}).
+		Controllers(
+			&testcontrollers.FooBarReconciler{},
+			// &Controller{},
+			// &Controller2{},
+		).
+		Webhooks(
+			// custom default webhook
+			admission.NewDefaulterWebhook(&testv1alpha1.FooBar{}).WithTransformer(
+				WithCreateUpdateTimes(),
+			).WithLoggerName("foobar-defaulting"),
+			// custom validation webhook
+			admission.NewValidatorWebhook(&testv1alpha1.FooBar{}).
+				WithValidateCreate(ValidateNameToHaveABC()).WithLoggerName("foobar-validating"),
+		).
 		APIDocs().
 		Run()
+}
+
+// ValidateNameToHaveABC extended create validation function added here
+func ValidateNameToHaveABC() admission.ValidateCreateFunc {
+	return func(ctx context.Context, obj runtime.Object, req ctrladmission.Request) error {
+		metaobj, ok := obj.(metav1.Object)
+		if !ok {
+			return fmt.Errorf("invalid object?")
+		}
+
+		if !strings.Contains(metaobj.GetName(), "abc") {
+			return fmt.Errorf("metadata.name should contain \"abc\"")
+		}
+		return nil
+	}
+}
+
+// WithCreateUpdateTimes extended defaulting/transformation function added here
+func WithCreateUpdateTimes() admission.TransformFunc {
+	return func(ctx context.Context, obj runtime.Object, req ctrladmission.Request) {
+		metaobj, ok := obj.(metav1.Object)
+		if !ok {
+			return
+		}
+		log := logging.FromContext(ctx).With("name", metaobj.GetName(), "ns", metaobj.GetNamespace())
+		annotations := metaobj.GetAnnotations()
+		if annotations == nil {
+			annotations = map[string]string{}
+		}
+
+		now := time.Now().Format(time.RFC3339)
+		if apis.IsInCreate(ctx) {
+			log.Debugw("adding created time", "time", now)
+			annotations["createdAt"] = now
+		} else if apis.IsInUpdate(ctx) {
+			annotations["updatedAt"] = now
+			log.Debugw("adding updated time", "time", now)
+		}
+		metaobj.SetAnnotations(annotations)
+	}
 }
 
 type Controller struct {
