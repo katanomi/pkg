@@ -126,6 +126,12 @@ type ScanImage interface {
 	ScanImage(ctx context.Context, params metav1alpha1.ArtifactOptions) error
 }
 
+// GetImageConfig get image config
+type ImageConfigGetter interface {
+	Interface
+	GetImageConfig(ctx context.Context, params metav1alpha1.ArtifactOptions) (*metav1alpha1.ImageConfig, error)
+}
+
 // WebhookRegister used to register and manage webhooks
 type WebhookRegister interface {
 	// Use the methods below to manage webhooks in the target platform

@@ -20,6 +20,7 @@ require (
 	github.com/jarcoal/httpmock v1.0.8
 	github.com/onsi/ginkgo v1.14.1
 	github.com/onsi/gomega v1.10.3
+	github.com/opencontainers/image-spec v1.0.2
 	github.com/opentracing/opentracing-go v1.1.0
 	github.com/prometheus/client_golang v1.11.0
 	github.com/sirupsen/logrus v1.7.0 // indirect
@@ -77,6 +78,7 @@ require (
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.1 // indirect
 	github.com/nxadm/tail v1.4.4 // indirect
+	github.com/opencontainers/go-digest v1.0.0 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/prometheus/client_model v0.2.0 // indirect
 	github.com/prometheus/common v0.26.0 // indirect
@@ -112,4 +114,7 @@ require (
 	sigs.k8s.io/structured-merge-diff/v4 v4.0.3 // indirect
 )
 
-replace go.uber.org/zap => github.com/katanomi/zap v1.18.2 // indirect
+replace (
+	github.com/opencontainers/image-spec => github.com/opencontainers/image-spec v1.0.2-0.20210819154149-5ad6f50d6283
+	go.uber.org/zap => github.com/katanomi/zap v1.18.2 // indirect
+)

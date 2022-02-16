@@ -87,6 +87,10 @@ func match(c client.Interface) []Route {
 		routes = append(routes, NewScanImage(v))
 	}
 
+	if v, ok := c.(client.ImageConfigGetter); ok {
+		routes = append(routes, NewImageConifgGetter(v))
+	}
+
 	if v, ok := c.(client.GitRepoFileGetter); ok {
 		routes = append(routes, NewGitRepoFileGetter(v))
 	}
@@ -194,6 +198,9 @@ func GetMethods(c client.Interface) []string {
 	}
 	if _, ok := c.(client.ScanImage); ok {
 		methods = append(methods, "ScanImage")
+	}
+	if _, ok := c.(client.ImageConfigGetter); ok {
+		methods = append(methods, "GetImageConfig")
 	}
 	if _, ok := c.(client.WebhookRegister); ok {
 		methods = append(methods, "CreateWebhook", "UpdateWebhook", "DeleteWebhook")
