@@ -17,9 +17,12 @@ A few changes are needed in the current objects in order to use this customized 
 
  1. Add `context.Context` to `ValidateCreate`, `ValidateUpdate`, `ValidateDelete` and `Default` methods as the first parameter. `Default` and/or `Validation` can be changed as necessary. If required, one or both can keep using regular webhooks.
  1. Import `"github.com/katanomi/pkg/webhook/admission"` on your `<type>_webhook.go` files
- 1. Change the interface check from `var _ webhook.Defaulter = &Type{}` to  `var _ admission.Defaulter = &Type{}` the last one comming from this package. Do the same for `Validator`
+ 1. Change the interface check from `var _ webhook.Defaulter = &Type{}` to  `var _ admission.Defaulter = &Type{}` the last one coming from this package. Do the same for `Validator`
  1. Use `"knative.dev/pkg/logging"` to fetch a logger from the context and `"knative.dev/pkg/apis"` methods like `apis.IsWithinCreate`
  1. Change one of the below methods to setup the webhook within the app
+
+
+> The [sample-controller](../examples/sample-controller) has full usable example implemented
 
 ### As default setup for object
 
@@ -43,6 +46,12 @@ func (r *Delivery) SetupRegisterWithManager(ctx context.Context, mgr ctrl.Manage
 	log := logging.FromContext(ctx)
     // defaulting and validating should be added here, if not added the standard one will be used instead
 	err := admission.RegisterDefaultWebhookFor(ctx, mgr, r, admission.WithCreatedBy())
+	if err != nil {
+		log.Fatalw("register webhook failed", "err", err)
+	}
+
+	// adds validate webhook for object
+	err := admission.RegisterValidateWebhookFor(ctx, mgr, r, []admission.ValidateCreateFunc{}, []admission.ValidateUpdateFunc{}, []admission.ValidateDeleteFunc{})
 	if err != nil {
 		log.Fatalw("register webhook failed", "err", err)
 	}
@@ -98,16 +107,16 @@ Using this method will give the ability to extend validation methods with new ex
 		Webhooks(
 			&deliveriesv1alpha1.Stage{},
 			&deliveriesv1alpha1.StageRun{},
-            // custom default webhook
-            admission.NewDefaulterWebhook(&deliveriesv1alpha1.Delivery{}).WithTransformer(
-                somepackage.SomeTrasnformerMethod,
-                somepackage.AnotherMethod,
-            ),
-            // custom validation webhook
-            admission.NewValidatorWebhook(&deliveriesv1alpha1.Delivery{}).
-              WithValidateCreate(somepackage.SomeValidateCreateFunc).
-              WithValidateUpdate(somepackage.SomeValidateUpdateFunc).
-              WithValidateDelete(somepackage.SomeValidateDeleteFunc),
+			// custom default webhook
+			admission.NewDefaulterWebhook(&deliveriesv1alpha1.Delivery{}).WithTransformer(
+				somepackage.SomeTrasnformerMethod,
+				somepackage.AnotherMethod,
+			),
+			// custom validation webhook
+			admission.NewValidatorWebhook(&deliveriesv1alpha1.Delivery{}).
+				WithValidateCreate(somepackage.SomeValidateCreateFunc).
+				WithValidateUpdate(somepackage.SomeValidateUpdateFunc).
+				WithValidateDelete(somepackage.SomeValidateDeleteFunc),
 			&deliveriesv1alpha1.Delivery{},
 			&deliveriesv1alpha1.DeliveryRun{},
 			&deliveriesv1alpha1.ClusterStage{},
@@ -143,9 +152,9 @@ func WithCreateUpdateTimes() TransformFunc {
 		}
 
 		now := time.Now().Format(time.RFC3339)
-		if apis.IsWithinCreate(ctx) {
+		if apis.IsInCreate(ctx) {
 			annotations["createdAt"] = now
-		} else if apis.IsWithinUpdate(ctx) {
+		} else if apis.IsInUpdate(ctx) {
 			annotations["updatedAt"] = now
 		}
 		metaobj.SetAnnotations(annotations)

@@ -25,6 +25,7 @@ import (
 	"github.com/katanomi/pkg/sharedmain"
 	"knative.dev/pkg/logging"
 	ctrl "sigs.k8s.io/controller-runtime"
+	"sigs.k8s.io/controller-runtime/pkg/webhook/admission"
 )
 
 type ValidatorWebhook interface {
@@ -34,13 +35,20 @@ type ValidatorWebhook interface {
 	WithValidateCreate(creates ...ValidateCreateFunc) ValidatorWebhook
 	WithValidateUpdate(updates ...ValidateUpdateFunc) ValidatorWebhook
 	WithValidateDelete(deletes ...ValidateDeleteFunc) ValidatorWebhook
+	WithLoggerName(loggerName string) ValidatorWebhook
 }
 
 type validatorWebhook struct {
 	Validator
-	creates []ValidateCreateFunc
-	updates []ValidateUpdateFunc
-	deletes []ValidateDeleteFunc
+	LoggerName string
+	creates    []ValidateCreateFunc
+	updates    []ValidateUpdateFunc
+	deletes    []ValidateDeleteFunc
+}
+
+func (d *validatorWebhook) WithLoggerName(loggerName string) ValidatorWebhook {
+	d.LoggerName = loggerName
+	return d
 }
 
 func (d *validatorWebhook) WithValidateCreate(creates ...ValidateCreateFunc) ValidatorWebhook {
@@ -65,9 +73,11 @@ func NewValidatorWebhook(validator Validator) ValidatorWebhook {
 }
 
 func (d *validatorWebhook) GetLoggerName() string {
+	if d.LoggerName != "" {
+		return d.LoggerName
+	}
 	if d.Validator != nil {
 		typeName := strings.ToLower(reflect.TypeOf(d.Validator).Name())
-
 		return fmt.Sprintf("%s-webhook-validation", typeName)
 	}
 
@@ -75,6 +85,11 @@ func (d *validatorWebhook) GetLoggerName() string {
 }
 
 func (r *validatorWebhook) SetupWebhookWithManager(mgr ctrl.Manager) error {
+	_, implementsDefaulter := r.Validator.(admission.Defaulter)
+	if !implementsDefaulter {
+		// not necessary to run this part if not implemented
+		return nil
+	}
 	return ctrl.NewWebhookManagedBy(mgr).
 		For(r.Validator).
 		Complete()

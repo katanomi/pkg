@@ -37,7 +37,7 @@ spec:
             fieldRef:
               fieldPath: metadata.name
         - name: CONFIG_LOGGING_NAME
-          value: testconfig-logging
+          value: test-config-logging
         securityContext:
           allowPrivilegeEscalation: false
         livenessProbe:

@@ -1,0 +1,6 @@
+apiVersion: test.katanomi.dev/v1alpha1
+kind: FooBar
+metadata:
+  name: sample-foobar
+spec:
+  text: "some text"

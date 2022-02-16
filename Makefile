@@ -73,7 +73,7 @@ ko: ## Download ko locally if necessary.
 GOIMPORTS = $(shell pwd)/bin/goimports
 goimports: ## Download goimports locally if necessary.
 	$(call go-get-tool,$(GOIMPORTS),golang.org/x/tools/cmd/goimports)
-	$(GOIMPORTS) -w -l $(shell find . -path '.git' -prune -path './vendor' -prune -o -path './examples' -prune -o -name '*.pb.go' -prune -o -type f -name '*.go' -print)
+	$(GOIMPORTS) -w -l $(shell find . -path '.git' -prune -path './vendor' -prune -o -name '*.pb.go' -prune -o -type f -name '*.go' -print)
 
 GINKGO = $(shell pwd)/bin/ginkgo
 ginkgo: ## Download ginkgo locally if necessary

@@ -25,6 +25,7 @@ import (
 	"github.com/katanomi/pkg/sharedmain"
 	"knative.dev/pkg/logging"
 	ctrl "sigs.k8s.io/controller-runtime"
+	"sigs.k8s.io/controller-runtime/pkg/webhook/admission"
 )
 
 type DefaulterWebhook interface {
@@ -32,11 +33,18 @@ type DefaulterWebhook interface {
 	sharedmain.WebhookSetup
 	sharedmain.WebhookRegisterSetup
 	WithTransformer(transformers ...TransformFunc) DefaulterWebhook
+	WithLoggerName(loggerName string) DefaulterWebhook
 }
 
 type defaulterWebhook struct {
 	Defaulter
+	LoggerName   string
 	transformers []TransformFunc
+}
+
+func (d *defaulterWebhook) WithLoggerName(loggerName string) DefaulterWebhook {
+	d.LoggerName = loggerName
+	return d
 }
 
 func (d *defaulterWebhook) WithTransformer(transformers ...TransformFunc) DefaulterWebhook {
@@ -52,6 +60,9 @@ func NewDefaulterWebhook(defaulter Defaulter) DefaulterWebhook {
 }
 
 func (d *defaulterWebhook) GetLoggerName() string {
+	if d.LoggerName != "" {
+		return d.LoggerName
+	}
 	if d.Defaulter != nil {
 		typeName := strings.ToLower(reflect.TypeOf(d.Defaulter).Name())
 
@@ -62,6 +73,11 @@ func (d *defaulterWebhook) GetLoggerName() string {
 }
 
 func (r *defaulterWebhook) SetupWebhookWithManager(mgr ctrl.Manager) error {
+	_, implementsValidator := r.Defaulter.(admission.Validator)
+	if !implementsValidator {
+		// not necessary to run this part if not implemented
+		return nil
+	}
 	return ctrl.NewWebhookManagedBy(mgr).
 		For(r.Defaulter).
 		Complete()
