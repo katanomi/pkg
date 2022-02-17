@@ -17,6 +17,7 @@ limitations under the License.
 package validation
 
 import (
+	"fmt"
 	"testing"
 
 	. "github.com/onsi/gomega"
@@ -55,6 +56,89 @@ func TestValidateDuplicatedName(t *testing.T) {
 		t.Run(i, func(t *testing.T) {
 			g := NewGomegaWithT(t)
 			errs := ValidateDuplicatedName(test.FieldPath, test.Name, test.Set)
+			test.Evaluation(g, errs)
+		})
+	}
+
+}
+
+func TestValidateGenericResourceName(t *testing.T) {
+	// g := NewGomegaWithT(t)
+	table := []struct {
+		Name       string
+		FieldPath  *field.Path
+		Evaluation func(g *WithT, errs field.ErrorList)
+	}{
+
+		{
+			"",
+			field.NewPath("a"),
+			func(g *WithT, errs field.ErrorList) {
+				g.Expect(errs).To(HaveLen(1))
+			},
+		},
+		{
+			"abc",
+			field.NewPath("abc"),
+			func(g *WithT, errs field.ErrorList) {
+				g.Expect(errs).To(HaveLen(0))
+			},
+		},
+		{
+			"abc-def",
+			field.NewPath("def"),
+			func(g *WithT, errs field.ErrorList) {
+				g.Expect(errs).To(HaveLen(0))
+			},
+		},
+		{
+			"abc-def/gh",
+			field.NewPath("gh"),
+			func(g *WithT, errs field.ErrorList) {
+				g.Expect(errs).To(HaveLen(0))
+			},
+		},
+		{
+			"abc-def/g-h",
+			field.NewPath("g-h"),
+			func(g *WithT, errs field.ErrorList) {
+				g.Expect(errs).To(HaveLen(0))
+			},
+		},
+		{
+			"abc-def/g-h_i",
+			field.NewPath("ghi"),
+			func(g *WithT, errs field.ErrorList) {
+				g.Expect(errs).To(HaveLen(0))
+			},
+		},
+		{
+			"abc-def/g-h_i.j",
+			field.NewPath("j"),
+			func(g *WithT, errs field.ErrorList) {
+				g.Expect(errs).To(HaveLen(0))
+			},
+		},
+		{
+			"Abc-def/g-h_i.j",
+			field.NewPath("j2"),
+			func(g *WithT, errs field.ErrorList) {
+				g.Expect(errs).To(HaveLen(0))
+			},
+		},
+		{
+			"Abc-def/g-h_i:j",
+			field.NewPath("j3"),
+			func(g *WithT, errs field.ErrorList) {
+				g.Expect(errs).To(HaveLen(1))
+			},
+		},
+	}
+
+	for i, test := range table {
+		t.Run(fmt.Sprintf("case %d", i), func(t *testing.T) {
+			g := NewGomegaWithT(t)
+			errs := ValidateGenericResourceName(test.Name, test.FieldPath)
 			test.Evaluation(g, errs)
 		})
 	}
