@@ -31,6 +31,11 @@ const DNS1123UnderscoreLabelMaxLength int = validation.DNS1123LabelMaxLength
 
 var dns1123LabelRegexp = regexp.MustCompile("^" + dns1123UnderscoreLabelFmt + "$")
 
+const genericResourceNameFmt string = "[-./A-Za-z0-9_]+"
+const genericResourceNameErrMsg string = "a resource name must consist of lower case alphanumeric characters, '_' or '-' or '/' or '.' "
+
+var genericResourceNameRegexp = regexp.MustCompile("^" + genericResourceNameFmt + "$")
+
 // IsDNS1123UnderscoreLabel tests for a string that conforms to the definition of a label in
 // DNS (RFC 1123) but accepting underscores in the middle.
 func IsDNS1123UnderscoreLabel(value string) []string {
@@ -44,11 +49,31 @@ func IsDNS1123UnderscoreLabel(value string) []string {
 	return errs
 }
 
+func IsGenericResourceName(value string) []string {
+	var errs []string
+
+	if !genericResourceNameRegexp.MatchString(value) {
+		errs = append(errs, validation.RegexError(genericResourceNameErrMsg, genericResourceNameFmt, "my-name", "abc/123"))
+	}
+	return errs
+}
+
 // ValidateItemNameUnderscore validates a name of an item in a slice. this is used in
 // resources,  volumes and etc
 func ValidateItemNameUnderscore(name string, fld *field.Path) field.ErrorList {
 	errs := field.ErrorList{}
 	errList := IsDNS1123UnderscoreLabel(name)
+	if len(errList) > 0 {
+		for _, errStr := range errList {
+			errs = append(errs, field.Invalid(fld, name, errStr))
+		}
+	}
+	return errs
+}
+
+func ValidateGenericResourceName(name string, fld *field.Path) field.ErrorList {
+	errs := field.ErrorList{}
+	errList := IsGenericResourceName(name)
 	if len(errList) > 0 {
 		for _, errStr := range errList {
 			errs = append(errs, field.Invalid(fld, name, errStr))
