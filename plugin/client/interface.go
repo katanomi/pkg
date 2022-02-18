@@ -320,7 +320,7 @@ type IssueBranchCreator interface {
 
 type IssueBranchDeleter interface {
 	Interface
-	DeleteIssueBranch(ctx context.Context, params metav1alpha1.IssueOptions, payload metav1alpha1.Branch) error
+	DeleteIssueBranch(ctx context.Context, params metav1alpha1.IssueOptions) error
 }
 
 type IssueAttributeGetter interface {

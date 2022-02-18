@@ -19,7 +19,6 @@ package route
 import (
 	"fmt"
 	"net/http"
-	"strconv"
 
 	restfulspec "github.com/emicklei/go-restful-openapi/v2"
 	"github.com/emicklei/go-restful/v3"
@@ -57,15 +56,9 @@ func (b *branchList) Register(ws *restful.WebService) {
 func (b *branchList) ListIssueBranches(request *restful.Request, response *restful.Response) {
 	fmt.Println("list issues branches request: ", request)
 	option := GetListOptionsFromRequest(request)
-	issueId, err := strconv.ParseInt(request.PathParameter("issue"), 10, 64)
-	if err != nil {
-		kerrors.HandleError(request, response, err)
-		return
-	}
-
 	pathParams := metav1alpha1.IssueOptions{
 		Identity: request.PathParameter("project"),
-		IssueId:  int(issueId),
+		IssueId:  request.QueryParameter("issue"),
 	}
 	branches, err := b.impl.ListIssueBranches(request.Request.Context(), pathParams, option)
 	if err != nil {
@@ -102,15 +95,9 @@ func (b *branchCreator) Register(ws *restful.WebService) {
 
 func (b *branchCreator) CreateIssueBranch(request *restful.Request, response *restful.Response) {
 	fmt.Println("create issue branch request: ", request)
-	issueId, err := strconv.ParseInt(request.PathParameter("issue"), 10, 64)
-	if err != nil {
-		kerrors.HandleError(request, response, err)
-		return
-	}
-
 	pathParams := metav1alpha1.IssueOptions{
 		Identity: request.PathParameter("project"),
-		IssueId:  int(issueId),
+		IssueId:  request.QueryParameter("issue"),
 	}
 
 	payload := &metav1alpha1.Branch{}
@@ -153,24 +140,12 @@ func (b *branchDeleter) Register(ws *restful.WebService) {
 
 func (b *branchDeleter) DeleteIssueBranch(request *restful.Request, response *restful.Response) {
 	fmt.Println("delete issue branch request: ", request)
-	issueId, err := strconv.ParseInt(request.PathParameter("issue"), 10, 64)
-	if err != nil {
-		kerrors.HandleError(request, response, err)
-		return
-	}
-
 	pathParams := metav1alpha1.IssueOptions{
 		Identity: request.PathParameter("project"),
-		IssueId:  int(issueId),
+		IssueId:  request.QueryParameter("issue"),
 	}
 
-	payload := &metav1alpha1.Branch{}
-	if err := request.ReadEntity(payload); err != nil {
-		kerrors.HandleError(request, response, err)
-		return
-	}
-	err = b.impl.DeleteIssueBranch(request.Request.Context(), pathParams, *payload)
-	if err != nil {
+	if err := b.impl.DeleteIssueBranch(request.Request.Context(), pathParams); err != nil {
 		kerrors.HandleError(request, response, err)
 		return
 	}

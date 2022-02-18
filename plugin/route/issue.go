@@ -19,7 +19,6 @@ package route
 import (
 	"fmt"
 	"net/http"
-	"strconv"
 
 	restfulspec "github.com/emicklei/go-restful-openapi/v2"
 	"github.com/emicklei/go-restful/v3"
@@ -95,15 +94,9 @@ func (i *issueGetter) Register(ws *restful.WebService) {
 func (i *issueGetter) GetIssue(request *restful.Request, response *restful.Response) {
 	fmt.Println("get issue request: ", request)
 	option := GetListOptionsFromRequest(request)
-	issueId, err := strconv.ParseInt(request.PathParameter("issue"), 10, 64)
-	if err != nil {
-		kerrors.HandleError(request, response, err)
-		return
-	}
-
 	pathParams := metav1alpha1.IssueOptions{
 		Identity: request.PathParameter("project"),
-		IssueId:  int(issueId),
+		IssueId:  request.QueryParameter("issue"),
 	}
 	issue, err := i.impl.GetIssue(request.Request.Context(), pathParams, option)
 	if err != nil {

@@ -98,7 +98,7 @@ type IssueOptions struct {
 	Identity string `json:"identity"`
 
 	// Issue id
-	IssueId int `json:"issueId"`
+	IssueId string `json:"issueId"`
 
 	// Issue branch
 	Branch string `json:"branch"`
