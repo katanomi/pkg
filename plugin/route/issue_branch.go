@@ -58,7 +58,7 @@ func (b *branchList) ListIssueBranches(request *restful.Request, response *restf
 	option := GetListOptionsFromRequest(request)
 	pathParams := metav1alpha1.IssueOptions{
 		Identity: request.PathParameter("project"),
-		IssueId:  request.QueryParameter("issue"),
+		IssueId:  request.PathParameter("issue"),
 	}
 	branches, err := b.impl.ListIssueBranches(request.Request.Context(), pathParams, option)
 	if err != nil {
@@ -97,7 +97,7 @@ func (b *branchCreator) CreateIssueBranch(request *restful.Request, response *re
 	fmt.Println("create issue branch request: ", request)
 	pathParams := metav1alpha1.IssueOptions{
 		Identity: request.PathParameter("project"),
-		IssueId:  request.QueryParameter("issue"),
+		IssueId:  request.PathParameter("issue"),
 	}
 
 	payload := &metav1alpha1.Branch{}
@@ -131,7 +131,7 @@ func (b *branchDeleter) Register(ws *restful.WebService) {
 	projectParam := ws.PathParameter("project", "issue belong to integrate project")
 	issueParam := ws.PathParameter("issue", "issue id")
 	ws.Route(
-		ws.DELETE("/projects/{project:*}/issues/{issue:*}/branches").To(b.DeleteIssueBranch).
+		ws.DELETE("/projects/{project:*}/issues/{issue:*}/branches/{branch}").To(b.DeleteIssueBranch).
 			Doc("DeleteIssueBranch").Param(projectParam).Param(issueParam).
 			Metadata(restfulspec.KeyOpenAPITags, b.tags).
 			Returns(http.StatusOK, "OK", nil),
@@ -140,12 +140,14 @@ func (b *branchDeleter) Register(ws *restful.WebService) {
 
 func (b *branchDeleter) DeleteIssueBranch(request *restful.Request, response *restful.Response) {
 	fmt.Println("delete issue branch request: ", request)
+	option := GetListOptionsFromRequest(request)
 	pathParams := metav1alpha1.IssueOptions{
 		Identity: request.PathParameter("project"),
-		IssueId:  request.QueryParameter("issue"),
+		IssueId:  request.PathParameter("issue"),
+		Branch:   request.PathParameter("branch"),
 	}
 
-	if err := b.impl.DeleteIssueBranch(request.Request.Context(), pathParams); err != nil {
+	if err := b.impl.DeleteIssueBranch(request.Request.Context(), pathParams, option); err != nil {
 		kerrors.HandleError(request, response, err)
 		return
 	}

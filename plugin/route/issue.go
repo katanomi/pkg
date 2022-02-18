@@ -96,7 +96,7 @@ func (i *issueGetter) GetIssue(request *restful.Request, response *restful.Respo
 	option := GetListOptionsFromRequest(request)
 	pathParams := metav1alpha1.IssueOptions{
 		Identity: request.PathParameter("project"),
-		IssueId:  request.QueryParameter("issue"),
+		IssueId:  request.PathParameter("issue"),
 	}
 	issue, err := i.impl.GetIssue(request.Request.Context(), pathParams, option)
 	if err != nil {
