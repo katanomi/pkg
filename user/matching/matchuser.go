@@ -60,3 +60,19 @@ func IsRightUser(userInfo authenticationv1.UserInfo, subject rbacv1.Subject) boo
 	}
 	return userMatch(userInfo, subjects)
 }
+
+func ConvertUserInfoToSubject(userInfo authenticationv1.UserInfo, namespace string) (subject rbacv1.Subject) {
+	isServiceAccount := strings.HasPrefix(userInfo.Username, serviceaccount.ServiceAccountUsernamePrefix)
+	if isServiceAccount {
+		return rbacv1.Subject{
+			Kind:      rbacv1.ServiceAccountKind,
+			Name:      strings.TrimPrefix(userInfo.Username, serviceaccount.ServiceAccountUsernamePrefix),
+			Namespace: namespace,
+		}
+	}
+
+	return rbacv1.Subject{
+		Kind: rbacv1.UserKind,
+		Name: userInfo.Username,
+	}
+}
