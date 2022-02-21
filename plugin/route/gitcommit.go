@@ -17,6 +17,7 @@ limitations under the License.
 package route
 
 import (
+	"fmt"
 	"net/http"
 	"time"
 
@@ -117,6 +118,7 @@ func (a *gitCommitLister) Register(ws *restful.WebService) {
 
 // ListCommit get commit info
 func (a *gitCommitLister) ListCommit(request *restful.Request, response *restful.Response) {
+	fmt.Println("list commit, request: ", request)
 	repo := handlePathParamHasSlash(request.PathParameter("repository"))
 	project := request.PathParameter("project")
 	ref := request.QueryParameter("ref")
