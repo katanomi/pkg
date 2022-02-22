@@ -17,6 +17,7 @@ limitations under the License.
 package v1alpha1
 
 type ReportSyncReason string
+type CodeScanReportSyncReason string
 
 const (
 	// SkippedReason a task/stage/step was skipped
@@ -56,4 +57,19 @@ const (
 	ReportSyncingReason ReportSyncReason = "ReportSyncing"
 	// Failed to sync report
 	ReportSyncFailedReason ReportSyncReason = "ReportSyncFailed"
+)
+
+const (
+	// Code scan task succeeded
+	CodeScanReportSyncSucceededReason CodeScanReportSyncReason = SucceededReason
+	// The code scan task was canceled
+	CodeScanTaskCancelled CodeScanReportSyncReason = "CodeScanTaskCancelled"
+	// Code scan task is waiting to start
+	CodeScanTaskPending CodeScanReportSyncReason = "CodeScanTaskPending"
+	// ode scan task in process
+	CodeScanTaskRunning CodeScanReportSyncReason = "CodeScanTaskRunning"
+	// Code scan task execution failed
+	CodeScanTaskFailedReason CodeScanReportSyncReason = "CodeScanTaskFailed"
+	// Error in sync report
+	CodeScanReportSyncErrorReason CodeScanReportSyncReason = "CodeScanSyncReportError"
 )
