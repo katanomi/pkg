@@ -95,3 +95,42 @@ var _ = Describe("Match test", func() {
 		Entry("service account name is found because of different namespace", serviceAccountConfigWildcard, "foo", "foo", BeFalse()),
 	)
 })
+
+var _ = Describe("Convert test", func() {
+	var (
+		defaultNamespace = "default"
+		userInfo         authenticationv1.UserInfo
+		subject          rbacv1.Subject
+	)
+
+	JustBeforeEach(func() {
+		subject = ConvertUserInfoToSubject(userInfo, defaultNamespace)
+	})
+
+	When("kind is user", func() {
+		BeforeEach(func() {
+			userInfo.Username = "user"
+		})
+		It("should convert to user", func() {
+			expectUser := rbacv1.Subject{
+				Kind: rbacv1.UserKind,
+				Name: "user",
+			}
+			Expect(subject).To(Equal(expectUser))
+		})
+	})
+
+	When("kind is sa", func() {
+		BeforeEach(func() {
+			userInfo.Username = "system:serviceaccount:default"
+		})
+		It("should convert to sa", func() {
+			expectSa := rbacv1.Subject{
+				Kind:      rbacv1.ServiceAccountKind,
+				Name:      "default",
+				Namespace: defaultNamespace,
+			}
+			Expect(subject).To(Equal(expectSa))
+		})
+	})
+})
