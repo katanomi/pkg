@@ -16,6 +16,8 @@ limitations under the License.
 
 package v1alpha1
 
+type ReportSyncReason string
+
 const (
 	// SkippedReason a task/stage/step was skipped
 	SkippedReason = "Skipped"
@@ -45,4 +47,13 @@ const (
 	ValidationError = "ValidationError"
 	// ErrorReason some error occurred
 	ErrorReason = "Error"
+)
+
+const (
+	// Sync task report succeeded
+	ReportSyncSucceededReason ReportSyncReason = SucceededReason
+	// Report is syncing
+	ReportSyncingReason ReportSyncReason = "ReportSyncing"
+	// Failed to sync report
+	ReportSyncFailedReason ReportSyncReason = "ReportSyncFailed"
 )
