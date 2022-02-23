@@ -103,3 +103,14 @@ type IssueOptions struct {
 	// Issue branch
 	Branch string `json:"branch"`
 }
+
+type UserOptions struct {
+	// Project identity
+	Project string `json:"project"`
+
+	// Group identity
+	Group string `json:"group"`
+
+	// User indentity
+	UserId string `json:"userId"`
+}

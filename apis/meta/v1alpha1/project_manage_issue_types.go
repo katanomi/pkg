@@ -60,13 +60,13 @@ type IssueSpec struct {
 	Status string `json:"status"`
 
 	// Issue assgin to someone
-	Assign Author `json:"assign"`
+	Assign UserSpec `json:"assign"`
 
 	// Issue latest update time
 	UpdatedTime metav1.Time
 
 	// Issue created user info
-	Author Author `json:"author"`
+	Author UserSpec `json:"author"`
 
 	// Issue description
 	Description string `json:"description"`
@@ -89,14 +89,6 @@ type IssueProject struct {
 	Name string `json:"name"`
 }
 
-type Author struct {
-	// Issue author name
-	Name string `json:"name"`
-
-	// Issue author email
-	Email string `json:"email"`
-}
-
 type RelateIssue struct {
 	// Relate issue subject
 	Subject string `json:"subject"`
@@ -107,7 +99,7 @@ type RelateIssue struct {
 
 type Comment struct {
 	// Issue comment by user
-	Author Author `json:"author"`
+	User UserSpec `json:"author"`
 
 	// Issue comment create time
 	CreatedTime metav1.Time `json:"createdTime"`

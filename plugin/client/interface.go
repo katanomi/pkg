@@ -327,3 +327,8 @@ type IssueAttributeGetter interface {
 	Interface
 	GetIssueAttribute(ctx context.Context, params metav1alpha1.IssueOptions) (*metav1alpha1.Attribute, error)
 }
+
+type ProjectUserLister interface {
+	Interface
+	ListProjectUsers(ctx context.Context, params metav1alpha1.UserOptions, option metav1alpha1.ListOptions) (*metav1alpha1.UserList, error)
+}

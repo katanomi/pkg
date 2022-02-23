@@ -39,7 +39,7 @@ type BranchSpec struct {
 	Issue IssueInfo `json:"issue"`
 
 	// Branch author
-	Author Author `json:"author"`
+	Author UserSpec `json:"author"`
 
 	// Address stores the branch address
 	Address *duckv1.Addressable `json:"address"`

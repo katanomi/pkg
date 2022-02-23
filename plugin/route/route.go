@@ -191,6 +191,10 @@ func match(c client.Interface) []Route {
 		routes = append(routes, NewIssueBranchDelete(v))
 	}
 
+	if v, ok := c.(client.ProjectUserLister); ok {
+		routes = append(routes, NewProjectUserList(v))
+	}
+
 	return routes
 }
 
@@ -299,6 +303,9 @@ func GetMethods(c client.Interface) []string {
 	}
 	if _, ok := c.(client.IssueBranchDeleter); ok {
 		methods = append(methods, "DeleteIssueBranch")
+	}
+	if _, ok := c.(client.ProjectUserLister); ok {
+		methods = append(methods, "ListProjectUsers")
 	}
 	return methods
 }
