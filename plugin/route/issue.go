@@ -17,7 +17,6 @@ limitations under the License.
 package route
 
 import (
-	"fmt"
 	"net/http"
 
 	restfulspec "github.com/emicklei/go-restful-openapi/v2"
@@ -53,7 +52,6 @@ func (i *issueList) Register(ws *restful.WebService) {
 }
 
 func (i *issueList) ListIssues(request *restful.Request, response *restful.Response) {
-	fmt.Println("list issues request: ", request)
 	option := GetListOptionsFromRequest(request)
 	pathParams := metav1alpha1.IssueOptions{
 		Identity: request.PathParameter("project"),
@@ -92,7 +90,6 @@ func (i *issueGetter) Register(ws *restful.WebService) {
 }
 
 func (i *issueGetter) GetIssue(request *restful.Request, response *restful.Response) {
-	fmt.Println("get issue request: ", request)
 	option := GetListOptionsFromRequest(request)
 	pathParams := metav1alpha1.IssueOptions{
 		Identity: request.PathParameter("project"),
@@ -132,10 +129,11 @@ func (i *issueAttributeGetter) Register(ws *restful.WebService) {
 }
 
 func (i *issueAttributeGetter) GetAttributes(request *restful.Request, response *restful.Response) {
+	option := GetListOptionsFromRequest(request)
 	pathParams := metav1alpha1.IssueOptions{
 		Identity: request.PathParameter("project"),
 	}
-	attribute, err := i.impl.GetIssueAttribute(request.Request.Context(), pathParams)
+	attribute, err := i.impl.GetIssueAttribute(request.Request.Context(), pathParams, option)
 	if err != nil {
 		kerrors.HandleError(request, response, err)
 		return

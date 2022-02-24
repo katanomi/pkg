@@ -17,7 +17,6 @@ limitations under the License.
 package route
 
 import (
-	"fmt"
 	"net/http"
 
 	restfulspec "github.com/emicklei/go-restful-openapi/v2"
@@ -54,7 +53,6 @@ func (b *branchList) Register(ws *restful.WebService) {
 }
 
 func (b *branchList) ListIssueBranches(request *restful.Request, response *restful.Response) {
-	fmt.Println("list issues branches request: ", request)
 	option := GetListOptionsFromRequest(request)
 	pathParams := metav1alpha1.IssueOptions{
 		Identity: request.PathParameter("project"),
@@ -94,7 +92,6 @@ func (b *branchCreator) Register(ws *restful.WebService) {
 }
 
 func (b *branchCreator) CreateIssueBranch(request *restful.Request, response *restful.Response) {
-	fmt.Println("create issue branch request: ", request)
 	pathParams := metav1alpha1.IssueOptions{
 		Identity: request.PathParameter("project"),
 		IssueId:  request.PathParameter("issue"),
@@ -139,7 +136,6 @@ func (b *branchDeleter) Register(ws *restful.WebService) {
 }
 
 func (b *branchDeleter) DeleteIssueBranch(request *restful.Request, response *restful.Response) {
-	fmt.Println("delete issue branch request: ", request)
 	option := GetListOptionsFromRequest(request)
 	pathParams := metav1alpha1.IssueOptions{
 		Identity: request.PathParameter("project"),

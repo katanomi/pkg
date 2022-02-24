@@ -17,7 +17,6 @@ limitations under the License.
 package route
 
 import (
-	"fmt"
 	"net/http"
 
 	restfulspec "github.com/emicklei/go-restful-openapi/v2"
@@ -53,7 +52,6 @@ func (u *projectUserList) Register(ws *restful.WebService) {
 }
 
 func (u *projectUserList) ListProjectUsers(request *restful.Request, response *restful.Response) {
-	fmt.Println("list project users request: ", request)
 	option := GetListOptionsFromRequest(request)
 	pathParams := metav1alpha1.UserOptions{
 		Project: request.PathParameter("project"),

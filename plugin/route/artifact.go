@@ -201,3 +201,47 @@ func (s *scanImage) ScanImage(request *restful.Request, response *restful.Respon
 
 	response.WriteHeader(http.StatusOK)
 }
+
+type imageConfigGetter struct {
+	impl client.ImageConfigGetter
+	tags []string
+}
+
+// NewImageConifgGetter create a get image config route with plugin client
+func NewImageConifgGetter(impl client.ImageConfigGetter) Route {
+	return &imageConfigGetter{
+		tags: []string{"projects", "repositories", "artifacts"},
+		impl: impl,
+	}
+}
+
+func (i *imageConfigGetter) Register(ws *restful.WebService) {
+	projectParam := ws.PathParameter("project", "repository belong to integraion")
+	repositoryParam := ws.PathParameter("repository", "artifact belong to repository")
+	artifactParam := ws.PathParameter("artifact", "artifact name, maybe is version or tag")
+	ws.Route(
+		ws.GET("/projects/{project:*}/repositories/{repository:*}/artifacts/{artifact}/config").To(i.GetImageConfig).
+			// docs
+			Doc("GetArtifact").Param(projectParam).Param(repositoryParam).Param(artifactParam).
+			Metadata(restfulspec.KeyOpenAPITags, i.tags).
+			Returns(http.StatusOK, "OK", metav1alpha1.ImageConfig{}),
+	)
+}
+
+// GetImageConfig http handler for get image config
+func (i *imageConfigGetter) GetImageConfig(request *restful.Request, response *restful.Response) {
+	pathParams := metav1alpha1.ArtifactOptions{
+		RepositoryOptions: metav1alpha1.RepositoryOptions{
+			Project: request.PathParameter("project"),
+		},
+		Repository: request.PathParameter("repository"),
+		Artifact:   request.PathParameter("artifact"),
+	}
+	config, err := i.impl.GetImageConfig(request.Request.Context(), pathParams)
+	if err != nil {
+		kerrors.HandleError(request, response, err)
+		return
+	}
+
+	response.WriteHeaderAndEntity(http.StatusOK, config)
+}

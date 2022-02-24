@@ -29,7 +29,7 @@ type User struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
 
-	Spec IssueSpec `json:"spec"`
+	Spec UserSpec `json:"spec"`
 }
 
 // UserSpec for Issue
