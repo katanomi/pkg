@@ -27,6 +27,11 @@ import (
 	"github.com/katanomi/pkg/plugin/component/tracing"
 )
 
+const (
+	// Defines the query key value for the search.
+	SearchQueryKey = "name"
+)
+
 var DefaultFilters = []restful.FilterFunction{
 	tracing.Filter,
 	metrics.Filter,
