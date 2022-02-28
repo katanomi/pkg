@@ -53,6 +53,7 @@ func (r ProjectSubType) Validate(fld *field.Path) field.ErrorList {
 		GitGroupProjectSubType:        {},
 		MavenRepositoryProjectSubType: {},
 		RawRepositoryProjectSubType:   {},
+		ProjectManagementSubtype:      {},
 	}
 
 	if _, exist := supportedTypes[r]; !exist {
@@ -80,6 +81,9 @@ const (
 
 	// MavenRepositoryProjectSubType maven repository project subtype
 	MavenRepositoryProjectSubType ProjectSubType = "MavenRepository"
+
+	// ProjectManagementSubtype project management subtype
+	ProjectManagementSubtype ProjectSubType = "ProjectManagement"
 
 	// TODO: add more subtypes
 )

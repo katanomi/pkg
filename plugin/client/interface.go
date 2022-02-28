@@ -302,3 +302,39 @@ type ArtifactTriggerRegister interface {
 	// cloud event type of push hook that will match
 	PushEventType() string
 }
+
+// project management
+type IssueLister interface {
+	Interface
+	ListIssues(ctx context.Context, params metav1alpha1.IssueOptions, option metav1alpha1.ListOptions) (*metav1alpha1.IssueList, error)
+}
+
+type IssueGetter interface {
+	Interface
+	GetIssue(ctx context.Context, params metav1alpha1.IssueOptions, option metav1alpha1.ListOptions) (*metav1alpha1.Issue, error)
+}
+
+type IssueBranchLister interface {
+	Interface
+	ListIssueBranches(ctx context.Context, params metav1alpha1.IssueOptions, option metav1alpha1.ListOptions) (*metav1alpha1.BranchList, error)
+}
+
+type IssueBranchCreator interface {
+	Interface
+	CreateIssueBranch(ctx context.Context, params metav1alpha1.IssueOptions, payload metav1alpha1.Branch) (*metav1alpha1.Branch, error)
+}
+
+type IssueBranchDeleter interface {
+	Interface
+	DeleteIssueBranch(ctx context.Context, params metav1alpha1.IssueOptions, option metav1alpha1.ListOptions) error
+}
+
+type IssueAttributeGetter interface {
+	Interface
+	GetIssueAttribute(ctx context.Context, params metav1alpha1.IssueOptions, option metav1alpha1.ListOptions) (*metav1alpha1.Attribute, error)
+}
+
+type ProjectUserLister interface {
+	Interface
+	ListProjectUsers(ctx context.Context, params metav1alpha1.UserOptions, option metav1alpha1.ListOptions) (*metav1alpha1.UserList, error)
+}
