@@ -28,8 +28,8 @@ import (
 )
 
 const (
-	// Define the key value of the repository query key.
-	RepositorySearchQueryKey = "name"
+	// Defines the query key value for the search.
+	SearchQueryKey = "name"
 )
 
 var DefaultFilters = []restful.FilterFunction{
