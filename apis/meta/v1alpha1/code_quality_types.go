@@ -19,10 +19,15 @@ package v1alpha1
 import (
 	"time"
 
+	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-var CodeQualityGVK = GroupVersion.WithKind("CodeQuality")
+var (
+	CodeQualityGVK            = GroupVersion.WithKind("CodeQuality")
+	CodeQualityLineChartGVK   = GroupVersion.WithKind("CodeQualityLineChart")
+	CodeQualityTaskMetricsGVK = GroupVersion.WithKind("CodeQualityTaskMetrics")
+)
 
 // CodeQuality object for plugin
 type CodeQuality struct {
@@ -54,8 +59,6 @@ type CodeQualityAnalyzeMetric struct {
 	Level *string `json:"level,omitempty"`
 }
 
-var CodeQualityLineChartGVK = GroupVersion.WithKind("CodeQualityLineChart")
-
 // CodeQualityLineChart object for plugin
 type CodeQualityLineChart struct {
 	metav1.TypeMeta   `json:",inline"`
@@ -74,10 +77,96 @@ type CodeQualityBaseOption struct {
 	BranchKey  string `json:"branchKey"`
 }
 
+type CodeQualityTaskOption struct {
+	TaskID      string `json:"taskID"`
+	ProjectKey  string `json:"projectKey"`
+	Branch      string `json:"branch"`
+	PullRequest string `json:"pullRequest"`
+}
+
 // +k8s:deepcopy-gen=false
 type CodeQualityLineChartOption struct {
 	CodeQualityBaseOption
 	StartTime      *time.Time `json:"startTime"`
 	CompletionTime *time.Time `json:"completionTime"`
 	Metrics        string     `json:"metrics"`
+}
+
+// CodeQualityTaskMetrics object obtains the code scan results obtained by the scan task
+type CodeQualityTaskMetrics struct {
+	metav1.TypeMeta   `json:",inline"`
+	metav1.ObjectMeta `json:"metadata,omitempty"`
+	Spec              CodeQualityTaskMetricsSpec   `json:"spec"`
+	Status            CodeQualityTaskMetricsStatus `json:"status,omitempty"`
+}
+
+// CodeQualityTaskMetricsSpec includes structured and raw data for code scans
+type CodeQualityTaskMetricsSpec struct {
+	// Summary is the panel data for code scans
+	// +optional
+	Summary CodeQualityTaskMetricsSpecSummary `json:"summary,omitempty"`
+	// Task is scan task specific information
+	Task CodeQualityTaskMetricsSpecTask `json:"task"`
+	// Component is code scan component
+	Component CodeQualityTaskMetricsSpecComponent `json:"component"`
+	// Metrics is other scan result indicators are stored here
+	Metrics map[string]string `json:"metrics"`
+}
+
+// CodeQualityTaskMetricsSpecSummary is the panel data for code scans
+type CodeQualityTaskMetricsSpecSummary struct {
+	// New Indicates the newly added data in this scan
+	// +optional
+	New *CodeQualityTaskMetricsSpecSummaryOverview `json:"new,omitempty"`
+	// Total represents all the issues scanned
+	// +optional
+	Total *CodeQualityTaskMetricsSpecSummaryOverview `json:"total,omitempty"`
+}
+
+// CodeQualityTaskMetricsSpecSummaryOverview is the overview data for code scans
+type CodeQualityTaskMetricsSpecSummaryOverview struct {
+	// Bugs means number of bugs
+	Bugs string `json:"bugs"`
+	// DuplicatedLinesDensity means ratio of duplicate code
+	DuplicatedLinesDensity string `json:"duplicatedLinesDensity"`
+	// Vulnerabilities means number of vulnerabilities
+	Vulnerabilities string `json:"vulnerabilities"`
+	// CodeSmells means number of codeSmells
+	CodeSmells string `json:"codeSmells"`
+}
+
+// CodeQualityTaskMetricsSpecComponent is code scan component
+type CodeQualityTaskMetricsSpecComponent struct {
+	// ID is component id
+	ID string `json:"id"`
+	// Key is component key
+	Key string `json:"key"`
+	// Name is component name
+	Name string `json:"name"`
+}
+
+// CodeQualityTaskMetricsSpecTask is scan task specific information
+type CodeQualityTaskMetricsSpecTask struct {
+	// StartedAt is start time
+	StartedAt string `json:"startedAt"`
+	// CompletedAt is end time
+	CompletedAt string `json:"executedAt"`
+	// ExecutionTimeMs is consuming to execute
+	ExecutionTimeMs string `json:"executionTimeMs"`
+	// ID is code scan task id
+	ID string `json:"id"`
+	// Status is code scan task status
+	Status CodeScanReportSyncReason `json:"status"`
+	// AnalysisId is analysis report id
+	AnalysisId string `json:"analysisId"`
+}
+
+// CodeQualityTaskMetricsStatus is a status attribute that specifies the need to integrate
+type CodeQualityTaskMetricsStatus struct {
+	// Reason is code scan reason
+	// +optional
+	Reason CodeScanReportSyncReason `json:"reason,omitempty"`
+	// Status is code scan status
+	// +optional
+	Status corev1.ConditionStatus `json:"status,omitempty"`
 }

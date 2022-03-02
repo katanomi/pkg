@@ -275,6 +275,7 @@ type CodeQualityGetter interface {
 	GetCodeQualityOverviewByBranch(ctx context.Context, opt metav1alpha1.CodeQualityBaseOption) (*metav1alpha1.CodeQuality, error)
 	GetCodeQualityLineCharts(ctx context.Context, opt metav1alpha1.CodeQualityLineChartOption) (*metav1alpha1.CodeQualityLineChart, error)
 	GetOverview(ctx context.Context) (*metav1alpha1.CodeQualityProjectOverview, error)
+	GetSummaryByTaskID(ctx context.Context, opt metav1alpha1.CodeQualityTaskOption) (*metav1alpha1.CodeQualityTaskMetrics, error)
 }
 
 type BlobStoreLister interface {

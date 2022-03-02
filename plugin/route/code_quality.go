@@ -75,6 +75,16 @@ func (c *codeQualityGetter) Register(ws *restful.WebService) {
 			Metadata(restfulspec.KeyOpenAPITags, c.tags).
 			Returns(http.StatusOK, "OK", metav1alpha1.CodeQualityProjectOverview{}),
 	)
+	ws.Route(
+		ws.GET("/codeQuality/task/{task-id}/summary").To(c.GetSummaryByTaskID).
+			Doc("GetSummaryByTaskID").
+			Metadata(restfulspec.KeyOpenAPITags, c.tags).
+			Param(ws.PathParameter("task-id", "code scan task id").DataType("string")).
+			Param(ws.QueryParameter("project-key", "identifier of the project").DataType("string")).
+			Param(ws.QueryParameter("branch", "branch name").DataType("string")).
+			Param(ws.QueryParameter("pullRequest", "pull request id").DataType("string")).
+			Returns(http.StatusOK, "OK", metav1alpha1.CodeQualityTaskMetrics{}),
+	)
 }
 
 // GetCodeQuality http handler for get code quality
@@ -145,6 +155,26 @@ func (c *codeQualityGetter) GetCodeQualityLineCharts(request *restful.Request, r
 
 func (c *codeQualityGetter) GetOverview(request *restful.Request, response *restful.Response) {
 	result, err := c.impl.GetOverview(request.Request.Context())
+	if err != nil {
+		kerrors.HandleError(request, response, err)
+		return
+	}
+	response.WriteHeaderAndEntity(http.StatusOK, result)
+}
+
+func (c *codeQualityGetter) GetSummaryByTaskID(request *restful.Request, response *restful.Response) {
+	taskID := request.PathParameter("task-id")
+	projectKey := request.QueryParameter("project-key")
+	branch := request.QueryParameter("branch")
+	pullRequest := request.QueryParameter("pullRequest")
+	param := metav1alpha1.CodeQualityTaskOption{
+		TaskID:      taskID,
+		ProjectKey:  projectKey,
+		Branch:      branch,
+		PullRequest: pullRequest,
+	}
+
+	result, err := c.impl.GetSummaryByTaskID(request.Request.Context(), param)
 	if err != nil {
 		kerrors.HandleError(request, response, err)
 		return
