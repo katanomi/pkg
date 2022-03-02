@@ -89,4 +89,7 @@ const (
 const (
 	// ArtifactAliasAnnotationKey indicates the alias of the artifact parameter in the delivery
 	ArtifactAliasAnnotationKey = "alias"
+
+	// ImageRegistryEndpoint for artifact endpoint
+	ImageRegistryEndpoint = "imageRegistryEndpoint"
 )
