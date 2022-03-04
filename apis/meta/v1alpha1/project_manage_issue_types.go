@@ -93,8 +93,8 @@ type RelateIssue struct {
 	// Relate issue subject
 	Subject string `json:"subject"`
 
-	// Relate issue address
-	Address *duckv1.Addressable `json:"address"`
+	// Relate issue access
+	Access *duckv1.Addressable `json:"access"`
 }
 
 type Comment struct {
