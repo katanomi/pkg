@@ -41,6 +41,18 @@ type ListMeta struct {
 
 	// TotalItems returned in the list
 	TotalItems int `json:"totalItems"`
+
+	// Current page number
+	// +optional
+	Page *int `json:"page,omitempty"`
+
+	// Current items per page
+	// +optional
+	ItemsPerPage *int `json:"itemsPerPage,omitempty"`
+
+	// Total number of pages
+	// +optional
+	TotalPages *int `json:"totalPages,omitempty"`
 }
 
 // ListOptions options for list
