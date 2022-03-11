@@ -77,3 +77,30 @@ func IsConditionChanged(current, old apis.ConditionAccessor, conditionType apis.
 		!currentCondition.LastTransitionTime.Inner.Equal(&oldCondition.LastTransitionTime.Inner) ||
 		currentCondition.Reason != oldCondition.Reason
 }
+
+// ConditionType is a camel-cased condition type.
+type ConditionType string
+
+const (
+	// ConditionReady specifies that the resource is ready.
+	// For long-running resources.
+	ConditionReady ConditionType = "Ready"
+	// ConditionSucceeded specifies that the resource has finished.
+	// For resource which run to completion.
+	ConditionSucceeded ConditionType = "Succeeded"
+	// ConditionPending specifies that the resource is pending.
+	// For resource which run is waiting to be executed.
+	ConditionPending ConditionType = "Pending"
+	// ConditionRunning specifies that the resource is running.
+	// For resource which run is running.
+	ConditionRunning ConditionType = "Running"
+	// ConditionFailed specifies that the resource is failed.
+	// For resource which run to failed.
+	ConditionFailed ConditionType = "Failed"
+	// ConditionDisabled specifies that the resource is disabled.
+	// For resource which can't be run.
+	ConditionDisabled ConditionType = "Disabled"
+	// ConditionCanceled specifies that the resource is canceled.
+	// For resource which run to canceled.
+	ConditionCanceled ConditionType = "Canceled"
+)

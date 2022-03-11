@@ -203,6 +203,12 @@ type GitCommitGetter interface {
 	GetGitCommit(ctx context.Context, option metav1alpha1.GitCommitOption) (metav1alpha1.GitCommit, error)
 }
 
+// GitCommitLister List git commit
+type GitCommitLister interface {
+	Interface
+	ListGitCommit(ctx context.Context, option metav1alpha1.GitCommitListOption, listOption metav1alpha1.ListOptions) (metav1alpha1.GitCommitList, error)
+}
+
 // GitBranchLister List git branch
 type GitBranchLister interface {
 	Interface

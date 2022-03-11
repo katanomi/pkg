@@ -94,6 +94,8 @@ type CreateCommitStatusParam struct {
 	Description *string  `json:"description,omitempty"`
 	Coverage    *float64 `json:"coverage,omitempty"`
 	PipelineID  *int     `json:"pipelineId,omitempty"`
+	// TODO CreateCommitStatusParam should remove, create function only use GitCommitStatus as param
+	*GitCommitStatus
 }
 
 // CreateCommitStatusPayload payload for create commit's status

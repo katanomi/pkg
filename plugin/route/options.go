@@ -29,27 +29,35 @@ import (
 	pclient "github.com/katanomi/pkg/plugin/client"
 )
 
+const (
+	PageQueryKey         = "page"
+	ItemsPerPageQueryKey = "itemsPerPage"
+	SortQueryKey         = "sortBy"
+	SinceQueryKey        = "since"
+	UntilQueryKey        = "until"
+)
+
 // GetListOptionsFromRequest returns ListOptions based on a request
 func GetListOptionsFromRequest(req *restful.Request) (opts metav1alpha1.ListOptions) {
-	itemsPerPage := req.QueryParameter("itemsPerPage")
+	itemsPerPage := req.QueryParameter(ItemsPerPageQueryKey)
 	if v, err := strconv.Atoi(itemsPerPage); err == nil {
 		opts.ItemsPerPage = v
 	}
-	page := req.QueryParameter("page")
+	page := req.QueryParameter(PageQueryKey)
 	if v, err := strconv.Atoi(page); err == nil {
 		opts.Page = v
 	}
 
 	opts.Search = req.Request.URL.Query()
-	delete(opts.Search, "page")
-	delete(opts.Search, "itemsPerPage")
+	delete(opts.Search, PageQueryKey)
+	delete(opts.Search, ItemsPerPageQueryKey)
 
 	subResourcesHeader := req.HeaderParameter(pclient.PluginSubresourcesHeader)
 	if strings.TrimSpace(subResourcesHeader) != "" {
 		opts.SubResources = strings.Split(subResourcesHeader, ",")
 	}
 
-	sortBy := req.QueryParameter("sortBy")
+	sortBy := req.QueryParameter(SortQueryKey)
 	if sortBy == "" {
 		return
 	}
@@ -57,12 +65,13 @@ func GetListOptionsFromRequest(req *restful.Request) (opts metav1alpha1.ListOpti
 	return
 }
 
+// HandleSortQuery parse the sorting parameters in the query and return a list of sorting parameters
 func HandleSortQuery(ctx context.Context, sortBy string) []metav1alpha1.SortOptions {
 	logger := logging.FromContext(ctx).Named("SortParamHandler")
 	sortList := []metav1alpha1.SortOptions{}
 	sortInfoList := strings.Split(sortBy, ",")
 	if len(sortInfoList)%2 != 0 {
-		logger.Errorw("It is singular after cutting, so it is impossible to obtain valid sorting conditions.Ignore sortBy!!!", "sortBy", url.QueryEscape(sortBy))
+		logger.Errorw("sortBy is expected to be in pairs ignoring sort by...", SortQueryKey, url.QueryEscape(sortBy), "sortInfoListLen", len(sortInfoList))
 		return sortList
 	}
 	for i, v := range sortInfoList {
@@ -72,7 +81,7 @@ func HandleSortQuery(ctx context.Context, sortBy string) []metav1alpha1.SortOpti
 				sortList = append(sortList, metav1alpha1.SortOptions{Order: metav1alpha1.SortOrder(v)})
 			default:
 				sortList = []metav1alpha1.SortOptions{}
-				logger.Errorw("unknown order type", "sortBy", url.QueryEscape(sortBy))
+				logger.Errorw("unknown order type", SortQueryKey, url.QueryEscape(sortBy))
 				return sortList
 			}
 		} else {
@@ -85,6 +94,6 @@ func HandleSortQuery(ctx context.Context, sortBy string) []metav1alpha1.SortOpti
 // ListOptionsDocs adds list options query parameters to the documentation
 func ListOptionsDocs(bldr *restful.RouteBuilder) *restful.RouteBuilder {
 	// TODO: adds parameters to lists here
-	return bldr.Param(restful.QueryParameter("itemsPerPage", "items to be returned in a page")).
-		Param(restful.QueryParameter("page", "page to be returned"))
+	return bldr.Param(restful.QueryParameter(ItemsPerPageQueryKey, "items to be returned in a page")).
+		Param(restful.QueryParameter(PageQueryKey, "page to be returned"))
 }
