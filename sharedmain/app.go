@@ -434,6 +434,8 @@ func (a *AppBuilder) Plugins(plugins ...client.Interface) *AppBuilder {
 		if err := plugin.Setup(a.Context, a.Logger); err != nil {
 			a.Logger.Fatalw("plugin could not be setup correctly", "err", err, "plugin", plugin.Path())
 		}
+		// MetaFilter and AuthFilter are dedicated to plugin api,
+		// so register the filters when the service is initialized.
 		ws, err := route.NewService(plugin, client.MetaFilter, client.AuthFilter)
 		if err != nil {
 			a.Logger.Fatalw("plugin could not start correctly", "err", err, "plugin", plugin.Path())
