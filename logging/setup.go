@@ -1,5 +1,5 @@
 /*
-Copyright 2021 The Katanomi Authors.
+Copyright 2022 The Katanomi Authors.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -17,18 +17,22 @@ limitations under the License.
 package logging
 
 import (
+	"sync"
+
 	"go.uber.org/zap"
 	"knative.dev/pkg/logging"
 )
 
-var setupLogger *zap.SugaredLogger
-
-func init() {
-	setupLogger, _ = logging.NewLogger(setupLogConfig, "debug")
-}
+var (
+	setupLogger *zap.SugaredLogger
+	once        sync.Once
+)
 
 // SetupLogger should only be used as a fallback for a logger when
 func SetupLogger(name string) *zap.SugaredLogger {
+	once.Do(func() {
+		setupLogger, _ = logging.NewLogger(setupLogConfig, "debug")
+	})
 	return setupLogger.Named(name)
 }
 
