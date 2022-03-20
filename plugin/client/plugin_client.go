@@ -19,12 +19,10 @@ package client
 import (
 	"context"
 	"fmt"
-	"net"
-	"net/http"
 	"strings"
-	"time"
 
 	"github.com/go-resty/resty/v2"
+	"github.com/katanomi/pkg/client"
 	perrors "github.com/katanomi/pkg/errors"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -50,7 +48,7 @@ type BuildOptions func(client *PluginClient)
 
 // NewPluginClient creates a new plugin client
 func NewPluginClient(opts ...BuildOptions) *PluginClient {
-	restyClient := resty.NewWithClient(NewHTTPClient())
+	restyClient := resty.NewWithClient(client.NewHTTPClient())
 	restyClient.SetDisableWarn(true)
 
 	pluginClient := &PluginClient{
@@ -61,30 +59,6 @@ func NewPluginClient(opts ...BuildOptions) *PluginClient {
 		op(pluginClient)
 	}
 	return pluginClient
-}
-
-func NewHTTPClient() *http.Client {
-
-	client := &http.Client{
-		Transport: GetDefaultTransport(),
-		Timeout:   30 * time.Second,
-	}
-
-	return client
-}
-
-func GetDefaultTransport() http.RoundTripper {
-	return &http.Transport{
-		Proxy: http.ProxyFromEnvironment,
-		DialContext: (&net.Dialer{
-			Timeout:   10 * time.Second,
-			KeepAlive: 30 * time.Second,
-		}).DialContext,
-		MaxIdleConns:          100,
-		IdleConnTimeout:       90 * time.Second,
-		TLSHandshakeTimeout:   10 * time.Second,
-		ExpectContinueTimeout: 1 * time.Second,
-	}
 }
 
 // ClientOpts adds a custom client build options for plugin client

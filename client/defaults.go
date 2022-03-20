@@ -16,10 +16,46 @@ limitations under the License.
 
 package client
 
-import "time"
+import (
+	"net"
+	"net/http"
+	"os"
+	"strconv"
+	"time"
+)
 
 var (
 	DefaultTimeout         = 10 * time.Second
 	DefaultQPS     float32 = 50.0
 	DefaultBurst           = 60
 )
+
+func NewHTTPClient() *http.Client {
+	var timeout int64
+	timeoutStr := os.Getenv("HTTP_CLIENT_TIMEOUT")
+	timeout, err := strconv.ParseInt(timeoutStr, 10, 64)
+	if len(timeoutStr) == 0 || err != nil {
+		timeout = 30
+	}
+
+	client := &http.Client{
+		Transport: GetDefaultTransport(),
+		Timeout:   time.Duration(timeout) * time.Second,
+	}
+
+	return client
+}
+
+func GetDefaultTransport() http.RoundTripper {
+	return &http.Transport{
+		Proxy: http.ProxyFromEnvironment,
+		DialContext: (&net.Dialer{
+			Timeout:   10 * time.Second,
+			KeepAlive: 30 * time.Second,
+		}).DialContext,
+		MaxIdleConns:          100,
+		IdleConnTimeout:       90 * time.Second,
+		TLSHandshakeTimeout:   10 * time.Second,
+		ExpectContinueTimeout: 1 * time.Second,
+	}
+}
