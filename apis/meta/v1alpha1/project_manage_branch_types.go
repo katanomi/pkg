@@ -90,7 +90,7 @@ func BranchResourceAttributes(verb string) authv1.ResourceAttributes {
 	return authv1.ResourceAttributes{
 		Group:    GroupVersion.Group,
 		Version:  GroupVersion.Version,
-		Resource: "branches",
+		Resource: "virtualissuebranches",
 		Verb:     verb,
 	}
 }
