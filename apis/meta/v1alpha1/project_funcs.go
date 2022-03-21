@@ -19,6 +19,8 @@ package v1alpha1
 import (
 	"sort"
 
+	"github.com/katanomi/pkg/common"
+
 	v1 "k8s.io/api/core/v1"
 )
 
@@ -45,25 +47,8 @@ const (
 
 // Paginate return a pagination subset of project list with specific page and page size
 func (p *ProjectList) Paginate(page int, pageSize int) *ProjectList {
-	if page < FirstPage {
-		page = FirstPage
-	}
-
-	if pageSize < FirstPage {
-		pageSize = DefaultPageSize
-	}
-
 	length := len(p.Items)
-	skip := (page - 1) * pageSize
-
-	if skip > length {
-		skip = length
-	}
-
-	end := skip + pageSize
-	if end > length {
-		end = length
-	}
+	skip, end := common.Paginate(length, pageSize, page)
 
 	newList := &ProjectList{}
 	newList.Items = p.Items[skip:end]
