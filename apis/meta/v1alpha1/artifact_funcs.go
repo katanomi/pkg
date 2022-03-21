@@ -18,47 +18,30 @@ package v1alpha1
 
 import (
 	"github.com/katanomi/pkg/common"
-	v1 "k8s.io/api/core/v1"
 )
 
-func (r *Repository) AddNamespaceRef(refs ...v1.ObjectReference) {
-	for _, item := range refs {
-		found := false
-		for _, old := range r.Spec.NamespaceRefs {
-			if old.Name == item.Name {
-				found = true
-				break
-			}
-		}
-
-		if !found {
-			r.Spec.NamespaceRefs = append(r.Spec.NamespaceRefs, item)
-		}
-	}
-}
-
-// Paginate return a pagination subset of repository list with specific page and page size
-func (r *RepositoryList) Paginate(page int, pageSize int) *RepositoryList {
+// Paginate return a pagination subset of artifact list with specific page and page size
+func (r *ArtifactList) Paginate(page int, pageSize int) *ArtifactList {
 	length := len(r.Items)
 	skip, end := common.Paginate(length, pageSize, page)
 
-	newList := &RepositoryList{}
+	newList := &ArtifactList{}
 	newList.Items = r.Items[skip:end]
 	newList.ListMeta.TotalItems = length
 
 	return newList
 }
 
-// Filter takes a closure that returns true or false, if true, the repository should be present
-func (r *RepositoryList) Filter(filter func(repository Repository) bool) *RepositoryList {
+// Filter takes a closure that returns true or false, if true, the artifact should be present
+func (r *ArtifactList) Filter(filter func(artifact Artifact) bool) *ArtifactList {
 	if filter == nil {
 		return r
 	}
 
-	newList := &RepositoryList{}
-	for _, repository := range r.Items {
-		if filter(repository) {
-			newList.Items = append(newList.Items, repository)
+	newList := &ArtifactList{}
+	for _, artifact := range r.Items {
+		if filter(artifact) {
+			newList.Items = append(newList.Items, artifact)
 		}
 	}
 
