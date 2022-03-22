@@ -141,7 +141,7 @@ func IssueResourceAttributes(verb string) authv1.ResourceAttributes {
 	return authv1.ResourceAttributes{
 		Group:    GroupVersion.Group,
 		Version:  GroupVersion.Version,
-		Resource: "issues",
+		Resource: "virtualissues",
 		Verb:     verb,
 	}
 }
