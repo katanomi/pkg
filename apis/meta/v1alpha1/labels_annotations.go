@@ -42,6 +42,9 @@ const (
 
 	// IntegrationResourceScope annotation key to store integration resource scope
 	IntegrationResourceScope = "integrations.katanomi.dev/integration.resourceScope"
+
+	// IntegrationSecretApplyNamespaces annotation key to store apply namespace for current secret
+	IntegrationSecretApplyNamespaces = "integrations.katanomi.dev/secret.applyNamespaces"
 )
 
 // Common Annotations
