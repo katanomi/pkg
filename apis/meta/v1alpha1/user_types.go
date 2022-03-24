@@ -59,7 +59,7 @@ func UserResourceAttributes(verb string) authv1.ResourceAttributes {
 	return authv1.ResourceAttributes{
 		Group:    GroupVersion.Group,
 		Version:  GroupVersion.Version,
-		Resource: "users",
+		Resource: "virtualusers",
 		Verb:     verb,
 	}
 }
