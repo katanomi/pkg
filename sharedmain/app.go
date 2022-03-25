@@ -160,7 +160,7 @@ func (a *AppBuilder) init() {
 		}
 		a.Context, a.startInformers = injection.EnableInjectionOrDie(a.Context, a.Config)
 
-		restyClient := resty.NewWithClient(http.DefaultClient).SetTimeout(DefaultTimeout)
+		restyClient := resty.NewWithClient(kclient.NewHTTPClient())
 		restyClient.SetDisableWarn(true)
 		restyClient.SetTLSClientConfig(&tls.Config{
 			InsecureSkipVerify: InsecureSkipVerify, // nolint: gosec // G402: TLS InsecureSkipVerify set true.
