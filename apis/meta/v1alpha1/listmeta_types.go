@@ -26,6 +26,9 @@ const (
 	NameSortKey        SortBy = "name"
 	UpdatedTimeSortKey SortBy = "updatedTime"
 	CreatedTimeSortKey SortBy = "createdTime"
+
+	// SearchValueKey The key of the keyword used for the search
+	SearchValueKey = "searchValue"
 )
 
 type SortOrder string
@@ -75,6 +78,16 @@ type ListOptions struct {
 
 	// Sort for listing
 	Sort []SortOptions `json:"sort"`
+}
+
+// GetSearchFirstElement get first element by key that in search map
+func (opt ListOptions) GetSearchFirstElement(key string) (value string) {
+	if valueList, ok := opt.Search[key]; ok {
+		if len(valueList) != 0 {
+			value = valueList[0]
+		}
+	}
+	return
 }
 
 // SortOptions options for sort
