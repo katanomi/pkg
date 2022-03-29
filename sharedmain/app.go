@@ -30,6 +30,9 @@ import (
 	"time"
 
 	utilyaml "k8s.io/apimachinery/pkg/util/yaml"
+	// load sigs.k8s.io/controller-runtime@v0.8.3/pkg/metrics/workqueue.go:99  workqueue.SetProvider(workqueueMetricsProvider{}) firstly
+	// avoid knative-pkg@v0.0.0-20220128061436-ff5a1e531de2/controller/stats_reporter.go:95 loading  firstly
+	_ "sigs.k8s.io/controller-runtime/pkg/metrics"
 
 	"k8s.io/client-go/dynamic"
 
