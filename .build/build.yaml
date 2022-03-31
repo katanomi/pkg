@@ -1,0 +1,59 @@
+apiVersion: builds.katanomi.dev/v1alpha1
+kind: Build
+spec:
+  workspaces:
+    - description: >
+        This workspace is shared among all the pipeline tasks to read/write
+        common resources
+      name: source
+  tasks:
+    - name: boilerplate
+      params:
+        - name: revision
+          value: $(params.git-revision)
+        - name: exclude
+          value: '(testing\/mock)/'
+      taskRef:
+        name: katanomi-boilerplate
+        kind: ClusterTask
+      workspaces:
+        - name: source
+          workspace: source
+    - name: donotsubmit
+      params:
+        - name: revision
+          value: $(params.git-revision)
+      taskRef:
+        name: katanomi-donotsubmit
+        kind: ClusterTask
+      workspaces:
+        - name: source
+          workspace: source
+    - name: gotest-withbuildtag
+      taskRef:
+        name: katanomi-gotest-withbuildtag
+        kind: ClusterTask
+      workspaces:
+        - name: source
+          workspace: source
+    - name: gotest
+      taskRef:
+        name: katanomi-gotest
+        kind: ClusterTask
+      workspaces:
+        - name: source
+          workspace: source
+    - name: knative-style
+      params:
+        - name: revision
+          value: $(params.git-revision)
+        - name: ignore-filetypes
+          value: '(\.md|\.png|\.drawio|\.DS_Store)$'
+        - name: ignore-dirs
+          value: '(^vendor/|^third_party/|^.git|kodata)'
+      taskRef:
+        name: katanomi-knative-style
+        kind: ClusterTask
+      workspaces:
+        - name: source
+          workspace: source
