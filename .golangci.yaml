@@ -13,14 +13,17 @@ run:
 linters:
   disable-all: true
   enable:
-    - gosimple
-    - govet
-    - whitespace
+    - asciicheck
+    - gosec
+    - prealloc
+    - unconvert
+    - unparam
+#    - whitespace
+#    - govet
 #    - stylecheck
 #    - revive
 #    - prealloc
 #    - nestif
-#    - gosec
 #    - gocritic
 #    - forcetypeassert
 #    - exportloopref

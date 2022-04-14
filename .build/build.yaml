@@ -34,6 +34,16 @@ spec:
       workspaces:
         - name: source
           workspace: source
+    - name: go-style
+      params:
+        - name: revision
+          value: $(params.git-revision)
+      taskRef:
+        name: katanomi-go-style
+        kind: ClusterTask
+      workspaces:
+        - name: source
+          workspace: source
     - name: knative-style
       params:
         - name: ignore-filetypes
