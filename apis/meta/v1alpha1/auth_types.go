@@ -76,7 +76,7 @@ type AuthCheckStatus struct {
 
 	// Provides the ability to convert username and password, and token refresh.
 	// +optional
-	ReflushData *AuthTokenStatus `json:"reflushData,omitempty"`
+	RefreshData *AuthTokenStatus `json:"refreshData,omitempty"`
 }
 
 const (
