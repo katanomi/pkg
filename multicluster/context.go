@@ -36,3 +36,20 @@ func MultiCluster(ctx context.Context) Interface {
 	clt, _ := val.(Interface)
 	return clt
 }
+
+type clusterNamesKey struct{}
+
+// WithClusterNames adds cluster names to the context
+func WithClusterNames(ctx context.Context, names []string) context.Context {
+	return context.WithValue(ctx, clusterNamesKey{}, names)
+}
+
+// ClusterNames return a cluster name list in context
+func ClusterNames(ctx context.Context) []string {
+	val := ctx.Value(clusterNamesKey{})
+	if val == nil {
+		return nil
+	}
+	names, _ := val.([]string)
+	return names
+}
