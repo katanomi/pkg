@@ -1,5 +1,5 @@
 /*
-Copyright 2022 The Katanomi Authors.
+Copyright 2021 The Katanomi Authors.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -13,3 +13,25 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
+
+package secret
+
+import (
+	"fmt"
+	"strings"
+
+	corev1 "k8s.io/api/core/v1"
+)
+
+type SortedSecretList []corev1.Secret
+
+func (s SortedSecretList) Len() int { return len(s) }
+
+func (s SortedSecretList) Less(i, j int) bool {
+	genKey := func(namespace, name string) string {
+		return fmt.Sprintf("%s/%s", namespace, name)
+	}
+	return strings.Compare(genKey(s[i].Namespace, s[i].Name), genKey(s[j].Namespace, s[j].Name)) == -1
+}
+
+func (s SortedSecretList) Swap(i, j int) { s[i], s[j] = s[j], s[i] }

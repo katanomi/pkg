@@ -124,10 +124,9 @@ jobs:
           files: .golangci.yaml
       - name: Go Lint
         if: steps.golangci_configuration.outputs.files_exists == 'true'
-        uses: golangci/golangci-lint-action@v2
+        uses: golangci/golangci-lint-action@v3
         with:
           version: v1.45.2
-
       - name: misspell
         shell: bash
         if: ${{ always() }}
