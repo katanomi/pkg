@@ -60,6 +60,22 @@ const (
 	OAuth2RedirectURLKey = "redirectURL"
 	// OAuth2BaseURLKey is the key of the baseURL for AuthTypeOAuth2 secrets
 	OAuth2BaseURLKey = "baseURL"
+
+	// DynamicUsernameKey is the key of the username for  dynamic secrets.
+	DynamicUsernameKey = corev1.BasicAuthUsernameKey
+	// DynamicPasswordKey is the key of the password for  dynamic secrets.
+	DynamicPasswordKey = corev1.BasicAuthPasswordKey
+
+	// DynamicClientKeyKey is the key of the clientKey for dynamic secret
+	DynamicClientKeyKey = "key"
+	// DynamicClientSecretKey is the key of the clientSecret for dynamic secret
+	DynamicClientSecretKey = "secret"
+	// redefine key for dynamic token reflush.
+	DynamicAccessTokenKey  = OAuth2AccessTokenKey
+	DynamicRefreshTokenKey = OAuth2RefreshTokenKey
+	DynamicCreatedAtKey    = OAuth2CreatedAtKey
+	DynamicExpiresInKey    = OAuth2ExpiresInKey
+	DynamicBaseURLKey      = OAuth2BaseURLKey
 )
 
 // Auth plugin auth
@@ -109,6 +125,26 @@ func (a *Auth) IsBasic() bool {
 // IsOAuth2 check auth is oauth2
 func (a *Auth) IsOAuth2() bool {
 	return a.Type == v1alpha1.AuthTypeOAuth2
+}
+
+// IsBasic check auth is basic
+func (a *Auth) IsDynamic() bool {
+	return a.Type == v1alpha1.AuthTypeDynamic
+}
+
+// GetDynamicInfo get dynamic auth ak and sk
+func (a *Auth) GetDynamicInfo() (ak string, sk string, err error) {
+	u, err := a.Get(DynamicClientKeyKey)
+	if err != nil {
+		return
+	}
+
+	p, err := a.Get(DynamicClientSecretKey)
+	if err != nil {
+		return
+	}
+
+	return u, p, nil
 }
 
 // GetBasicInfo get basic auth username and password

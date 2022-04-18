@@ -17,6 +17,7 @@ limitations under the License.
 package v1alpha1
 
 import (
+	"github.com/katanomi/pkg/common"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -88,6 +89,17 @@ func (opt ListOptions) GetSearchFirstElement(key string) (value string) {
 		}
 	}
 	return
+}
+
+// When ListOption page less than zero, set default value.
+func (opt *ListOptions) DefaultPager() {
+	if opt.ItemsPerPage < 1 {
+		opt.ItemsPerPage = common.DefaultPerPage
+	}
+
+	if opt.Page < 1 {
+		opt.Page = common.DefaultPage
+	}
 }
 
 // SortOptions options for sort

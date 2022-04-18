@@ -26,8 +26,9 @@ import (
 type AuthType string
 
 const (
-	AuthTypeBasic  = AuthType(corev1.SecretTypeBasicAuth)
-	AuthTypeOAuth2 = AuthType("katanomi.dev/oauth2")
+	AuthTypeBasic   = AuthType(corev1.SecretTypeBasicAuth)
+	AuthTypeOAuth2  = AuthType("katanomi.dev/oauth2")
+	AuthTypeDynamic = AuthType("katanomi.dev/dynamic")
 )
 
 var AuthCheckGVK = GroupVersion.WithKind("AuthCheck")
@@ -72,6 +73,10 @@ type AuthCheckStatus struct {
 	// AuthorizeURL url for the oAuth2 flow
 	// +optional
 	AuthorizeURL string `json:"authorizeURL,omitempty"`
+
+	// Provides the ability to convert username and password, and token refresh.
+	// +optional
+	RefreshData *AuthTokenStatus `json:"refreshData,omitempty"`
 }
 
 const (

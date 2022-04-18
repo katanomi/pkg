@@ -18,6 +18,9 @@ package v1alpha1
 
 import (
 	"testing"
+
+	"github.com/katanomi/pkg/common"
+	. "github.com/onsi/gomega"
 )
 
 func TestGetSearchValue(t *testing.T) {
@@ -41,4 +44,34 @@ func TestGetSearchValue(t *testing.T) {
 		t.Fail()
 		return
 	}
+}
+
+func TestListOptions_DefaultPager(t *testing.T) {
+	opt := ListOptions{
+		Page:         0,
+		ItemsPerPage: 0,
+	}
+
+	opt.DefaultPager()
+	Equal(opt.Page).Match(common.DefaultPage)
+	Equal(opt.ItemsPerPage).Match(common.DefaultPerPage)
+
+	opt1 := ListOptions{
+		Page:         10,
+		ItemsPerPage: 0,
+	}
+	opt1.DefaultPager()
+	opt1.DefaultPager()
+
+	Equal(opt1.Page).Match(10)
+	Equal(opt1.ItemsPerPage).Match(common.DefaultPerPage)
+
+	opt2 := ListOptions{
+		Page:         10,
+		ItemsPerPage: 30,
+	}
+	opt2.DefaultPager()
+
+	Equal(opt2.Page).Match(10)
+	Equal(opt2.ItemsPerPage).Match(30)
 }
