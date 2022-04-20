@@ -26,9 +26,10 @@ import (
 type AuthType string
 
 const (
-	AuthTypeBasic   = AuthType(corev1.SecretTypeBasicAuth)
-	AuthTypeOAuth2  = AuthType("katanomi.dev/oauth2")
-	AuthTypeDynamic = AuthType("katanomi.dev/dynamic")
+	AuthTypeBasic        = AuthType(corev1.SecretTypeBasicAuth)
+	AuthTypeOAuth2       = AuthType("katanomi.dev/oauth2")
+	AuthTypeOAuth2Devops = AuthType("devops.alauda.io/oauth2")
+	AuthTypeDynamic      = AuthType("katanomi.dev/dynamic")
 )
 
 var AuthCheckGVK = GroupVersion.WithKind("AuthCheck")
