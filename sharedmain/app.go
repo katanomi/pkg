@@ -29,7 +29,6 @@ import (
 	"sync"
 	"time"
 
-	"go.opentelemetry.io/otel/propagation"
 	utilyaml "k8s.io/apimachinery/pkg/util/yaml"
 	// load sigs.k8s.io/controller-runtime@v0.8.3/pkg/metrics/workqueue.go:99  workqueue.SetProvider(workqueueMetricsProvider{}) firstly
 	// avoid knative-pkg@v0.0.0-20220128061436-ff5a1e531de2/controller/stats_reporter.go:95 loading  firstly
@@ -227,12 +226,6 @@ func (a *AppBuilder) Tracing(ops ...tracing.TraceOption) *AppBuilder {
 	a.init()
 	ops = append([]tracing.TraceOption{
 		tracing.WithServiceName(a.Name),
-		tracing.WithTextMapPropagator(
-			propagation.NewCompositeTextMapPropagator(
-				propagation.TraceContext{},
-				propagation.Baggage{},
-			),
-		),
 	}, ops...)
 	t := tracing.NewTracing(a.Logger, ops...)
 	err := tracing.SetupDynamicPublishing(t, a.ConfigMapWatcher)

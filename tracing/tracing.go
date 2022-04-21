@@ -99,12 +99,11 @@ func (t *Tracing) ApplyConfig(cfg *Config) {
 	t.applyOnce.Do(func() {
 		otel.SetTracerProvider(traceApi.NewNoopTracerProvider())
 
-		if len(t.Propagators) == 0 {
-			otel.SetTextMapPropagator(propagation.TraceContext{})
-		} else {
-			propagators := propagation.NewCompositeTextMapPropagator(t.Propagators...)
-			otel.SetTextMapPropagator(propagators)
+		propagators := propagation.TextMapPropagator(propagation.TraceContext{})
+		if len(t.Propagators) > 0 {
+			propagators = propagation.NewCompositeTextMapPropagator(t.Propagators...)
 		}
+		otel.SetTextMapPropagator(propagators)
 	})
 
 	tp, err := t.traceProvider(cfg)
