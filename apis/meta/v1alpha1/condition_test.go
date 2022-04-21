@@ -52,6 +52,67 @@ func (s *StatusTest) GetCondition(t apis.ConditionType) *apis.Condition {
 	return stageTestCondSet.Manage(s).GetCondition(t)
 }
 
+func TestGetCondition(t *testing.T) {
+	table := map[string]struct {
+		source        apis.Conditions
+		t             apis.ConditionType
+		expectedIndex int
+	}{
+		"length is 0":   {source: apis.Conditions{}, t: apis.ConditionType("WHAT"), expectedIndex: -1},
+		"source is nil": {source: nil, t: apis.ConditionType("WHAT"), expectedIndex: -1},
+		"contains in source": {
+			source: apis.Conditions{
+				{
+					Type: "AType",
+				},
+				{
+					Type: "BType",
+				},
+			},
+			t:             "AType",
+			expectedIndex: 0,
+		},
+		"not contains in source": {
+			source: apis.Conditions{
+				{
+					Type: "AType",
+				},
+				{
+					Type: "BType",
+				},
+			},
+			t:             "CType",
+			expectedIndex: -1,
+		},
+		"empty type": {
+			source: apis.Conditions{
+				{
+					Type: "AType",
+				},
+				{
+					Type: "BType",
+				},
+			},
+			t:             "",
+			expectedIndex: -1,
+		},
+	}
+
+	for name, item := range table {
+		t.Run(name, func(t *testing.T) {
+			actual := GetCondition(item.source, item.t)
+			g := NewGomegaWithT(t)
+			if item.expectedIndex < 0 {
+				g.Expect(actual).Should(BeNil())
+			} else {
+				g.Expect(fmt.Sprintf("%p", actual)).Should(BeEquivalentTo(fmt.Sprintf("%p", &item.source[item.expectedIndex])))
+				actual.Message = "changed"
+				g.Expect(item.source[item.expectedIndex].Message).Should(BeEquivalentTo(actual.Message))
+			}
+		})
+	}
+}
+
 func TestIsConditionChanged(t *testing.T) {
 	now := metav1.Now()
 	oneSecondAgo := metav1.NewTime(now.Add(-time.Second))
