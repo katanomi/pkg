@@ -78,6 +78,21 @@ func IsConditionChanged(current, old apis.ConditionAccessor, conditionType apis.
 		currentCondition.Reason != oldCondition.Reason
 }
 
+// GetCondition will return the first condition pointer filter by type in conditions
+func GetCondition(conditions apis.Conditions, t apis.ConditionType) *apis.Condition {
+	if len(conditions) == 0 {
+		return nil
+	}
+
+	for i := range conditions {
+		if conditions[i].Type == t {
+			return &conditions[i]
+		}
+	}
+
+	return nil
+}
+
 // ConditionType is a camel-cased condition type.
 type ConditionType string
 
