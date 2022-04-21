@@ -22,6 +22,8 @@ import (
 	"os"
 	"strconv"
 	"time"
+
+	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 )
 
 var (
@@ -47,7 +49,7 @@ func NewHTTPClient() *http.Client {
 }
 
 func GetDefaultTransport() http.RoundTripper {
-	return &http.Transport{
+	tp := &http.Transport{
 		Proxy: http.ProxyFromEnvironment,
 		DialContext: (&net.Dialer{
 			Timeout:   10 * time.Second,
@@ -58,4 +60,11 @@ func GetDefaultTransport() http.RoundTripper {
 		TLSHandshakeTimeout:   10 * time.Second,
 		ExpectContinueTimeout: 1 * time.Second,
 	}
+	return otelhttp.NewTransport(tp,
+		otelhttp.WithSpanNameFormatter(defaulSpanNameFormatter),
+	)
+}
+
+func defaulSpanNameFormatter(operation string, r *http.Request) string {
+	return r.Method + " " + r.URL.EscapedPath()
 }

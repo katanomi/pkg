@@ -26,7 +26,7 @@ import (
 func main() {
 	sharedmain.App("harbor-example").
 		Log().
-		Tracing(nil).
+		Tracing().
 		Profiling().
 		APIDocs().
 		Plugins(

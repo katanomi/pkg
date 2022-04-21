@@ -29,6 +29,7 @@ import (
 	"sync"
 	"time"
 
+	"go.opentelemetry.io/otel/propagation"
 	utilyaml "k8s.io/apimachinery/pkg/util/yaml"
 	// load sigs.k8s.io/controller-runtime@v0.8.3/pkg/metrics/workqueue.go:99  workqueue.SetProvider(workqueueMetricsProvider{}) firstly
 	// avoid knative-pkg@v0.0.0-20220128061436-ff5a1e531de2/controller/stats_reporter.go:95 loading  firstly
@@ -45,11 +46,10 @@ import (
 	kmanager "github.com/katanomi/pkg/manager"
 	"github.com/katanomi/pkg/multicluster"
 	"github.com/katanomi/pkg/plugin/client"
-	"github.com/katanomi/pkg/plugin/component/tracing"
-	"github.com/katanomi/pkg/plugin/config"
 	"github.com/katanomi/pkg/plugin/route"
 	"github.com/katanomi/pkg/restclient"
 	kscheme "github.com/katanomi/pkg/scheme"
+	"github.com/katanomi/pkg/tracing"
 	"go.uber.org/zap"
 	"golang.org/x/sync/errgroup"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -112,9 +112,6 @@ type AppBuilder struct {
 
 	// plugins
 	plugins []client.Interface
-
-	// tracing
-	tracingConfig *config.Config
 
 	// restful container
 	container *restful.Container
@@ -223,6 +220,27 @@ func (a *AppBuilder) initClient(clientVar ctrlclient.Client) {
 		}
 		a.Context = kclient.WithDynamicClient(a.Context, dynamicClient)
 	})
+}
+
+// Tracing adds tracing and tracer to the app
+func (a *AppBuilder) Tracing(ops ...tracing.TraceOption) *AppBuilder {
+	a.init()
+	ops = append([]tracing.TraceOption{
+		tracing.WithServiceName(a.Name),
+		tracing.WithTextMapPropagator(
+			propagation.NewCompositeTextMapPropagator(
+				propagation.TraceContext{},
+				propagation.Baggage{},
+			),
+		),
+	}, ops...)
+	t := tracing.NewTracing(a.Logger, ops...)
+	err := tracing.SetupDynamicPublishing(t, a.ConfigMapWatcher)
+	if err != nil {
+		log.Fatal("Error reading/parsing tracing configuration: ", err)
+	}
+	a.filters = append(a.filters, t.Filter())
+	return a
 }
 
 // Log adds logging and logger to the app
@@ -362,31 +380,6 @@ func (a *AppBuilder) Webhooks(objs ...runtime.Object) *AppBuilder {
 			controllerLogger.Infow("setup register webhook")
 			ctx := logging.WithLogger(a.Context, controllerLogger)
 			setup.SetupRegisterWithManager(ctx, a.Manager)
-		}
-	}
-	return a
-}
-
-// Tracing adds tracing capabilities to this app
-// TODO: change this configuration to use a configmap watcher and turn on/off on the fly
-func (a *AppBuilder) Tracing(cfg *config.Config) *AppBuilder {
-	if cfg == nil {
-		cfg = config.NewConfig()
-	}
-	a.tracingConfig = cfg
-
-	if a.tracingConfig.Trace.Enable {
-		closer, err := tracing.Config(&a.tracingConfig.Trace)
-		if err != nil {
-			a.Logger.Fatalw("tracing start error", "err", err)
-		}
-		if closer != nil {
-			a.startFunc = append(a.startFunc, func(ctx context.Context) error {
-				// waits until it is shutting down to close
-				<-ctx.Done()
-				return closer.Close()
-			})
-
 		}
 	}
 	return a
