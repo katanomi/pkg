@@ -50,6 +50,13 @@ func NewManager(ctx context.Context, get GetConfigFunc, baseConfig GetBaseConfig
 	if get == nil {
 		get = FromBearerToken
 	}
+	get = func(req *restful.Request, baseConfig GetBaseConfigFunc) (*rest.Config, error) {
+		cfg, err := get(req, baseConfig)
+		if cfg != nil {
+			cfg.WrapTransport = WrapTransportForTracing
+		}
+		return cfg, err
+	}
 	if baseConfig == nil {
 		baseConfig = config.GetConfig
 	}

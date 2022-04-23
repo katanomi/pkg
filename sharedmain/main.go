@@ -62,6 +62,7 @@ func GetConfigOrDie(ctx context.Context) (context.Context, *rest.Config) {
 		cfg = ctrl.GetConfigOrDie()
 		ctx = injection.WithConfig(ctx, cfg)
 	}
+	cfg.WrapTransport = kclient.WrapTransportForTracing
 	return ctx, cfg
 }
 

@@ -28,7 +28,7 @@ func SetupDynamicPublishing(tracing *Tracing, configMapWatcher configmap.Watcher
 		"config-tracing-store",
 		tracing.logger,
 		configmap.Constructors{
-			tracing.ConfigMapName: NewTracingConfigFromConfigMap,
+			tracing.ConfigMapName: newTracingConfigFromConfigMap,
 		},
 		tracerUpdater)
 	configStore.WatchConfigs(configMapWatcher)

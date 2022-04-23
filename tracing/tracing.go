@@ -114,7 +114,7 @@ func (t *Tracing) ApplyConfig(cfg *Config) {
 	otel.SetTracerProvider(tp)
 }
 
-func (t *Tracing) traceProvider(cfg *Config) (tp *trace.TracerProvider, err error) {
+func (t *Tracing) traceProvider(cfg *Config) (tp traceApi.TracerProvider, err error) {
 	if t.traceProviderConstructor != nil {
 		tp, err = t.traceProviderConstructor(cfg)
 		if err != nil {
@@ -124,6 +124,10 @@ func (t *Tracing) traceProvider(cfg *Config) (tp *trace.TracerProvider, err erro
 			)
 		}
 		return
+	}
+
+	if cfg == nil {
+		return traceApi.NewNoopTracerProvider(), nil
 	}
 
 	exp, err := t.exporter(cfg)
@@ -139,6 +143,7 @@ func (t *Tracing) traceProvider(cfg *Config) (tp *trace.TracerProvider, err erro
 	ops := []trace.TracerProviderOption{
 		trace.WithBatcher(exp),
 		trace.WithResource(res),
+		trace.WithSampler(trace.TraceIDRatioBased(cfg.SamplingRatio)),
 	}
 	ops = append(ops, t.traceProviderOptions...)
 	tp = trace.NewTracerProvider(ops...)

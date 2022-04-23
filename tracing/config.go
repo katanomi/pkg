@@ -14,11 +14,12 @@ const (
 	defaultServiceName   = "katanomi"
 	defaultConfigMapName = "config-tracing"
 
-	enableKey       = "enable"
-	backendKey      = "backend"
-	jaegerConfigKey = "jaeger-config"
-	zipkinConfigKey = "zipkin-config"
-	customConfigKey = "custom-config"
+	enableKey        = "enable"
+	backendKey       = "backend"
+	samplingRatioKey = "sampling-ratio"
+	jaegerConfigKey  = "jaeger-config"
+	zipkinConfigKey  = "zipkin-config"
+	customConfigKey  = "custom-config"
 )
 
 type ExporterBackend string
@@ -31,11 +32,11 @@ var (
 
 // Config tracing config
 type Config struct {
-	Enable bool `json:"enable" yaml:"enable" env:"TRACE_ENABLE"`
-
-	Backend ExporterBackend `json:"backend" yaml:"backend"`
-	Jaeger  JaegerConfig    `json:"jaeger" yaml:"jaeger"`
-	Zipkin  ZipkinConfig    `json:"zipkin" yaml:"zipkin"`
+	Enable        bool            `json:"enable" yaml:"enable"`
+	SamplingRatio float64         `json:"sampling_ratio" yaml:"samplingRatio"`
+	Backend       ExporterBackend `json:"backend" yaml:"backend"`
+	Jaeger        JaegerConfig    `json:"jaeger" yaml:"jaeger"`
+	Zipkin        ZipkinConfig    `json:"zipkin" yaml:"zipkin"`
 
 	Custom string `json:"custom" yaml:"custom"`
 	// todo support OTLP
@@ -53,8 +54,8 @@ type JaegerConfig struct {
 	AttemptReconnectInterval   time.Duration `json:"attempt_reconnect_interval" yaml:"attemptReconnectInterval"`
 }
 
-// NewTracingConfigFromConfigMap returns a Config for the given configmap
-func NewTracingConfigFromConfigMap(config *corev1.ConfigMap) (*Config, error) {
+// newTracingConfigFromConfigMap returns a Config for the given configmap
+func newTracingConfigFromConfigMap(config *corev1.ConfigMap) (*Config, error) {
 	if config == nil {
 		return &Config{}, nil
 	}
@@ -64,12 +65,13 @@ func NewTracingConfigFromConfigMap(config *corev1.ConfigMap) (*Config, error) {
 		cm.AsBool(enableKey, &c.Enable),
 		cm.AsString(backendKey, &backend),
 		cm.AsString(customConfigKey, &c.Custom),
+		cm.AsFloat64(samplingRatioKey, &c.SamplingRatio),
 	)
 	if err != nil {
 		return nil, err
 	}
 	c.Backend = ExporterBackend(backend)
-	if !c.Enable {
+	if !c.Enable || c.SamplingRatio <= 0 {
 		return c, nil
 	}
 	switch c.Backend {

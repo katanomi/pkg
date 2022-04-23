@@ -60,11 +60,15 @@ func GetDefaultTransport() http.RoundTripper {
 		TLSHandshakeTimeout:   10 * time.Second,
 		ExpectContinueTimeout: 1 * time.Second,
 	}
-	return otelhttp.NewTransport(tp,
-		otelhttp.WithSpanNameFormatter(defaulSpanNameFormatter),
-	)
+	return WrapTransportForTracing(tp)
 }
 
-func defaulSpanNameFormatter(operation string, r *http.Request) string {
+func defaultSpanNameFormatter(_ string, r *http.Request) string {
 	return r.Method + " " + r.URL.EscapedPath()
+}
+
+func WrapTransportForTracing(rt http.RoundTripper) http.RoundTripper {
+	return otelhttp.NewTransport(rt,
+		otelhttp.WithSpanNameFormatter(defaultSpanNameFormatter),
+	)
 }
