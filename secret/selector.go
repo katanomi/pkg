@@ -48,6 +48,10 @@ type SelectSecretOption struct {
 	// ExcludedSecretTypes exclude some secret types when do selecting
 	ExcludedSecretTypes SecretTypeList
 
+	// SecretTypes means only secret which type exist in this list will be selected
+	// if it is empty means there is no limit for secret type when selecting
+	SecretTypes SecretTypeList
+
 	// Namespace indicates current namespace that current resource belongs.
 	// the secret will be searched in this namespace
 	// as a default action, secret in the same namespace could be used by other resources in same namespace
@@ -191,9 +195,13 @@ func selectToolSecretFrom(logger *zap.SugaredLogger, secretList []corev1.Secret,
 	for _, _secret := range sortedSecrets {
 		var sec = _secret
 
+		if len(option.SecretTypes) != 0 && !option.SecretTypes.Contains(sec.Type) {
+			continue
+		}
 		if len(option.ExcludedSecretTypes) != 0 && option.ExcludedSecretTypes.Contains(sec.Type) {
 			continue
 		}
+
 		address := sec.Annotations[metav1alpha1.IntegrationAddressAnnotation]
 		if address == "" {
 			continue
