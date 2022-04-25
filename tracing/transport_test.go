@@ -1,1 +1,117 @@
 package tracing
+
+import (
+	"io/ioutil"
+	"net/http"
+	"net/http/httptest"
+	"net/url"
+	"strings"
+	"testing"
+	"time"
+
+	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/gomega"
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/propagation"
+	"go.opentelemetry.io/otel/sdk/trace"
+	"golang.org/x/net/context"
+)
+
+var _ = Describe("testing for WrapTransportForTracing", func() {
+	Context("when nil transport is provided", func() {
+		It("should use the default transport", func() {
+			rt := WrapTransportForTracing(nil)
+			tp, ok := rt.(*Transport)
+			Expect(ok).Should(BeTrue())
+			Expect(tp.originalRT).Should(Equal(http.DefaultTransport))
+		})
+	})
+	Context("when special transport is provided", func() {
+		It("should use the special transport", func() {
+			originalTp := &http.Transport{}
+			rt := WrapTransportForTracing(originalTp)
+			tp, ok := rt.(*Transport)
+			Expect(ok).Should(BeTrue())
+			Expect(tp.originalRT).Should(Equal(originalTp))
+		})
+	})
+	Context("when handler request", func() {
+		var shutdown []func()
+		var client http.Client
+
+		testHttpServer := func(handler func(http.ResponseWriter, *http.Request)) *http.Request {
+			testServer := httptest.NewServer(http.HandlerFunc(handler))
+			shutdown = append(shutdown, func() {
+				testServer.Close()
+			})
+			testRequest, err := http.NewRequest(http.MethodGet, testServer.URL, nil)
+			Expect(err).ShouldNot(HaveOccurred())
+			return testRequest
+		}
+
+		BeforeEach(func() {
+			client = http.Client{Transport: WrapTransportForTracing(nil)}
+			otel.SetTracerProvider(trace.NewTracerProvider(
+				trace.WithSampler(trace.AlwaysSample()),
+			))
+			otel.SetTextMapPropagator(propagation.TextMapPropagator(propagation.TraceContext{}))
+		})
+
+		It("should have a Tracing header", func() {
+			body := []byte("ok")
+			req := testHttpServer(func(response http.ResponseWriter, request *http.Request) {
+				Expect(request.Header.Get("Traceparent")).ShouldNot(BeEmpty())
+				_, _ = response.Write(body)
+			})
+
+			resp, err := client.Do(req)
+			Expect(err).ShouldNot(HaveOccurred())
+			defer resp.Body.Close()
+			Expect(err).ShouldNot(HaveOccurred())
+			Expect(ioutil.ReadAll(resp.Body)).Should(Equal(body))
+		})
+
+		It("need to cancel the request when it times out", func() {
+			body := []byte("ok")
+			req := testHttpServer(func(response http.ResponseWriter, request *http.Request) {
+				Expect(request.Header.Get("Traceparent")).ShouldNot(BeEmpty())
+				time.Sleep(2 * time.Second)
+				response.Write(body)
+			})
+
+			ctx, cancelFunc := context.WithTimeout(context.Background(), time.Second*1)
+			defer cancelFunc()
+			req = req.WithContext(ctx)
+
+			_, err := client.Do(req)
+			Expect(strings.Contains(err.Error(), "deadline exceeded")).Should(BeTrue())
+		})
+	})
+})
+
+func Test_defaultSpanNameFormatter(t *testing.T) {
+	tests := []struct {
+		url  string
+		want string
+	}{
+		{
+			url:  "https://a.com/a/b/c?a=b",
+			want: "GET /a/b/c",
+		},
+		{
+			url:  "https://a.com/a/b/c/?a=b",
+			want: "GET /a/b/c/",
+		},
+	}
+	g := NewGomegaWithT(t)
+	for _, tt := range tests {
+		url, err := url.Parse(tt.url)
+		g.Expect(err).ShouldNot(HaveOccurred())
+		req := &http.Request{
+			URL:    url,
+			Method: http.MethodGet,
+		}
+		spanName := defaultSpanNameFormatter("", req)
+		g.Expect(spanName).Should(Equal(tt.want))
+	}
+}
