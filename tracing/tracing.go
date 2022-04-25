@@ -14,57 +14,8 @@ import (
 	"go.uber.org/zap"
 )
 
-type TraceOption func(tracing *Tracing)
-type ExporterConstructor func(config *Config) (trace.SpanExporter, error)
-type ResourceConstructor func(config *Config) (*resource.Resource, error)
-type TraceProviderConstructor func(config *Config) (*trace.TracerProvider, error)
-
-func WithServiceName(name string) TraceOption {
-	return func(tracing *Tracing) {
-		tracing.ServiceName = name
-	}
-}
-
-func WithExporter(f ExporterConstructor) TraceOption {
-	return func(tracing *Tracing) {
-		if f != nil {
-			tracing.exporterConstructor = f
-		}
-	}
-}
-
-func WithResource(f ResourceConstructor) TraceOption {
-	return func(tracing *Tracing) {
-		if f != nil {
-			tracing.resourceConstructor = f
-		}
-	}
-}
-
-func WithTraceProvider(f TraceProviderConstructor) TraceOption {
-	return func(tracing *Tracing) {
-		if f != nil {
-			tracing.traceProviderConstructor = f
-		}
-	}
-}
-
-func WithTracerProviderOption(ops ...trace.TracerProviderOption) TraceOption {
-	return func(tracing *Tracing) {
-		tracing.traceProviderOptions = append(tracing.traceProviderOptions, ops...)
-	}
-}
-
-func WithTextMapPropagator(ops ...propagation.TextMapPropagator) TraceOption {
-	return func(tracing *Tracing) {
-		for _, item := range ops {
-			if item != nil {
-				tracing.Propagators = append(tracing.Propagators, item)
-			}
-		}
-	}
-}
-
+// NewTracing construct `Tracing` instance
+// `TraceOption` can be used to customize settings.
 func NewTracing(logger *zap.SugaredLogger, ops ...TraceOption) *Tracing {
 	tracing := &Tracing{
 		logger:        logger,
@@ -80,8 +31,11 @@ func NewTracing(logger *zap.SugaredLogger, ops ...TraceOption) *Tracing {
 	return tracing
 }
 
+// Tracing describe an entity that watching configuration file changes and
+// maintain the global tracing.
 type Tracing struct {
 	applyOnce sync.Once
+	lock      sync.Mutex
 	logger    *zap.SugaredLogger
 
 	ServiceName   string
@@ -95,6 +49,9 @@ type Tracing struct {
 	Propagators          []propagation.TextMapPropagator
 }
 
+// ApplyConfig Apply configuration and reinitialize global tracing.
+// This method will be triggered when the configuration changes.
+// If an error occurs, the initialization process will be skipped.
 func (t *Tracing) ApplyConfig(cfg *Config) {
 	t.applyOnce.Do(func() {
 		otel.SetTracerProvider(traceApi.NewNoopTracerProvider())
@@ -105,6 +62,8 @@ func (t *Tracing) ApplyConfig(cfg *Config) {
 		}
 		otel.SetTextMapPropagator(propagators)
 	})
+	t.lock.Lock()
+	defer t.lock.Unlock()
 
 	tp, err := t.traceProvider(cfg)
 	if err != nil {
@@ -114,6 +73,7 @@ func (t *Tracing) ApplyConfig(cfg *Config) {
 	otel.SetTracerProvider(tp)
 }
 
+// traceProvider construct traceProvider according to the specified configuration.
 func (t *Tracing) traceProvider(cfg *Config) (tp traceApi.TracerProvider, err error) {
 	if t.traceProviderConstructor != nil {
 		tp, err = t.traceProviderConstructor(cfg)
@@ -150,6 +110,7 @@ func (t *Tracing) traceProvider(cfg *Config) (tp traceApi.TracerProvider, err er
 	return tp, nil
 }
 
+// exporter construct backend exporter according to the specified configuration.
 func (t *Tracing) exporter(config *Config) (exporter trace.SpanExporter, err error) {
 	if t.exporterConstructor != nil {
 		exporter, err = t.exporterConstructor(config)
@@ -179,6 +140,7 @@ func (t *Tracing) exporter(config *Config) (exporter trace.SpanExporter, err err
 	return exporter, nil
 }
 
+// constructZipkinExporter construct zipkin exporter according to the specified configuration.
 func (t *Tracing) constructZipkinExporter(cfg ZipkinConfig) (exporter trace.SpanExporter, err error) {
 	exporter, err = zipkin.New(cfg.Url)
 	if err != nil {
@@ -190,6 +152,7 @@ func (t *Tracing) constructZipkinExporter(cfg ZipkinConfig) (exporter trace.Span
 	return exporter, err
 }
 
+// constructJaegerExporter construct jaeger exporter according to the specified configuration.
 func (t *Tracing) constructJaegerExporter(cfg JaegerConfig) (exporter trace.SpanExporter, err error) {
 	ops := make([]jaeger.AgentEndpointOption, 0)
 	if cfg.Host != "" {
@@ -219,6 +182,7 @@ func (t *Tracing) constructJaegerExporter(cfg JaegerConfig) (exporter trace.Span
 	return exporter, err
 }
 
+// resource construct Resource according to the specified configuration.
 func (t *Tracing) resource(config *Config) (r *resource.Resource, err error) {
 	if t.resourceConstructor != nil {
 		r, err = t.resourceConstructor(config)

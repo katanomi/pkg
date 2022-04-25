@@ -22,6 +22,7 @@ import (
 	"encoding/json"
 	"errors"
 
+	"github.com/katanomi/pkg/tracing"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
@@ -157,6 +158,8 @@ func (m *ClusterRegistryClient) GetConfigFromCluster(ctx context.Context, cluste
 			CAData: caBundle,
 		},
 	}
+
+	config.Wrap(tracing.WrapTransportForTracing)
 
 	// Uses the controller secret for controller auth
 	// this configuration or config should only be used by controllers

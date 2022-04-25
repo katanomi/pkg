@@ -69,6 +69,11 @@ import (
 	ctrllog "sigs.k8s.io/controller-runtime/pkg/log"
 )
 
+const (
+	healthzRoutePath = "healthz"
+	readyzRoutePath  = "readyz"
+)
+
 var (
 	DefaultTimeout = kclient.DefaultTimeout
 	DefaultQPS     = kclient.DefaultQPS
@@ -232,7 +237,7 @@ func (a *AppBuilder) Tracing(ops ...tracing.TraceOption) *AppBuilder {
 	if err != nil {
 		log.Fatal("Error reading/parsing tracing configuration: ", err)
 	}
-	a.filters = append(a.filters, t.Filter())
+	a.filters = append(a.filters, tracing.RestfulFilter(a.Name, healthzRoutePath, readyzRoutePath))
 	return a
 }
 
@@ -309,10 +314,10 @@ func (a *AppBuilder) Controllers(ctors ...controllers.SetupChecker) *AppBuilder 
 	if err != nil {
 		a.Logger.Fatalw("unable to start manager", "err", err)
 	}
-	if err := a.Manager.AddHealthzCheck("healthz", healthz.Ping); err != nil {
+	if err := a.Manager.AddHealthzCheck(healthzRoutePath, healthz.Ping); err != nil {
 		a.Logger.Fatalw("unable to set up health check", "err", err)
 	}
-	if err := a.Manager.AddReadyzCheck("readyz", healthz.Ping); err != nil {
+	if err := a.Manager.AddReadyzCheck(readyzRoutePath, healthz.Ping); err != nil {
 		a.Logger.Fatalw("unable to set up ready check", "err", err)
 	}
 

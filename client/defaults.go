@@ -23,7 +23,7 @@ import (
 	"strconv"
 	"time"
 
-	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
+	"github.com/katanomi/pkg/tracing"
 )
 
 var (
@@ -60,15 +60,5 @@ func GetDefaultTransport() http.RoundTripper {
 		TLSHandshakeTimeout:   10 * time.Second,
 		ExpectContinueTimeout: 1 * time.Second,
 	}
-	return WrapTransportForTracing(tp)
-}
-
-func defaultSpanNameFormatter(_ string, r *http.Request) string {
-	return r.Method + " " + r.URL.EscapedPath()
-}
-
-func WrapTransportForTracing(rt http.RoundTripper) http.RoundTripper {
-	return otelhttp.NewTransport(rt,
-		otelhttp.WithSpanNameFormatter(defaultSpanNameFormatter),
-	)
+	return tracing.WrapTransportForTracing(tp)
 }

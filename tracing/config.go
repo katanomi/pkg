@@ -22,6 +22,7 @@ const (
 	customConfigKey  = "custom-config"
 )
 
+// ExporterBackend Built-in supported export types
 type ExporterBackend string
 
 var (
@@ -32,32 +33,58 @@ var (
 
 // Config tracing config
 type Config struct {
-	Enable        bool            `json:"enable" yaml:"enable"`
-	SamplingRatio float64         `json:"sampling_ratio" yaml:"samplingRatio"`
-	Backend       ExporterBackend `json:"backend" yaml:"backend"`
-	Jaeger        JaegerConfig    `json:"jaeger" yaml:"jaeger"`
-	Zipkin        ZipkinConfig    `json:"zipkin" yaml:"zipkin"`
+	// Enable Controls whether to enable tracing.
+	// default false.
+	Enable bool `json:"enable" yaml:"enable"`
 
+	// SamplingRatio Control the rate of sampling.
+	// SamplingRatio >= 1 will always sample.
+	// SamplingRatio <= 0 will never sample.
+	// default 0.
+	SamplingRatio float64 `json:"sampling_ratio" yaml:"samplingRatio"`
+
+	// Backend The type of exporter backend
+	Backend ExporterBackend `json:"backend" yaml:"backend"`
+
+	// Jaeger The configuration used by jaeger backend
+	Jaeger JaegerConfig `json:"jaeger" yaml:"jaeger"`
+
+	// Zipkin The configuration used by zipkin backend
+	Zipkin ZipkinConfig `json:"zipkin" yaml:"zipkin"`
+
+	// Custom The configuration used by custom backend
 	Custom string `json:"custom" yaml:"custom"`
 	// todo support OTLP
 }
 
+// ZipkinConfig The configuration used by zipkin backend
 type ZipkinConfig struct {
+	// Url The collector url of zipkin backend
 	Url string `json:"url" yaml:"url"`
 }
 
+// JaegerConfig The configuration used by Jaeger backend
 type JaegerConfig struct {
-	Host                       string        `json:"host" yaml:"host"`
-	Port                       string        `json:"port" yaml:"port"`
-	MaxPacketSize              int           `json:"max_packet_size" yaml:"maxPacketSize"`
-	DisableAttemptReconnecting bool          `json:"disable_attempt_reconnecting" yaml:"disableAttemptReconnecting"`
-	AttemptReconnectInterval   time.Duration `json:"attempt_reconnect_interval" yaml:"attemptReconnectInterval"`
+	// Host The host of jaeger backend.
+	Host string `json:"host" yaml:"host"`
+
+	// Port the port of jaeger backend.
+	Port string `json:"port" yaml:"port"`
+
+	// MaxPacketSize The maximum UDP packet size for transport to the Jaeger agent.
+	MaxPacketSize int `json:"max_packet_size" yaml:"maxPacketSize"`
+
+	// DisableAttemptReconnecting Disable reconnecting udp client.
+	DisableAttemptReconnecting bool `json:"disable_attempt_reconnecting" yaml:"disableAttemptReconnecting"`
+
+	// AttemptReconnectInterval The interval between attempts to re resolve agent endpoint.
+	AttemptReconnectInterval time.Duration `json:"attempt_reconnect_interval" yaml:"attemptReconnectInterval"`
 }
 
 // newTracingConfigFromConfigMap returns a Config for the given configmap
 func newTracingConfigFromConfigMap(config *corev1.ConfigMap) (*Config, error) {
 	if config == nil {
-		return &Config{}, nil
+		return nil, nil
 	}
 	c := &Config{}
 	backend := ""
