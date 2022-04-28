@@ -36,10 +36,28 @@ func ReasonForError(err error) string {
 // If the given error is not nil will examine its reason and mark the condition as False
 // otherwise will set condition to True
 func SetConditionByError(conditionManager apis.ConditionManager, condition apis.ConditionType, err error) {
-	if err == nil {
-		conditionManager.MarkTrue(condition)
+	SetConditionByErrorReason(conditionManager, condition, err, "")
+}
+
+// SetConditionByErrorReason sets a condition with error and reason
+// If the given error is not nil will examine its reason and mark the condition as False
+// otherwise will set condition to True
+// If the given reason is empty, it will parse a string for reason from the error
+func SetConditionByErrorReason(conditionManager apis.ConditionManager, condition apis.ConditionType, err error, reason string) {
+	old := conditionManager.GetCondition(condition)
+
+	if err != nil {
+		if reason == "" {
+			reason = ReasonForError(err)
+		}
+		message := err.Error()
+		if old == nil || old.IsTrue() || old.GetMessage() != message || old.GetReason() != reason {
+			conditionManager.MarkFalse(condition, reason, message)
+		}
 	} else {
-		conditionManager.MarkFalse(condition, ReasonForError(err), err.Error())
+		if old == nil || old.IsFalse() {
+			conditionManager.MarkTrue(condition)
+		}
 	}
 }
 
