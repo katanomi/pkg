@@ -289,7 +289,7 @@ type BlobStoreLister interface {
 	ListBlobStores(ctx context.Context, listOption metav1alpha1.ListOptions) (*metav1alpha1.BlobStoreList, error)
 }
 
-// Client inteface for PluginClient, client code shoud use the interface
+// Client interface for PluginClient, client code should use the interface
 // as dependency
 type Client interface {
 	Get(ctx context.Context, baseURL *duckv1.Addressable, uri string, options ...OptionFunc) error

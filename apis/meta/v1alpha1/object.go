@@ -31,7 +31,7 @@ func GetNamespacedNameFromObject(obj metav1.Object) (named types.NamespacedName)
 	return
 }
 
-// TopLevelConditionObject shoule be an metav1.Object that implement func GetTopLevelCondition() *apis.Condition
+// TopLevelConditionObject shouled be an metav1.Object that implement func GetTopLevelCondition() *apis.Condition
 // +k8s:deepcopy-gen=false
 type TopLevelConditionObject interface {
 	metav1.Object

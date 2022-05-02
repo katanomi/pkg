@@ -59,7 +59,7 @@ func TestSelect(t *testing.T) {
 			t.Errorf("actual should not be nil")
 		}
 		if actual.Namespace != secretNamespace || actual.Name != secretName {
-			t.Errorf("acutal should be %s/%s but: %s/%s", secretNamespace, secretName, actual.Namespace, actual.Name)
+			t.Errorf("actual should be %s/%s but: %s/%s", secretNamespace, secretName, actual.Namespace, actual.Name)
 		}
 	}
 
@@ -71,7 +71,7 @@ func TestSelect(t *testing.T) {
 				"", []string{"/devops-2/"}, []string{}, false),
 		}
 		actual, err := selectToolSecret(log, secrets, []corev1.Secret{}, "https://gitlab.com/devops-2/demo", SelectSecretOption{
-			PerferredSecret:            types.NamespacedName{},
+			PreferredSecret:            types.NamespacedName{},
 			ExcludedSecretTypes:        nil,
 			Namespace:                  "project-2",
 			GlobalCredentialsNamespace: "global-credentials",
@@ -79,7 +79,7 @@ func TestSelect(t *testing.T) {
 		expect(err, actual, "project-2", "secret-2")
 	})
 
-	t.Run("has namespaced credentials and correct scopes and perferred secret", func(t *testing.T) {
+	t.Run("has namespaced credentials and correct scopes and preferred secret", func(t *testing.T) {
 		secrets := []corev1.Secret{
 			buildSecret("secret-1", "project-1", "https://gitlab.com/",
 				"", []string{"/devops-1/"}, []string{}, false),
@@ -91,7 +91,7 @@ func TestSelect(t *testing.T) {
 				"", []string{"/devops-2/"}, []string{}, false),
 		}
 		actual, err := selectToolSecret(log, secrets, []corev1.Secret{}, "https://gitlab.com/devops-2/demo", SelectSecretOption{
-			PerferredSecret:            types.NamespacedName{Namespace: "project-2", Name: "secret-2.1"},
+			PreferredSecret:            types.NamespacedName{Namespace: "project-2", Name: "secret-2.1"},
 			ExcludedSecretTypes:        nil,
 			Namespace:                  "project-2",
 			GlobalCredentialsNamespace: "global-credentials",
@@ -110,7 +110,7 @@ func TestSelect(t *testing.T) {
 				"", []string{"/devops-2/"}, []string{}, true),
 		}
 		actual, err := selectToolSecret(log, secrets, globalSecrets, "https://gitlab.com/devops-2/demo", SelectSecretOption{
-			PerferredSecret:            types.NamespacedName{Namespace: "project-2", Name: "secret-2.1"},
+			PreferredSecret:            types.NamespacedName{Namespace: "project-2", Name: "secret-2.1"},
 			ExcludedSecretTypes:        nil,
 			Namespace:                  "project-1",
 			GlobalCredentialsNamespace: "global-credentials",
@@ -134,7 +134,7 @@ func TestSelect(t *testing.T) {
 				"", []string{"/devops-2/"}, []string{"project-1"}, true),
 		}
 		actual, err := selectToolSecret(log, secrets, globalSecrets, "https://gitlab.com/devops-2/demo", SelectSecretOption{
-			PerferredSecret:            types.NamespacedName{Namespace: "project-2", Name: "secret-what-ever"},
+			PreferredSecret:            types.NamespacedName{Namespace: "project-2", Name: "secret-what-ever"},
 			ExcludedSecretTypes:        nil,
 			Namespace:                  "project-1",
 			GlobalCredentialsNamespace: "global-credentials",
@@ -152,7 +152,7 @@ func TestSelect(t *testing.T) {
 				"", []string{"/devops-2/"}, []string{"project-2"}, true),
 		}
 		actual, err := selectToolSecret(log, secrets, globalSecrets, "https://gitlab.com/devops-2/demo", SelectSecretOption{
-			PerferredSecret:            types.NamespacedName{Namespace: "project-2", Name: "secret-what-ever"},
+			PreferredSecret:            types.NamespacedName{Namespace: "project-2", Name: "secret-what-ever"},
 			ExcludedSecretTypes:        nil,
 			Namespace:                  "project-1",
 			GlobalCredentialsNamespace: "global-credentials",

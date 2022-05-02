@@ -188,7 +188,7 @@ func TestIsConditionChanged(t *testing.T) {
 
 }
 
-func TestSetConditonByErrorReason(t *testing.T) {
+func TestSetConditionByErrorReason(t *testing.T) {
 	t.Run("Error with empty reason", func(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
@@ -225,7 +225,7 @@ func TestSetConditonByErrorReason(t *testing.T) {
 	})
 }
 
-func TestSetConditonByError(t *testing.T) {
+func TestSetConditionByError(t *testing.T) {
 
 	t.Run("Explicit reason error case", func(t *testing.T) {
 		ctrl := gomock.NewController(t)

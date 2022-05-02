@@ -59,7 +59,7 @@ type IssueSpec struct {
 	// Issue status
 	Status string `json:"status"`
 
-	// Issue assgin to someone
+	// Issue assign to someone
 	Assign UserSpec `json:"assign"`
 
 	// Issue latest update time

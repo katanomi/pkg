@@ -52,7 +52,7 @@ Most test cases can be written in a `ginkgo` fashion with a few helper methods t
 After constructing a few more methods:
 
    1. `WithFunc`: takes a `TestFunction` that is given a context in which the test case executes.
-   1. `Do`: finilizes the test case construction
+   1. `Do`: finalizes the test case construction
 
 
 

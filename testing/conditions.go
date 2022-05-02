@@ -47,9 +47,9 @@ func (c *ConditionBuilder) SetStatus(stat corev1.ConditionStatus) *ConditionBuil
 }
 
 // SetReasonMessage sets the message for the condition
-func (c *ConditionBuilder) SetReasonMessage(reason, message string, formtKeyValues ...interface{}) *ConditionBuilder {
+func (c *ConditionBuilder) SetReasonMessage(reason, message string, formatKeyValues ...interface{}) *ConditionBuilder {
 	c.Reason = reason
-	c.Message = fmt.Sprintf(message, formtKeyValues...)
+	c.Message = fmt.Sprintf(message, formatKeyValues...)
 	return c
 }
 

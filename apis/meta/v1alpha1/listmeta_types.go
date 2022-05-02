@@ -148,6 +148,6 @@ type UserOptions struct {
 	// Group identity
 	Group string `json:"group"`
 
-	// User indentity
+	// User identity
 	UserId string `json:"userId"`
 }

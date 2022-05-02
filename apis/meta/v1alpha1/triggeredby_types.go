@@ -58,7 +58,7 @@ type TriggeredBy struct {
 	Ref *corev1.ObjectReference `json:"ref,omitempty"`
 
 	// Date time of creation of triggered event. Will match a resource's metadata.creationTimestamp
-	// it is added here for convinience only
+	// it is added here for convenience only
 	// +optional
 	TriggeredTimestamp *metav1.Time `json:"triggeredTimestamp,omitempty"`
 
@@ -102,7 +102,7 @@ func (by *TriggeredBy) FromAnnotation(annotations map[string]string) (*Triggered
 // return annotations that with triggeredby.
 func (by TriggeredBy) SetIntoAnnotation(annotations map[string]string) (map[string]string, error) {
 	if by.CloudEvent != nil {
-		// clean cloudevent data, it is so big limitted in annotations
+		// clean cloudevent data, it is so big limited in annotations
 		by.CloudEvent.Data = ""
 	}
 

@@ -13,8 +13,8 @@ All shared common packages and code across katanomi repos
  - [logging](logging): logging related
  - [manager](manager): controller-runtime manager methods
  - [multicluster](multicluster): shared multicluster interfaces and implementations for client, etc.
- - [names](names): name generation releated methods (k8s.io/apiserver inspired)
- - [namespace](namespace): namespace releated methods
+ - [names](names): name generation related methods (k8s.io/apiserver inspired)
+ - [namespace](namespace): namespace related methods
  - [parallel](parallel): parallel task execution implementation
  - [plugin](plugin): plugin system files and subpackages
  - [restclient](restclient): RESTful client methods
@@ -22,7 +22,7 @@ All shared common packages and code across katanomi repos
  - [sharedmain](sharedmain): common main functions to init components
  - [testing](testing): automated test related methods
  - [testing/framework](testing/framework): automated test framework for e2e and integration testing
- - [user](user): user matching releated functions
+ - [user](user): user matching related functions
  - [webhook](webhook): custom webhook methods to extend current controller-runtime webhooks
 
 ## TODO

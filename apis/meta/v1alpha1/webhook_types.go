@@ -57,7 +57,7 @@ type WebhookRegisterSpec struct {
 	// Address stores the target address for the webhook
 	Address apis.URL `json:"addressURL"`
 	// RequestSecret will hold information for a request header that should be used
-	// by the registring webhook
+	// by the registering webhook
 	// this data will be used during request to validate webhook requests
 	// +optional
 	RequestSecret string `json:"requestSecret"`

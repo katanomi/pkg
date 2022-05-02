@@ -96,13 +96,13 @@ func TestObjectConditionsSet(t *testing.T) {
 
 		obj := &SomeStatusObj{conditions: objcs}
 		mgr := objcs.Manage(obj)
-		mgr.MarkFalse(abcPod.ObjectReference, "FalseReason", "My errror message")
+		mgr.MarkFalse(abcPod.ObjectReference, "FalseReason", "My error message")
 		mgr.SetConditionType(abcPod.ObjectReference, apis.ConditionReady)
 		mgr.SetSeverity(abcPod.ObjectReference, apis.ConditionSeverityInfo)
 		gotObj := mgr.GetObjectConditionByObjRef(abcPod.ObjectReference)
 		g.Expect(gotObj.Status).To(Equal(corev1.ConditionFalse))
 		g.Expect(gotObj.Reason).To(Equal("FalseReason"))
-		g.Expect(gotObj.Message).To(Equal("My errror message"))
+		g.Expect(gotObj.Message).To(Equal("My error message"))
 		g.Expect(gotObj.LastTransitionTime.Inner.IsZero()).ToNot(BeTrue())
 		g.Expect(gotObj.Type).To(Equal(apis.ConditionReady))
 		g.Expect(gotObj.Severity).To(Equal(apis.ConditionSeverityInfo))

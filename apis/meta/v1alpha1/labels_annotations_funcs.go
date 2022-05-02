@@ -38,7 +38,7 @@ func CopyAnnotations(object, dest metav1.Object) {
 	dest.SetAnnotations(anno)
 }
 
-// CopyMapStringString copies content from a map to annother
+// CopyMapStringString copies content from a map to another
 func CopyMapStringString(object, dest map[string]string) map[string]string {
 	if object != nil {
 		if dest == nil {

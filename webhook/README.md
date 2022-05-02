@@ -109,7 +109,7 @@ Using this method will give the ability to extend validation methods with new ex
 			&deliveriesv1alpha1.StageRun{},
 			// custom default webhook
 			admission.NewDefaulterWebhook(&deliveriesv1alpha1.Delivery{}).WithTransformer(
-				somepackage.SomeTrasnformerMethod,
+				somepackage.SomeTransformerMethod,
 				somepackage.AnotherMethod,
 			),
 			// custom validation webhook

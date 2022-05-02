@@ -55,10 +55,10 @@ func TestParallelTask(t *testing.T) {
 	RunSpecsWithDefaultAndCustomReporters(t, "pkg/parallel", []Reporter{junitReporter})
 }
 
-func generateTask(index int, sleep time.Duration, err error, excuted *executeFlag) (task parallel.Task) {
+func generateTask(index int, sleep time.Duration, err error, executed *executeFlag) (task parallel.Task) {
 	return func() (interface{}, error) {
 		time.Sleep(sleep * time.Second)
-		excuted.set(true)
+		executed.set(true)
 		return fmt.Sprintf("task-%d", index), err
 	}
 }
@@ -67,13 +67,13 @@ var _ = Describe("P().Do().Wait()", func() {
 
 	var (
 		t1        parallel.Task
-		t1Excuted *executeFlag
+		t1Execute *executeFlag
 		t2        parallel.Task
-		t2Excuted *executeFlag
+		t2Execute *executeFlag
 		t3        parallel.Task
-		t3Excuted *executeFlag
+		t3Execute *executeFlag
 		t4        parallel.Task
-		t4Excuted *executeFlag
+		t4Execute *executeFlag
 
 		ptasks *parallel.ParallelTasks
 
@@ -86,16 +86,16 @@ var _ = Describe("P().Do().Wait()", func() {
 	)
 
 	BeforeEach(func() {
-		t1Excuted = &executeFlag{}
-		t2Excuted = &executeFlag{}
-		t3Excuted = &executeFlag{}
-		t4Excuted = &executeFlag{}
+		t1Execute = &executeFlag{}
+		t2Execute = &executeFlag{}
+		t3Execute = &executeFlag{}
+		t4Execute = &executeFlag{}
 
-		t1 = generateTask(1, 2, nil, t1Excuted)
-		t2 = generateTask(2, 2, nil, t2Excuted)
-		t3 = generateTask(3, 3, nil, t3Excuted)
+		t1 = generateTask(1, 2, nil, t1Execute)
+		t2 = generateTask(2, 2, nil, t2Execute)
+		t3 = generateTask(3, 3, nil, t3Execute)
 		t4 = func() (interface{}, error) {
-			t4Excuted.set(true)
+			t4Execute.set(true)
 			return nil, nil
 		}
 		ptasks = parallel.P(log, "custom case", t1, t2, t3, t4)
@@ -110,9 +110,9 @@ var _ = Describe("P().Do().Wait()", func() {
 	Context("when none error happened", func() {
 		It("should execute task parallel and collect the results", func() {
 			Expect(errs).To(BeNil())
-			Expect(t1Excuted.get()).To(BeTrue())
-			Expect(t2Excuted.get()).To(BeTrue())
-			Expect(t3Excuted.get()).To(BeTrue())
+			Expect(t1Execute.get()).To(BeTrue())
+			Expect(t2Execute.get()).To(BeTrue())
+			Expect(t3Execute.get()).To(BeTrue())
 			Expect(elapsed < 4 && elapsed > 3).To(BeTrue())
 			Expect(len(res)).To(BeEquivalentTo(3))
 			Expect(res).To(ContainElement("task-1"))
@@ -125,8 +125,8 @@ var _ = Describe("P().Do().Wait()", func() {
 		errT1 := errors.New("task-1 error")
 		errT2 := errors.New("task-2 error")
 		BeforeEach(func() {
-			t1 = generateTask(1, 2, errT1, t1Excuted)
-			t2 = generateTask(2, 2, errT2, t2Excuted)
+			t1 = generateTask(1, 2, errT1, t1Execute)
+			t2 = generateTask(2, 2, errT2, t2Execute)
 			ptasks = parallel.P(log, "errors case", t1, t2, t3)
 		})
 
@@ -138,9 +138,9 @@ var _ = Describe("P().Do().Wait()", func() {
 			Expect(multiErrs.Errors()).To(ContainElement(errT2))
 			Expect(multiErrs.Error()).NotTo(BeEmpty())
 
-			Expect(t1Excuted.get()).To(BeTrue())
-			Expect(t2Excuted.get()).To(BeTrue())
-			Expect(t3Excuted.get()).To(BeTrue())
+			Expect(t1Execute.get()).To(BeTrue())
+			Expect(t2Execute.get()).To(BeTrue())
+			Expect(t3Execute.get()).To(BeTrue())
 
 			Expect(elapsed < 4 && elapsed > 3).To(BeTrue())
 
@@ -153,8 +153,8 @@ var _ = Describe("P().Do().Wait()", func() {
 		errT1 := errors.New("task-1 error")
 		errT2 := errors.New("task-2 error")
 		BeforeEach(func() {
-			t1 = generateTask(1, 2, errT1, t1Excuted)
-			t2 = generateTask(2, 1, errT2, t2Excuted)
+			t1 = generateTask(1, 2, errT1, t1Execute)
+			t2 = generateTask(2, 1, errT2, t2Execute)
 			ptasks = parallel.P(log, "failfast case", t1, t2, t3).FailFast()
 		})
 
@@ -162,9 +162,9 @@ var _ = Describe("P().Do().Wait()", func() {
 			Expect(errs).ToNot(BeNil())
 			Expect(errs).To(BeEquivalentTo(errT2))
 
-			Expect(t1Excuted.get()).To(BeFalse())
-			Expect(t2Excuted.get()).To(BeTrue())
-			Expect(t3Excuted.get()).To(BeFalse())
+			Expect(t1Execute.get()).To(BeFalse())
+			Expect(t2Execute.get()).To(BeTrue())
+			Expect(t3Execute.get()).To(BeFalse())
 
 			Expect(elapsed < 2 && elapsed > 1).To(BeTrue())
 
@@ -187,11 +187,11 @@ var _ = Describe("P().Do().Wait()", func() {
 			Expect(errs).ToNot(BeNil())
 			Expect(errs).To(BeEquivalentTo(context.DeadlineExceeded))
 
-			fmt.Printf("%v,%v,%v,", t1Excuted.get(), t2Excuted.get(), t3Excuted.get())
+			fmt.Printf("%v,%v,%v,", t1Execute.get(), t2Execute.get(), t3Execute.get())
 			//up to now, task is not support cancel
-			//Expect(t1Excuted.executed).To(BeFalse())
-			//Expect(t2Excuted.executed).To(BeFalse())
-			//Expect(t3Excuted.executed).To(BeFalse())
+			//Expect(t1Execute.executed).To(BeFalse())
+			//Expect(t2Execute.executed).To(BeFalse())
+			//Expect(t3Execute.executed).To(BeFalse())
 
 			Expect(elapsed < 1 && elapsed > 0.1).To(BeTrue())
 			Expect(len(res)).To(BeEquivalentTo(0))
@@ -221,9 +221,9 @@ var _ = Describe("P().Do().Wait()", func() {
 		It("should return results of all tasks", func() {
 			Expect(errs).To(BeNil())
 
-			Expect(t1Excuted.get()).To(BeTrue())
-			Expect(t2Excuted.get()).To(BeTrue())
-			Expect(t3Excuted.get()).To(BeTrue())
+			Expect(t1Execute.get()).To(BeTrue())
+			Expect(t2Execute.get()).To(BeTrue())
+			Expect(t3Execute.get()).To(BeTrue())
 			Expect(flag4.get()).To(BeTrue())
 			Expect(flag5.get()).To(BeTrue())
 			Expect(flag6.get()).To(BeTrue())
@@ -265,9 +265,9 @@ var _ = Describe("P().Do().Wait()", func() {
 		It("should run tasks in conccurrent count", func() {
 			Expect(errs).To(BeNil())
 
-			Expect(t1Excuted.get()).To(BeTrue())
-			Expect(t2Excuted.get()).To(BeTrue())
-			Expect(t3Excuted.get()).To(BeTrue())
+			Expect(t1Execute.get()).To(BeTrue())
+			Expect(t2Execute.get()).To(BeTrue())
+			Expect(t3Execute.get()).To(BeTrue())
 			Expect(flag4.get()).To(BeTrue())
 			Expect(flag5.get()).To(BeTrue())
 			Expect(flag6.get()).To(BeTrue())

@@ -42,8 +42,8 @@ import (
 
 // Encapsulate the configuration related to selecting secrets
 type SelectSecretOption struct {
-	// PerferredSecret will return the secret if it is be selected
-	PerferredSecret types.NamespacedName
+	// PreferredSecret will return the secret if it is be selected
+	PreferredSecret types.NamespacedName
 
 	// ExcludedSecretTypes exclude some secret types when do selecting
 	ExcludedSecretTypes SecretTypeList
@@ -77,14 +77,14 @@ func (s SecretTypeList) Contains(e corev1.SecretType) bool {
 func NewSecretSelectOption(preferredSecret types.NamespacedName, namespace string, globalCredentialsNamespace string) (option SelectSecretOption) {
 
 	return SelectSecretOption{
-		PerferredSecret:            preferredSecret,
+		PreferredSecret:            preferredSecret,
 		Namespace:                  namespace,
 		GlobalCredentialsNamespace: globalCredentialsNamespace}
 }
 
 // SelectToolSecret will select secret according to tool address and resource scope on secret
 //   clientI could be sigs.k8s.io/controller-runtime/pkg/client.Client or k8s.io/client-go/kubernetes.Interface or "k8s.io/client-go/informers".SharedInformerFactory
-//   resourceURL refers resource url lik git http url or harbor http url. eg. https://github.com/example or  build.harbor.com/example
+//   resourceURL refers resource url like git http url or harbor http url. eg. https://github.com/example or  build.harbor.com/example
 //   namespaces refers to all namespaces where the secret may exist
 // if no secret was found, secret will be nil and err is nil
 // if any errors occurred, err will not be nil
@@ -179,7 +179,7 @@ func selectToolSecret(logger *zap.SugaredLogger, secretList []corev1.Secret, glo
 	if len(usableSecrets) == 0 {
 		return nil, nil
 	}
-	find, secretIndex := findPreferredSecret(usableSecrets, option.PerferredSecret.Namespace, option.PerferredSecret.Name)
+	find, secretIndex := findPreferredSecret(usableSecrets, option.PreferredSecret.Namespace, option.PreferredSecret.Name)
 	if find {
 		return &usableSecrets[secretIndex], nil
 	}
