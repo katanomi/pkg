@@ -26,9 +26,11 @@ import (
 )
 
 const (
+	requestIDHeaderKey = "X-Request-ID"
+
 	configMapNameEnv     = "CONFIG_TRACING_NAME"
 	defaultServiceName   = "katanomi"
-	defaultConfigMapName = "config-tracing"
+	defaultConfigMapName = "katanomi-config-tracing"
 
 	enableKey        = "enable"
 	backendKey       = "backend"

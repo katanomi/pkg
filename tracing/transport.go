@@ -19,6 +19,7 @@ package tracing
 import (
 	"net/http"
 
+	"github.com/go-resty/resty/v2"
 	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 )
 
@@ -27,9 +28,37 @@ func defaultSpanNameFormatter(_ string, r *http.Request) string {
 	return r.Method + " " + r.URL.EscapedPath()
 }
 
-// WrapTransportForTracing Wrap Transport for Tracing
+// WrapTransportForRestyClient Specifically wrapped for the go-resty client for tracking
+// Warning: Because some methods in go-resty (such as SetTLSClientConfig、SetProxy)
+// rely on *http.Transport, this method must be called after initialization.
+//
+// correct example:
+//		restyClient := resty.New()
+//		restyClient.SetTLSClientConfig(&tls.Config{
+//			InsecureSkipVerify: true,
+//		})
+//		tracing.WrapTransportForRestyClient(restyClient)
+//
+// wrong example:
+//		restyClient := resty.New()
+//      tracing.WrapTransportForRestyClient(restyClient)
+//		restyClient.SetTLSClientConfig(&tls.Config{
+//			InsecureSkipVerify: true,
+//		})
+func WrapTransportForRestyClient(client *resty.Client) {
+	if client == nil {
+		return
+	}
+	if httpClient := client.GetClient(); httpClient != nil {
+		client.SetTransport(WrapTransport(httpClient.Transport))
+	} else {
+		client.SetTransport(WrapTransport(nil))
+	}
+}
+
+// WrapTransport Wrap Transport for Tracing
 // When rt is nil, default transport will be used
-func WrapTransportForTracing(rt http.RoundTripper) http.RoundTripper {
+func WrapTransport(rt http.RoundTripper) http.RoundTripper {
 	if rt == nil {
 		rt = http.DefaultTransport
 	}

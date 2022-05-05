@@ -22,8 +22,6 @@ import (
 	"os"
 	"strconv"
 	"time"
-
-	"github.com/katanomi/pkg/tracing"
 )
 
 var (
@@ -49,7 +47,7 @@ func NewHTTPClient() *http.Client {
 }
 
 func GetDefaultTransport() http.RoundTripper {
-	tp := &http.Transport{
+	return &http.Transport{
 		Proxy: http.ProxyFromEnvironment,
 		DialContext: (&net.Dialer{
 			Timeout:   10 * time.Second,
@@ -60,5 +58,4 @@ func GetDefaultTransport() http.RoundTripper {
 		TLSHandshakeTimeout:   10 * time.Second,
 		ExpectContinueTimeout: 1 * time.Second,
 	}
-	return tracing.WrapTransportForTracing(tp)
 }

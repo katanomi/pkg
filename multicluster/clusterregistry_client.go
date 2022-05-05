@@ -159,7 +159,7 @@ func (m *ClusterRegistryClient) GetConfigFromCluster(ctx context.Context, cluste
 		},
 	}
 
-	config.Wrap(tracing.WrapTransportForTracing)
+	config.Wrap(tracing.WrapTransport)
 
 	// Uses the controller secret for controller auth
 	// this configuration or config should only be used by controllers

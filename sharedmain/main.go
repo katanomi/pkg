@@ -63,7 +63,7 @@ func GetConfigOrDie(ctx context.Context) (context.Context, *rest.Config) {
 		cfg = ctrl.GetConfigOrDie()
 		ctx = injection.WithConfig(ctx, cfg)
 	}
-	cfg.Wrap(tracing.WrapTransportForTracing)
+	cfg.Wrap(tracing.WrapTransport)
 	return ctx, cfg
 }
 

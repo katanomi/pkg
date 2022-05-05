@@ -169,6 +169,7 @@ func (a *AppBuilder) init() {
 		restyClient.SetTLSClientConfig(&tls.Config{
 			InsecureSkipVerify: InsecureSkipVerify, // nolint: gosec // G402: TLS InsecureSkipVerify set true.
 		})
+		tracing.WrapTransportForRestyClient(restyClient)
 		a.Context = restclient.WithRESTClient(a.Context, restyClient)
 
 		a.ConfigMapWatcher = sharedmain.SetupConfigMapWatchOrDie(a.Context, a.Logger)

@@ -63,6 +63,9 @@ func RestfulFilter(serviceName string, ignorePaths ...string) restful.FilterFunc
 
 		// pass the span through the request context
 		req.Request = req.Request.WithContext(ctx)
+		if spanContext := span.SpanContext(); spanContext.IsSampled() {
+			resp.AddHeader(requestIDHeaderKey, spanContext.TraceID().String())
+		}
 
 		chain.ProcessFilter(req, resp)
 

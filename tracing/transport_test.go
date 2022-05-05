@@ -33,10 +33,10 @@ import (
 	"golang.org/x/net/context"
 )
 
-var _ = Describe("testing for WrapTransportForTracing", func() {
+var _ = Describe("testing for WrapTransport", func() {
 	Context("when nil transport is provided", func() {
 		It("should use the default transport", func() {
-			rt := WrapTransportForTracing(nil)
+			rt := WrapTransport(nil)
 			tp, ok := rt.(*Transport)
 			Expect(ok).Should(BeTrue())
 			Expect(tp.originalRT).Should(Equal(http.DefaultTransport))
@@ -45,7 +45,7 @@ var _ = Describe("testing for WrapTransportForTracing", func() {
 	Context("when special transport is provided", func() {
 		It("should use the special transport", func() {
 			originalTp := &http.Transport{}
-			rt := WrapTransportForTracing(originalTp)
+			rt := WrapTransport(originalTp)
 			tp, ok := rt.(*Transport)
 			Expect(ok).Should(BeTrue())
 			Expect(tp.originalRT).Should(Equal(originalTp))
@@ -66,7 +66,7 @@ var _ = Describe("testing for WrapTransportForTracing", func() {
 		}
 
 		BeforeEach(func() {
-			client = http.Client{Transport: WrapTransportForTracing(nil)}
+			client = http.Client{Transport: WrapTransport(nil)}
 			otel.SetTracerProvider(trace.NewTracerProvider(
 				trace.WithSampler(trace.AlwaysSample()),
 			))

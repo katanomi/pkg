@@ -54,7 +54,7 @@ func NewManager(ctx context.Context, get GetConfigFunc, baseConfig GetBaseConfig
 	configGetter := func(req *restful.Request, baseConfig GetBaseConfigFunc) (*rest.Config, error) {
 		cfg, err := get(req, baseConfig)
 		if cfg != nil {
-			cfg.Wrap(tracing.WrapTransportForTracing)
+			cfg.Wrap(tracing.WrapTransport)
 		}
 		return cfg, err
 	}
