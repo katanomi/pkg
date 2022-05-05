@@ -32,9 +32,12 @@ import (
 	utilyaml "k8s.io/apimachinery/pkg/util/yaml"
 	// load sigs.k8s.io/controller-runtime@v0.8.3/pkg/metrics/workqueue.go:99  workqueue.SetProvider(workqueueMetricsProvider{}) firstly
 	// avoid knative-pkg@v0.0.0-20220128061436-ff5a1e531de2/controller/stats_reporter.go:95 loading  firstly
+	"sigs.k8s.io/controller-runtime/pkg/leaderelection"
 	_ "sigs.k8s.io/controller-runtime/pkg/metrics"
+	"sigs.k8s.io/controller-runtime/pkg/recorder"
 
 	"k8s.io/client-go/dynamic"
+	"k8s.io/client-go/tools/leaderelection/resourcelock"
 
 	"github.com/emicklei/go-restful/v3"
 	"github.com/go-logr/zapr"
@@ -85,6 +88,9 @@ var (
 	InsecureSkipVerify bool
 )
 
+// Ref: https://github.com/kubernetes-sigs/controller-runtime/blob/1638a6a9b82dc1e0046c7a1006f12dacd9475f54/pkg/leaderelection/leader_election.go#L54
+type ResourceLockFunc func(*rest.Config, recorder.Provider, leaderelection.Options) (resourcelock.Interface, error)
+
 // AppBuilder builds an app using multiple configuration options
 type AppBuilder struct {
 	// Basic options
@@ -124,6 +130,9 @@ type AppBuilder struct {
 	startFunc []func(context.Context) error
 
 	initClientOnce sync.Once
+
+	// newResourceLock override the default resourcelock of controller-runtime.
+	newResourceLock ResourceLockFunc
 }
 
 // ParseFlag parse flag needed for App
@@ -310,6 +319,9 @@ func (a *AppBuilder) Controllers(ctors ...controllers.SetupChecker) *AppBuilder 
 		}
 	}
 	options.Scheme = a.scheme
+	// If the value is empty, the default behavior will still be used.
+	// Ref: https://github.com/kubernetes-sigs/controller-runtime/blob/b9219528d95974cb4f5b06f86c9b1c9b7d3045a5/pkg/manager/manager.go#L551
+	options.SetNewResourceLock(a.newResourceLock)
 
 	a.Manager, err = ctrl.NewManager(a.Config, options)
 	if err != nil {
@@ -485,6 +497,13 @@ func (a *AppBuilder) Profiling() *AppBuilder {
 	// 	return a.ProfilingServer.ListenAndServe()
 	// })
 
+	return a
+}
+
+// NewResourceLock set a new resource lock
+// Used to change the default behavior in controller-runtime
+func (a *AppBuilder) NewResourceLock(newResourceLock ResourceLockFunc) *AppBuilder {
+	a.newResourceLock = newResourceLock
 	return a
 }
 
