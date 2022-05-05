@@ -20,6 +20,7 @@ import (
 	"context"
 	"time"
 
+	"github.com/katanomi/pkg/tracing"
 	"k8s.io/client-go/dynamic"
 
 	"github.com/emicklei/go-restful/v3"
@@ -50,12 +51,19 @@ func NewManager(ctx context.Context, get GetConfigFunc, baseConfig GetBaseConfig
 	if get == nil {
 		get = FromBearerToken
 	}
+	configGetter := func(req *restful.Request, baseConfig GetBaseConfigFunc) (*rest.Config, error) {
+		cfg, err := get(req, baseConfig)
+		if cfg != nil {
+			cfg.Wrap(tracing.WrapTransport)
+		}
+		return cfg, err
+	}
 	if baseConfig == nil {
 		baseConfig = config.GetConfig
 	}
 	return &Manager{
 		SugaredLogger:  logging.FromContext(ctx),
-		GetConfig:      get,
+		GetConfig:      configGetter,
 		GetBasicConfig: baseConfig,
 	}
 }

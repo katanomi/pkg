@@ -45,11 +45,10 @@ import (
 	kmanager "github.com/katanomi/pkg/manager"
 	"github.com/katanomi/pkg/multicluster"
 	"github.com/katanomi/pkg/plugin/client"
-	"github.com/katanomi/pkg/plugin/component/tracing"
-	"github.com/katanomi/pkg/plugin/config"
 	"github.com/katanomi/pkg/plugin/route"
 	"github.com/katanomi/pkg/restclient"
 	kscheme "github.com/katanomi/pkg/scheme"
+	"github.com/katanomi/pkg/tracing"
 	"go.uber.org/zap"
 	"golang.org/x/sync/errgroup"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -68,6 +67,11 @@ import (
 	ctrlcluster "sigs.k8s.io/controller-runtime/pkg/cluster"
 	"sigs.k8s.io/controller-runtime/pkg/healthz"
 	ctrllog "sigs.k8s.io/controller-runtime/pkg/log"
+)
+
+const (
+	healthzRoutePath = "healthz"
+	readyzRoutePath  = "readyz"
 )
 
 var (
@@ -112,9 +116,6 @@ type AppBuilder struct {
 
 	// plugins
 	plugins []client.Interface
-
-	// tracing
-	tracingConfig *config.Config
 
 	// restful container
 	container *restful.Container
@@ -168,6 +169,7 @@ func (a *AppBuilder) init() {
 		restyClient.SetTLSClientConfig(&tls.Config{
 			InsecureSkipVerify: InsecureSkipVerify, // nolint: gosec // G402: TLS InsecureSkipVerify set true.
 		})
+		tracing.WrapTransportForRestyClient(restyClient)
 		a.Context = restclient.WithRESTClient(a.Context, restyClient)
 
 		a.ConfigMapWatcher = sharedmain.SetupConfigMapWatchOrDie(a.Context, a.Logger)
@@ -223,6 +225,21 @@ func (a *AppBuilder) initClient(clientVar ctrlclient.Client) {
 		}
 		a.Context = kclient.WithDynamicClient(a.Context, dynamicClient)
 	})
+}
+
+// Tracing adds tracing and tracer to the app
+func (a *AppBuilder) Tracing(ops ...tracing.TraceOption) *AppBuilder {
+	a.init()
+	ops = append([]tracing.TraceOption{
+		tracing.WithServiceName(a.Name),
+	}, ops...)
+	t := tracing.NewTracing(a.Logger, ops...)
+	err := tracing.SetupDynamicPublishing(t, a.ConfigMapWatcher)
+	if err != nil {
+		log.Fatal("Error reading/parsing tracing configuration: ", err)
+	}
+	a.filters = append(a.filters, tracing.RestfulFilter(a.Name, healthzRoutePath, readyzRoutePath))
+	return a
 }
 
 // Log adds logging and logger to the app
@@ -298,10 +315,10 @@ func (a *AppBuilder) Controllers(ctors ...controllers.SetupChecker) *AppBuilder 
 	if err != nil {
 		a.Logger.Fatalw("unable to start manager", "err", err)
 	}
-	if err := a.Manager.AddHealthzCheck("healthz", healthz.Ping); err != nil {
+	if err := a.Manager.AddHealthzCheck(healthzRoutePath, healthz.Ping); err != nil {
 		a.Logger.Fatalw("unable to set up health check", "err", err)
 	}
-	if err := a.Manager.AddReadyzCheck("readyz", healthz.Ping); err != nil {
+	if err := a.Manager.AddReadyzCheck(readyzRoutePath, healthz.Ping); err != nil {
 		a.Logger.Fatalw("unable to set up ready check", "err", err)
 	}
 
@@ -362,31 +379,6 @@ func (a *AppBuilder) Webhooks(objs ...runtime.Object) *AppBuilder {
 			controllerLogger.Infow("setup register webhook")
 			ctx := logging.WithLogger(a.Context, controllerLogger)
 			setup.SetupRegisterWithManager(ctx, a.Manager)
-		}
-	}
-	return a
-}
-
-// Tracing adds tracing capabilities to this app
-// TODO: change this configuration to use a configmap watcher and turn on/off on the fly
-func (a *AppBuilder) Tracing(cfg *config.Config) *AppBuilder {
-	if cfg == nil {
-		cfg = config.NewConfig()
-	}
-	a.tracingConfig = cfg
-
-	if a.tracingConfig.Trace.Enable {
-		closer, err := tracing.Config(&a.tracingConfig.Trace)
-		if err != nil {
-			a.Logger.Fatalw("tracing start error", "err", err)
-		}
-		if closer != nil {
-			a.startFunc = append(a.startFunc, func(ctx context.Context) error {
-				// waits until it is shutting down to close
-				<-ctx.Done()
-				return closer.Close()
-			})
-
 		}
 	}
 	return a

@@ -24,6 +24,7 @@ import (
 	"github.com/go-resty/resty/v2"
 	"github.com/katanomi/pkg/client"
 	perrors "github.com/katanomi/pkg/errors"
+	"github.com/katanomi/pkg/tracing"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	duckv1 "knative.dev/pkg/apis/duck/v1"
@@ -58,6 +59,8 @@ func NewPluginClient(opts ...BuildOptions) *PluginClient {
 	for _, op := range opts {
 		op(pluginClient)
 	}
+
+	tracing.WrapTransportForRestyClient(pluginClient.client)
 	return pluginClient
 }
 

@@ -23,6 +23,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/katanomi/pkg/tracing"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	cminformer "knative.dev/pkg/configmap/informer"
 
@@ -62,6 +63,7 @@ func GetConfigOrDie(ctx context.Context) (context.Context, *rest.Config) {
 		cfg = ctrl.GetConfigOrDie()
 		ctx = injection.WithConfig(ctx, cfg)
 	}
+	cfg.Wrap(tracing.WrapTransport)
 	return ctx, cfg
 }
 
