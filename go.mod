@@ -117,4 +117,5 @@ require (
 replace (
 	github.com/opencontainers/image-spec => github.com/opencontainers/image-spec v1.0.2-0.20210819154149-5ad6f50d6283
 	go.uber.org/zap => github.com/katanomi/zap v1.18.2 // indirect
+	sigs.k8s.io/controller-runtime v0.8.3 => github.com/katanomi/controller-runtime v0.8.3-1
 )
