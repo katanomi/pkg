@@ -188,6 +188,43 @@ func TestIsConditionChanged(t *testing.T) {
 
 }
 
+func TestSetConditonByErrorReason(t *testing.T) {
+	t.Run("Error with empty reason", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+
+		conditionManager := apismock.NewMockConditionManager(ctrl)
+
+		err := errors.NewBadRequest("some reason")
+
+		conditionManager.EXPECT().GetCondition(apis.ConditionReady).Return(nil)
+
+		conditionManager.EXPECT().
+			MarkFalse(apis.ConditionReady, string(metav1.StatusReasonBadRequest), err.Error()).
+			Times(1)
+
+		SetConditionByErrorReason(conditionManager, apis.ConditionReady, err, "")
+	})
+
+	t.Run("Error with specific reason", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+
+		conditionManager := apismock.NewMockConditionManager(ctrl)
+
+		err := errors.NewBadRequest("some reason")
+		reason := "another reason"
+
+		conditionManager.EXPECT().GetCondition(apis.ConditionReady).Return(nil)
+
+		conditionManager.EXPECT().
+			MarkFalse(apis.ConditionReady, reason, err.Error()).
+			Times(1)
+
+		SetConditionByErrorReason(conditionManager, apis.ConditionReady, err, reason)
+	})
+}
+
 func TestSetConditonByError(t *testing.T) {
 
 	t.Run("Explicit reason error case", func(t *testing.T) {
@@ -197,6 +234,94 @@ func TestSetConditonByError(t *testing.T) {
 		conditionManager := apismock.NewMockConditionManager(ctrl)
 
 		err := errors.NewBadRequest("some reason")
+
+		conditionManager.EXPECT().GetCondition(apis.ConditionReady).Return(nil)
+
+		conditionManager.EXPECT().
+			MarkFalse(apis.ConditionReady, string(metav1.StatusReasonBadRequest), err.Error()).
+			Times(1)
+
+		SetConditionByError(conditionManager, apis.ConditionReady, err)
+	})
+
+	t.Run("Error condition reason changed", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+
+		conditionManager := apismock.NewMockConditionManager(ctrl)
+
+		err := errors.NewBadRequest("some reason")
+
+		conditionManager.EXPECT().GetCondition(apis.ConditionReady).Return(&apis.Condition{
+			Type:    apis.ConditionReady,
+			Status:  corev1.ConditionFalse,
+			Reason:  "another reason",
+			Message: err.Error(),
+		})
+
+		conditionManager.EXPECT().
+			MarkFalse(apis.ConditionReady, string(metav1.StatusReasonBadRequest), err.Error()).
+			Times(1)
+
+		SetConditionByError(conditionManager, apis.ConditionReady, err)
+	})
+
+	t.Run("Error condition message changed", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+
+		conditionManager := apismock.NewMockConditionManager(ctrl)
+
+		err := errors.NewBadRequest("some reason")
+
+		conditionManager.EXPECT().GetCondition(apis.ConditionReady).Return(&apis.Condition{
+			Type:    apis.ConditionReady,
+			Status:  corev1.ConditionFalse,
+			Reason:  string(metav1.StatusReasonBadRequest),
+			Message: "some message",
+		})
+
+		conditionManager.EXPECT().
+			MarkFalse(apis.ConditionReady, string(metav1.StatusReasonBadRequest), err.Error()).
+			Times(1)
+
+		SetConditionByError(conditionManager, apis.ConditionReady, err)
+	})
+
+	t.Run("Error condition not changed", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+
+		conditionManager := apismock.NewMockConditionManager(ctrl)
+
+		err := errors.NewBadRequest("some reason")
+
+		conditionManager.EXPECT().GetCondition(apis.ConditionReady).Return(&apis.Condition{
+			Type:    apis.ConditionReady,
+			Status:  corev1.ConditionFalse,
+			Reason:  string(metav1.StatusReasonBadRequest),
+			Message: err.Error(),
+		})
+
+		conditionManager.EXPECT().
+			MarkFalse(apis.ConditionReady, string(metav1.StatusReasonBadRequest), err.Error()).
+			Times(0)
+
+		SetConditionByError(conditionManager, apis.ConditionReady, err)
+	})
+
+	t.Run("Success condition change to error", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+
+		conditionManager := apismock.NewMockConditionManager(ctrl)
+
+		err := errors.NewBadRequest("some reason")
+
+		conditionManager.EXPECT().GetCondition(apis.ConditionReady).Return(&apis.Condition{
+			Type:   apis.ConditionReady,
+			Status: corev1.ConditionTrue,
+		})
 
 		conditionManager.EXPECT().
 			MarkFalse(apis.ConditionReady, string(metav1.StatusReasonBadRequest), err.Error()).
@@ -213,6 +338,8 @@ func TestSetConditonByError(t *testing.T) {
 
 		err := fmt.Errorf("some random error")
 
+		conditionManager.EXPECT().GetCondition(apis.ConditionSucceeded).Return(nil)
+
 		conditionManager.EXPECT().
 			MarkFalse(apis.ConditionSucceeded, "", err.Error()).
 			Times(1)
@@ -225,6 +352,44 @@ func TestSetConditonByError(t *testing.T) {
 		defer ctrl.Finish()
 
 		conditionManager := apismock.NewMockConditionManager(ctrl)
+
+		conditionManager.EXPECT().GetCondition(apis.ConditionSucceeded).Return(nil)
+
+		conditionManager.EXPECT().
+			MarkTrue(apis.ConditionSucceeded).
+			Times(1)
+
+		SetConditionByError(conditionManager, apis.ConditionSucceeded, nil)
+	})
+
+	t.Run("Success condition not changed", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+
+		conditionManager := apismock.NewMockConditionManager(ctrl)
+
+		conditionManager.EXPECT().GetCondition(apis.ConditionSucceeded).Return(&apis.Condition{
+			Type:   apis.ConditionSucceeded,
+			Status: corev1.ConditionTrue,
+		})
+
+		conditionManager.EXPECT().
+			MarkTrue(apis.ConditionSucceeded).
+			Times(0)
+
+		SetConditionByError(conditionManager, apis.ConditionSucceeded, nil)
+	})
+
+	t.Run("Error condition change to success", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+
+		conditionManager := apismock.NewMockConditionManager(ctrl)
+
+		conditionManager.EXPECT().GetCondition(apis.ConditionSucceeded).Return(&apis.Condition{
+			Type:   apis.ConditionSucceeded,
+			Status: corev1.ConditionFalse,
+		})
 
 		conditionManager.EXPECT().
 			MarkTrue(apis.ConditionSucceeded).
