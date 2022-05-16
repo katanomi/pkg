@@ -99,7 +99,11 @@ type ProjectCreator interface {
 // RepositoryLister list repository
 type RepositoryLister interface {
 	Interface
-	ListRepositories(ctx context.Context, params metav1alpha1.RepositoryOptions, option metav1alpha1.ListOptions) (*metav1alpha1.RepositoryList, error)
+	ListRepositories(
+		ctx context.Context,
+		params metav1alpha1.RepositoryOptions,
+		option metav1alpha1.ListOptions,
+	) (*metav1alpha1.RepositoryList, error)
 }
 
 // ArtifactLister list artifact
@@ -186,13 +190,21 @@ type GitPullRequestCommentCreator interface {
 // GitPullRequestCommentLister list pull request comment functions
 type GitPullRequestCommentLister interface {
 	Interface
-	ListPullRequestComment(ctx context.Context, option metav1alpha1.GitPullRequestOption, listOption metav1alpha1.ListOptions) (metav1alpha1.GitPullRequestNoteList, error)
+	ListPullRequestComment(
+		ctx context.Context,
+		option metav1alpha1.GitPullRequestOption,
+		listOption metav1alpha1.ListOptions,
+	) (metav1alpha1.GitPullRequestNoteList, error)
 }
 
 // GitPullRequestHandler list, get and create pr function
 type GitPullRequestHandler interface {
 	Interface
-	ListGitPullRequest(ctx context.Context, option metav1alpha1.GitPullRequestListOption, listOption metav1alpha1.ListOptions) (metav1alpha1.GitPullRequestList, error)
+	ListGitPullRequest(
+		ctx context.Context,
+		option metav1alpha1.GitPullRequestListOption,
+		listOption metav1alpha1.ListOptions,
+	) (metav1alpha1.GitPullRequestList, error)
 	GetGitPullRequest(ctx context.Context, option metav1alpha1.GitPullRequestOption) (metav1alpha1.GitPullRequest, error)
 	CreatePullRequest(ctx context.Context, payload metav1alpha1.CreatePullRequestPayload) (metav1alpha1.GitPullRequest, error)
 }
@@ -206,7 +218,11 @@ type GitCommitGetter interface {
 // GitCommitLister List git commit
 type GitCommitLister interface {
 	Interface
-	ListGitCommit(ctx context.Context, option metav1alpha1.GitCommitListOption, listOption metav1alpha1.ListOptions) (metav1alpha1.GitCommitList, error)
+	ListGitCommit(
+		ctx context.Context,
+		option metav1alpha1.GitCommitListOption,
+		listOption metav1alpha1.ListOptions,
+	) (metav1alpha1.GitCommitList, error)
 }
 
 // GitBranchLister List git branch
@@ -242,7 +258,12 @@ type GitRepoFileCreator interface {
 // GitRepositoryLister list git repository
 type GitRepositoryLister interface {
 	Interface
-	ListGitRepository(ctx context.Context, id, keyword string, subtype metav1alpha1.ProjectSubType, listOption metav1alpha1.ListOptions) (metav1alpha1.GitRepositoryList, error)
+	ListGitRepository(
+		ctx context.Context,
+		id, keyword string,
+		subtype metav1alpha1.ProjectSubType,
+		listOption metav1alpha1.ListOptions,
+	) (metav1alpha1.GitRepositoryList, error)
 }
 
 // GitRepositoryGetter get git repository
@@ -251,10 +272,24 @@ type GitRepositoryGetter interface {
 	GetGitRepository(ctx context.Context, repoOption metav1alpha1.GitRepo) (metav1alpha1.GitRepository, error)
 }
 
+// GitRepositoryFileTreeGetter get git repository file tree
+type GitRepositoryFileTreeGetter interface {
+	Interface
+	GetGitRepositoryFileTree(
+		ctx context.Context,
+		repoOption metav1alpha1.GitRepoFileTreeOption,
+		listOption metav1alpha1.ListOptions,
+	) (metav1alpha1.GitRepositoryFileTree, error)
+}
+
 // GitCommitStatusLister list git commit status
 type GitCommitStatusLister interface {
 	Interface
-	ListGitCommitStatus(ctx context.Context, option metav1alpha1.GitCommitOption, listOption metav1alpha1.ListOptions) (metav1alpha1.GitCommitStatusList, error)
+	ListGitCommitStatus(
+		ctx context.Context,
+		option metav1alpha1.GitCommitOption,
+		listOption metav1alpha1.ListOptions,
+	) (metav1alpha1.GitCommitStatusList, error)
 }
 
 // GitCommitStatusCreator create git commit status
@@ -266,7 +301,11 @@ type GitCommitStatusCreator interface {
 // GitCommitCommentLister list git commit comment
 type GitCommitCommentLister interface {
 	Interface
-	ListGitCommitComment(ctx context.Context, option metav1alpha1.GitCommitOption, listOption metav1alpha1.ListOptions) (metav1alpha1.GitCommitCommentList, error)
+	ListGitCommitComment(
+		ctx context.Context,
+		option metav1alpha1.GitCommitOption,
+		listOption metav1alpha1.ListOptions,
+	) (metav1alpha1.GitCommitCommentList, error)
 }
 
 // GitCommitCommentCreator create git commit comment

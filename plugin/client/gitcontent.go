@@ -78,6 +78,7 @@ func (g *gitContent) Create(ctx context.Context, baseURL *duckv1.Addressable, pa
 	}
 	w.Close()
 	payload.Content = b.Bytes()
+
 	options = append(options, MetaOpts(g.meta), SecretOpts(g.secret), BodyOpts(payload.CreateRepoFileParams), ResultOpts(commitInfo))
 	if payload.Repository == "" {
 		return nil, errors.NewBadRequest("repo is empty string")
