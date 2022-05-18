@@ -20,10 +20,10 @@ linters:
     - unparam
 #    - whitespace
 #    - govet
-#    - stylecheck
-#    - revive
-#    - prealloc
-#    - nestif
+    - stylecheck
+    - revive
+    - prealloc
+    - nestif
 #    - gocritic
 #    - forcetypeassert
 #    - exportloopref
@@ -32,6 +32,8 @@ linters:
 #    - bodyclose
 
 linters-settings:
+  nestif:
+    min-complexity: 12
   prealloc:
     range-loops: true
     for-loops: true
