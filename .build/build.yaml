@@ -17,6 +17,7 @@ spec:
       workspaces:
         - name: source
           workspace: source
+
     - name: donotsubmit
       params:
         - name: revision
@@ -27,6 +28,7 @@ spec:
       workspaces:
         - name: source
           workspace: source
+
     - name: gotest
       taskRef:
         name: katanomi-gotest
@@ -34,6 +36,7 @@ spec:
       workspaces:
         - name: source
           workspace: source
+
     - name: go-style
       params:
         - name: revision
@@ -44,6 +47,7 @@ spec:
       workspaces:
         - name: source
           workspace: source
+
     - name: knative-style
       params:
         - name: ignore-filetypes
@@ -55,6 +59,104 @@ spec:
       taskRef:
         name: katanomi-knative-style
         kind: ClusterTask
+      workspaces:
+        - name: source
+          workspace: source
+
+    - name: generate-version
+      params:
+        - name: repo-url
+          value: $(params.git-url)
+        - name: repo-ref
+          value: $(params.git-revision)
+      runAfter:
+        - git-clone
+      taskRef:
+        kind: ClusterTask
+        name: katanomi-generate-version
+      workspaces:
+        - name: source
+          workspace: source
+
+    #################
+    # gosec-scan
+    #################
+    - name: gosec-scan
+      workspaces:
+        - name: source
+          workspace: source
+        - name: cache
+          workspace: cache
+      taskRef:
+        kind: ClusterTask
+        name: alauda-golang-codesec-scan
+      params:
+      - name: GONOSUMDB
+        value: "*"
+
+
+    #################
+    # code-scan
+    #################
+    - name: code-scan
+      params:
+        - name: address
+          value: https://build-sonar.alauda.cn
+        - name: version
+          value: $(tasks.generate-version.results.semver-version)
+        - name: pr-id
+          value: "$(tasks.generate-version.results.pr-id)"
+        - name: target
+          value: "$(tasks.generate-version.results.target-branch)"
+        - name: branch
+          value: $(tasks.generate-version.results.branch)
+
+        - name: extra-reports
+          value:
+          - "$(tasks.gosec-scan.results.report)"
+
+      taskRef:
+        kind: ClusterTask
+        name: katanomi-codescan-sonarqube
+      workspaces:
+        - name: source
+          workspace: source
+      runAfter:
+      - generate-version
+      - gotest
+
+    #################
+    # code-scan
+    #################
+    - name: code-scan-quality-gate
+      params:
+        - name: address
+          value: https://build-sonar.alauda.cn
+
+        - name: pr-id
+          value: "$(tasks.generate-version.results.pr-id)"
+
+        - name: branch
+          value: $(tasks.generate-version.results.branch)
+
+        - name: target-branch
+          value: $(tasks.generate-version.results.target-branch)
+
+        - name: task-id
+          value: $(tasks.code-scan.results.task-id)
+
+        - name: project-key
+          value: $(tasks.code-scan.results.project-key)
+
+        - name: sonar-result-url
+          value: $(tasks.code-scan.results.report-html-url)
+
+        - name: repo-url
+          value: $(params.git-url)
+
+      taskRef:
+        kind: ClusterTask
+        name: katanomi-codescan-sonarqube-qualitygate
       workspaces:
         - name: source
           workspace: source
