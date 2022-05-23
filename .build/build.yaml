@@ -82,21 +82,6 @@ spec:
         - name: source
           workspace: source
 
-    #################
-    # gosec-scan
-    #################
-    - name: gosec-scan
-      workspaces:
-        - name: source
-          workspace: source
-        - name: cache
-          workspace: cache
-      taskRef:
-        kind: ClusterTask
-        name: alauda-golang-codesec-scan
-      params:
-      - name: GONOSUMDB
-        value: "*"
 
 
     #################
@@ -115,10 +100,6 @@ spec:
         - name: branch
           value: $(tasks.generate-version.results.branch)
 
-        - name: extra-reports
-          value:
-          - "$(tasks.gosec-scan.results.report)"
-
       taskRef:
         kind: ClusterTask
         name: katanomi-codescan-sonarqube
@@ -130,7 +111,7 @@ spec:
       - gotest
 
     #################
-    # code-scan
+    # code-scan quality gate
     #################
     - name: code-scan-quality-gate
       params:

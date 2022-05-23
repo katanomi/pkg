@@ -51,6 +51,40 @@ linters-settings:
     checks: [ "ST1000", "ST1019", "ST1020", "ST1021", "ST1022" ]
     http-status-code-whitelist: [ "200", "400", "404", "500" ]
 
+  gosec:
+    includes:
+      - G101
+      # - G102
+      # - G103
+      # - G104
+      # - G106
+      # - G107
+      # - G108
+      # - G109
+      # - G110
+      # - G111
+      # - G201
+      # - G202
+      - G203
+      # - G204
+      # - G301
+      # - G302
+      # - G303
+      # - G304
+      # - G305
+      # - G306
+      # - G307
+      - G401
+      # - G402
+      # - G403
+      # - G404
+      # - G501
+      # - G502
+      # - G503
+      # - G504
+      # - G505
+      # - G601
+
 issues:
   exclude-rules:
     - path: test # Excludes /test, *_test.go etc.
