@@ -6,6 +6,10 @@ spec:
         This workspace is shared among all the pipeline tasks to read/write
         common resources
       name: source
+    - description: >
+        Cache for go modules
+      name: cache
+      optional: true
   tasks:
     - name: boilerplate
       params:
