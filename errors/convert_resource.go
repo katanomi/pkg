@@ -18,7 +18,7 @@ package errors
 
 import "k8s.io/apimachinery/pkg/runtime/schema"
 
-// GVKToGR convert schema GroupVersionKind to GroupVersionResource
+// GVKToGVR convert schema GroupVersionKind to GroupVersionResource
 // Warning: this function just for show error info
 func GVKToGVR(gvk schema.GroupVersionKind) (gr schema.GroupVersionResource) {
 	return schema.GroupVersionResource{

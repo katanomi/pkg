@@ -62,7 +62,7 @@ type AdditionalWebhookRegister interface {
 	GetWebhookSupport() map[metav1alpha1.WebhookEventSupportType][]string
 }
 
-// AuthCheck implements an authorization check method for plugins
+// AuthChecker implements an authorization check method for plugins
 type AuthChecker interface {
 	AuthCheck(ctx context.Context, option metav1alpha1.AuthCheckOptions) (*metav1alpha1.AuthCheck, error)
 }
@@ -126,7 +126,7 @@ type ScanImage interface {
 	ScanImage(ctx context.Context, params metav1alpha1.ArtifactOptions) error
 }
 
-// GetImageConfig get image config
+// ImageConfigGetter get image config
 type ImageConfigGetter interface {
 	Interface
 	GetImageConfig(ctx context.Context, params metav1alpha1.ArtifactOptions) (*metav1alpha1.ImageConfig, error)
@@ -263,13 +263,13 @@ type GitCommitStatusCreator interface {
 	CreateGitCommitStatus(ctx context.Context, payload metav1alpha1.CreateCommitStatusPayload) (metav1alpha1.GitCommitStatus, error)
 }
 
-// GitRepositoryLister list git commit comment
+// GitCommitCommentLister list git commit comment
 type GitCommitCommentLister interface {
 	Interface
 	ListGitCommitComment(ctx context.Context, option metav1alpha1.GitCommitOption, listOption metav1alpha1.ListOptions) (metav1alpha1.GitCommitCommentList, error)
 }
 
-// GitRepositoryLister create git commit comment
+// GitCommitCommentCreator create git commit comment
 type GitCommitCommentCreator interface {
 	Interface
 	CreateGitCommitComment(ctx context.Context, payload metav1alpha1.CreateCommitCommentPayload) (metav1alpha1.GitCommitComment, error)
@@ -310,7 +310,7 @@ type ArtifactTriggerRegister interface {
 	PushEventType() string
 }
 
-// project management
+// IssueLister issue lister
 type IssueLister interface {
 	Interface
 	ListIssues(ctx context.Context, params metav1alpha1.IssueOptions, option metav1alpha1.ListOptions) (*metav1alpha1.IssueList, error)

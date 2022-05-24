@@ -43,6 +43,8 @@ func ConvertResponseError(ctx context.Context, response *http.Response, err erro
 		name = names[0]
 	} else if response != nil && response.Request != nil && response.Request.URL != nil {
 		name = response.Request.URL.String()
+	} else {
+		// use default
 	}
 
 	return errors.NewGenericServerResponse(

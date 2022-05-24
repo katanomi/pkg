@@ -85,15 +85,15 @@ const (
 	NeedsAuthorizationAuthCheckReason = "NeedsAuthorization"
 )
 
-// +k8s:deepcopy-gen=false
 // AuthToken access token request response
+// +k8s:deepcopy-gen=false
 type AuthToken struct {
 	metav1.TypeMeta `json:",inline"`
 	Status          AuthTokenStatus `json:"status"`
 }
 
-// +k8s:deepcopy-gen=false
 // AuthTokenStatus access token request response status
+// +k8s:deepcopy-gen=false
 type AuthTokenStatus struct {
 	// AccessTokenKey store the key for accessToken it is mainly for git clone as userName
 	AccessTokenKey string `json:"accessTokenKey"`

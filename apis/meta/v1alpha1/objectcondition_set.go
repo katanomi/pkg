@@ -85,7 +85,7 @@ func (o *ObjectConditionSet) GetObjectConditions() ObjectConditions {
 	return o.accessor.GetObjectConditions()
 }
 
-// GetObjectConditions set conditions
+// SetObjectConditions set conditions
 func (o *ObjectConditionSet) SetObjectConditions(objcs ObjectConditions) {
 	o.accessor.SetObjectConditions(objcs)
 }

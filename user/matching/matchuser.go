@@ -14,6 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+// Package matching contains useful functionality for matching users
 package matching
 
 import (
@@ -32,6 +33,8 @@ func userMatch(userInfo authenticationv1.UserInfo, subjects []rbacv1.Subject) bo
 			match = UserMatches(subject, userInfo)
 		case rbacv1.GroupKind:
 			match = UserGroupMatches(subject, userInfo)
+		default:
+			// do nothing
 		}
 		if match {
 			return true

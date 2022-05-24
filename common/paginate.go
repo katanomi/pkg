@@ -24,7 +24,7 @@ const (
 	DefaultPage = 1
 )
 
-// This function implements the paging of List, inputting the total number of data (usually
+// Paginate this function implements the paging of List, inputting the total number of data (usually
 // the length of Slice), the number of each page, and the page number. The function guarantees
 // that Begin and End do not exceed the total number of data.
 //

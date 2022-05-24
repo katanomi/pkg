@@ -16,7 +16,7 @@ limitations under the License.
 
 package v1alpha1
 
-// CreateBranchParams params for create file in server
+// CreateRepoFileParams params for create file in server
 type CreateRepoFileParams struct {
 	// Branch target branch to create file
 	Branch string `json:"branch"`

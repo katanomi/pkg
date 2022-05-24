@@ -16,7 +16,7 @@ limitations under the License.
 
 package v1alpha1
 
-// storage resource type
+// StorageResourceType storage resource type
 type StorageResourceType string
 
 const (
@@ -28,7 +28,7 @@ func (s StorageResourceType) String() string {
 	return string(s)
 }
 
-// Payload type
+// PayloadType payload type
 type PayloadType string
 
 const (
@@ -43,7 +43,7 @@ func (p PayloadType) String() string {
 	return string(p)
 }
 
-// backend storage type
+// BackendType backend storage type
 type BackendType string
 
 const (

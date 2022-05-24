@@ -26,7 +26,7 @@ import (
 const dns1123UnderscoreLabelFmt string = "[A-Za-z0-9]([-A-Za-z0-9_/]*[A-Za-z0-9])?"
 const dns1123UnderscoreLabelErrMsg string = "a lowercase RFC 1123 with underscore label must consist of lower case alphanumeric characters, '_' or '-', and must start and end with an alphanumeric character"
 
-// DNS1123LabelMaxLength is a label's max length in DNS (RFC 1123)
+// DNS1123UnderscoreLabelMaxLength is a label's max length in DNS (RFC 1123)
 const DNS1123UnderscoreLabelMaxLength int = validation.DNS1123LabelMaxLength
 
 var dns1123LabelRegexp = regexp.MustCompile("^" + dns1123UnderscoreLabelFmt + "$")

@@ -14,6 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+// Package namespace contains functions to add and retrieve namespace from context
 package namespace
 
 import (

@@ -14,6 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+// Package multicluster contains functions to add and retrieve multi cluster from context
 package multicluster
 
 import (

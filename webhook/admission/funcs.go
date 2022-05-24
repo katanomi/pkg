@@ -36,7 +36,7 @@ func generateValidatePath(gvk schema.GroupVersionKind) string {
 		gvk.Version + "-" + strings.ToLower(gvk.Kind)
 }
 
-// returns a user based on the request information
+// SubjectFromRequest returns a user based on the request information
 func SubjectFromRequest(req admission.Request) *rbacv1.Subject {
 	sub := &rbacv1.Subject{}
 	if strings.HasPrefix(req.UserInfo.Username, "system:serviceaccount:") {

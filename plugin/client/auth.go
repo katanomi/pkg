@@ -14,6 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+// Package client contains functions to add and retrieve auth from context
 package client
 
 import (
@@ -127,7 +128,7 @@ func (a *Auth) IsOAuth2() bool {
 	return a.Type == v1alpha1.AuthTypeOAuth2
 }
 
-// IsBasic check auth is basic
+// IsDynamic check auth is dynamic
 func (a *Auth) IsDynamic() bool {
 	return a.Type == v1alpha1.AuthTypeDynamic
 }

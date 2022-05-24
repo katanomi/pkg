@@ -141,6 +141,8 @@ func (h *validatingHandler) Handle(ctx context.Context, req admission.Request) a
 				return convertToResponse(err)
 			}
 		}
+	default:
+		// do nothing
 	}
 	return admission.Allowed("")
 }
