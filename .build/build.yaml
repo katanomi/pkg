@@ -109,6 +109,7 @@ spec:
       runAfter:
       - generate-version
       - gotest
+      - go-style
 
     #################
     # code-scan quality gate
