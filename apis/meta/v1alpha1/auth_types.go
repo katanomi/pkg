@@ -40,6 +40,7 @@ type AuthCheckOptions struct {
 }
 
 // AuthCheck consists of result for an auth check request
+// +k8s:deepcopy-gen=false
 type AuthCheck struct {
 	metav1.TypeMeta `json:",inline"`
 	Spec            *AuthCheckSpec  `json:"spec,omitempty"`
@@ -53,6 +54,8 @@ type AuthCheckSpec struct {
 	BaseURL              string                  `json:"baseURL,omitempty"`
 	Version              string                  `json:"version,omitempty"`
 }
+
+// +k8s:deepcopy-gen=false
 
 type AuthCheckStatus struct {
 	// Allowed describes if the headers used where accepted or not by the integrated system.
