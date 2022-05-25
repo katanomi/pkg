@@ -50,7 +50,7 @@ type CodeQualityBranch struct {
 	Metrics           map[string]CodeQualityAnalyzeMetric `json:"metrics"`
 }
 
-// CodeQualityAnalyzeResult present CodeQualityProject analyze result
+// CodeQualityAnalyzeMetric present CodeQualityProject analyze result
 type CodeQualityAnalyzeMetric struct {
 	// Value defines the value of this metric
 	Value string `json:"value"`
@@ -84,6 +84,7 @@ type CodeQualityTaskOption struct {
 	PullRequest string `json:"pullRequest"`
 }
 
+// CodeQualityLineChartOption code quality line chart option
 // +k8s:deepcopy-gen=false
 type CodeQualityLineChartOption struct {
 	CodeQualityBaseOption

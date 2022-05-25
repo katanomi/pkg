@@ -31,7 +31,7 @@ type blobStoreLister struct {
 	tags []string
 }
 
-//NewCodeQualityGetter create a get codeQuality route with plugin client
+// NewBlobStoreLister create a get codeQuality route with plugin client
 func NewBlobStoreLister(impl client.BlobStoreLister) Route {
 	return &blobStoreLister{
 		tags: []string{"blobStore"},

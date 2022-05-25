@@ -92,6 +92,8 @@ func (h *mutatingHandler) Handle(ctx context.Context, req admission.Request) adm
 		ctx = apis.WithinUpdate(ctx, old)
 	case admissionv1.Delete:
 		ctx = apis.WithinDelete(ctx)
+	default:
+		// do nothing
 	}
 
 	// apply some common transformations before handling defaults

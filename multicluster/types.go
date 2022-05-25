@@ -30,6 +30,7 @@ import (
 
 // DO NOT use this type for anything else
 
+// Cluster is the Schema for the clusters API
 // +k8s:deepcopy-gen=false
 type Cluster struct {
 	metav1.TypeMeta `json:",inline"`

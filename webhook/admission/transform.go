@@ -27,7 +27,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/webhook/admission"
 )
 
-// TransformFuncused to make common defaulting logic amongst multiple resource
+// TransformFunc used to make common defaulting logic amongst multiple resource
 // using a context, an object and a request
 type TransformFunc func(context.Context, runtime.Object, admission.Request)
 

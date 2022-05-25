@@ -22,7 +22,7 @@ import (
 	rbacv1 "k8s.io/api/rbac/v1"
 )
 
-// Stores a list of created information.
+// CreatedBy stores a list of created information.
 type CreatedBy struct {
 	// Reference to the user that created the object. Any Kubernetes `Subject` is accepted.
 	// +optional

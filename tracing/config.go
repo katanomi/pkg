@@ -17,12 +17,14 @@ limitations under the License.
 package tracing
 
 import (
+	"context"
 	"encoding/json"
 	"os"
 	"time"
 
 	corev1 "k8s.io/api/core/v1"
 	cm "knative.dev/pkg/configmap"
+	"knative.dev/pkg/logging"
 )
 
 const (
@@ -132,6 +134,8 @@ func newTracingConfigFromConfigMap(config *corev1.ConfigMap) (*Config, error) {
 				return nil, err
 			}
 		}
+	default:
+		logging.FromContext(context.TODO()).Warnw("unknown tracing backend", "backend", c.Backend)
 	}
 	return c, nil
 }
