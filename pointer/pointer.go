@@ -14,6 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+// Package pointer provides helper functions for generating pointers
 package pointer
 
 // Bool is a helper routine that allocates a new bool value

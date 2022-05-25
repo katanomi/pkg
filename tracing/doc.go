@@ -1,5 +1,5 @@
 /*
-Copyright 2021 The Katanomi Authors.
+Copyright 2022 The Katanomi Authors.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -14,25 +14,5 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-// Package scheme contains functions to add and retrieve scheme from context
-package scheme
-
-import (
-	"context"
-
-	"k8s.io/apimachinery/pkg/runtime"
-)
-
-type schemeCtxKey struct{}
-
-func WithScheme(ctx context.Context, scheme *runtime.Scheme) context.Context {
-	return context.WithValue(ctx, schemeCtxKey{}, scheme)
-}
-
-func Scheme(ctx context.Context) *runtime.Scheme {
-	val := ctx.Value(schemeCtxKey{})
-	if val == nil {
-		return nil
-	}
-	return val.(*runtime.Scheme)
-}
+// Package tracing contains tracing related functions.
+package tracing

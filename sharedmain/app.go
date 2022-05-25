@@ -88,6 +88,7 @@ var (
 	InsecureSkipVerify bool
 )
 
+// ResourceLockFunc resouce lock function
 // Ref: https://github.com/kubernetes-sigs/controller-runtime/blob/1638a6a9b82dc1e0046c7a1006f12dacd9475f54/pkg/leaderelection/leader_election.go#L54
 type ResourceLockFunc func(*rest.Config, recorder.Provider, leaderelection.Options) (resourcelock.Interface, error)
 

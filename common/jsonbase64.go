@@ -14,6 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+// Package common useful functionality for encoding and decoding objects
 package common
 
 import (
@@ -21,7 +22,7 @@ import (
 	"encoding/json"
 )
 
-//Convert obj to json string, and then encode it with base64.
+// ToJSONBase64 convert obj to json string, and then encode it with base64.
 func ToJSONBase64(obj interface{}) (string, error) {
 	objBytes, err := json.Marshal(obj)
 	if err != nil {
@@ -31,7 +32,7 @@ func ToJSONBase64(obj interface{}) (string, error) {
 	return base64.StdEncoding.EncodeToString(objBytes), nil
 }
 
-//Decode encodeStr using base64, and then use json to convert to obj.
+// FromJSONBase64 decode encodeStr using base64, and then use json to convert to obj.
 func FromJSONBase64(encodeStr string, obj interface{}) error {
 	decodeBytes, err := base64.StdEncoding.DecodeString(encodeStr)
 	if err != nil {

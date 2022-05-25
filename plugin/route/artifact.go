@@ -75,7 +75,7 @@ type artifactGetter struct {
 	tags []string
 }
 
-//NewArtifactGetter create a get artifact route with plugin client
+// NewArtifactGet create a get artifact route with plugin client
 func NewArtifactGet(impl client.ArtifactGetter) Route {
 	return &artifactGetter{
 		tags: []string{"projects", "repositories", "artifacts"},
@@ -119,7 +119,7 @@ type artifactDeleter struct {
 	tags []string
 }
 
-//NewArtifactDeleter create a delete artifact route with plugin client
+// NewArtifactDelete create a delete artifact route with plugin client
 func NewArtifactDelete(impl client.ArtifactDeleter) Route {
 	return &artifactDeleter{
 		tags: []string{"projects", "repositories", "artifacts"},

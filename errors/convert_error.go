@@ -14,6 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+// Package errors contains useful functionality for conversion errors
 package errors
 
 import (

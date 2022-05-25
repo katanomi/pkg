@@ -14,6 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+// Package sharedmain contains useful functionality for main
 package sharedmain
 
 import (
@@ -122,5 +123,7 @@ func WatchLoggingConfigOrDie(ctx context.Context, cmw *cminformer.InformedWatche
 		cmw.Watch(logging.ConfigMapName(), lvlMGR.Update())
 	} else if !apierrors.IsNotFound(err) {
 		logger.Fatalw("Error reading ConfigMap "+logging.ConfigMapName(), zap.Error(err))
+	} else {
+		// No mistakes, or tolerable mistakes
 	}
 }

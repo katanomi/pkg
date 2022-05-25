@@ -17,6 +17,7 @@ limitations under the License.
 package tracing
 
 import (
+	"context"
 	"sync"
 
 	"go.opentelemetry.io/otel"
@@ -28,6 +29,7 @@ import (
 	semconv "go.opentelemetry.io/otel/semconv/v1.7.0"
 	traceApi "go.opentelemetry.io/otel/trace"
 	"go.uber.org/zap"
+	"knative.dev/pkg/logging"
 )
 
 // NewTracing construct `Tracing` instance
@@ -150,6 +152,8 @@ func (t *Tracing) exporter(config *Config) (exporter trace.SpanExporter, err err
 				"err", err,
 				"config", config,
 			)
+		default:
+			logging.FromContext(context.TODO()).Warnw("unknown tracing backend", "backend", config.Backend)
 		}
 	}
 
