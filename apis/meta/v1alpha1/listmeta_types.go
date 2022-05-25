@@ -91,7 +91,7 @@ func (opt ListOptions) GetSearchFirstElement(key string) (value string) {
 	return
 }
 
-// When ListOption page less than zero, set default value.
+// DefaultPager when ListOption page less than zero, set default value.
 func (opt *ListOptions) DefaultPager() {
 	if opt.ItemsPerPage < 1 {
 		opt.ItemsPerPage = common.DefaultPerPage
@@ -129,7 +129,7 @@ type ArtifactOptions struct {
 	Artifact string `json:"artifact"`
 }
 
-// IssueOption path params
+// IssueOptions path params
 type IssueOptions struct {
 	// Project identity name
 	Identity string `json:"identity"`

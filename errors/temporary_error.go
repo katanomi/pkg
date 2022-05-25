@@ -45,7 +45,7 @@ func IsTemporaryError(err error) bool {
 	}
 }
 
-// TemporaryError
+// TemporaryError is an error and has a Temporary function
 type TemporaryError interface {
 	error
 	Temporary() bool

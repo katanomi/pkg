@@ -14,6 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+// Package names contains useful functionality for generating names
 package names
 
 import (
@@ -43,7 +44,7 @@ const (
 // copied from https://github.com/kubernetes/kubernetes/blob/c9fb3c8a1b3f407a5e84562843780aa3047d7d06/staging/src/k8s.io/apiserver/pkg/storage/names/generate.go#L49
 // temporarily
 
-// Generates a name with a random suffix
+// GenerateName generates a name with a random suffix
 func GenerateName(base string) string {
 	if len(base) > MaxGeneratedNameLength {
 		base = base[:MaxGeneratedNameLength]

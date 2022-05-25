@@ -40,6 +40,7 @@ type AuthCheckOptions struct {
 }
 
 // AuthCheck consists of result for an auth check request
+// +k8s:deepcopy-gen=false
 type AuthCheck struct {
 	metav1.TypeMeta `json:",inline"`
 	Spec            *AuthCheckSpec  `json:"spec,omitempty"`
@@ -53,6 +54,8 @@ type AuthCheckSpec struct {
 	BaseURL              string                  `json:"baseURL,omitempty"`
 	Version              string                  `json:"version,omitempty"`
 }
+
+// +k8s:deepcopy-gen=false
 
 type AuthCheckStatus struct {
 	// Allowed describes if the headers used where accepted or not by the integrated system.
@@ -85,15 +88,15 @@ const (
 	NeedsAuthorizationAuthCheckReason = "NeedsAuthorization"
 )
 
-// +k8s:deepcopy-gen=false
 // AuthToken access token request response
+// +k8s:deepcopy-gen=false
 type AuthToken struct {
 	metav1.TypeMeta `json:",inline"`
 	Status          AuthTokenStatus `json:"status"`
 }
 
-// +k8s:deepcopy-gen=false
 // AuthTokenStatus access token request response status
+// +k8s:deepcopy-gen=false
 type AuthTokenStatus struct {
 	// AccessTokenKey store the key for accessToken it is mainly for git clone as userName
 	AccessTokenKey string `json:"accessTokenKey"`

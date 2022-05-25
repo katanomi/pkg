@@ -14,6 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+// Package scheme contains functions to add and retrieve scheme from context
 package scheme
 
 import (
