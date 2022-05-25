@@ -285,7 +285,6 @@ func isNil(i interface{}) bool {
 	case reflect.Ptr, reflect.Map, reflect.Array, reflect.Chan, reflect.Slice, reflect.Func:
 		return reflect.ValueOf(i).IsNil()
 	default:
-		// do nothing
+		return false
 	}
-	return false
 }

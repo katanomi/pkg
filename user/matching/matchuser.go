@@ -35,6 +35,7 @@ func userMatch(userInfo authenticationv1.UserInfo, subjects []rbacv1.Subject) bo
 			match = UserGroupMatches(subject, userInfo)
 		default:
 			// do nothing
+			continue
 		}
 		if match {
 			return true
