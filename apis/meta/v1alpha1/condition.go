@@ -51,11 +51,11 @@ func SetConditionByErrorReason(conditionManager apis.ConditionManager, condition
 			reason = ReasonForError(err)
 		}
 		message := err.Error()
-		if old == nil || old.IsTrue() || old.GetMessage() != message || old.GetReason() != reason {
+		if old == nil || !old.IsFalse() || old.GetMessage() != message || old.GetReason() != reason {
 			conditionManager.MarkFalse(condition, reason, message)
 		}
 	} else {
-		if old == nil || old.IsFalse() {
+		if old == nil || !old.IsTrue() {
 			conditionManager.MarkTrue(condition)
 		}
 	}

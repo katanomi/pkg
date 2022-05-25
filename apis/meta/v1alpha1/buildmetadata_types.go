@@ -25,7 +25,7 @@ const (
 	BuildMetadataKey = "builds.katanomi.dev/buildrun"
 )
 
-// This structure is a derivative of buildrun and is used for artifacts to record build information.
+// BuildMetaData this structure is a derivative of buildrun and is used for artifacts to record build information.
 type BuildMetaData struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
@@ -59,7 +59,7 @@ type BuildRunGitStatus struct {
 	Branch *BuildGitBranchStatus `json:"branch,omitempty"`
 }
 
-// GitBranchStatus represent branch status of build run
+// BuildGitBranchStatus represent branch status of build run
 type BuildGitBranchStatus struct {
 	// Name of git branch
 	Name string `json:"name"`

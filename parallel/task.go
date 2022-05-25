@@ -14,6 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+// Package parallel used to execute tasks in parallel
 package parallel
 
 import (
@@ -120,7 +121,7 @@ func (p *ParallelTasks) Name(name string) *ParallelTasks {
 // for _, item := range itemArrar {
 // 	pts.Add(genTask(item))
 // }
-//
+
 func (p *ParallelTasks) Add(tasks ...Task) *ParallelTasks {
 	p.tasks = append(p.tasks, tasks...)
 	return p
@@ -283,6 +284,7 @@ func isNil(i interface{}) bool {
 	switch reflect.TypeOf(i).Kind() {
 	case reflect.Ptr, reflect.Map, reflect.Array, reflect.Chan, reflect.Slice, reflect.Func:
 		return reflect.ValueOf(i).IsNil()
+	default:
+		return false
 	}
-	return false
 }

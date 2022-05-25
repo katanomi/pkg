@@ -14,6 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+// Package admission contains functions to add and retrieve admission request from context
 package admission
 
 import (

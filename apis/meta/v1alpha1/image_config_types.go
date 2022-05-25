@@ -24,12 +24,15 @@ import (
 var ImageConfigGVK = GroupVersion.WithKind("ImageConfig")
 
 // ImageConfig object for plugins
+// +k8s:deepcopy-gen=false
 type ImageConfig struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
 
 	Spec ImageConfigSpec `json:"spec"`
 }
+
+// +k8s:deepcopy-gen=false
 
 type ImageConfigSpec struct {
 	Config v1.ImageConfig `json:"config"`
