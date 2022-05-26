@@ -55,8 +55,8 @@ type AuthCheckSpec struct {
 	Version              string                  `json:"version,omitempty"`
 }
 
+// AuthCheckStatus status for authcheck
 // +k8s:deepcopy-gen=false
-
 type AuthCheckStatus struct {
 	// Allowed describes if the headers used where accepted or not by the integrated system.
 	// `True` when accepted,

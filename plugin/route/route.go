@@ -88,6 +88,10 @@ func match(c client.Interface) []Route {
 		routes = append(routes, NewArtifactDelete(v))
 	}
 
+	if v, ok := c.(client.ArtifactTagDeleter); ok {
+		routes = append(routes, NewArtifactTagDelete(v))
+	}
+
 	if v, ok := c.(client.ScanImage); ok {
 		routes = append(routes, NewScanImage(v))
 	}
@@ -236,6 +240,9 @@ func GetMethods(c client.Interface) []string {
 	}
 	if _, ok := c.(client.ArtifactDeleter); ok {
 		methods = append(methods, "DeleteArtifact")
+	}
+	if _, ok := c.(client.ArtifactTagDeleter); ok {
+		methods = append(methods, "DeleteArtifactTag")
 	}
 	if _, ok := c.(client.ScanImage); ok {
 		methods = append(methods, "ScanImage")

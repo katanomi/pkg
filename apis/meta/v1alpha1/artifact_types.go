@@ -55,6 +55,10 @@ type ArtifactSpec struct {
 	// +optional
 	UpdatedTime metav1.Time `json:"updatedTime"`
 
+	// PullTime latest pull time for repository
+	// +optional
+	PullTime metav1.Time `json:"pullTime,omitempty"`
+
 	// Properties extended properties for Artifact
 	// +optional
 	Properties *runtime.RawExtension `json:"properties,omitempty"`

@@ -158,6 +158,56 @@ func (a *artifactDeleter) DeleteArtifact(request *restful.Request, response *res
 	response.WriteHeader(http.StatusOK)
 }
 
+type artifactTagDeleter struct {
+	impl client.ArtifactTagDeleter
+	tags []string
+}
+
+//NewArtifactTagDelete create a delete artifact tag route with plugin client
+func NewArtifactTagDelete(impl client.ArtifactTagDeleter) Route {
+	return &artifactTagDeleter{
+		tags: []string{"projects", "repositories", "artifacts", "tag"},
+		impl: impl,
+	}
+}
+
+func (a *artifactTagDeleter) Register(ws *restful.WebService) {
+	projectParam := ws.PathParameter("project", "repository belong to integraion")
+	repositoryParam := ws.PathParameter("repository", "artifact belong to repository")
+	artifactParam := ws.PathParameter("artifact", "artifact name, maybe is version or tag")
+	tagParam := ws.PathParameter("tag", "the name of the tag")
+
+	ws.Route(
+		ws.DELETE("/projects/{project:*}/repositories/{repository:*}/artifacts/{artifact}/tags/{tag}").To(a.DeleteArtifactTag).
+			// docs
+			Doc("DeleteArtifactTag").Param(projectParam).Param(repositoryParam).Param(artifactParam).Param(tagParam).
+			Metadata(restfulspec.KeyOpenAPITags, a.tags).
+			Returns(http.StatusOK, "OK", nil),
+	)
+}
+
+// DeleteArtifact http handler for delete artifact
+func (a *artifactTagDeleter) DeleteArtifactTag(request *restful.Request, response *restful.Response) {
+	pathParams := metav1alpha1.ArtifactTagOptions{
+		ArtifactOptions: metav1alpha1.ArtifactOptions{
+			RepositoryOptions: metav1alpha1.RepositoryOptions{
+				Project: request.PathParameter("project"),
+			},
+			Repository: request.PathParameter("repository"),
+			Artifact:   request.PathParameter("artifact"),
+		},
+		Tag: request.PathParameter("tag"),
+	}
+
+	err := a.impl.DeleteArtifactTag(request.Request.Context(), pathParams)
+	if err != nil {
+		kerrors.HandleError(request, response, err)
+		return
+	}
+
+	response.WriteHeader(http.StatusOK)
+}
+
 type scanImage struct {
 	impl client.ScanImage
 	tags []string
