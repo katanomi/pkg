@@ -26,6 +26,8 @@ type CreateRepoFileParams struct {
 	Message string `json:"message"`
 	// Content must be base64 encoded
 	Content []byte `json:"content"`
+	// Author commit author
+	Author *GitUserBaseInfo `json:"author,omitempty"`
 }
 
 // CreateRepoFilePayload option for create file and commit + push

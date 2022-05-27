@@ -168,6 +168,10 @@ func match(c client.Interface) []Route {
 		routes = append(routes, NewBlobStoreLister(v))
 	}
 
+	if v, ok := c.(client.GitRepositoryFileTreeGetter); ok {
+		routes = append(routes, NewGitRepositoryFileTreeGetter(v))
+	}
+
 	authCheck, ok := c.(client.AuthChecker)
 	// uses a default implementation that returns an Unknown allowed result
 	// with an NotImplemented reason
@@ -283,6 +287,9 @@ func GetMethods(c client.Interface) []string {
 	}
 	if _, ok := c.(client.GitRepositoryGetter); ok {
 		methods = append(methods, "GetGitRepository")
+	}
+	if _, ok := c.(client.GitRepositoryFileTreeGetter); ok {
+		methods = append(methods, "GetGitRepositoryFileTree")
 	}
 	if _, ok := c.(client.GitCommitCommentLister); ok {
 		methods = append(methods, "ListGitCommitComment")

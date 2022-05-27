@@ -226,6 +226,11 @@ func (p *PluginClient) GitRepository(meta Meta, secret corev1.Secret) ClientGitR
 	return newGitRepository(p, meta, secret)
 }
 
+// GitRepositoryFileTree get repo file tree client
+func (p *PluginClient) GitRepositoryFileTree(meta Meta, secret corev1.Secret) ClientGitRepositoryFileTree {
+	return newGitRepositoryFileTree(p, meta, secret)
+}
+
 // GitCommitComment get commit comment client
 func (p *PluginClient) GitCommitComment(meta Meta, secret corev1.Secret) ClientGitCommitComment {
 	return newGitCommitComment(p, meta, secret)

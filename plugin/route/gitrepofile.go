@@ -122,6 +122,7 @@ func (a *gitRepoFileCreator) CreateGitRepoFile(request *restful.Request, respons
 		kerrors.HandleError(request, response, err)
 		return
 	}
+
 	payload := metav1alpha1.CreateRepoFilePayload{
 		GitRepo:              metav1alpha1.GitRepo{Repository: repo, Project: project},
 		CreateRepoFileParams: params,

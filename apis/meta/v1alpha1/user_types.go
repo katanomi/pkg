@@ -17,6 +17,8 @@ limitations under the License.
 package v1alpha1
 
 import (
+	"github.com/golang-jwt/jwt"
+	authenticationv1 "k8s.io/api/authentication/v1"
 	authv1 "k8s.io/api/authorization/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -62,4 +64,49 @@ func UserResourceAttributes(verb string) authv1.ResourceAttributes {
 		Resource: "virtualusers",
 		Verb:     verb,
 	}
+}
+
+// UserInfo is generic user information types
+type UserInfo struct {
+	// UserInfo holds the information about the user needed to implement the user.Info interface.
+	authenticationv1.UserInfo
+}
+
+const (
+	userNameKey  string = "name"
+	userEmailKey string = "email"
+)
+
+// FromJWT get information from jwt to populate userinfo
+func (user *UserInfo) FromJWT(claims jwt.MapClaims) {
+
+	_username, ok := claims[userNameKey]
+	if ok {
+		username := _username.(string)
+		user.Username = username
+	}
+	_email, ok := claims[userEmailKey]
+	if ok {
+		email := _email.(string)
+		user.Extra = make(map[string]authenticationv1.ExtraValue)
+		user.Extra[userEmailKey] = authenticationv1.ExtraValue{email}
+	}
+	return
+}
+
+// GetName get username from UserInfo
+func (user *UserInfo) GetName() string {
+	return user.Username
+}
+
+// GetEmail get email from UserInfo
+func (user *UserInfo) GetEmail() string {
+	extraValue, ok := user.Extra[userEmailKey]
+	if !ok {
+		return ""
+	}
+	if len(extraValue) > 0 {
+		return extraValue[0]
+	}
+	return ""
 }
