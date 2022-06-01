@@ -43,12 +43,29 @@ var _ = Describe("testing for WrapTransport", func() {
 		})
 	})
 	Context("when special transport is provided", func() {
-		It("should use the special transport", func() {
-			originalTp := &http.Transport{}
-			rt := WrapTransport(originalTp)
-			tp, ok := rt.(*Transport)
-			Expect(ok).Should(BeTrue())
-			Expect(tp.originalRT).Should(Equal(originalTp))
+		var (
+			originalTp *http.Transport
+			rt         http.RoundTripper
+		)
+		BeforeEach(func() {
+			originalTp = &http.Transport{}
+			rt = WrapTransport(originalTp)
+		})
+		When("wrapping once", func() {
+			It("should use the special transport", func() {
+				tp, ok := rt.(*Transport)
+				Expect(ok).Should(BeTrue())
+				Expect(tp.originalRT).Should(Equal(originalTp))
+			})
+		})
+		When("wrapping multiple times", func() {
+			It("should wrap only once", func() {
+				rt2 := WrapTransport(rt)
+				tp2, ok := rt2.(*Transport)
+				Expect(ok).Should(BeTrue())
+				Expect(tp2.originalRT).Should(Equal(originalTp))
+				Expect(tp2.originalRT).ShouldNot(Equal(rt))
+			})
 		})
 	})
 	Context("when handler request", func() {
