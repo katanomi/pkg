@@ -62,6 +62,9 @@ func WrapTransport(rt http.RoundTripper) http.RoundTripper {
 	if rt == nil {
 		rt = http.DefaultTransport
 	}
+	if _, ok := rt.(*Transport); ok {
+		return rt
+	}
 	return &Transport{
 		originalRT: rt,
 		Transport: otelhttp.NewTransport(rt,
