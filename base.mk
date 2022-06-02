@@ -3,6 +3,8 @@ CRD_OPTIONS ?= "crd"
 
 LOCAL ?=
 
+TOOLBIN ?= $(shell pwd)/bin
+
 # Get the currently used golang install path (in GOPATH/bin, unless GOBIN is set)
 ifeq (,$(shell go env GOBIN))
 GOBIN=$(shell go env GOPATH)/bin
@@ -42,7 +44,7 @@ vet: ##@Development Run go vet against code.
 lint: golangcilint ##@Development Run golangci-lint against code.
 	$(GOLANGCILINT) run
 
-ENVTEST_ASSETS_DIR=$(shell pwd)/testbin
+ENVTEST_ASSETS_DIR=$(TOOLBIN)/testbin
 test: manifests generate fmt vet goimports ##@Development Run tests.
 	mkdir -p ${ENVTEST_ASSETS_DIR}
 	test -f ${ENVTEST_ASSETS_DIR}/setup-envtest.sh || curl -sSLo ${ENVTEST_ASSETS_DIR}/setup-envtest.sh https://raw.githubusercontent.com/kubernetes-sigs/controller-runtime/v0.8.3/hack/setup-envtest.sh
@@ -66,30 +68,30 @@ certmanager: ##@Deployment Install certmanager v1.4.0 from github manifest to th
 e2e: ginkgo ##@Testing Executes e2e tests inside test/e2e folder
 	$(GINKGO) -progress -v -tags e2e ./test/e2e
 
-CONTROLLER_GEN = $(shell pwd)/bin/controller-gen
+CONTROLLER_GEN = $(TOOLBIN)/controller-gen
 controller-gen: ##@Setup Download controller-gen locally if necessary.
 	## this is a necessary evil already reported by knative community https://github.com/kubernetes-sigs/controller-tools/ issue 560
 	## once the issue is fixed we can move to use the original package. the original line uses go-get-tools with sigs.k8s.io/controller-tools/cmd/controller-gen@v0.4.1
 	$(call go-get-fork,$(CONTROLLER_GEN),https://github.com/danielfbm/controller-tools,cmd/controller-gen,controller-gen)
 
-KUSTOMIZE = $(shell pwd)/bin/kustomize
+KUSTOMIZE = $(TOOLBIN)/kustomize
 kustomize: ##@Setup Download kustomize locally if necessary.
 	$(call go-get-tool,$(KUSTOMIZE),sigs.k8s.io/kustomize/kustomize/v3@v3.8.7)
 
-KO = $(shell pwd)/bin/ko
+KO = $(TOOLBIN)/ko
 ko: ##@Setup Download ko locally if necessary.
 	$(call go-get-tool,$(KO),github.com/google/ko@v0.8.3)
 
-GOIMPORTS = $(shell pwd)/bin/goimports
+GOIMPORTS = $(TOOLBIN)/goimports
 goimports: ##@Setup Download goimports locally if necessary.
 	$(call go-get-tool,$(GOIMPORTS),golang.org/x/tools/cmd/goimports@v0.1.10)
 	$(GOIMPORTS) -w -l $(shell find . -path '.git' -prune -path './vendor' -prune -o -path './examples' -prune -o -name '*.pb.go' -prune -o -type f -name '*.go' -print)
 
-GINKGO = $(shell pwd)/bin/ginkgo
+GINKGO = $(TOOLBIN)/ginkgo
 ginkgo: ##@Setup Download ginkgo locally if necessary
 	$(call go-get-tool,$(GINKGO),github.com/onsi/ginkgo/ginkgo@v1.16.4)
 
-GOLANGCILINT = $(shell pwd)/bin/golangci-lint
+GOLANGCILINT = $(TOOLBIN)/golangci-lint
 golangcilint: ##@Setup Download golangci-lint locally if necessary
 	$(call go-get-tool,$(GOLANGCILINT),github.com/golangci/golangci-lint/cmd/golangci-lint@v1.45.2)
 
