@@ -77,4 +77,18 @@ func TestClusterRegistryClientGetConfig(t *testing.T) {
 		g.Expect(client).ToNot(BeNil())
 	})
 
+	t.Run("list clusters namespaces", func(t *testing.T) {
+		clusterNamespaces, err := clusterClient.ListClustersNamespaces(ctx, "namespace")
+
+		g.Expect(err).To(BeNil())
+		g.Expect(clusterNamespaces).To(HaveLen(0))
+	})
+
+	t.Run("is namespace in this project", func(t *testing.T) {
+		exist, err := clusterClient.IsNamespaceInProject(ctx, "projectName", nil, "namespace")
+
+		g.Expect(err).To(BeNil())
+		g.Expect(exist).To(BeTrue())
+	})
+
 }

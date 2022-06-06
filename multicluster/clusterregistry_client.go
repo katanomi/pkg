@@ -194,6 +194,14 @@ func (m *ClusterRegistryClient) GetConfigFromCluster(ctx context.Context, cluste
 	return
 }
 
-func (m *ClusterRegistryClient) ListClustersNamespaces(ctx context.Context, namespace string) (clusterNamespaces map[*corev1.ObjectReference][]corev1.Namespace, err error) {
+// ListClustersNamespaces returns the project namespaces in the clusters
+func (m *ClusterRegistryClient) ListClustersNamespaces(ctx context.Context,
+	namespace string) (clusterNamespaces map[*corev1.ObjectReference][]corev1.Namespace, err error) {
 	return map[*corev1.ObjectReference][]corev1.Namespace{}, err
+}
+
+// IsNamespaceInProject returns true if the namespace is in the project
+func (m *ClusterRegistryClient) IsNamespaceInProject(ctx context.Context, projectName string,
+	clusterRef *corev1.ObjectReference, namespace string) (bool, error) {
+	return true, nil
 }
