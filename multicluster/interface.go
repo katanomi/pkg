@@ -39,4 +39,5 @@ type Interface interface {
 
 	// TODO: add this method to the interface and implementation
 	ListClustersNamespaces(ctx context.Context, namespace string) (clusterNamespaces map[*corev1.ObjectReference][]corev1.Namespace, err error)
+	IsProjectNamespace(ctx context.Context, projectName string, clusterRef *corev1.ObjectReference, namespace string) (bool, error)
 }
