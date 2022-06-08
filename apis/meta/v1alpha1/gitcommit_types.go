@@ -17,6 +17,7 @@ limitations under the License.
 package v1alpha1
 
 import (
+	authv1 "k8s.io/api/authorization/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	duckv1 "knative.dev/pkg/apis/duck/v1"
@@ -71,4 +72,14 @@ type GitCommitList struct {
 	ListMeta        `json:"metadata,omitempty"`
 
 	Items []GitCommit `json:"items"`
+}
+
+// GitCommitResourceAttributes returns a ResourceAttribute object to be used in a filter
+func GitCommitResourceAttributes(verb string) authv1.ResourceAttributes {
+	return authv1.ResourceAttributes{
+		Group:    GroupVersion.Group,
+		Version:  GroupVersion.Version,
+		Resource: "gitcommits",
+		Verb:     verb,
+	}
 }
