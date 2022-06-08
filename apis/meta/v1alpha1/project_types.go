@@ -17,6 +17,7 @@ limitations under the License.
 package v1alpha1
 
 import (
+	authv1 "k8s.io/api/authorization/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -131,4 +132,14 @@ type ProjectList struct {
 	ListMeta        `json:"metadata,omitempty"`
 
 	Items []Project `json:"items"`
+}
+
+// ProjectResourceAttributes returns a ResourceAttribute object to be used in a filter
+func ProjectResourceAttributes(verb string) authv1.ResourceAttributes {
+	return authv1.ResourceAttributes{
+		Group:    GroupVersion.Group,
+		Version:  GroupVersion.Version,
+		Resource: "projects",
+		Verb:     verb,
+	}
 }
