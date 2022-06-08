@@ -59,6 +59,11 @@ uninstall: manifests kustomize ##@Deployment Uninstall CRDs from the K8s cluster
 deploy: manifests kustomize ko certmanager ##@Deployment Deploy controller to the K8s cluster specified in ~/.kube/config.
 	$(KUSTOMIZE) build config/default | $(KO) apply -P ${LOCAL} -f -
 
+wait: manifests kustomize yq ##@Deployment Wait for deployment to complete
+	$(KUSTOMIZE) build config/default | $(YQ) 'select(.kind == "Deployment") | .metadata | {.namespace:.name}' | grep -v -- --- | awk -F ': ' '{print "kubectl -n "$$1" rollout status deploy "$$2}' | sh
+
+deploy-wait: deploy wait ##@Deployment Deploy controller to the K8s cluster and wait for completion
+
 undeploy: ##@Deployment Undeploy controller from the K8s cluster specified in ~/.kube/config.
 	$(KUSTOMIZE) build config/default | $(KO) delete -f -
 
@@ -95,12 +100,16 @@ GOLANGCILINT = $(TOOLBIN)/golangci-lint
 golangcilint: ##@Setup Download golangci-lint locally if necessary
 	$(call go-get-tool,$(GOLANGCILINT),github.com/golangci/golangci-lint/cmd/golangci-lint@v1.45.2)
 
+YQ = $(TOOLBIN)/yq
+yq: ##@Setup Download yq locally if necessary.
+	$(call go-get-tool,$(YQ),github.com/mikefarah/yq/v4@v4.25.2)
+
 # go-get-tool will 'go get' any package $2 and install it to $1.
 PROJECT_DIR := $(shell dirname $(abspath $(lastword $(MAKEFILE_LIST))))
 define go-get-tool
 @[ -f $(1) ] || { \
 set -e ;\
-GOBIN=$(PROJECT_DIR)/bin go install $(2) ;\
+GOBIN=$(TOOLBIN) go install $(2) ;\
 }
 endef
 
@@ -113,7 +122,7 @@ cd $$TMP_DIR ;\
 echo "Cloning $(2)" ;\
 git clone $(2) $(4) ;\
 cd $(4) ;\
-GOBIN=$(PROJECT_DIR)/bin go install ./$(3);\
+GOBIN=$(TOOLBIN) go install ./$(3);\
 rm -rf $$TMP_DIR ;\
 }
 endef
