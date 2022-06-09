@@ -129,6 +129,14 @@ type ArtifactOptions struct {
 	Artifact string `json:"artifact"`
 }
 
+// ArtifactTagOptions path params
+type ArtifactTagOptions struct {
+	ArtifactOptions
+
+	// repository name
+	Tag string `json:"tag"`
+}
+
 // IssueOptions path params
 type IssueOptions struct {
 	// Project identity name

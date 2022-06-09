@@ -32,8 +32,8 @@ type ImageConfig struct {
 	Spec ImageConfigSpec `json:"spec"`
 }
 
+// ImageConfigSpec object for plugin
 // +k8s:deepcopy-gen=false
-
 type ImageConfigSpec struct {
 	Config v1.ImageConfig `json:"config"`
 }

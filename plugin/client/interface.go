@@ -124,6 +124,12 @@ type ArtifactDeleter interface {
 	DeleteArtifact(ctx context.Context, params metav1alpha1.ArtifactOptions) error
 }
 
+// ArtifactTagDeleter delete a specific tag of the artifact.
+type ArtifactTagDeleter interface {
+	Interface
+	DeleteArtifactTag(ctx context.Context, params metav1alpha1.ArtifactTagOptions) error
+}
+
 // ScanImage scan image
 type ScanImage interface {
 	Interface

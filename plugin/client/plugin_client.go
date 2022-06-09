@@ -201,6 +201,11 @@ func (p *PluginClient) Repository(meta Meta, secret corev1.Secret) ClientReposit
 	return newRepository(p, meta, secret)
 }
 
+// Artifact get Artifact client
+func (p *PluginClient) Artifact(meta Meta, secret corev1.Secret) ClientArtifact {
+	return newArtifact(p, meta, secret)
+}
+
 // GitBranch get branch client
 func (p *PluginClient) GitBranch(meta Meta, secret corev1.Secret) ClientGitBranch {
 	return newGitBranch(p, meta, secret)
