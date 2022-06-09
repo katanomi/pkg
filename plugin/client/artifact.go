@@ -26,9 +26,9 @@ import (
 )
 
 type ClientArtifact interface {
-	List(ctx context.Context, baseURL *duckv1.Addressable, project string, repsitory string, options ...OptionFunc) (*metav1alpha1.ArtifactList, error)
-	Delete(ctx context.Context, baseURL *duckv1.Addressable, project string, repsitory string, artifact string, options ...OptionFunc) error
-	DeleteTag(ctx context.Context, baseURL *duckv1.Addressable, project string, repsitory string, artifact string, tag string, options ...OptionFunc) error
+	List(ctx context.Context, baseURL *duckv1.Addressable, project string, repository string, options ...OptionFunc) (*metav1alpha1.ArtifactList, error)
+	Delete(ctx context.Context, baseURL *duckv1.Addressable, project string, repository string, artifact string, options ...OptionFunc) error
+	DeleteTag(ctx context.Context, baseURL *duckv1.Addressable, project string, repository string, artifact string, tag string, options ...OptionFunc) error
 }
 
 type artifact struct {

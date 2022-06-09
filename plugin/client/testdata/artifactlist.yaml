@@ -13,25 +13,24 @@
               {
                 "core.katanomi.dev/integrationClass": "harbor",
                 "core.kubernetes.io/namespace": "devops",
-                "core.kubernetes.io/secret": "build-harbor",
+                "core.kubernetes.io/secret": "harbor.com",
                 "integrations.katanomi.dev/clusterIntegration": "",
-                "integrations.katanomi.dev/integration": "build-harbor",
+                "integrations.katanomi.dev/integration": "harbor.com",
                 "integrations.katanomi.dev/project": "3rdparty",
               },
             "annotations":
               {
-                "imageRegistryEndpoint": "build-harbor.alauda.cn",
+                "imageRegistryEndpoint": "harbor.com",
                 "integrations.katanomi.dev/icon": "",
                 "katanomi.dev/creationTime": "2022-05-25T10:39:05Z",
               },
           },
         "spec":
           {
-            "address":
-              { "url": "https://build-harbor.alauda.cn/3rdparty/minio/mc" },
+            "address": { "url": "https://harbor.com/3rdparty/minio/mc" },
             "access":
               {
-                "url": "https://build-harbor.alauda.cn/harbor/projects/15/repositories/3rdparty/minio/mc",
+                "url": "https://harbor.com/harbor/projects/15/repositories/3rdparty/minio/mc",
               },
             "type": "ImageRepository",
             "namespaceRefs": [{ "name": "devops" }],
@@ -50,25 +49,24 @@
               {
                 "core.katanomi.dev/integrationClass": "harbor",
                 "core.kubernetes.io/namespace": "devops",
-                "core.kubernetes.io/secret": "build-harbor",
+                "core.kubernetes.io/secret": "harbor.com",
                 "integrations.katanomi.dev/clusterIntegration": "",
-                "integrations.katanomi.dev/integration": "build-harbor",
+                "integrations.katanomi.dev/integration": "harbor.com",
                 "integrations.katanomi.dev/project": "3rdparty",
               },
             "annotations":
               {
-                "imageRegistryEndpoint": "build-harbor.alauda.cn",
+                "imageRegistryEndpoint": "harbor.com",
                 "integrations.katanomi.dev/icon": "",
                 "katanomi.dev/creationTime": "2022-05-25T10:39:05Z",
               },
           },
         "spec":
           {
-            "address":
-              { "url": "https://build-harbor.alauda.cn/3rdparty/minio/minio" },
+            "address": { "url": "https://harbor.com/3rdparty/minio/minio" },
             "access":
               {
-                "url": "https://build-harbor.alauda.cn/harbor/projects/15/repositories/3rdparty/minio/minio",
+                "url": "https://harbor.com/harbor/projects/15/repositories/3rdparty/minio/minio",
               },
             "type": "ImageRepository",
             "namespaceRefs": [{ "name": "devops" }],
