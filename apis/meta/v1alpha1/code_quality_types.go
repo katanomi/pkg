@@ -19,6 +19,7 @@ package v1alpha1
 import (
 	"time"
 
+	authv1 "k8s.io/api/authorization/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -170,4 +171,14 @@ type CodeQualityTaskMetricsStatus struct {
 	// Status is code scan status
 	// +optional
 	Status corev1.ConditionStatus `json:"status,omitempty"`
+}
+
+// CodeQualityResourceAttributes returns a ResourceAttribute object to be used in a filter
+func CodeQualityResourceAttributes(verb string) authv1.ResourceAttributes {
+	return authv1.ResourceAttributes{
+		Group:    GroupVersion.Group,
+		Version:  GroupVersion.Version,
+		Resource: "codequalities",
+		Verb:     verb,
+	}
 }
