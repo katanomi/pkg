@@ -45,10 +45,12 @@ lint: golangcilint ##@Development Run golangci-lint against code.
 	$(GOLANGCILINT) run
 
 ENVTEST_ASSETS_DIR=$(TOOLBIN)/testbin
+COVER_PROFILE ?= cover.out
+TEST_FILE ?= test.json
 test: manifests generate fmt vet goimports ##@Development Run tests.
 	mkdir -p ${ENVTEST_ASSETS_DIR}
 	test -f ${ENVTEST_ASSETS_DIR}/setup-envtest.sh || curl -sSLo ${ENVTEST_ASSETS_DIR}/setup-envtest.sh https://raw.githubusercontent.com/kubernetes-sigs/controller-runtime/v0.8.3/hack/setup-envtest.sh
-	source ${ENVTEST_ASSETS_DIR}/setup-envtest.sh; fetch_envtest_tools $(ENVTEST_ASSETS_DIR); setup_envtest_env $(ENVTEST_ASSETS_DIR); go test ./... -coverprofile cover.out
+	source ${ENVTEST_ASSETS_DIR}/setup-envtest.sh; fetch_envtest_tools $(ENVTEST_ASSETS_DIR); setup_envtest_env $(ENVTEST_ASSETS_DIR); go test -v -json -coverpkg=./... -coverprofile ${COVER_PROFILE} ./... | tee ${TEST_FILE}
 
 install: manifests kustomize ##@Deployment Install CRDs into the K8s cluster specified in ~/.kube/config.
 	$(KUSTOMIZE) build config/crd | kubectl apply -f -
