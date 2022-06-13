@@ -18,6 +18,8 @@ spec:
       taskRef:
         name: katanomi-boilerplate
         kind: ClusterTask
+      runAfter:
+        - gotest
       workspaces:
         - name: source
           workspace: source
@@ -29,6 +31,8 @@ spec:
       taskRef:
         name: katanomi-donotsubmit
         kind: ClusterTask
+      runAfter:
+        - gotest
       workspaces:
         - name: source
           workspace: source
@@ -37,9 +41,13 @@ spec:
       taskRef:
         name: katanomi-gotest
         kind: ClusterTask
+      runAfter:
+        - generate-version
       workspaces:
         - name: source
           workspace: source
+        - name: cache
+          workspace: cache
 
     - name: go-style
       params:
@@ -48,9 +56,13 @@ spec:
       taskRef:
         name: katanomi-go-style
         kind: ClusterTask
+      runAfter:
+        - gotest
       workspaces:
         - name: source
           workspace: source
+        - name: cache
+          workspace: cache
 
     - name: knative-style
       params:
@@ -63,6 +75,8 @@ spec:
       taskRef:
         name: katanomi-knative-style
         kind: ClusterTask
+      runAfter:
+        - gotest
       workspaces:
         - name: source
           workspace: source

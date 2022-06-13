@@ -3,6 +3,8 @@ CRD_OPTIONS ?= "crd"
 
 LOCAL ?=
 
+TOOLBIN ?= $(shell pwd)/bin
+
 # Get the currently used golang install path (in GOPATH/bin, unless GOBIN is set)
 ifeq (,$(shell go env GOBIN))
 GOBIN=$(shell go env GOPATH)/bin
@@ -42,11 +44,13 @@ vet: ##@Development Run go vet against code.
 lint: golangcilint ##@Development Run golangci-lint against code.
 	$(GOLANGCILINT) run
 
-ENVTEST_ASSETS_DIR=$(shell pwd)/testbin
+ENVTEST_ASSETS_DIR=$(TOOLBIN)/testbin
+COVER_PROFILE ?= cover.out
+TEST_FILE ?= test.json
 test: manifests generate fmt vet goimports ##@Development Run tests.
 	mkdir -p ${ENVTEST_ASSETS_DIR}
 	test -f ${ENVTEST_ASSETS_DIR}/setup-envtest.sh || curl -sSLo ${ENVTEST_ASSETS_DIR}/setup-envtest.sh https://raw.githubusercontent.com/kubernetes-sigs/controller-runtime/v0.8.3/hack/setup-envtest.sh
-	source ${ENVTEST_ASSETS_DIR}/setup-envtest.sh; fetch_envtest_tools $(ENVTEST_ASSETS_DIR); setup_envtest_env $(ENVTEST_ASSETS_DIR); go test ./... -coverprofile cover.out
+	source ${ENVTEST_ASSETS_DIR}/setup-envtest.sh; fetch_envtest_tools $(ENVTEST_ASSETS_DIR); setup_envtest_env $(ENVTEST_ASSETS_DIR); go test -v -json -coverpkg=./... -coverprofile ${COVER_PROFILE} ./... | tee ${TEST_FILE}
 
 install: manifests kustomize ##@Deployment Install CRDs into the K8s cluster specified in ~/.kube/config.
 	$(KUSTOMIZE) build config/crd | kubectl apply -f -
@@ -57,6 +61,11 @@ uninstall: manifests kustomize ##@Deployment Uninstall CRDs from the K8s cluster
 deploy: manifests kustomize ko certmanager ##@Deployment Deploy controller to the K8s cluster specified in ~/.kube/config.
 	$(KUSTOMIZE) build config/default | $(KO) apply -P ${LOCAL} -f -
 
+wait: manifests kustomize yq ##@Deployment Wait for deployment to complete
+	$(KUSTOMIZE) build config/default | $(YQ) 'select(.kind == "Deployment") | .metadata | {.namespace:.name}' | grep -v -- --- | awk -F ': ' '{print "kubectl -n "$$1" rollout status deploy "$$2}' | sh
+
+deploy-wait: deploy wait ##@Deployment Deploy controller to the K8s cluster and wait for completion
+
 undeploy: ##@Deployment Undeploy controller from the K8s cluster specified in ~/.kube/config.
 	$(KUSTOMIZE) build config/default | $(KO) delete -f -
 
@@ -66,44 +75,43 @@ certmanager: ##@Deployment Install certmanager v1.4.0 from github manifest to th
 e2e: ginkgo ##@Testing Executes e2e tests inside test/e2e folder
 	$(GINKGO) -progress -v -tags e2e ./test/e2e
 
-CONTROLLER_GEN = $(shell pwd)/bin/controller-gen
+CONTROLLER_GEN = $(TOOLBIN)/controller-gen
 controller-gen: ##@Setup Download controller-gen locally if necessary.
 	## this is a necessary evil already reported by knative community https://github.com/kubernetes-sigs/controller-tools/ issue 560
 	## once the issue is fixed we can move to use the original package. the original line uses go-get-tools with sigs.k8s.io/controller-tools/cmd/controller-gen@v0.4.1
 	$(call go-get-fork,$(CONTROLLER_GEN),https://github.com/danielfbm/controller-tools,cmd/controller-gen,controller-gen)
 
-KUSTOMIZE = $(shell pwd)/bin/kustomize
+KUSTOMIZE = $(TOOLBIN)/kustomize
 kustomize: ##@Setup Download kustomize locally if necessary.
 	$(call go-get-tool,$(KUSTOMIZE),sigs.k8s.io/kustomize/kustomize/v3@v3.8.7)
 
-KO = $(shell pwd)/bin/ko
+KO = $(TOOLBIN)/ko
 ko: ##@Setup Download ko locally if necessary.
 	$(call go-get-tool,$(KO),github.com/google/ko@v0.8.3)
 
-GOIMPORTS = $(shell pwd)/bin/goimports
+GOIMPORTS = $(TOOLBIN)/goimports
 goimports: ##@Setup Download goimports locally if necessary.
-	$(call go-get-tool,$(GOIMPORTS),golang.org/x/tools/cmd/goimports)
+	$(call go-get-tool,$(GOIMPORTS),golang.org/x/tools/cmd/goimports@v0.1.10)
 	$(GOIMPORTS) -w -l $(shell find . -path '.git' -prune -path './vendor' -prune -o -path './examples' -prune -o -name '*.pb.go' -prune -o -type f -name '*.go' -print)
 
-GINKGO = $(shell pwd)/bin/ginkgo
+GINKGO = $(TOOLBIN)/ginkgo
 ginkgo: ##@Setup Download ginkgo locally if necessary
 	$(call go-get-tool,$(GINKGO),github.com/onsi/ginkgo/ginkgo@v1.16.4)
 
-GOLANGCILINT = $(shell pwd)/bin/golangci-lint
+GOLANGCILINT = $(TOOLBIN)/golangci-lint
 golangcilint: ##@Setup Download golangci-lint locally if necessary
 	$(call go-get-tool,$(GOLANGCILINT),github.com/golangci/golangci-lint/cmd/golangci-lint@v1.45.2)
+
+YQ = $(TOOLBIN)/yq
+yq: ##@Setup Download yq locally if necessary.
+	$(call go-get-tool,$(YQ),github.com/mikefarah/yq/v4@v4.25.2)
 
 # go-get-tool will 'go get' any package $2 and install it to $1.
 PROJECT_DIR := $(shell dirname $(abspath $(lastword $(MAKEFILE_LIST))))
 define go-get-tool
 @[ -f $(1) ] || { \
 set -e ;\
-TMP_DIR=$$(mktemp -d) ;\
-cd $$TMP_DIR ;\
-go mod init tmp ;\
-echo "Downloading $(2)" ;\
-GOBIN=$(PROJECT_DIR)/bin go get $(2) ;\
-rm -rf $$TMP_DIR ;\
+GOBIN=$(TOOLBIN) go install $(2) ;\
 }
 endef
 
@@ -116,7 +124,7 @@ cd $$TMP_DIR ;\
 echo "Cloning $(2)" ;\
 git clone $(2) $(4) ;\
 cd $(4) ;\
-GOBIN=$(PROJECT_DIR)/bin go install ./$(3);\
+GOBIN=$(TOOLBIN) go install ./$(3);\
 rm -rf $$TMP_DIR ;\
 }
 endef
