@@ -28,8 +28,13 @@ type book struct {
 }
 
 type bookSection struct {
-	Name  string `json:"name"`
-	Title string `json:"title"`
+	Name  string      `json:"name"`
+	Title string      `json:"title"`
+	Info  sectionInfo `json:"info"`
+}
+
+type sectionInfo struct {
+	Page string `json:"page"`
 }
 
 var data book = book{
@@ -39,6 +44,9 @@ var data book = book{
 		{
 			Name:  "pkg",
 			Title: "pkg description",
+			Info: sectionInfo{
+				Page: "100",
+			},
 		},
 		{
 			Name:  "core",
@@ -130,6 +138,14 @@ func TestWrite(t *testing.T) {
 			"not pkg description",
 			func(dataW *book) bool {
 				return dataW.Sections[1].Title == "not pkg description" && dataW.Sections[2].Title == "not pkg description"
+			},
+		},
+		{
+			"attribute filter in array object and return array with nested struct",
+			"{.sections[?(@.info.page=='100')].title}",
+			"not pkg description",
+			func(dataW *book) bool {
+				return dataW.Sections[1].Title == "not pkg description" && dataW.Sections[0].Title == "not pkg description"
 			},
 		},
 	}
