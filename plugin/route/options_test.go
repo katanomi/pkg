@@ -21,17 +21,13 @@ import (
 	"testing"
 
 	metav1alpha1 "github.com/katanomi/pkg/apis/meta/v1alpha1"
-	"sigs.k8s.io/controller-runtime/pkg/envtest/printer"
-
-	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 )
 
 func TestHandleSortQuery(t *testing.T) {
 	RegisterFailHandler(Fail)
-	RunSpecsWithDefaultAndCustomReporters(t,
-		"test for get sort params",
-		[]Reporter{printer.NewlineReporter{}})
+	RunSpecs(t, "test for get sort params")
 }
 
 var _ = Describe("test for get sort params", func() {

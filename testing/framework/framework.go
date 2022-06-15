@@ -25,9 +25,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/onsi/ginkgo"
-	"github.com/onsi/ginkgo/reporters"
-	"github.com/onsi/gomega"
+	. "github.com/onsi/ginkgo/v2"
+	. "github.com/onsi/gomega"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -68,13 +67,12 @@ func New(name string) *Framework {
 // init is a do once initialization function to startup any necessary data
 func (f *Framework) init() {
 	f.Once.Do(func() {
-		ginkgo.By("Framework.Init")
 		f.Context = context.TODO()
 		cfg := ctrl.GetConfigOrDie()
 		f.Context = injection.WithConfig(f.Context, cfg)
 		f.Config = cfg
 
-		logger, err := zap.NewDevelopment(zap.ErrorOutput(zapcore.AddSync(ginkgo.GinkgoWriter)))
+		logger, err := zap.NewDevelopment(zap.ErrorOutput(zapcore.AddSync(GinkgoWriter)))
 		if err != nil {
 			panic(err)
 		}
@@ -91,10 +89,8 @@ func (f *Framework) MRun(m *testing.M) {
 
 // Run start tests
 func (f *Framework) Run(t *testing.T) {
-	gomega.RegisterFailHandler(ginkgo.Fail)
-	var r []ginkgo.Reporter
-	r = append(r, reporters.NewJUnitReporter(f.Name+".xml"))
-	ginkgo.RunSpecsWithDefaultAndCustomReporters(t, f.Name, r)
+	RegisterFailHandler(Fail)
+	RunSpecs(t, f.Name)
 }
 
 // WithScheme adds a scheme object to the framework
@@ -105,28 +101,28 @@ func (f *Framework) WithScheme(scheme *runtime.Scheme) *Framework {
 
 // SynchronizedBeforeSuite basic before suite initialization
 func (f *Framework) SynchronizedBeforeSuite(initFunc func()) *Framework {
-	ginkgo.SynchronizedBeforeSuite(func() []byte {
-		ginkgo.By("Setup")
+	SynchronizedBeforeSuite(func() []byte {
+		By("Setup")
 		if initFunc != nil {
-			ginkgo.By("Setup.Func")
+			By("Setup.Func")
 			initFunc()
 		}
 		return nil
 	}, func(_ []byte) {
 		// no-op for now
-	}, DurationToFloat(f.InitTimeout))
+	})
 	return f
 }
 
 // SynchronizedAfterSuite destroys the whole environment
 func (f *Framework) SynchronizedAfterSuite(destroyFunc func()) *Framework {
-	ginkgo.SynchronizedAfterSuite(func() {}, func() {
-		ginkgo.By("Teardown")
+	SynchronizedAfterSuite(func() {}, func() {
+		By("Teardown")
 		if destroyFunc != nil {
-			ginkgo.By("Teardown.Func")
+			By("Teardown.Func")
 			destroyFunc()
 		}
-	}, DurationToFloat(f.InitTimeout))
+	})
 	return f
 }
 

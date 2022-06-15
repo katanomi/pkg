@@ -33,7 +33,7 @@ type projectList struct {
 	tags []string
 }
 
-//NewProjectList create a list project route with plugin client
+// NewProjectList create a list project route with plugin client
 func NewProjectList(impl client.ProjectLister) Route {
 	return &projectList{
 		tags: []string{"projects"},

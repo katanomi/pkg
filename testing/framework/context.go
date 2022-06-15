@@ -18,21 +18,44 @@ package framework
 
 import (
 	"context"
+	"strings"
 
 	"go.uber.org/zap"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/util/rand"
 	"k8s.io/client-go/rest"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 // TestContext a test context
 type TestContext struct {
 	Context context.Context
 	Config  *rest.Config
-	Opts    Options
+	Client  client.Client
+
 	*zap.SugaredLogger
+
+	Namespace string
 
 	Scheme *runtime.Scheme
 }
 
+// TestContextOption options for TestContext
+type TestContextOption func(*TestContext)
+
+// NamespaceOption customize the namespace name
+func NamespaceOption(ns string) TestContextOption {
+	return func(testCtx *TestContext) {
+		testCtx.Namespace = ns
+	}
+}
+
+// NamespacePrefixOption customize the prefix of the namespace name
+func NamespacePrefixOption(prefix string) TestContextOption {
+	return func(testCtx *TestContext) {
+		testCtx.Namespace = strings.TrimSuffix(prefix, "-") + "-" + rand.String(5)
+	}
+}
+
 // TestFunction function used as describe
-type TestFunction func(TestContext)
+type TestFunction func(*TestContext)

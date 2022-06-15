@@ -19,7 +19,10 @@ package framework
 import (
 	"fmt"
 
-	"github.com/onsi/ginkgo"
+	. "github.com/onsi/ginkgo/v2"
+	. "github.com/onsi/gomega"
+	"k8s.io/apimachinery/pkg/util/rand"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 // TestCasePriority priority for the testcase
@@ -42,8 +45,18 @@ type TestCaseScope string
 const (
 	// ClusterScoped cluster test case scope
 	ClusterScoped TestCaseScope = "Cluster"
-	//NamespaceScoped test case scoped for a namespace
+	// NamespaceScoped test case scoped for a Namespace
 	NamespaceScoped TestCaseScope = "Namespaced"
+)
+
+// TestCaseLabel label for test case
+type TestCaseLabel = string
+
+const (
+	ControllerLabel TestCaseLabel = "controller"
+	WebhookLabel    TestCaseLabel = "webhook"
+	WebServiceLabel TestCaseLabel = "webservice"
+	CliLabel        TestCaseLabel = "cli"
 )
 
 // Options options for TestCase
@@ -54,6 +67,12 @@ type Options struct {
 	Priority TestCasePriority
 	// Scope defines what kind of permissions this test case needs
 	Scope TestCaseScope
+	// Labels used to filter test cases when executing testing
+	Labels []string
+	// Condition used to check condition before testing
+	Conditions []Condition
+	// TestContextOptions used to setup TestContext
+	TestContextOptions []TestContextOption
 }
 
 func (o Options) defaultVals() Options {
@@ -64,6 +83,33 @@ func (o Options) defaultVals() Options {
 		o.Priority = P0
 	}
 	return o
+}
+
+func (o Options) appendLabels(labels ...string) Options {
+	m := make(map[string]struct{}, len(o.Labels))
+	for _, label := range o.Labels {
+		m[label] = struct{}{}
+	}
+	for _, newLabel := range labels {
+		if _, exist := m[newLabel]; exist {
+			continue
+		}
+		m[newLabel] = struct{}{}
+		o.Labels = append(o.Labels, newLabel)
+	}
+	return o
+}
+
+func (o Options) checkCondition(testCtx *TestContext) error {
+	for _, condition := range o.Conditions {
+		if condition == nil {
+			continue
+		}
+		if err := condition.Condition(testCtx); err != nil {
+			return fmt.Errorf("condition %s check failed: %w", reflectName(condition), err)
+		}
+	}
+	return nil
 }
 
 // TestCaseBuilder builder for TestCases
@@ -113,6 +159,24 @@ func (b *TestCaseBuilder) WithPriority(prior TestCasePriority) *TestCaseBuilder 
 	return b
 }
 
+// WithLabels sets labels
+func (b *TestCaseBuilder) WithLabels(labels ...string) *TestCaseBuilder {
+	b.opts = b.opts.appendLabels(labels...)
+	return b
+}
+
+// WithCondition sets conditions
+func (b *TestCaseBuilder) WithCondition(funcs ...Condition) *TestCaseBuilder {
+	b.opts.Conditions = append(b.opts.Conditions, funcs...)
+	return b
+}
+
+// WithTestContextOptions sets options of TestContext
+func (b *TestCaseBuilder) WithTestContextOptions(options ...TestContextOption) *TestCaseBuilder {
+	b.opts.TestContextOptions = append(b.opts.TestContextOptions, options...)
+	return b
+}
+
 // Namespaced set the scope of the testcase as namespaced
 func (b *TestCaseBuilder) Namespaced() *TestCaseBuilder {
 	b.opts.Scope = NamespaceScoped
@@ -145,18 +209,61 @@ func (b *TestCaseBuilder) P3() *TestCaseBuilder {
 	return b.WithPriority(P3)
 }
 
-// Do builds and returns the test case
-func (b *TestCaseBuilder) Do() bool {
-	ctx := TestContext{
-		Opts: b.opts,
+// setupTestContext initial TestContext configuration
+func (b *TestCaseBuilder) setupTestContext(ctx *TestContext) {
+	ctx.Context = fmw.Context
+	ctx.Config = fmw.Config
+	ctx.SugaredLogger = fmw.SugaredLogger.Named(b.caseName())
+	ctx.Scheme = fmw.Scheme
+
+	for _, option := range b.opts.TestContextOptions {
+		option(ctx)
 	}
-	fullName := fmt.Sprintf("[P%d][%s][%s]", b.opts.Priority, b.opts.Scope, b.opts.Name)
-	return ginkgo.Describe(fullName, func() {
-		ginkgo.By("Initializing " + fullName)
-		ctx.Config = fmw.Config
-		ctx.Context = fmw.Context
-		ctx.SugaredLogger = fmw.SugaredLogger.Named(fullName)
-		ctx.Scheme = fmw.Scheme
-		b.testFunc(ctx)
+
+	if ctx.Namespace == "" {
+		ctx.Namespace = "e2e-test-ns" + rand.String(5)
+	}
+
+	if ctx.Client == nil {
+		c, err := client.New(ctx.Config, client.Options{Scheme: ctx.Scheme})
+		Expect(err).To(Succeed())
+		ctx.Client = c
+	}
+}
+
+func (b *TestCaseBuilder) caseName() string {
+	return fmt.Sprintf("[P%d][%s][%s]", b.opts.Priority, b.opts.Scope, b.opts.Name)
+}
+
+// Do build and return the test case
+func (b *TestCaseBuilder) Do() bool {
+	fullName := b.caseName()
+	return Describe(fullName, Ordered, Labels(b.opts.Labels), func() {
+		var testCtx = &TestContext{}
+
+		BeforeAll(func() {
+			b.setupTestContext(testCtx)
+
+			// builtin condition
+			conditions := append([]Condition{}, builtInConditions...)
+			b.opts.Conditions = append(conditions, b.opts.Conditions...)
+			err := b.opts.checkCondition(testCtx)
+			if err != nil && skipWhenConditionMismatch == "true" {
+				skipMsg := fmt.Sprintf("Skip test case, name: %s, reason: %s", fullName, err.Error())
+				Skip(skipMsg)
+			} else {
+				Expect(err).To(Succeed())
+			}
+		})
+
+		if b.testFunc != nil {
+			b.testFunc(testCtx)
+		}
 	})
+}
+
+// DoFunc build and return the test case, just like the Do function
+func (b *TestCaseBuilder) DoFunc(f TestFunction) bool {
+	b.testFunc = f
+	return b.Do()
 }

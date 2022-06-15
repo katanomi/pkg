@@ -28,8 +28,7 @@ import (
 	"go.uber.org/zap"
 	apierrors "k8s.io/apimachinery/pkg/util/errors"
 
-	. "github.com/onsi/ginkgo"
-	"github.com/onsi/ginkgo/reporters"
+	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 )
 
@@ -51,8 +50,7 @@ func (e *executeFlag) get() bool {
 
 func TestParallelTask(t *testing.T) {
 	RegisterFailHandler(Fail)
-	junitReporter := reporters.NewJUnitReporter("parallel.xml")
-	RunSpecsWithDefaultAndCustomReporters(t, "pkg/parallel", []Reporter{junitReporter})
+	RunSpecs(t, "pkg/parallel")
 }
 
 func generateTask(index int, sleep time.Duration, err error, excuted *executeFlag) (task parallel.Task) {
@@ -188,10 +186,10 @@ var _ = Describe("P().Do().Wait()", func() {
 			Expect(errs).To(BeEquivalentTo(context.DeadlineExceeded))
 
 			fmt.Printf("%v,%v,%v,", t1Excuted.get(), t2Excuted.get(), t3Excuted.get())
-			//up to now, task is not support cancel
-			//Expect(t1Excuted.executed).To(BeFalse())
-			//Expect(t2Excuted.executed).To(BeFalse())
-			//Expect(t3Excuted.executed).To(BeFalse())
+			// up to now, task is not support cancel
+			// Expect(t1Excuted.executed).To(BeFalse())
+			// Expect(t2Excuted.executed).To(BeFalse())
+			// Expect(t3Excuted.executed).To(BeFalse())
 
 			Expect(elapsed < 1 && elapsed > 0.1).To(BeTrue())
 			Expect(len(res)).To(BeEquivalentTo(0))
