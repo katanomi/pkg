@@ -239,6 +239,13 @@ var _ = Describe("P().Do().Wait()", func() {
 				Expect(res).To(ContainElement(fmt.Sprintf("task-%d", i)))
 			}
 		})
+
+		It("should return with same sort", func() {
+			Expect(errs).To(BeNil())
+			for i := 0; i <= 9; i++ {
+				Expect(res[i]).To(Equal(fmt.Sprintf("task-%d", i+1)))
+			}
+		})
 	})
 
 	Context("when set conccurrent", func() {
