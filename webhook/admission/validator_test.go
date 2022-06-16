@@ -281,7 +281,7 @@ func TestValidatorDelete(t *testing.T) {
 				AdmissionRequest: admissionv1.AdmissionRequest{
 					Operation: admissionv1.Delete,
 					OldObject: runtime.RawExtension{
-						Raw:    []byte(`{"metadata":{"name":"def","namespace":"default"}}`),
+						Raw:    []byte(`{"metadata":{"name":"def"}}`),
 						Object: &MyObject{},
 					},
 				},
