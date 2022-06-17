@@ -9,7 +9,7 @@ require (
 	github.com/cloudevents/sdk-go/v2 v2.5.0
 	github.com/davecgh/go-spew v1.1.1
 	github.com/emicklei/go-restful-openapi/v2 v2.3.0
-	github.com/emicklei/go-restful/v3 v3.5.1
+	github.com/emicklei/go-restful/v3 v3.8.0
 	github.com/go-logr/logr v0.4.0
 	github.com/go-logr/zapr v0.2.0
 	github.com/go-openapi/spec v0.20.2 // indirect
