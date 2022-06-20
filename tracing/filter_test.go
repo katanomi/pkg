@@ -22,7 +22,7 @@ import (
 	"net/http/httptest"
 
 	"github.com/emicklei/go-restful/v3"
-	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/propagation"

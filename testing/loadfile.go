@@ -17,6 +17,7 @@ limitations under the License.
 package testing
 
 import (
+	"fmt"
 	"io/ioutil"
 
 	corev1 "k8s.io/api/core/v1"
@@ -34,6 +35,14 @@ func LoadYAML(file string, obj interface{}) (err error) {
 	}
 	err = yaml.Unmarshal(data, obj)
 	return
+}
+
+// MustLoadYaml loads yaml or panics if the parse fails.
+func MustLoadYaml(file string, obj interface{}) {
+	err := LoadYAML(file, obj)
+	if err != nil {
+		panic(fmt.Sprintf("load yaml file failed, file path: %s", file))
+	}
 }
 
 // LoadObjectOrDie loads object from yaml and returns

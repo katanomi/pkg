@@ -21,7 +21,7 @@ package e2e
 
 import (
 	. "github.com/katanomi/pkg/testing/framework"
-	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 )
 

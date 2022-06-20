@@ -41,6 +41,29 @@ func TestE2E(t *testing.T) {
 
 ```
 
+## Configuration
+
+Each project e2e test may depend on some configurations. By default, if these configurations are missing, the test will not execute normally.
+
+The framework has a built-in NewConfigCondition tool method to help us load and manage configurations. By default configuration files are stored in the `katanomi-e2e` namespace of the target cluster, and the name of the configmap will be prefixed with `e2e-config`.
+
+```go
+func NewConfigCondition(configName string, obj interface{}) *configCondition {
+	c := &configCondition{
+		name: configName,
+		obj:  obj,
+	}
+
+	return c
+}
+```
+
+Of course, you can use environment variables to change these defaults:
+```go
+E2E_CONFIG_NAMESPACE
+E2E_CONFIG_NAME_PREFIX
+```
+
 ## TestCases
 
 Most test cases can be written in a `ginkgo` fashion with a few helper methods to speedup construction and common logic. Cases can be started with:
@@ -62,7 +85,7 @@ package another
 
 import (
 	. "github.com/katanomi/pkg/testing/framework"
-	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 )
 
@@ -100,9 +123,4 @@ var _ = P1Case("another-test").Cluster().WithFunc(func(ctx TestContext) {
 }).Do()
 
 ```
-
-
-## TODO:
-
- - [ ]  Add support for traits/external dependencies: Add functions to declare dependencies of other systems/toolings and having independent implementations for each of them.
 

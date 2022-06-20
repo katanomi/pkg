@@ -1,5 +1,5 @@
 /*
-Copyright 2021 The Katanomi Authors.
+Copyright 2022 The Katanomi Authors.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -14,22 +14,35 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package sharedmain_test
+package framework
 
 import (
-	"github.com/katanomi/pkg/sharedmain"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 )
 
-var _ = Describe("Sharedmain", func() {
-	Context("ParseFlag should work as except", func() {
-		It("If flag is not provided,should return the default value", func() {
-			sharedmain.ParseFlag()
-			Expect(sharedmain.QPS).To(Equal(float64(sharedmain.DefaultQPS)))
-			Expect(sharedmain.Burst).To(Equal(sharedmain.DefaultBurst))
-			Expect(sharedmain.ConfigFile).To(Equal(""))
+var _ = Describe("Test NamespaceOption", func() {
+	var testCtx *TestContext
+	BeforeEach(func() {
+		testCtx = &TestContext{}
+	})
 
-		})
+	It("should get the correct namespace", func() {
+		ns := "abc"
+		NamespaceOption(ns)(testCtx)
+		Expect(testCtx.Namespace).To(Equal(ns))
+	})
+})
+
+var _ = Describe("Test NamespacePrefixOption", func() {
+	var testCtx *TestContext
+	BeforeEach(func() {
+		testCtx = &TestContext{}
+	})
+
+	It("should get the correct namespace", func() {
+		ns := "abc"
+		NamespacePrefixOption(ns)(testCtx)
+		Expect(testCtx.Namespace).To(HavePrefix(ns))
 	})
 })

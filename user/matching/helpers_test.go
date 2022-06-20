@@ -19,8 +19,7 @@ package matching_test
 import (
 	. "github.com/katanomi/pkg/user/matching"
 
-	. "github.com/onsi/ginkgo"
-	. "github.com/onsi/ginkgo/extensions/table"
+	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	gomegatypes "github.com/onsi/gomega/types"
 	authenticationv1 "k8s.io/api/authentication/v1"

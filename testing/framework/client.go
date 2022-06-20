@@ -14,16 +14,26 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package testing_test
+package framework
 
 import (
-	"testing"
+	"encoding/base64"
+	"encoding/json"
 
-	. "github.com/onsi/ginkgo/v2"
-	. "github.com/onsi/gomega"
+	"github.com/go-resty/resty/v2"
+	"github.com/katanomi/pkg/plugin/client"
 )
 
-func TestTesting(t *testing.T) {
-	RegisterFailHandler(Fail)
-	RunSpecs(t, "Testing Suite")
+// RequestWrapAuthMeta wrap auth and meta information into http request
+func RequestWrapAuthMeta(req *resty.Request, auth client.Auth, meta client.Meta) *resty.Request {
+	if req == nil || req.Header == nil {
+		return nil
+	}
+
+	req.SetHeader(client.PluginAuthHeader, string(auth.Type))
+	authData, _ := json.Marshal(auth.Secret)
+	req.SetHeader(client.PluginSecretHeader, base64.StdEncoding.EncodeToString(authData))
+
+	client.MetaOpts(meta)(req)
+	return req
 }

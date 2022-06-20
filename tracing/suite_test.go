@@ -23,7 +23,7 @@ import (
 	"testing"
 
 	"github.com/emicklei/go-restful/v3"
-	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	"go.opentelemetry.io/otel"
 	"k8s.io/client-go/kubernetes"
