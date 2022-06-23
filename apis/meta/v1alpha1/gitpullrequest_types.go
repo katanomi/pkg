@@ -28,6 +28,20 @@ var (
 	GitPullRequestNoteListGVK = GroupVersion.WithKind("GitPullRequestNoteList")
 )
 
+// MergeStatus is the status of a merge request
+type MergeStatus string
+
+const (
+	// MergeStatusChecking indicates that the merge request is being checked
+	MergeStatusChecking MergeStatus = "checking"
+	// MergeStatusUnknown is the unknown status of the merge request
+	MergeStatusUnknown MergeStatus = "unknown"
+	// MergeStatusCanBeMerged indicates that the merge request can be merged
+	MergeStatusCanBeMerged MergeStatus = "can_be_merged"
+	// MergeStatusCannotBeMerged indicates that the merge request cannot be merged
+	MergeStatusCannotBeMerged MergeStatus = "cannot_be_merged"
+)
+
 // GitPullRequest object for plugins
 type GitPullRequest struct {
 	metav1.TypeMeta   `json:",inline"`
@@ -63,7 +77,12 @@ type GitPullRequestSpec struct {
 	MergeLog   *GitOperateLogBaseInfo `json:"mergeLog,omitempty"`
 	Properties *runtime.RawExtension  `json:"properties,omitempty"`
 	// HasConflicts means source and target branch has conflict change
+	// It is dependent on the merge_status.
 	HasConflicts bool `json:"hasConflicts,omitempty"`
+	// MergeStatus indicates if there is a merge conflict
+	MergeStatus MergeStatus `json:"mergeStatus,omitempty"`
+	// OriginMergeStatus used to store origin merge status
+	OriginMergeStatus string `json:"originMergeStatus,omitempty"`
 }
 
 // GitPullRequestList list of pr

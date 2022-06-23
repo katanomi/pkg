@@ -23,3 +23,5 @@ bin
 
 *.xml
 .vscode/
+test.json
+cover.out
