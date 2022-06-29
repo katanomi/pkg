@@ -57,6 +57,11 @@ type PluginRegister interface {
 	GetAllowEmptySecret() []string
 }
 
+type ControllerManager interface {
+	// GetControllerName get controller name
+	GetControllerName() string
+}
+
 type AdditionalWebhookRegister interface {
 	// GetWebhookSupport get webhook support map
 	GetWebhookSupport() map[metav1alpha1.WebhookEventSupportType][]string
