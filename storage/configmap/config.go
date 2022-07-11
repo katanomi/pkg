@@ -45,7 +45,9 @@ func (f dftConfigConstruct) CmName() string {
 }
 
 func (f dftConfigConstruct) Handle(cm *corev1.ConfigMap) {
-	f.constructFunc(cm)
+	if f.constructFunc != nil {
+		f.constructFunc(cm)
+	}
 }
 
 func (f dftConfigConstruct) Default() *corev1.ConfigMap {

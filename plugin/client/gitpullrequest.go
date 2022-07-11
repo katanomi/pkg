@@ -29,6 +29,7 @@ import (
 
 // ClientGitPullRequest is interface for Create and Read pull requests
 // Deprecated: Integrations should implement GitPullRequestCRUClient instead (or additionally).
+//go:generate ../../bin/mockgen -source=gitpullrequest.go -destination=../../testing/mock/github.com/katanomi/pkg/plugin/client/gitpullrequest.go -package=client ClientGitPullRequest
 type ClientGitPullRequest interface {
 	Create(
 		ctx context.Context,
