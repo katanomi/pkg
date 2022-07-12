@@ -217,7 +217,7 @@ func (p *PluginClient) GitContent(meta Meta, secret corev1.Secret) ClientGitCont
 }
 
 // GitPullRequest get pr client
-func (p *PluginClient) GitPullRequest(meta Meta, secret corev1.Secret) ClientGitPullRequest {
+func (p *PluginClient) GitPullRequest(meta Meta, secret corev1.Secret) GitPullRequestCRUClient {
 	return newGitPullRequest(p, meta, secret)
 }
 

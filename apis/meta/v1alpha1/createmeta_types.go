@@ -71,6 +71,14 @@ type CreatePullRequestCommentParam struct {
 	Body string `json:"body"`
 }
 
+// UpdatePullRequestCommentPayload is payload for update pr's Comment
+type UpdatePullRequestCommentPayload struct {
+	GitRepo
+	CreatePullRequestCommentParam
+	Index     int `json:"index"`
+	CommentID int `json:"commentID"`
+}
+
 // CreateCommitCommentParam param for create commit's comment
 type CreateCommitCommentParam struct {
 	Note     *string `json:"note,omitempty"`

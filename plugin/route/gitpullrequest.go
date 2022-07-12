@@ -180,6 +180,69 @@ func (a *gitPullRequestNoteCreator) CreateGitPullRequestNote(request *restful.Re
 	response.WriteHeaderAndEntity(http.StatusOK, note)
 }
 
+type gitPullRequestNoteUpdater struct {
+	impl client.GitPullRequestCommentUpdater
+	tags []string
+}
+
+// NewGitPullRequestNoteUpdater updates a git pr note route with plugin client
+func NewGitPullRequestNoteUpdater(impl client.GitPullRequestCommentUpdater) Route {
+	return &gitPullRequestNoteUpdater{
+		tags: []string{"git", "repositories", "pull request", "note"},
+		impl: impl,
+	}
+}
+
+// Register route
+func (a *gitPullRequestNoteUpdater) Register(ws *restful.WebService) {
+	repositoryParam := ws.PathParameter("repository", "pulls belong to repository")
+	projectParam := ws.PathParameter("project", "repository belong to project")
+	indexParam := ws.PathParameter("index", "note belong to index")
+	noteIDParam := ws.PathParameter("noteid", "PR comment/note id")
+	ws.Route(
+		ws.PUT("/projects/{project:*}/coderepositories/{repository}/pulls/{index}/note/{noteid}").To(a.UpdateGitPullRequestNote).
+			Doc("UpdateGitPullRequestNote").Param(projectParam).Param(repositoryParam).Param(indexParam).Param(noteIDParam).
+			Metadata(restfulspec.KeyOpenAPITags, a.tags).
+			Returns(http.StatusOK, "OK", metav1alpha1.GitPullRequestNote{}),
+	)
+}
+
+// UpdateGitPullRequestNote updates pr note
+func (a *gitPullRequestNoteUpdater) UpdateGitPullRequestNote(request *restful.Request, response *restful.Response) {
+	repo := handlePathParamHasSlash(request.PathParameter("repository"))
+	project := request.PathParameter("project")
+	indexStr := request.PathParameter("index")
+	index, err := strconv.Atoi(indexStr)
+	if err != nil {
+		kerrors.HandleError(request, response, err)
+		return
+	}
+
+	noteIdStr := request.PathParameter("noteid")
+	noteId, err := strconv.Atoi(noteIdStr)
+	if err != nil {
+		kerrors.HandleError(request, response, err)
+		return
+	}
+
+	var params metav1alpha1.CreatePullRequestCommentParam
+	if err = request.ReadEntity(&params); err != nil {
+		kerrors.HandleError(request, response, err)
+		return
+	}
+	note, err := a.impl.UpdatePullRequestComment(request.Request.Context(), metav1alpha1.UpdatePullRequestCommentPayload{
+		GitRepo:                       metav1alpha1.GitRepo{Repository: repo, Project: project},
+		Index:                         index,
+		CreatePullRequestCommentParam: params,
+		CommentID:                     noteId,
+	})
+	if err != nil {
+		kerrors.HandleError(request, response, err)
+		return
+	}
+	response.WriteHeaderAndEntity(http.StatusOK, note)
+}
+
 type gitPullRequestCommentLister struct {
 	impl client.GitPullRequestCommentLister
 	tags []string

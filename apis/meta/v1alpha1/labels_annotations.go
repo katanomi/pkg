@@ -72,14 +72,17 @@ const (
 )
 
 // Attribute keys for Integrations
+// Keys used in IntegrationClass.status.attributes
 const (
-	// Keys used in IntegrationClass.status.attributes
 	AuthAttributeKey                   = "auth"
 	ReplicationPolicyTypesAttributeKey = "replicationPolicyTypes"
 	ResourceTypesAttributeKey          = "resourceTypes"
 	MethodsAttributeKey                = "methods"
 	AllowEmptySecretAttributeKey       = "allowEmptySecret"
 	DefaultProjectTypeAttributeKey     = "defaultProjectSubType"
+	// GitPRRevisionPrefixes allows git related integrations
+	// define custom PR revision prefixes
+	GitPRRevisionPrefixes = "gitPRRevisionPrefixes"
 )
 
 // Attribute values for label source

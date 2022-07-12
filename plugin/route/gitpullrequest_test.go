@@ -171,6 +171,60 @@ func TestAboutGitPullRequestNote(t *testing.T) {
 	g.Expect(err).To(BeNil())
 	g.Expect(prNoteList.Kind).To(Equal(metav1alpha1.GitPullRequestNoteListGVK.Kind))
 
+	httpWriter2 := httptest.NewRecorder()
+
+	prNoteCreatePayload := metav1alpha1.CreatePullRequestCommentPayload{
+		CreatePullRequestCommentParam: metav1alpha1.CreatePullRequestCommentParam{
+			Body: "Pull request comment body",
+		},
+	}
+	createPayloadContent, _ := json.Marshal(prNoteCreatePayload)
+	httpRequest2, _ := http.NewRequest(
+		"POST",
+		"/plugins/v1alpha1/test-z/projects/1/coderepositories/1/pulls/1/note",
+		bytes.NewBuffer(createPayloadContent),
+	)
+	httpRequest2.Header.Set("Content-Type", "application/json")
+	httpRequest2.Header.Set(client.PluginMetaHeader, meta)
+
+	container.Dispatch(httpWriter2, httpRequest2)
+	g.Expect(httpWriter2.Code).To(Equal(http.StatusOK))
+	prNote := metav1alpha1.GitPullRequestNote{}
+	err = json.Unmarshal(httpWriter2.Body.Bytes(), &prNote)
+	g.Expect(err).To(BeNil())
+	g.Expect(prNote.Kind).To(Equal(metav1alpha1.GitPullRequestNotesGVK.Kind))
+	g.Expect(prNote.Spec.Body).To(Equal(prNoteCreatePayload.Body))
+	g.Expect(prNote.Spec.ID).ToNot(BeNil())
+
+	httpWriter3 := httptest.NewRecorder()
+
+	prNoteUpdatePayload := metav1alpha1.UpdatePullRequestCommentPayload{
+		CreatePullRequestCommentParam: metav1alpha1.CreatePullRequestCommentParam{
+			Body: "Pull request comment body 2",
+		},
+		Index:     1,
+		CommentID: 2,
+	}
+
+	updatePayloadContent, _ := json.Marshal(prNoteUpdatePayload)
+
+	httpRequest3, _ := http.NewRequest(
+		"PUT",
+		"/plugins/v1alpha1/test-z/projects/1/coderepositories/1/pulls/1/note/2",
+		bytes.NewBuffer(updatePayloadContent),
+	)
+
+	httpRequest3.Header.Set("Content-Type", "application/json")
+	httpRequest3.Header.Set(client.PluginMetaHeader, meta)
+
+	container.Dispatch(httpWriter3, httpRequest3)
+	g.Expect(httpWriter3.Code).To(Equal(http.StatusOK))
+	newPrNote := metav1alpha1.GitPullRequestNote{}
+	err = json.Unmarshal(httpWriter3.Body.Bytes(), &newPrNote)
+	g.Expect(err).To(BeNil())
+	g.Expect(newPrNote.Kind).To(Equal(metav1alpha1.GitPullRequestNotesGVK.Kind))
+	g.Expect(newPrNote.Spec.Body).To(Equal(prNoteUpdatePayload.Body))
+	g.Expect(newPrNote.Spec.ID).To(Equal(prNoteUpdatePayload.CommentID))
 }
 
 type TestGitPullRequestNoteLister struct {
@@ -196,6 +250,22 @@ func (t *TestGitPullRequestNoteLister) CreatePullRequestComment(ctx context.Cont
 	return metav1alpha1.GitPullRequestNote{
 		TypeMeta: metav1.TypeMeta{
 			Kind: metav1alpha1.GitPullRequestNotesGVK.Kind,
+		},
+		Spec: metav1alpha1.GitPullRequestNoteSpec{
+			Body: option.Body,
+			ID:   1,
+		},
+	}, nil
+}
+
+func (t *TestGitPullRequestNoteLister) UpdatePullRequestComment(ctx context.Context, option metav1alpha1.UpdatePullRequestCommentPayload) (metav1alpha1.GitPullRequestNote, error) {
+	return metav1alpha1.GitPullRequestNote{
+		TypeMeta: metav1.TypeMeta{
+			Kind: metav1alpha1.GitPullRequestNotesGVK.Kind,
+		},
+		Spec: metav1alpha1.GitPullRequestNoteSpec{
+			Body: option.Body,
+			ID:   option.CommentID,
 		},
 	}, nil
 }
