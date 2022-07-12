@@ -136,6 +136,10 @@ func match(c client.Interface) []Route {
 		routes = append(routes, NewGitPullRequestNoteCreator(v))
 	}
 
+	if v, ok := c.(client.GitPullRequestCommentUpdater); ok {
+		routes = append(routes, NewGitPullRequestNoteUpdater(v))
+	}
+
 	if v, ok := c.(client.GitPullRequestCommentLister); ok {
 		routes = append(routes, NewGitPullRequestCommentLister(v))
 	}

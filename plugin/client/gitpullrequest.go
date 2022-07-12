@@ -27,12 +27,48 @@ import (
 	duckv1 "knative.dev/pkg/apis/duck/v1"
 )
 
+// ClientGitPullRequest is interface for Create and Read pull requests
+// Deprecated: Integrations should implement GitPullRequestCRUClient instead (or additionally).
 type ClientGitPullRequest interface {
-	Create(ctx context.Context, baseURL *duckv1.Addressable, payload metav1alpha1.CreatePullRequestPayload, options ...OptionFunc) (*metav1alpha1.GitPullRequest, error)
-	CreateNote(ctx context.Context, baseURL *duckv1.Addressable, payload metav1alpha1.CreatePullRequestCommentPayload, options ...OptionFunc) (*metav1alpha1.GitPullRequestNote, error)
-	List(ctx context.Context, baseURL *duckv1.Addressable, option metav1alpha1.GitPullRequestListOption, options ...OptionFunc) (*metav1alpha1.GitPullRequestList, error)
-	ListNote(ctx context.Context, baseURL *duckv1.Addressable, option metav1alpha1.GitPullRequestOption, options ...OptionFunc) (*metav1alpha1.GitPullRequestNoteList, error)
-	Get(ctx context.Context, baseURL *duckv1.Addressable, option metav1alpha1.GitPullRequestOption, options ...OptionFunc) (*metav1alpha1.GitPullRequest, error)
+	Create(
+		ctx context.Context,
+		baseURL *duckv1.Addressable,
+		payload metav1alpha1.CreatePullRequestPayload,
+		options ...OptionFunc,
+	) (*metav1alpha1.GitPullRequest, error)
+	CreateNote(
+		ctx context.Context,
+		baseURL *duckv1.Addressable,
+		payload metav1alpha1.CreatePullRequestCommentPayload,
+		options ...OptionFunc,
+	) (*metav1alpha1.GitPullRequestNote, error)
+	List(
+		ctx context.Context,
+		baseURL *duckv1.Addressable,
+		option metav1alpha1.GitPullRequestListOption,
+		options ...OptionFunc,
+	) (*metav1alpha1.GitPullRequestList, error)
+	ListNote(ctx context.Context,
+		baseURL *duckv1.Addressable,
+		option metav1alpha1.GitPullRequestOption,
+		options ...OptionFunc,
+	) (*metav1alpha1.GitPullRequestNoteList, error)
+	Get(ctx context.Context,
+		baseURL *duckv1.Addressable,
+		option metav1alpha1.GitPullRequestOption,
+		options ...OptionFunc,
+	) (*metav1alpha1.GitPullRequest, error)
+}
+
+// GitPullRequestCRUClient is the client interface with Create Read and Update operations
+type GitPullRequestCRUClient interface {
+	ClientGitPullRequest
+	UpdateNote(
+		ctx context.Context,
+		baseURL *duckv1.Addressable,
+		payload metav1alpha1.UpdatePullRequestCommentPayload,
+		options ...OptionFunc,
+	) (*metav1alpha1.GitPullRequestNote, error)
 }
 
 type gitPullRequest struct {
@@ -41,7 +77,10 @@ type gitPullRequest struct {
 	secret corev1.Secret
 }
 
-func newGitPullRequest(client Client, meta Meta, secret corev1.Secret) ClientGitPullRequest {
+func newGitPullRequest(
+	client Client,
+	meta Meta, secret corev1.Secret,
+) GitPullRequestCRUClient {
 	return &gitPullRequest{
 		client: client,
 		meta:   meta,
@@ -50,7 +89,12 @@ func newGitPullRequest(client Client, meta Meta, secret corev1.Secret) ClientGit
 }
 
 // Create pr
-func (g *gitPullRequest) Create(ctx context.Context, baseURL *duckv1.Addressable, payload metav1alpha1.CreatePullRequestPayload, options ...OptionFunc) (*metav1alpha1.GitPullRequest, error) {
+func (g *gitPullRequest) Create(
+	ctx context.Context,
+	baseURL *duckv1.Addressable,
+	payload metav1alpha1.CreatePullRequestPayload,
+	options ...OptionFunc,
+) (*metav1alpha1.GitPullRequest, error) {
 	prObj := &metav1alpha1.GitPullRequest{}
 	options = append(options, MetaOpts(g.meta), SecretOpts(g.secret), BodyOpts(payload), ResultOpts(prObj))
 	uri := fmt.Sprintf("projects/%s/coderepositories/%s/pulls", payload.Source.Project, handlePathParamHasSlash(payload.Source.Repository))
@@ -61,7 +105,12 @@ func (g *gitPullRequest) Create(ctx context.Context, baseURL *duckv1.Addressable
 }
 
 // List pr
-func (g *gitPullRequest) List(ctx context.Context, baseURL *duckv1.Addressable, option metav1alpha1.GitPullRequestListOption, options ...OptionFunc) (*metav1alpha1.GitPullRequestList, error) {
+func (g *gitPullRequest) List(
+	ctx context.Context,
+	baseURL *duckv1.Addressable,
+	option metav1alpha1.GitPullRequestListOption,
+	options ...OptionFunc,
+) (*metav1alpha1.GitPullRequestList, error) {
 	prList := &metav1alpha1.GitPullRequestList{}
 	options = append(options, MetaOpts(g.meta), SecretOpts(g.secret), ResultOpts(prList))
 	if option.State != nil {
@@ -80,7 +129,12 @@ func (g *gitPullRequest) List(ctx context.Context, baseURL *duckv1.Addressable, 
 }
 
 // Get pr info
-func (g *gitPullRequest) Get(ctx context.Context, baseURL *duckv1.Addressable, option metav1alpha1.GitPullRequestOption, options ...OptionFunc) (*metav1alpha1.GitPullRequest, error) {
+func (g *gitPullRequest) Get(
+	ctx context.Context,
+	baseURL *duckv1.Addressable,
+	option metav1alpha1.GitPullRequestOption,
+	options ...OptionFunc,
+) (*metav1alpha1.GitPullRequest, error) {
 	prObj := &metav1alpha1.GitPullRequest{}
 	options = append(options, MetaOpts(g.meta), SecretOpts(g.secret), ResultOpts(prObj))
 	if option.Repository == "" {
@@ -98,7 +152,12 @@ func (g *gitPullRequest) Get(ctx context.Context, baseURL *duckv1.Addressable, o
 }
 
 // CreateNote create pr note
-func (g *gitPullRequest) CreateNote(ctx context.Context, baseURL *duckv1.Addressable, payload metav1alpha1.CreatePullRequestCommentPayload, options ...OptionFunc) (*metav1alpha1.GitPullRequestNote, error) {
+func (g *gitPullRequest) CreateNote(
+	ctx context.Context,
+	baseURL *duckv1.Addressable,
+	payload metav1alpha1.CreatePullRequestCommentPayload,
+	options ...OptionFunc,
+) (*metav1alpha1.GitPullRequestNote, error) {
 	noteObj := &metav1alpha1.GitPullRequestNote{}
 	options = append(options, MetaOpts(g.meta), SecretOpts(g.secret), BodyOpts(payload.CreatePullRequestCommentParam), ResultOpts(noteObj))
 	if payload.Repository == "" {
@@ -115,8 +174,39 @@ func (g *gitPullRequest) CreateNote(ctx context.Context, baseURL *duckv1.Address
 	return noteObj, nil
 }
 
+// UpdateNote updates pr note
+func (g *gitPullRequest) UpdateNote(
+	ctx context.Context, baseURL *duckv1.Addressable,
+	payload metav1alpha1.UpdatePullRequestCommentPayload,
+	options ...OptionFunc,
+) (*metav1alpha1.GitPullRequestNote, error) {
+	noteObj := &metav1alpha1.GitPullRequestNote{}
+	options = append(options, MetaOpts(g.meta), SecretOpts(g.secret), BodyOpts(payload.CreatePullRequestCommentParam), ResultOpts(noteObj))
+	if payload.Repository == "" {
+		return nil, errors.NewBadRequest("repo is empty string")
+	}
+	if payload.Index < 1 {
+		return nil, errors.NewBadRequest("pr's index is unknown")
+	}
+	if payload.CommentID < 1 {
+		return nil, errors.NewBadRequest("pr's comment id is unknown")
+	}
+	index := strconv.Itoa(payload.Index)
+	commentID := strconv.Itoa(payload.CommentID)
+	uri := fmt.Sprintf("projects/%s/coderepositories/%s/pulls/%s/note/%s", payload.Project, handlePathParamHasSlash(payload.Repository), index, commentID)
+	if err := g.client.Put(ctx, baseURL, uri, options...); err != nil {
+		return nil, err
+	}
+	return noteObj, nil
+}
+
 // ListNote list pr note
-func (g *gitPullRequest) ListNote(ctx context.Context, baseURL *duckv1.Addressable, option metav1alpha1.GitPullRequestOption, options ...OptionFunc) (*metav1alpha1.GitPullRequestNoteList, error) {
+func (g *gitPullRequest) ListNote(
+	ctx context.Context,
+	baseURL *duckv1.Addressable,
+	option metav1alpha1.GitPullRequestOption,
+	options ...OptionFunc,
+) (*metav1alpha1.GitPullRequestNoteList, error) {
 	noteList := &metav1alpha1.GitPullRequestNoteList{}
 	options = append(options, MetaOpts(g.meta), SecretOpts(g.secret), ResultOpts(noteList))
 	if option.Repository == "" {
