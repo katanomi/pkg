@@ -23,7 +23,7 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 )
 
-// IsTheSameObjRef compares two corev1.ObjectReference comparing:
+// IsTheSameObject compares two corev1.ObjectReference comparing:
 // APIVersion, Kind, Name and Namespace. All other attributes are ignored
 func IsTheSameObject(obj, compared corev1.ObjectReference) bool {
 	return obj.APIVersion == compared.APIVersion &&
@@ -58,6 +58,7 @@ func GetNamespacedNameFromRef(ref *corev1.ObjectReference) (named types.Namespac
 	return
 }
 
+// ObjectRefOptionsFunc is a function that can be used to modify an object reference
 // +k8s:deepcopy-gen=false
 type ObjectRefOptionsFunc func(obj metav1.Object, ref *corev1.ObjectReference)
 

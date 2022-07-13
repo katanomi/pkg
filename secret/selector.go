@@ -14,6 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+// Package secret contains useful functionality for select secret
 package secret
 
 import (
@@ -40,7 +41,7 @@ import (
 // A better secret selection solution that do not dependency on tool resource about tool secret
 // https://github.com/katanomi/spec/blob/main/3.core.credential.selection.md
 
-// Encapsulate the configuration related to selecting secrets
+// SelectSecretOption encapsulate the configuration related to selecting secrets
 type SelectSecretOption struct {
 	// PerferredSecret will return the secret if it is be selected
 	PerferredSecret types.NamespacedName

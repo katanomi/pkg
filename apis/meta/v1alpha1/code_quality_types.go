@@ -19,6 +19,7 @@ package v1alpha1
 import (
 	"time"
 
+	authv1 "k8s.io/api/authorization/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -50,7 +51,7 @@ type CodeQualityBranch struct {
 	Metrics           map[string]CodeQualityAnalyzeMetric `json:"metrics"`
 }
 
-// CodeQualityAnalyzeResult present CodeQualityProject analyze result
+// CodeQualityAnalyzeMetric present CodeQualityProject analyze result
 type CodeQualityAnalyzeMetric struct {
 	// Value defines the value of this metric
 	Value string `json:"value"`
@@ -84,6 +85,7 @@ type CodeQualityTaskOption struct {
 	PullRequest string `json:"pullRequest"`
 }
 
+// CodeQualityLineChartOption code quality line chart option
 // +k8s:deepcopy-gen=false
 type CodeQualityLineChartOption struct {
 	CodeQualityBaseOption
@@ -169,4 +171,14 @@ type CodeQualityTaskMetricsStatus struct {
 	// Status is code scan status
 	// +optional
 	Status corev1.ConditionStatus `json:"status,omitempty"`
+}
+
+// CodeQualityResourceAttributes returns a ResourceAttribute object to be used in a filter
+func CodeQualityResourceAttributes(verb string) authv1.ResourceAttributes {
+	return authv1.ResourceAttributes{
+		Group:    GroupVersion.Group,
+		Version:  GroupVersion.Version,
+		Resource: "codequalities",
+		Verb:     verb,
+	}
 }

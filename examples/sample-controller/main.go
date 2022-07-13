@@ -115,6 +115,8 @@ func WithCreateUpdateTimes() admission.TransformFunc {
 		} else if apis.IsInUpdate(ctx) {
 			annotations["updatedAt"] = now
 			log.Debugw("adding updated time", "time", now)
+		} else {
+			// not changed
 		}
 		metaobj.SetAnnotations(annotations)
 	}

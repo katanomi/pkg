@@ -42,7 +42,7 @@ var DefinitionTriggeredTypeValues = definitionTriggeredTypeValuesType{
 	Automated: "Automated",
 }
 
-// Stores a list of triggered information such as: Entity that triggered,
+// TriggeredBy stores a list of triggered information such as: Entity that triggered,
 // reference of an object that could have triggered, and event that triggered.
 type TriggeredBy struct {
 	// Reference to the user that triggered the object. Any Kubernetes `Subject` is accepted.

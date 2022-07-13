@@ -14,26 +14,26 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-// Package errors contains useful functionality for conversion errors
-package errors
+package v1alpha1
 
 import (
-	"k8s.io/apimachinery/pkg/util/validation/field"
-	"knative.dev/pkg/apis"
+	"testing"
+
+	. "github.com/onsi/gomega"
+	authv1 "k8s.io/api/authorization/v1"
 )
 
-func ConvertKnativeFieldErrorToInternalError(err *apis.FieldError) *field.Error {
-	if err == nil {
-		return nil
+func TestGitBranchResourceAttributes(t *testing.T) {
+	attr := authv1.ResourceAttributes{
+		Group:    "meta.katanomi.dev",
+		Version:  "v1alpha1",
+		Resource: "gitbranches",
+		Verb:     "list",
 	}
-	return field.InternalError(field.NewPath(""), err)
-}
 
-func ConvertKnativeFieldErrorToErrorList(err *apis.FieldError) field.ErrorList {
-	if err == nil {
-		return nil
-	}
-	return field.ErrorList{
-		ConvertKnativeFieldErrorToInternalError(err),
-	}
+	t.Run("list branches", func(t *testing.T) {
+		g := NewGomegaWithT(t)
+		branchAttr := GitBranchResourceAttributes("list")
+		g.Expect(attr, branchAttr)
+	})
 }
