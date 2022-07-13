@@ -39,4 +39,6 @@ type Interface interface {
 
 	// TODO: add this method to the interface and implementation
 	ListClustersNamespaces(ctx context.Context, namespace string) (clusterNamespaces map[*corev1.ObjectReference][]corev1.Namespace, err error)
+	// StartWarmUpClientCache used to start warming the client cache, only needs to be called once.
+	StartWarmUpClientCache(ctx context.Context)
 }
