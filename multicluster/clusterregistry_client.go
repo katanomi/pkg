@@ -197,3 +197,6 @@ func (m *ClusterRegistryClient) GetConfigFromCluster(ctx context.Context, cluste
 func (m *ClusterRegistryClient) ListClustersNamespaces(ctx context.Context, namespace string) (clusterNamespaces map[*corev1.ObjectReference][]corev1.Namespace, err error) {
 	return map[*corev1.ObjectReference][]corev1.Namespace{}, err
 }
+
+func (m *ClusterRegistryClient) StartWarmUpClientCache(ctx context.Context) {
+}

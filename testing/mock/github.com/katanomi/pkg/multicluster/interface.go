@@ -114,3 +114,15 @@ func (mr *MockInterfaceMockRecorder) ListClustersNamespaces(arg0, arg1 interface
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListClustersNamespaces", reflect.TypeOf((*MockInterface)(nil).ListClustersNamespaces), arg0, arg1)
 }
+
+// StartWarmUpClientCache mocks base method.
+func (m *MockInterface) StartWarmUpClientCache(arg0 context.Context) {
+	m.ctrl.T.Helper()
+	m.ctrl.Call(m, "StartWarmUpClientCache", arg0)
+}
+
+// StartWarmUpClientCache indicates an expected call of StartWarmUpClientCache.
+func (mr *MockInterfaceMockRecorder) StartWarmUpClientCache(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "StartWarmUpClientCache", reflect.TypeOf((*MockInterface)(nil).StartWarmUpClientCache), arg0)
+}
