@@ -17,15 +17,16 @@ limitations under the License.
 package tracing
 
 import (
-	"go.uber.org/zap"
+	"github.com/katanomi/pkg/storage/configmap"
 	v1 "k8s.io/api/core/v1"
-	"knative.dev/pkg/configmap"
 	cminformer "knative.dev/pkg/configmap/informer"
+	"knative.dev/pkg/system"
 )
 
 func defaultConfigMap(name string) *v1.ConfigMap {
 	cm := &v1.ConfigMap{}
 	cm.Name = name
+	cm.Namespace = system.Namespace()
 	return cm
 }
 
@@ -35,65 +36,21 @@ func defaultConfigMap(name string) *v1.ConfigMap {
 // tracing.HTTPSpanMiddleware as a middleware HTTP handler. The configuration will be dynamically
 // updated when the ConfigMap is updated.
 func SetupDynamicPublishing(tracing *Tracing, configMapWatcher *cminformer.InformedWatcher) error {
-	tracerUpdater := func(name string, value interface{}) {
-		if name != tracing.ConfigMapName {
+	tracerUpdater := func(cm *v1.ConfigMap) {
+		cfg, err := newTracingConfigFromConfigMap(cm)
+		if err != nil {
 			return
 		}
-		cfg := value.(*Config)
 		tracing.ApplyConfig(cfg)
 	}
 
 	// Set up our config store.
-	w := NewDftConfigMapWatcher("config-tracing-store", tracing.logger, configMapWatcher)
-	w.AddWatch(tracing.ConfigMapName, newTracingConfigFromConfigMap, defaultConfigMap(tracing.ConfigMapName))
-	w.Run(tracerUpdater)
+	dftCm := defaultConfigMap(tracing.ConfigMapName)
+	w := configmap.NewWatcher("config-tracing-store", configMapWatcher).WithLogger(tracing.logger)
+	w.AddWatch(dftCm.GetName(), configmap.NewConfigConstructor(dftCm, func(cm *v1.ConfigMap) {
+		tracerUpdater(cm)
+	}))
+	w.Run()
 
 	return nil
-}
-
-// NewDftConfigMapWatcher constructs new dftConfigMapWatcher
-func NewDftConfigMapWatcher(name string, logger *zap.SugaredLogger, informedWatcher *cminformer.InformedWatcher) *dftConfigMapWatcher {
-	return &dftConfigMapWatcher{
-		name:            name,
-		InformedWatcher: informedWatcher,
-		constructors:    map[string]interface{}{},
-		defaults:        map[string]v1.ConfigMap{},
-		logger:          logger,
-	}
-}
-
-// dftConfigMapWatcher describe configmap watcher
-type dftConfigMapWatcher struct {
-	*cminformer.InformedWatcher
-
-	name         string
-	constructors map[string]interface{}
-	defaults     map[string]v1.ConfigMap
-
-	logger *zap.SugaredLogger
-}
-
-// AddWatch watch the configmap based on the given name
-// If there is no configmap specified in the current namespace,
-// the default configuration you provide will be used, if not, `InformedWatcher` will exit
-func (d *dftConfigMapWatcher) AddWatch(name string, constructor interface{}, defaultCM *v1.ConfigMap) {
-	d.constructors[name] = constructor
-	if defaultCM != nil {
-		d.defaults[name] = *defaultCM
-	}
-}
-
-// Run register the watcher to configStore
-func (d *dftConfigMapWatcher) Run(onAfterStore ...func(name string, value interface{})) {
-	configStore := configmap.NewUntypedStore(d.name, d.logger, d.constructors, onAfterStore...)
-	configStore.WatchConfigs(d)
-}
-
-// Watch register the watcher to InformedWatcher
-func (d *dftConfigMapWatcher) Watch(name string, obs ...configmap.Observer) {
-	if cm, ok := d.defaults[name]; ok {
-		d.InformedWatcher.WatchWithDefault(cm, obs...)
-	} else {
-		d.InformedWatcher.Watch(name, obs...)
-	}
 }

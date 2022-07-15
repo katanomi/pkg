@@ -85,6 +85,9 @@ type BuildGitCommitStatus struct {
 	// PushedAt means push time of last commit
 	// +optional
 	PushedAt *metav1.Time `json:"pushedAt,omitempty"`
+	// webURL access link of the commit
+	// +optional
+	WebURL string `json:"webURL"`
 }
 
 type BuildGitPullRequestStatus struct {
