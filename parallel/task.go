@@ -20,11 +20,10 @@ package parallel
 import (
 	"context"
 	"fmt"
+	"reflect"
 	"sync"
 
 	"go.uber.org/zap"
-
-	"reflect"
 
 	"k8s.io/apimachinery/pkg/util/errors"
 )
@@ -189,6 +188,9 @@ func (p *ParallelTasks) Do() *ParallelTasks {
 		}
 	}()
 
+	p.results = make([]interface{}, len(p.tasks))
+	p.errs = make([]error, len(p.tasks))
+
 	for i, task := range p.tasks {
 		if !p.waitThreshold() {
 			return p
@@ -213,7 +215,7 @@ func (p *ParallelTasks) Do() *ParallelTasks {
 			if err != nil {
 				p.errLock.Lock()
 				defer p.errLock.Unlock()
-				p.errs = append(p.errs, err)
+				p.errs[index] = err
 				if p.Options.FailFast {
 					log.Debugw("fail fast, will cancel", "task-index", index, "result", result)
 					p.Cancel(err)
@@ -223,9 +225,7 @@ func (p *ParallelTasks) Do() *ParallelTasks {
 
 			// error is nil, we should save result
 			if !isNil(result) {
-				p.resultsLock.Lock()
-				p.results = append(p.results, result)
-				p.resultsLock.Unlock()
+				p.results[index] = result
 			}
 
 		}(i, task)
@@ -266,15 +266,31 @@ func (p *ParallelTasks) Wait() ([]interface{}, error) {
 	p.Log.Debugw("waiting done.")
 	<-p.doneChan
 	p.Log.Debugw("waited done.")
+
+	var (
+		results = make([]interface{}, 0)
+		errs    = make([]error, 0)
+	)
+	for _, result := range p.results {
+		if result != nil {
+			results = append(results, result)
+		}
+	}
+	for _, err := range p.errs {
+		if err != nil {
+			errs = append(errs, err)
+		}
+	}
+
 	if p.doneError != nil {
-		return p.results, p.doneError
+		return results, p.doneError
 	}
 
-	if len(p.errs) > 0 {
-		return p.results, errors.NewAggregate(p.errs)
+	if len(errs) > 0 {
+		return results, errors.NewAggregate(errs)
 	}
 
-	return p.results, nil
+	return results, nil
 }
 
 func isNil(i interface{}) bool {
