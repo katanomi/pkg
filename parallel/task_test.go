@@ -188,10 +188,10 @@ var _ = Describe("P().Do().Wait()", func() {
 			Expect(errs).To(BeEquivalentTo(context.DeadlineExceeded))
 
 			fmt.Printf("%v,%v,%v,", t1Excuted.get(), t2Excuted.get(), t3Excuted.get())
-			//up to now, task is not support cancel
-			//Expect(t1Excuted.executed).To(BeFalse())
-			//Expect(t2Excuted.executed).To(BeFalse())
-			//Expect(t3Excuted.executed).To(BeFalse())
+			// up to now, task is not support cancel
+			// Expect(t1Excuted.executed).To(BeFalse())
+			// Expect(t2Excuted.executed).To(BeFalse())
+			// Expect(t3Excuted.executed).To(BeFalse())
 
 			Expect(elapsed < 1 && elapsed > 0.1).To(BeTrue())
 			Expect(len(res)).To(BeEquivalentTo(0))
@@ -237,6 +237,13 @@ var _ = Describe("P().Do().Wait()", func() {
 
 			for i := 1; i <= 10; i++ {
 				Expect(res).To(ContainElement(fmt.Sprintf("task-%d", i)))
+			}
+		})
+
+		It("should return with same sort", func() {
+			Expect(errs).To(BeNil())
+			for i := 0; i <= 9; i++ {
+				Expect(res[i]).To(Equal(fmt.Sprintf("task-%d", i+1)))
 			}
 		})
 	})
