@@ -1,0 +1,21 @@
+kind: "GitCommit"
+apiVersion: "v1alpha1"
+metadata:
+  name: "9525206bcb1b51e3cb11e5efc19f274fc9cfc6fd"
+  creationTimestamp: "2022-07-26T15:01:21Z"
+spec:
+  sha: "9525206bcb1b51e3cb11e5efc19f274fc9cfc6fd"
+  createdAt: "2022-07-26T15:01:21Z"
+  address:
+    url: "https://github.com/kubernetes/kubernetes/commit/9525206bcb1b51e3cb11e5efc19f274fc9cfc6fd"
+  author:
+    name: "Kubernetes Prow Robot"
+    email: "k8s-ci-robot@users.noreply.github.com"
+  committer:
+    name: "GitHub"
+    email: "noreply@github.com"
+  message: "Merge pull request #111306 from stlaz/restricted_scheduling_test\n\nMake scheduling e2e tests run PSa-restricted pods"
+  properties:
+    shortID: "952520"
+    title: "Merge pull request #111306 from stlaz/restricted_scheduling_test\n\nMake scheduling e2e tests run PSa-restricted pods"
+
