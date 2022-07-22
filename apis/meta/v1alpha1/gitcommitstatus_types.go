@@ -41,17 +41,21 @@ const (
 	VulnerabilityScanCriticalLevelKey   = "Critical"
 )
 
-// CommitStatusStateType is the type of a commit status state
-type CommitStatusStateType string
+// BuildStateType represents a build state of the repository.
+type BuildStateType string
 
+// These constants represent all valid build states.
 const (
-	// Ref: https://docs.gitlab.com/ee/api/commits.html#post-the-build-status-to-a-commit
-	// The state of the status. Can be one of the following: pending, running, success, failed, canceled
-	CommitStatusStatePending  CommitStatusStateType = "pending"
-	CommitStatusStateRunning  CommitStatusStateType = "running"
-	CommitStatusStateSuccess  CommitStatusStateType = "success"
-	CommitStatusStateFailed   CommitStatusStateType = "failed"
-	CommitStatusStateCanceled CommitStatusStateType = "canceled"
+	// Each tool needs to be converted to the corresponding value
+	BuildStatePending  BuildStateType = "Pending"
+	BuildStateCreated  BuildStateType = "Created"
+	BuildStateRunning  BuildStateType = "Running"
+	BuildStateSuccess  BuildStateType = "Success"
+	BuildStateFailed   BuildStateType = "Failed"
+	BuildStateCanceled BuildStateType = "Canceled"
+	BuildStateSkipped  BuildStateType = "Skipped"
+	BuildStateManual   BuildStateType = "Manual"
+	BuildStateError    BuildStateType = "Error"
 )
 
 var (

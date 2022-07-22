@@ -136,11 +136,4 @@ const (
 	// ConditionCanceled specifies that the resource is canceled.
 	// For resource which run to canceled.
 	ConditionCanceled ConditionType = "Canceled"
-
-	// ConditionTrue means a resource is in the condition.
-	ConditionTrue ConditionType = "True"
-	// ConditionFalse means a resource is not in the condition
-	ConditionFalse ConditionType = "False"
-	// ConditionUnknown means can't decide if a resource is in the condition or not
-	ConditionUnknown ConditionType = "Unknown"
 )
