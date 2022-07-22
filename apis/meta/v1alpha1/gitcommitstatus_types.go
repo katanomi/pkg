@@ -29,6 +29,7 @@ const (
 	StatusInfoTypeCodeScanKey          = "codeScan"
 	StatusInfoTypeArtifactKey          = "artifact"
 	StatusInfoTypeUnittestKey          = "unittest"
+	StatusInfoTypeVersionKey           = "version"
 
 	// vulnerability scan severity level key
 	VulnerabilityScanNoneLevelKey       = "None"
@@ -40,6 +41,23 @@ const (
 	VulnerabilityScanCriticalLevelKey   = "Critical"
 )
 
+// BuildStateType represents a build state of the repository.
+type BuildStateType string
+
+// These constants represent all valid build states.
+const (
+	// Each tool needs to be converted to the corresponding value
+	BuildStatePending  BuildStateType = "Pending"
+	BuildStateCreated  BuildStateType = "Created"
+	BuildStateRunning  BuildStateType = "Running"
+	BuildStateSuccess  BuildStateType = "Success"
+	BuildStateFailed   BuildStateType = "Failed"
+	BuildStateCanceled BuildStateType = "Canceled"
+	BuildStateSkipped  BuildStateType = "Skipped"
+	BuildStateManual   BuildStateType = "Manual"
+	BuildStateError    BuildStateType = "Error"
+)
+
 var (
 	GitCommitStatusGVK     = GroupVersion.WithKind("GitCommitStatus")
 	GitCommitStatusListGVK = GroupVersion.WithKind("GitCommitStatusList")
@@ -48,7 +66,7 @@ var (
 // GitCommitStatusInfo pipeline for code repository in commit statues
 // https://github.com/katanomi/spec/blob/main/3.core.plugins.gitapi.md search 8.commit status
 type GitCommitStatusInfo struct {
-	// Type of additional information(pipeline, vulnerabilityScan, codeScan, artifact)
+	// Type of additional information(pipeline, vulnerabilityScan, codeScan, artifact, unittest, version)
 	Type string `json:"type"`
 	// Status for additional information
 	Status ConditionType `json:"status"`

@@ -45,6 +45,9 @@ const (
 
 	// IntegrationSecretApplyNamespaces annotation key to store apply namespace for current secret
 	IntegrationSecretApplyNamespaces = "integrations.katanomi.dev/secret.applyNamespaces"
+
+	// SecretSyncMutationLabelKey label key to select the suitable secret
+	SecretSyncMutationLabelKey = "integrations.katanomi.dev/integration.mutation"
 )
 
 // Common Annotations
