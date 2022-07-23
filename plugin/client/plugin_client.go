@@ -255,3 +255,8 @@ func (p *PluginClient) CodeQuality(meta Meta, secret corev1.Secret) ClientCodeQu
 func (p *PluginClient) BlobStore(meta Meta, secret corev1.Secret) ClientBlobStore {
 	return newBlobStore(p, meta, secret)
 }
+
+// GitTag get tag client
+func (p *PluginClient) GitTag(meta Meta, secret corev1.Secret) ClientGitTag {
+	return newGitTag(p, meta, secret)
+}
