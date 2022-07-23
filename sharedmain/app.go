@@ -268,6 +268,9 @@ func (a *AppBuilder) Log() *AppBuilder {
 	}
 
 	a.Logger, _ = SetupLoggerOrDie(a.Context, a.Name)
+
+	// support dynamic adjustment the log levels
+	a.Logger = a.Logger.Desugar().WithOptions(zap.UpdateCore(a.LevelManager.Get(a.Name), *a.ZapConfig)).Sugar()
 	a.Context = logging.WithLogger(a.Context, a.Logger)
 	lvlMGR.SetLogger(a.Logger)
 

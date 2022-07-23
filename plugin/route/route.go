@@ -168,6 +168,13 @@ func match(c client.Interface) []Route {
 		routes = append(routes, NewGitCommitStatusCreator(v))
 	}
 
+	if v, ok := c.(client.GitRepositoryTagGetter); ok {
+		routes = append(routes, NewGitRepositoryTagGetter(v))
+	}
+	if v, ok := c.(client.GitRepositoryTagLister); ok {
+		routes = append(routes, NewGitRepositoryTagLister(v))
+	}
+
 	if v, ok := c.(client.CodeQualityGetter); ok {
 		routes = append(routes, NewCodeQualityGetter(v))
 	}
@@ -313,6 +320,12 @@ func GetMethods(c client.Interface) []string {
 	}
 	if _, ok := c.(client.GitCommitStatusCreator); ok {
 		methods = append(methods, "CreateGitCommitStatus")
+	}
+	if _, ok := c.(client.GitRepositoryTagGetter); ok {
+		methods = append(methods, "GetGitRepositoryTag")
+	}
+	if _, ok := c.(client.GitRepositoryTagLister); ok {
+		methods = append(methods, "ListGitRepositoryTag")
 	}
 	if _, ok := c.(client.CodeQualityGetter); ok {
 		methods = append(methods, "GetCodeQuality", "GetCodeQualityOverviewByBranch", "GetCodeQualityLineCharts", "GetOverview", "GetSummaryByTaskID")
