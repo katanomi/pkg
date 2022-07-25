@@ -21,7 +21,6 @@ import (
 
 	restfulspec "github.com/emicklei/go-restful-openapi/v2"
 	"github.com/emicklei/go-restful/v3"
-	"k8s.io/apimachinery/pkg/api/errors"
 
 	metav1alpha1 "github.com/katanomi/pkg/apis/meta/v1alpha1"
 	kerrors "github.com/katanomi/pkg/errors"
@@ -47,7 +46,7 @@ func (a *gitRepositoryTagLister) Register(ws *restful.WebService) {
 	repositoryParam := ws.PathParameter("repository", "tag belong to repository")
 	ws.Route(
 		ws.GET("/projects/{project:*}/coderepositories/{repository}/tags").To(a.ListGitRepositoryTag).
-			Doc("GetGitRepoList").Param(projectParam).Param(repositoryParam).
+			Doc("ListGitRepositoryTag").Param(projectParam).Param(repositoryParam).
 			Metadata(restfulspec.KeyOpenAPITags, a.tags).
 			Returns(http.StatusOK, "OK", metav1alpha1.GitRepositoryTagList{}),
 	)
@@ -90,7 +89,7 @@ func (a *gitRepositoryTagGetter) Register(ws *restful.WebService) {
 	tagParam := ws.PathParameter("tag", "the name of the tag")
 	ws.Route(
 		ws.GET("/projects/{project:*}/coderepositories/{repository}/tags/{tag}").To(a.GetGitRepositoryTag).
-			Doc("GetGitRepo").Param(projectParam).Param(repositoryParam).Param(tagParam).
+			Doc("GetGitRepositoryTag").Param(projectParam).Param(repositoryParam).Param(tagParam).
 			Metadata(restfulspec.KeyOpenAPITags, a.tags).
 			Returns(http.StatusOK, "OK", metav1alpha1.GitRepositoryTag{}),
 	)
@@ -108,10 +107,6 @@ func (a *gitRepositoryTagGetter) GetGitRepositoryTag(request *restful.Request, r
 		},
 	)
 	if err != nil {
-		if errors.IsNotFound(err) {
-			response.WriteError(http.StatusNotFound, err)
-			return
-		}
 		kerrors.HandleError(request, response, err)
 		return
 	}
