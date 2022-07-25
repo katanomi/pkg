@@ -23,7 +23,6 @@ require (
 	github.com/opencontainers/image-spec v1.0.2
 	github.com/opentracing/opentracing-go v1.1.0
 	github.com/prometheus/client_golang v1.11.0
-	github.com/sirupsen/logrus v1.8.1 // indirect
 	github.com/uber/jaeger-client-go v2.29.1+incompatible
 	github.com/uber/jaeger-lib v2.4.1+incompatible
 	go.uber.org/zap v1.18.1
@@ -47,14 +46,11 @@ require (
 	go.opentelemetry.io/otel v1.2.0
 	go.opentelemetry.io/otel/exporters/jaeger v1.2.0
 	go.opentelemetry.io/otel/exporters/zipkin v1.2.0
-	go.opentelemetry.io/otel/metric v0.25.0 // indirect
 	go.opentelemetry.io/otel/sdk v1.2.0
 	go.opentelemetry.io/otel/trace v1.2.0
 )
 
 require golang.org/x/net v0.0.0-20220225172249-27dd8689420f
-
-require github.com/docker/spdystream v0.0.0-20160310174837-449fdfce4d96 // indirect
 
 require (
 	contrib.go.opencensus.io/exporter/ocagent v0.7.1-0.20200907061046-05415f1de66d // indirect
@@ -67,6 +63,7 @@ require (
 	github.com/blang/semver/v4 v4.0.0 // indirect
 	github.com/census-instrumentation/opencensus-proto v0.3.0 // indirect
 	github.com/cespare/xxhash/v2 v2.1.1 // indirect
+	github.com/docker/spdystream v0.0.0-20160310174837-449fdfce4d96 // indirect
 	github.com/evanphx/json-patch v4.9.0+incompatible // indirect
 	github.com/evanphx/json-patch/v5 v5.5.0 // indirect
 	github.com/felixge/httpsnoop v1.0.2 // indirect
@@ -75,7 +72,6 @@ require (
 	github.com/go-openapi/jsonreference v0.19.5 // indirect
 	github.com/go-openapi/swag v0.19.15 // indirect
 	github.com/gogo/protobuf v1.3.2 // indirect
-	github.com/golang-jwt/jwt v3.2.2+incompatible
 	github.com/golang/groupcache v0.0.0-20200121045136-8c9f03a8e57e // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/google/gofuzz v1.2.0 // indirect
@@ -93,20 +89,21 @@ require (
 	github.com/mgutz/ansi v0.0.0-20170206155736-9520e82c474b // indirect
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.1 // indirect
-	github.com/opencontainers/go-digest v1.0.0 // indirect
-	github.com/openzipkin/zipkin-go v0.4.0 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/prometheus/client_model v0.2.0 // indirect
 	github.com/prometheus/common v0.26.0 // indirect
 	github.com/prometheus/procfs v0.6.0 // indirect
 	github.com/prometheus/statsd_exporter v0.20.0 // indirect
+	github.com/sirupsen/logrus v1.8.1 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
 	go.opencensus.io v0.23.0 // indirect
 	go.opentelemetry.io/otel/internal/metric v0.25.0 // indirect
+	go.opentelemetry.io/otel/metric v0.25.0 // indirect
 	go.uber.org/atomic v1.8.0 // indirect
 	go.uber.org/automaxprocs v1.4.0 // indirect
 	go.uber.org/multierr v1.6.0 // indirect
-	golang.org/x/crypto v0.0.0-20210920023735-84f357641f63 // indirect
+	golang.org/x/crypto v0.0.0-20210921155107-089bfa567519 // indirect
+	golang.org/x/mod v0.6.0-dev.0.20220106191415-9b9b3d81d5e3 // indirect
 	golang.org/x/oauth2 v0.0.0-20210628180205-a41e5a781914 // indirect
 	golang.org/x/sys v0.0.0-20220319134239-a9b59b0215f8 // indirect
 	golang.org/x/term v0.0.0-20210927222741-03fcf44c2211 // indirect
@@ -124,8 +121,14 @@ require (
 	k8s.io/apiextensions-apiserver v0.20.7 // indirect
 	k8s.io/component-base v0.20.7 // indirect
 	k8s.io/klog v1.0.0 // indirect
-	k8s.io/utils v0.0.0-20210111153108-fddb29f9d009
 	sigs.k8s.io/structured-merge-diff/v4 v4.0.3 // indirect
+)
+
+require (
+	github.com/golang-jwt/jwt v3.2.2+incompatible
+	github.com/opencontainers/go-digest v1.0.0 // indirect
+	github.com/openzipkin/zipkin-go v0.4.0 // indirect
+	k8s.io/utils v0.0.0-20210111153108-fddb29f9d009
 )
 
 replace (

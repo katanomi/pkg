@@ -62,6 +62,8 @@ func LoadKubeResources(file string, clt client.Client, converts ...ConvertRuntim
 	if err != nil {
 		return
 	}
+	// Automatically convert corev1 resources, such as Secret, Configmap, Service, Pod, etc
+	converts = append(converts, ConvertCorev1Resouces)
 OUTER:
 	for _, obj := range objs {
 		runtimeObj, err := convertFromUnstructuredIfNecessary(clt.Scheme(), &obj)
