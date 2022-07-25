@@ -57,6 +57,18 @@ type GitPullRequestOption struct {
 	Index int `json:"Index"`
 }
 
+// GitRepositoryTagOption option for repository tag
+type GitRepositoryTagOption struct {
+	GitRepo
+	// Tag the name of the tag
+	Tag string `json:"tag"`
+}
+
+// GitRepositoryTagListOption option for list repository tag
+type GitRepositoryTagListOption struct {
+	GitRepo
+}
+
 type PullRequestState string
 
 const (

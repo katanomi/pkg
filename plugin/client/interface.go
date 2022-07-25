@@ -326,6 +326,25 @@ type GitCommitCommentCreator interface {
 	CreateGitCommitComment(ctx context.Context, payload metav1alpha1.CreateCommitCommentPayload) (metav1alpha1.GitCommitComment, error)
 }
 
+// GitRepositoryTagGetter get git repository Tag
+type GitRepositoryTagGetter interface {
+	Interface
+	GetGitRepositoryTag(
+		ctx context.Context,
+		option metav1alpha1.GitRepositoryTagOption,
+	) (metav1alpha1.GitRepositoryTag, error)
+}
+
+// GitRepositoryTagLister list git repository Tag
+type GitRepositoryTagLister interface {
+	Interface
+	ListGitRepositoryTag(
+		ctx context.Context,
+		option metav1alpha1.GitRepositoryTagListOption,
+		listOption metav1alpha1.ListOptions,
+	) (metav1alpha1.GitRepositoryTagList, error)
+}
+
 type CodeQualityGetter interface {
 	Interface
 	GetCodeQuality(ctx context.Context, projectKey string) (*metav1alpha1.CodeQuality, error)

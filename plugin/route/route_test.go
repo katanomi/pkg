@@ -54,6 +54,10 @@ func TestMatch(t *testing.T) {
 			c:   &TestProjectListCreate{},
 			len: 3,
 		},
+		{
+			c:   &TestGitRepoTagGetterAndLister{},
+			len: 3,
+		},
 	}
 
 	g := NewGomegaWithT(t)
@@ -86,6 +90,10 @@ func TestGetMethods(t *testing.T) {
 		{
 			c:       &TestProjectListCreate{},
 			methods: []string{"ListProjects", "CreateProject"},
+		},
+		{
+			c:       &TestGitRepoTagGetterAndLister{},
+			methods: []string{"GetGitRepositoryTag", "ListGitRepositoryTag"},
 		},
 	}
 
@@ -315,4 +323,23 @@ func (t *TestProjectListCreate) ListProjects(ctx context.Context, option metav1a
 
 func (t *TestProjectListCreate) CreateProject(ctx context.Context, project *metav1alpha1.Project) (*metav1alpha1.Project, error) {
 	return &metav1alpha1.Project{}, nil
+}
+
+type TestGitRepoTagGetterAndLister struct {
+}
+
+func (t *TestGitRepoTagGetterAndLister) Path() string {
+	return "test-5"
+}
+
+func (t *TestGitRepoTagGetterAndLister) Setup(_ context.Context, _ *zap.SugaredLogger) error {
+	return nil
+}
+
+func (t *TestGitRepoTagGetterAndLister) GetGitRepositoryTag(ctx context.Context, option metav1alpha1.GitRepositoryTagOption) (metav1alpha1.GitRepositoryTag, error) {
+	return metav1alpha1.GitRepositoryTag{}, nil
+}
+
+func (t *TestGitRepoTagGetterAndLister) ListGitRepositoryTag(ctx context.Context, option metav1alpha1.GitRepositoryTagListOption, listOption metav1alpha1.ListOptions) (metav1alpha1.GitRepositoryTagList, error) {
+	return metav1alpha1.GitRepositoryTagList{}, nil
 }
