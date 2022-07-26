@@ -61,7 +61,7 @@ var _ = Describe("Test.GetSecretByRefOrLabel", func() {
 		})
 		It("should return error", func() {
 			Expect(err).ShouldNot(BeNil())
-			Expect(err).Should(Equal(kerrors.ErrNilPoint))
+			Expect(err).Should(Equal(kerrors.ErrNilPointer))
 			Expect(secret).Should(BeNil())
 		})
 	})
