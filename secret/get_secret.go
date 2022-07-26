@@ -36,7 +36,7 @@ import (
 // If the resource does not exist, it will try to match according to the label.
 func GetSecretByRefOrLabel(ctx context.Context, clt client.Client, ref *corev1.ObjectReference) (obj *corev1.Secret, err error) {
 	if clt == nil || ref == nil {
-		return nil, kerrors.ErrInvalidInputNilPoint
+		return nil, kerrors.ErrNilPoint
 	}
 
 	log := logging.FromContext(ctx)

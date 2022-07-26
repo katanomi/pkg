@@ -17,9 +17,9 @@ limitations under the License.
 package errors
 
 import (
-	apierrors "k8s.io/apimachinery/pkg/api/errors"
+	"errors"
 )
 
-// ErrInvalidInputNilPoint invalid input parameters, specifically a nil point
+// ErrNilPoint indicates nil point, avoid panic.
 // Although unlikely just in case
-var ErrInvalidInputNilPoint = apierrors.NewBadRequest("Invalid input parameters - nil point")
+var ErrNilPoint = errors.New("nil point")
