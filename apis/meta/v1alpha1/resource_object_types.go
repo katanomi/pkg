@@ -42,3 +42,22 @@ func (r *ResourceURI) Validate(path *field.Path) field.ErrorList {
 	errs = append(errs, kvalidation.ValidateObjectReference(r.SecretRef, false, false, path.Child("secretRef"))...)
 	return errs
 }
+
+// ResourceURL stores a resource URL together with secret references
+// for usage
+type ResourceURL struct {
+	// url can be a specific code repository or a group
+	URL *apis.URL `json:"url"`
+
+	// SecretRef stores a reference to a secret object
+	// that contain authentication data for the described resource
+	SecretRef *corev1.ObjectReference `json:"secretRef"`
+}
+
+// Validate basic validation for ResourceURL
+func (r *ResourceURL) Validate(path *field.Path) field.ErrorList {
+	errs := field.ErrorList{}
+	errs = append(errs, kvalidation.ValidateURL(r.URL, path.Child("url"))...)
+	errs = append(errs, kvalidation.ValidateObjectReference(r.SecretRef, false, false, path.Child("secretRef"))...)
+	return errs
+}

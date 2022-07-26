@@ -62,6 +62,8 @@ func LoadKubeResources(file string, clt client.Client, converts ...ConvertRuntim
 	if err != nil {
 		return
 	}
+	// Automatically convert runtime object to client object
+	converts = append(converts, DefaultConvertRuntimeToClientobjectFunc)
 OUTER:
 	for _, obj := range objs {
 		runtimeObj, err := convertFromUnstructuredIfNecessary(clt.Scheme(), &obj)
