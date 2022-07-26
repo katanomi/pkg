@@ -20,6 +20,6 @@ import (
 	"errors"
 )
 
-// ErrNilPoint indicates nil point, avoid panic.
+// ErrNilPointer indicates nil pointer, avoid panic.
 // Although unlikely just in case
-var ErrNilPoint = errors.New("nil point")
+var ErrNilPointer = errors.New("nil pointer")
