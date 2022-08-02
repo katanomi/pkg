@@ -152,6 +152,14 @@ type WebhookRegister interface {
 }
 
 // GitTriggerRegister used to register GitTrigger
+// the "event type value" is arbitrary.
+// it will used to create webhook on remote git server and match cloudevent that generate by WebhookReceiver.ReceiveWebhook() when event coming into system
+// you should identify the "event type value" when you implement your WebhookRegister.CreateWebhook function,
+//    use the "event type value" to select webhook event type on remote git server.
+// you should set cloudevent.type as the "event type value" in WebhookReceiver.ReceiveWebhook()
+// usually, you can just use the original event type that send by remote git server.
+//          eg. Push Hook, Merge Request Hook in gitlab
+//
 // TODO: need refactor: maybe integration plugin should decided how to generate cloudevents filters
 // up to now, it is not a better solution that relying on plugins to give some events type to GitTriggerReconcile.
 //
@@ -160,15 +168,17 @@ type WebhookRegister interface {
 //   TagCloudEventFilter() CloudEventFilters
 //   WebHook() WebHook
 type GitTriggerRegister interface {
+	// GetIntegrationClassName should return integration class name of current git server
+	// it will used to invoke plugin api. eg. retrieving pull request list
 	GetIntegrationClassName() string
 
-	// cloud event type of pull request hook that will match
+	// event type value of pull request
 	PullRequestEventType() string
 
-	// cloud event type of push hook that will match
+	// event type value of push
 	PushEventType() string
 
-	// cloud event type of push hook that will match
+	// event type value of tag
 	TagEventType() string
 }
 
@@ -184,6 +194,9 @@ type WebhookResourceDiffer interface {
 // WebhookReceiver receives a webhook request with validation and transform it into a cloud event
 type WebhookReceiver interface {
 	Interface
+	// ReceiveWebhook will parse webhook to cloudevent that come from remote server
+	// the event type should be format of "dev.katanomi.cloudevents.{integrationclass}.{event type value}"
+	// the "event type value" should be same as GitTriggerRegister.XXXEventType
 	ReceiveWebhook(ctx context.Context, req *restful.Request, secret string) (cloudevent.Event, error)
 }
 
