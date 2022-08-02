@@ -21,7 +21,7 @@ import (
 	"strconv"
 )
 
-// AssignByGitBranch is used to assign the infomation from GitBranch
+// AssignByGitBranch is used to assign the information from GitBranch
 func (b *BuildGitBranchStatus) AssignByGitBranch(gitBranch *GitBranch) *BuildGitBranchStatus {
 	if gitBranch == nil {
 		return b
@@ -49,7 +49,7 @@ type CommitProperties struct {
 	Title string `json:"title"`
 }
 
-// AssignByGitCommit is used to assign the infomation from GitCommit
+// AssignByGitCommit is used to assign the information from GitCommit
 func (b *BuildGitCommitStatus) AssignByGitCommit(gitCommit *GitCommit) *BuildGitCommitStatus {
 	if gitCommit == nil {
 		return b
@@ -81,7 +81,7 @@ func (b *BuildGitCommitStatus) AssignByGitCommit(gitCommit *GitCommit) *BuildGit
 	return b
 }
 
-// AssignByGitPullRequest is used to assign the infomation from GitPullRequest
+// AssignByGitPullRequest is used to assign the information from GitPullRequest
 func (b *BuildGitPullRequestStatus) AssignByGitPullRequest(gitPullRequest *GitPullRequest) *BuildGitPullRequestStatus {
 	if gitPullRequest == nil {
 		return b
