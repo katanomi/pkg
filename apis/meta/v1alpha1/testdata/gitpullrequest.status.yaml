@@ -1,0 +1,7 @@
+id: 1
+title: "Release 1.18"
+source: release-1.18
+target: master
+authorEmail: "k8s-ci-robot@users.noreply.github.com"
+webURL: https://github.com/kubernetes/kubernetes/pull/1
+hasConflicts: false

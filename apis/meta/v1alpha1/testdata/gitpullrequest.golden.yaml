@@ -1,0 +1,29 @@
+kind: GitPullRequest
+apiVersion: v1alpha1
+metadata:
+  name: PR_kwDODnYaK848fkOR
+  creationTimestamp: null
+spec:
+  project: kubernetes
+  repository: kubernetes
+  id: 1014907793
+  num: 1
+  title: Release 1.18
+  state: open
+  createdAt: "2022-08-02T10:08:24Z"
+  updateAt: "2022-08-02T10:08:24Z"
+  target:
+    project: kubernetes
+    repository: kubernetes
+    name: master
+  source:
+    project: kubernetes
+    repository: kubernetes
+    name: release-1.18
+  author:
+    name: kubernetes
+    email: "k8s-ci-robot@users.noreply.github.com"
+  properties:
+    revision: refs/pull/1/head
+    webURL: https://github.com/kubernetes/kubernetes/pull/1
+  hasConflicts: false

@@ -48,6 +48,8 @@ const (
 	ValidationError = "ValidationError"
 	// ErrorReason some error occurred
 	ErrorReason = "Error"
+	// StartedReason resource started to be reconciled
+	StartedReason = "Started"
 )
 
 const (

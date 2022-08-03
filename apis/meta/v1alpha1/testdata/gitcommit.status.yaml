@@ -1,0 +1,7 @@
+shortID: "952520"
+id: "9525206bcb1b51e3cb11e5efc19f274fc9cfc6fd"
+title: "Merge pull request #111306 from stlaz/restricted_scheduling_test\n\nMake scheduling e2e tests run PSa-restricted pods"
+message: "Merge pull request #111306 from stlaz/restricted_scheduling_test\n\nMake scheduling e2e tests run PSa-restricted pods"
+authorEmail: "k8s-ci-robot@users.noreply.github.com"
+pushedAT: "2022-07-26T15:01:21Z"
+webURL: "https://github.com/kubernetes/kubernetes/commit/9525206bcb1b51e3cb11e5efc19f274fc9cfc6fd"
