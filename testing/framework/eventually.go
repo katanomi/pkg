@@ -26,35 +26,37 @@ import (
 // IsReadyCheckFunc additional function to check if object is ready in an Eventually context
 /* example:
    ```
-   func(obj client.Object) error {
+   func(g Gomega, obj client.Object) error {
 	  if obj.GetName() == "" {
 		fmt.Errorf("should have a name")
 	  }
+      // or use g.Expect instead
+      g.Expect(obj.GetName()).To(Equal(""))
 	  return nil
    }
    ```
 */
-type IsReadyCheckFunc func(obj client.Object) error
+type IsReadyCheckFunc func(g Gomega, obj client.Object) error
 
 type hasGetTopLevelCondition interface {
 	GetTopLevelCondition() *apis.Condition
 }
 
 // ResourceTopConditionIsReadyEventually generic function to check if a resource is ready
-// reasouce type must implement  GetTopLevelCondition() *apis.Condition function
+// resource type must implement  GetTopLevelCondition() *apis.Condition function
 func ResourceTopConditionIsReadyEventually(ctx *TestContext, obj client.Object, readyFuncs ...IsReadyCheckFunc) func(g Gomega) error {
 	key := client.ObjectKeyFromObject(obj)
-	_, ok := obj.(hasGetTopLevelCondition)
-	Expect(ok).To(BeTrue(), "object should implement GetTopLevelCondition() *apis.Condition function")
 	return func(g Gomega) error {
+		condManager, ok := obj.(hasGetTopLevelCondition)
+		g.Expect(ok).To(BeTrue(), "object should implement GetTopLevelCondition() *apis.Condition function")
+
 		g.Expect(ctx.Client.Get(ctx.Context, key, obj)).To(Succeed(), "should get the object")
 
-		condManager, _ := obj.(hasGetTopLevelCondition)
 		if err := testing.ConditionIsReady(condManager.GetTopLevelCondition()); err != nil {
 			return err
 		}
 		for _, isReady := range readyFuncs {
-			if err := isReady(obj); err != nil {
+			if err := isReady(g, obj); err != nil {
 				return err
 			}
 		}
