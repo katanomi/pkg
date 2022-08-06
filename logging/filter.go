@@ -34,6 +34,9 @@ func Filter(logger *zap.SugaredLogger) func(req *restful.Request, resp *restful.
 		req.Request = req.Request.WithContext(logging.WithLogger(req.Request.Context(), log))
 		chain.ProcessFilter(req, resp)
 		if notHealthz(req.Request.URL.Path) {
+			if resp != nil {
+				log = log.With("status", resp.StatusCode)
+			}
 			log.Debugw("<== returned a response")
 		}
 	}
