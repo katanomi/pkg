@@ -21,7 +21,7 @@ import (
 	"fmt"
 	"reflect"
 
-	"k8s.io/client-go/util/jsonpath"
+	"github.com/yuzp1996/client-go/util/jsonpath"
 )
 
 // Read will read value of data by jsonpath

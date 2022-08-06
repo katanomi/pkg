@@ -21,6 +21,8 @@ import (
 	"net/http"
 	"strconv"
 
+	"k8s.io/klog/v2"
+
 	kerrors "github.com/katanomi/pkg/errors"
 
 	restfulspec "github.com/emicklei/go-restful-openapi/v2"
@@ -102,7 +104,9 @@ func (a *gitPullRequestHandler) GetGitPullRequest(request *restful.Request, resp
 		Index:   index,
 	}
 	prInfo, err := a.impl.GetGitPullRequest(request.Request.Context(), option)
+	klog.Errorf("returned  get conflict is %v prInfo ID is %v and prInfo title is %v", prInfo.Spec.HasConflicts, prInfo.Spec.ID, prInfo.Spec.Title)
 	if err != nil {
+		klog.Errorf("returned  get conflict before return is %v error is %v prID is %v and title is %v ", prInfo.Spec.HasConflicts, prInfo.Spec.ID, prInfo.Spec.Title, err)
 		kerrors.HandleError(request, response, err)
 		return
 	}

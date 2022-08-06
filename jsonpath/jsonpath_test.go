@@ -19,6 +19,8 @@ package jsonpath
 import (
 	"reflect"
 	"testing"
+
+	"k8s.io/klog"
 )
 
 type book struct {
@@ -34,7 +36,8 @@ type bookSection struct {
 }
 
 type sectionInfo struct {
-	Page string `json:"page"`
+	Page  string `json:"page"`
+	Title string `json:"title"`
 }
 
 var data book = book{
@@ -45,16 +48,24 @@ var data book = book{
 			Name:  "pkg",
 			Title: "pkg description",
 			Info: sectionInfo{
-				Page: "100",
+				Page:  "199",
+				Title: "BuildRef",
 			},
 		},
 		{
 			Name:  "core",
 			Title: "core description",
+			Info: sectionInfo{
+				Page:  "99",
+				Title: "IntegrationBuildRef",
+			},
 		},
 		{
 			Name:  "builds",
 			Title: "builds description",
+			Info: sectionInfo{
+				Title: "Build",
+			},
 		},
 	},
 }
@@ -143,9 +154,26 @@ func TestWrite(t *testing.T) {
 		{
 			"attribute filter in array object and return array with nested struct",
 			"{.sections[?(@.info.page=='100')].title}",
-			"not pkg description",
+			"with page 100",
 			func(dataW *book) bool {
-				return dataW.Sections[1].Title == "not pkg description" && dataW.Sections[0].Title == "not pkg description"
+				return dataW.Sections[0].Title == "with page 100" && dataW.Sections[1].Title == "core description" && dataW.Sections[2].Title == "builds description"
+			},
+		},
+		{
+			"attribute filter in array object and return array with nested struct and page is 99 or 199",
+			"{.sections[?(@.info.page=~'(^99$|^199$)')].title}",
+			"with page number",
+			func(dataW *book) bool {
+				return dataW.Sections[0].Title == "with page number" && dataW.Sections[1].Title == "with page number" && dataW.Sections[2].Title == "builds description"
+			},
+		},
+
+		{
+			"attribute filter in array object and return array with nested struct and title is BuildRef or IntegrationBuildRef",
+			"{.sections[?(@.info.title=~'(^BuildRef$|^IntegrationBuildRef$)')].title}",
+			"with page number",
+			func(dataW *book) bool {
+				return dataW.Sections[0].Title == "with page number" && dataW.Sections[1].Title == "with page number" && dataW.Sections[2].Title == "builds description"
 			},
 		},
 	}
@@ -153,7 +181,8 @@ func TestWrite(t *testing.T) {
 	for _, item := range items {
 		t.Run(item.Description, func(t *testing.T) {
 			var dataW = data
-			Write(&dataW, item.Path, item.SetValue)
+			err := Write(&dataW, item.Path, item.SetValue)
+			klog.Errorf("get the error is %v", err)
 			if !item.Assert(&dataW) {
 				t.Errorf("could not write correctly, data: %#v", dataW)
 			}
