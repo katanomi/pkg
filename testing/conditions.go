@@ -62,7 +62,7 @@ func (c *ConditionBuilder) Done() *apis.Condition {
 // useful for Eventually checks
 func ConditionIsReady(condition *apis.Condition) error {
 	if !condition.IsTrue() {
-		return fmt.Errorf("condition type %q value %q != True", condition.Type, condition.Status)
+		return fmt.Errorf("condition type %q value %q != True, reason: %s", condition.Type, condition.Status, condition.Reason)
 	}
 	return nil
 }

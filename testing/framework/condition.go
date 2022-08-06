@@ -20,6 +20,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/katanomi/pkg/testing"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	v1 "k8s.io/api/core/v1"
@@ -146,11 +147,7 @@ func (n *ReconcileCondition) Condition(testCtx *TestContext) error {
 	interval, timeout := n.Settings()
 	return wait.PollImmediate(interval, timeout, func() (bool, error) {
 		if err = clt.Get(ctx, brokerKey, n.obj); err != nil {
-			if errors.IsNotFound(err) {
-				return false, nil
-			} else {
-				return false, err
-			}
+			return false, client.IgnoreNotFound(err)
 		}
 		if n.objCheckFun != nil && !n.objCheckFun(n.obj) {
 			return false, nil
@@ -179,4 +176,51 @@ func WaitRollback(testCtx *TestContext, obj client.Object) {
 		g.Expect(errors.IsNotFound(err)).To(BeTrue())
 		return nil
 	}).WithPolling(time.Second).WithTimeout(time.Minute).Should(Succeed())
+}
+
+type ObjectKeyFunc func(ctx *TestContext) client.ObjectKey
+
+type ObjectCheckFunc func(obj client.Object) error
+
+type objectCondition struct {
+	obj       client.Object
+	keyFunc   ObjectKeyFunc
+	checkFunc ObjectCheckFunc
+}
+
+func NewObjectCondition(obj client.Object, keyFunc ObjectKeyFunc, checkFunc ObjectCheckFunc) Condition {
+	return objectCondition{keyFunc: keyFunc, checkFunc: checkFunc}
+}
+
+func (o objectCondition) Condition(testCtx *TestContext) error {
+	key := o.keyFunc(testCtx)
+
+	return wait.PollImmediate(5*time.Second, 30*time.Second, func() (bool, error) {
+		if err := testCtx.Client.Get(testCtx.Context, key, o.obj); err != nil {
+			return false, client.IgnoreNotFound(err)
+		}
+
+		if o.checkFunc != nil {
+			if err := o.checkFunc(o.obj); err != nil {
+				return false, err
+			}
+		}
+
+		return true, nil
+	})
+}
+
+func NewObjectExistCondition(obj client.Object, keyFunc ObjectKeyFunc) Condition {
+	return NewObjectCondition(obj, keyFunc, nil)
+}
+
+func NewObjectStatusCondition(obj client.Object, keyFunc ObjectKeyFunc) Condition {
+	return NewObjectCondition(obj, keyFunc, func(obj client.Object) error {
+		status, ok := obj.(hasGetTopLevelCondition)
+		if !ok {
+			return fmt.Errorf("object %s does not implemet status interface", obj.GetName())
+		}
+
+		return testing.ConditionIsReady(status.GetTopLevelCondition())
+	})
 }
