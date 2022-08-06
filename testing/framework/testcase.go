@@ -19,6 +19,8 @@ package framework
 import (
 	"fmt"
 
+	"github.com/katanomi/pkg/multicluster"
+
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	"k8s.io/apimachinery/pkg/util/rand"
@@ -228,6 +230,11 @@ func (b *TestCaseBuilder) setupTestContext(ctx *TestContext) {
 		c, err := client.New(ctx.Config, client.Options{Scheme: ctx.Scheme})
 		Expect(err).To(Succeed())
 		ctx.Client = c
+	}
+	if ctx.MultiClusterClient == nil {
+		mc, err := multicluster.NewClusterRegistryClient(ctx.Config)
+		Expect(err).To(Succeed())
+		ctx.MultiClusterClient = mc
 	}
 }
 
