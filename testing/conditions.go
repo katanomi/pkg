@@ -57,3 +57,12 @@ func (c *ConditionBuilder) SetReasonMessage(reason, message string, formtKeyValu
 func (c *ConditionBuilder) Done() *apis.Condition {
 	return &c.Condition
 }
+
+// ConditionIsReady returns an error if the condition status is not True
+// useful for Eventually checks
+func ConditionIsReady(condition *apis.Condition) error {
+	if !condition.IsTrue() {
+		return fmt.Errorf("condition type %q value %q != True", condition.Type, condition.Status)
+	}
+	return nil
+}
