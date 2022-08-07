@@ -17,25 +17,13 @@ limitations under the License.
 package substitution
 
 import (
-	// "context"
-
 	"fmt"
-	"testing"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	"k8s.io/apimachinery/pkg/util/sets"
 	"knative.dev/pkg/apis"
 )
-
-func TestSubstitution(t *testing.T) {
-	RegisterFailHandler(Fail)
-
-	RunSpecsWithDefaultAndCustomReporters(t,
-		"Webhook Suite",
-		[]Reporter{})
-
-}
 
 var _ = Describe("ValidateVariable", func() {
 	DescribeTable("Tekton.Validate.Variable",
