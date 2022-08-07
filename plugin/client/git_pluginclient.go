@@ -31,13 +31,21 @@ import (
 	ksecret "github.com/katanomi/pkg/secret"
 )
 
-// GenerateGitPluginClientParams generate git plugin client params
-func GenerateGitPluginClientParams(ctx context.Context, secretRef *corev1.ObjectReference,
+// GenerateGitPluginClient generate git plugin client params
+func GenerateGitPluginClient(ctx context.Context, secretRef *corev1.ObjectReference,
 	gitRepoURL, integrationClassName string, classAddress *duckv1.Addressable) (
-	params *PluginClientParams, err error) {
+	pclient *PluginClient, err error) {
+
 	log := logging.FromContext(ctx)
-	var secret *corev1.Secret
+	pclient = PluginClientValue(ctx)
+	if pclient == nil {
+		pclient = NewPluginClient()
+	} else {
+		pclient = pclient.Clone()
+	}
+
 	if secretRef != nil {
+		var secret *corev1.Secret
 		clt := kclient.Client(ctx)
 		if clt == nil {
 			err = fmt.Errorf("cannot get client from ctx")
@@ -48,6 +56,14 @@ func GenerateGitPluginClientParams(ctx context.Context, secretRef *corev1.Object
 			err = fmt.Errorf("get secret for version steam failed: %w", err)
 			return
 		}
+		pclient = pclient.WithSecret(*secret)
+	}
+
+	if integrationClassName != "" {
+		pclient = pclient.WithIntegrationClassName(integrationClassName)
+	}
+	if classAddress != nil {
+		pclient = pclient.WithClassAddress(classAddress)
 	}
 
 	gitAddress, gitRepo, err := GetGitRepoInfo(gitRepoURL)
@@ -55,21 +71,16 @@ func GenerateGitPluginClientParams(ctx context.Context, secretRef *corev1.Object
 		err = fmt.Errorf("get git repo info failed: %w", err)
 		return
 	}
-
 	meta := Meta{
 		BaseURL: gitAddress,
 	}
-
-	params = NewPluginClientParams().
+	pclient = pclient.
 		WithMeta(meta).
-		WithGitRepo(gitRepo).
-		WithClassAddress(classAddress).
-		WithSecret(secret).
-		WithIntegrationClassName(integrationClassName)
+		WithGitRepo(gitRepo)
 
-	log.Debugw("generate git plugin client params", "BaseURL", gitAddress, "GitRepo", gitRepo,
+	log.Debugw("generate git plugin client", "BaseURL", gitAddress, "GitRepo", gitRepo,
 		"ClassAddress", classAddress, "IntegrationClassName", integrationClassName)
-	return params, nil
+	return pclient, nil
 }
 
 // GetGitRepoInfo try to get the project and repository from the git address.

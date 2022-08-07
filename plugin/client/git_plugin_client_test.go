@@ -30,18 +30,18 @@ import (
 	metav1alpha1 "github.com/katanomi/pkg/apis/meta/v1alpha1"
 )
 
-var _ = Describe("Test.GenerateGitPluginClientParams", func() {
+var _ = Describe("Test.GenerateGitPluginClient", func() {
 	var (
 		ctx                  context.Context
 		secretRef            *corev1.ObjectReference
 		gitRepoURL           string
 		integrationClassName string
 		classAddress         *duckv1.Addressable
-		params               *PluginClientParams
+		params               *PluginClient
 		err                  error
 	)
 	BeforeEach(func() {
-		ctx = context.TODO()
+		ctx = WithPluginClient(context.TODO(), NewPluginClient())
 		secretRef = nil
 		gitRepoURL = "https://github.com/katanomi/pkg"
 		integrationClassName = "github"
@@ -50,7 +50,7 @@ var _ = Describe("Test.GenerateGitPluginClientParams", func() {
 	})
 
 	JustBeforeEach(func() {
-		params, err = GenerateGitPluginClientParams(ctx, secretRef, gitRepoURL, integrationClassName, classAddress)
+		params, err = GenerateGitPluginClient(ctx, secretRef, gitRepoURL, integrationClassName, classAddress)
 	})
 
 	Context("ctx without client and secretRef is not nil", func() {
@@ -77,13 +77,13 @@ var _ = Describe("Test.GenerateGitPluginClientParams", func() {
 		It("should generate success", func() {
 			Expect(err).To(BeNil())
 			Expect(params).ToNot(BeNil())
-			Expect(params.Meta.BaseURL).To(Equal("https://github.com"))
+			Expect(params.meta.BaseURL).To(Equal("https://github.com"))
 			Expect(params.GitRepo).To(Equal(metav1alpha1.GitRepo{
 				Project:    "katanomi",
 				Repository: "pkg",
 			}))
 			Expect(params.ClassAddress).To(Equal(classAddress))
-			Expect(params.Secret).To(BeNil())
+			Expect(params.secret).To(Equal(corev1.Secret{}))
 			Expect(params.IntegrationClassName).To(Equal(integrationClassName))
 		})
 	})
