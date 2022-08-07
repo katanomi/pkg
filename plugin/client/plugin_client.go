@@ -22,14 +22,15 @@ import (
 	"strings"
 
 	"github.com/go-resty/resty/v2"
-	"github.com/katanomi/pkg/client"
-	perrors "github.com/katanomi/pkg/errors"
-	"github.com/katanomi/pkg/tracing"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	duckv1 "knative.dev/pkg/apis/duck/v1"
+	ctrlclient "sigs.k8s.io/controller-runtime/pkg/client"
 
 	metav1alpha1 "github.com/katanomi/pkg/apis/meta/v1alpha1"
+	"github.com/katanomi/pkg/client"
+	perrors "github.com/katanomi/pkg/errors"
+	"github.com/katanomi/pkg/tracing"
 )
 
 var (
@@ -42,6 +43,30 @@ var (
 // PluginClient client for plugins
 type PluginClient struct {
 	client *resty.Client
+
+	// meta plugin meta with base url and version info, for calling plugin api
+	// +optional
+	meta Meta
+
+	// secret is the secret to use for the plugin client
+	// +optional
+	secret corev1.Secret
+
+	// ClassAddress is the address of the integration class
+	// +optional
+	ClassAddress *duckv1.Addressable
+
+	// ClassObject store the integration class object
+	// +optional
+	ClassObject ctrlclient.Object
+
+	// IntegrationClassName is the name of the integration class
+	// +optional
+	IntegrationClassName string
+
+	// GitRepo Repo base info, such as project, repository
+	// +optional
+	GitRepo metav1alpha1.GitRepo
 }
 
 // BuildOptions Options to build the plugin client
@@ -76,6 +101,46 @@ var _ Client = &PluginClient{}
 
 // OptionFunc options for requests
 type OptionFunc func(request *resty.Request)
+
+// Clone shallow clone the plugin client
+// used to update some fields without changing the original
+func (p *PluginClient) Clone() *PluginClient {
+	if p == nil {
+		return nil
+	}
+	p = &(*p)
+	return p
+}
+
+func (p *PluginClient) WithMeta(meta Meta) *PluginClient {
+	p.meta = meta
+	return p
+}
+
+func (p *PluginClient) WithSecret(secret corev1.Secret) *PluginClient {
+	p.secret = secret
+	return p
+}
+
+func (p *PluginClient) WithClassAddress(classAddress *duckv1.Addressable) *PluginClient {
+	p.ClassAddress = classAddress
+	return p
+}
+
+func (p *PluginClient) WithClassObject(object ctrlclient.Object) *PluginClient {
+	p.ClassObject = object
+	return p
+}
+
+func (p *PluginClient) WithIntegrationClassName(integrationClassName string) *PluginClient {
+	p.IntegrationClassName = integrationClassName
+	return p
+}
+
+func (p *PluginClient) WithGitRepo(gitRepo metav1alpha1.GitRepo) *PluginClient {
+	p.GitRepo = gitRepo
+	return p
+}
 
 // Get performs a GET request using defined options
 func (p *PluginClient) Get(ctx context.Context, baseURL *duckv1.Addressable, path string, options ...OptionFunc) error {
@@ -191,9 +256,21 @@ func (p *PluginClient) Auth(meta Meta, secret corev1.Secret) ClientAuth {
 	return newAuthClient(p, meta, secret)
 }
 
+// NewAuth provides an auth methods for clients
+// Use the internal meta and secret to generate the client, please assign in advance.
+func (p *PluginClient) NewAuth() ClientAuth {
+	return newAuthClient(p, p.meta, p.secret)
+}
+
 // Project get project client
 func (p *PluginClient) Project(meta Meta, secret corev1.Secret) ClientProject {
 	return newProject(p, meta, secret)
+}
+
+// NewProject get project client
+// Use the internal meta and secret to generate the client, please assign in advance.
+func (p *PluginClient) NewProject() ClientProject {
+	return newProject(p, p.meta, p.secret)
 }
 
 // Repository get Repository client
@@ -201,9 +278,21 @@ func (p *PluginClient) Repository(meta Meta, secret corev1.Secret) ClientReposit
 	return newRepository(p, meta, secret)
 }
 
+// NewRepository get Repository client
+// Use the internal meta and secret to generate the client, please assign in advance.
+func (p *PluginClient) NewRepository() ClientRepository {
+	return newRepository(p, p.meta, p.secret)
+}
+
 // Artifact get Artifact client
 func (p *PluginClient) Artifact(meta Meta, secret corev1.Secret) ClientArtifact {
 	return newArtifact(p, meta, secret)
+}
+
+// NewArtifact get Artifact client
+// Use the internal meta and secret to generate the client, please assign in advance.
+func (p *PluginClient) NewArtifact() ClientArtifact {
+	return newArtifact(p, p.meta, p.secret)
 }
 
 // GitBranch get branch client
@@ -211,9 +300,21 @@ func (p *PluginClient) GitBranch(meta Meta, secret corev1.Secret) ClientGitBranc
 	return newGitBranch(p, meta, secret)
 }
 
+// NewGitBranch get branch client
+// Use the internal meta and secret to generate the client, please assign in advance.
+func (p *PluginClient) NewGitBranch() ClientGitBranch {
+	return newGitBranch(p, p.meta, p.secret)
+}
+
 // GitContent get content client
 func (p *PluginClient) GitContent(meta Meta, secret corev1.Secret) ClientGitContent {
 	return newGitContent(p, meta, secret)
+}
+
+// NewGitContent get content client
+// Use the internal meta and secret to generate the client, please assign in advance.
+func (p *PluginClient) NewGitContent() ClientGitContent {
+	return newGitContent(p, p.meta, p.secret)
 }
 
 // GitPullRequest get pr client
@@ -221,9 +322,21 @@ func (p *PluginClient) GitPullRequest(meta Meta, secret corev1.Secret) GitPullRe
 	return newGitPullRequest(p, meta, secret)
 }
 
+// NewGitPullRequest get pr client
+// Use the internal meta and secret to generate the client, please assign in advance.
+func (p *PluginClient) NewGitPullRequest() GitPullRequestCRUClient {
+	return newGitPullRequest(p, p.meta, p.secret)
+}
+
 // GitCommit get pr client
 func (p *PluginClient) GitCommit(meta Meta, secret corev1.Secret) ClientGitCommit {
 	return newGitCommit(p, meta, secret)
+}
+
+// NewGitCommit get pr client
+// Use the internal meta and secret to generate the client, please assign in advance.
+func (p *PluginClient) NewGitCommit() ClientGitCommit {
+	return newGitCommit(p, p.meta, p.secret)
 }
 
 // GitRepository get repo client
@@ -231,9 +344,21 @@ func (p *PluginClient) GitRepository(meta Meta, secret corev1.Secret) ClientGitR
 	return newGitRepository(p, meta, secret)
 }
 
+// NewGitRepository get repo client
+// Use the internal meta and secret to generate the client, please assign in advance.
+func (p *PluginClient) NewGitRepository() ClientGitRepository {
+	return newGitRepository(p, p.meta, p.secret)
+}
+
 // GitRepositoryFileTree get repo file tree client
 func (p *PluginClient) GitRepositoryFileTree(meta Meta, secret corev1.Secret) ClientGitRepositoryFileTree {
 	return newGitRepositoryFileTree(p, meta, secret)
+}
+
+// NewGitRepositoryFileTree get repo file tree client
+// Use the internal meta and secret to generate the client, please assign in advance.
+func (p *PluginClient) NewGitRepositoryFileTree() ClientGitRepositoryFileTree {
+	return newGitRepositoryFileTree(p, p.meta, p.secret)
 }
 
 // GitCommitComment get commit comment client
@@ -241,9 +366,21 @@ func (p *PluginClient) GitCommitComment(meta Meta, secret corev1.Secret) ClientG
 	return newGitCommitComment(p, meta, secret)
 }
 
+// NewGitCommitComment get commit comment client
+// Use the internal meta and secret to generate the client, please assign in advance.
+func (p *PluginClient) NewGitCommitComment() ClientGitCommitComment {
+	return newGitCommitComment(p, p.meta, p.secret)
+}
+
 // GitCommitStatus get commit comment client
 func (p *PluginClient) GitCommitStatus(meta Meta, secret corev1.Secret) ClientGitCommitStatus {
 	return newGitCommitStatus(p, meta, secret)
+}
+
+// NewGitCommitStatus get commit comment client
+// Use the internal meta and secret to generate the client, please assign in advance.
+func (p *PluginClient) NewGitCommitStatus() ClientGitCommitStatus {
+	return newGitCommitStatus(p, p.meta, p.secret)
 }
 
 // CodeQuality get code quality client
@@ -251,12 +388,30 @@ func (p *PluginClient) CodeQuality(meta Meta, secret corev1.Secret) ClientCodeQu
 	return newCodeQuality(p, meta, secret)
 }
 
+// NewCodeQuality get code quality client
+// Use the internal meta and secret to generate the client, please assign in advance.
+func (p *PluginClient) NewCodeQuality() ClientCodeQuality {
+	return newCodeQuality(p, p.meta, p.secret)
+}
+
 // BlobStore get blob store client
 func (p *PluginClient) BlobStore(meta Meta, secret corev1.Secret) ClientBlobStore {
 	return newBlobStore(p, meta, secret)
 }
 
+// NewBlobStore get blob store client
+// Use the internal meta and secret to generate the client, please assign in advance.
+func (p *PluginClient) NewBlobStore() ClientBlobStore {
+	return newBlobStore(p, p.meta, p.secret)
+}
+
 // GitRepositoryTag get repository tag client
 func (p *PluginClient) GitRepositoryTag(meta Meta, secret corev1.Secret) ClientGitRepositoryTag {
 	return newGitRepositoryTag(p, meta, secret)
+}
+
+// NewGitRepositoryTag get repository tag client
+// Use the internal meta and secret to generate the client, please assign in advance.
+func (p *PluginClient) NewGitRepositoryTag() ClientGitRepositoryTag {
+	return newGitRepositoryTag(p, p.meta, p.secret)
 }
