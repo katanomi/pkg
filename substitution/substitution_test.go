@@ -22,8 +22,7 @@ import (
 	"fmt"
 	"testing"
 
-	. "github.com/onsi/ginkgo"
-	. "github.com/onsi/ginkgo/extensions/table"
+	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	"k8s.io/apimachinery/pkg/util/sets"
 	"knative.dev/pkg/apis"
@@ -39,9 +38,10 @@ func TestSubstitution(t *testing.T) {
 }
 
 var _ = Describe("ValidateVariable", func() {
-	DescribeTable("Status.Conditions.Basic",
+	DescribeTable("Tekton.Validate.Variable",
 		func(name, value, prefix, locationName, path string, vars sets.String, err error) {
-			realError := ValidateVariable(name, value, prefix, locationName, path, vars)
+			realError := ValidateVariable(name, value, prefix, locationName, path, vars,
+				parameterSubstitutionSample, TektonValidateSingleVariable)
 			if err == nil {
 				Expect(realError).To(BeNil())
 			} else {
@@ -73,6 +73,30 @@ var _ = Describe("ValidateVariable", func() {
 		),
 		Entry("valid sub variable",
 			"abc", "$(params.abc.def)", "params", "somewhere", "params", sets.NewString("abc", "def", "abc.def"),
+			nil,
+		),
+	)
+
+	DescribeTable("Version.Validate.Variable",
+		func(name, value, prefix, locationName, path string, vars sets.String, err error) {
+			realError := ValidateVariable(name, value, prefix, locationName, path, vars,
+				parameterSubstitutionSample, VersionValidateSingleVariable)
+			if err == nil {
+				Expect(realError).To(BeNil())
+			} else {
+				Expect(realError).To(Equal(err))
+			}
+
+		},
+		Entry("invalid sub variable",
+			"abc", "$(context.abc.def)", "context", "localtionName", "path", sets.NewString("abc", "def"),
+			&apis.FieldError{
+				Message: "non-existent variable in \"$(context.abc.def)\" for localtionName abc.def",
+				Paths:   []string{"path"},
+			},
+		),
+		Entry("valid sub variable",
+			"abc", "$(context.abc.def)", "context", "localtionName", "path", sets.NewString("abc", "def", "abc.def"),
 			nil,
 		),
 	)

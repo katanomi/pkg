@@ -26,27 +26,48 @@ import (
 	"knative.dev/pkg/apis"
 )
 
-const parameterSubstitution = `[_a-zA-Z][_a-zA-Z0-9.-]*(\[\*\])?`
+const parameterSubstitutionSample = `[_a-zA-Z][_a-zA-Z0-9.-]*(\[\*\])?`
 
-const braceMatchingRegex = "(\\$(\\(%s\\.(?P<var>%s)\\)))"
+const BraceMatchingRegex = "(\\$(\\(%s\\.(?P<var>%s)\\)))"
 
-func ValidateVariable(name, value, prefix, locationName, path string, vars sets.String) *apis.FieldError {
-	if vs, present := extractVariablesFromString(value, prefix); present {
+type ValidateSingleVariableFunc func(vars sets.String, path string, name string, value string, locationName string, paramName string) *apis.FieldError
+
+func TektonValidateSingleVariable(vars sets.String, path string, name, value, locationName, v string) *apis.FieldError {
+	v = strings.TrimSuffix(v, "[*]")
+	if !vars.Has(v) {
+		return &apis.FieldError{
+			Message: fmt.Sprintf("non-existent variable in %q for %s %s", value, locationName, name),
+			Paths:   []string{path + "." + name},
+		}
+	}
+	return nil
+}
+
+func VersionValidateSingleVariable(vars sets.String, path string, name, value, locationName, v string) *apis.FieldError {
+	if !vars.Has(v) {
+		return &apis.FieldError{
+			Message: fmt.Sprintf("non-existent variable in %q for %s %s", value, locationName, v),
+			Paths:   []string{path},
+		}
+	}
+	return nil
+}
+
+func ValidateVariable(name, value, prefix, locationName, path string, vars sets.String,
+	paramSubstitution string, validateFunc ValidateSingleVariableFunc) *apis.FieldError {
+	if vs, present := extractVariablesFromString(value, prefix, paramSubstitution); present {
 		for _, v := range vs {
-			v = strings.TrimSuffix(v, "[*]")
-			if !vars.Has(v) {
-				return &apis.FieldError{
-					Message: fmt.Sprintf("non-existent variable in %q for %s %s", value, locationName, name),
-					Paths:   []string{path + "." + name},
-				}
+			err := validateFunc(vars, path, name, value, locationName, v)
+			if err != nil {
+				return err
 			}
 		}
 	}
 	return nil
 }
 
-func extractVariablesFromString(s, prefix string) ([]string, bool) {
-	pattern := fmt.Sprintf(braceMatchingRegex, prefix, parameterSubstitution)
+func extractVariablesFromString(s, prefix, paramSubstitution string) ([]string, bool) {
+	pattern := fmt.Sprintf(BraceMatchingRegex, prefix, paramSubstitution)
 	re := regexp.MustCompile(pattern)
 	matches := re.FindAllStringSubmatch(s, -1)
 	if len(matches) == 0 {
