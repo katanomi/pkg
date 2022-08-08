@@ -17,11 +17,13 @@ limitations under the License.
 package v1alpha1
 
 import (
+	"context"
 	"testing"
 
-	// ktesting "github.com/katanomi/pkg/testing"
+	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	// corev1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/util/validation/field"
+	"knative.dev/pkg/logging"
 
 	ktesting "github.com/katanomi/pkg/testing"
 )
@@ -64,3 +66,86 @@ func TestAssignByGitPullRequest(t *testing.T) {
 	actualGitPullRequestStatus := gitPullRequestStatus.AssignByGitPullRequest(&gitPullRequest)
 	g.Expect(*actualGitPullRequestStatus).To(Equal(expectStatus))
 }
+
+var _ = Describe("Test.BuildRunGitStatus.GetValWithKey", func() {
+	var (
+		ctx       context.Context
+		gitStatus *BuildRunGitStatus
+		actual    map[string]string
+		//
+		// log level. It can be debug, info, warn, error, dpanic, panic, fatal.
+		log, _ = logging.NewLogger("", "debug")
+	)
+
+	BeforeEach(func() {
+		ctx = context.TODO()
+		gitStatus = &BuildRunGitStatus{}
+		Expect(ktesting.LoadYAML("testdata/gitstatus.golden.yaml", &gitStatus)).To(Succeed())
+	})
+
+	JustBeforeEach(func() {
+		actual = gitStatus.GetValWithKey(ctx, field.NewPath("git"))
+		log.Infow("BuildRunGitStatus.GetValWithKey", "gitStatus", gitStatus, "result", actual)
+	})
+
+	When("struct is empty", func() {
+		BeforeEach(func() {
+			gitStatus = &BuildRunGitStatus{}
+		})
+
+		It("should have values", func() {
+			Expect(actual).To(Equal(map[string]string{
+				"git.url": "",
+				//
+				"git.lastCommit.id":          "",
+				"git.lastCommit.shortID":     "",
+				"git.lastCommit.title":       "",
+				"git.lastCommit.message":     "",
+				"git.lastCommit.authorEmail": "",
+				"git.lastCommit.pushedAt":    "",
+				"git.lastCommit.webURL":      "",
+				//
+				"git.pullRequest.id":           "",
+				"git.pullRequest.title":        "",
+				"git.pullRequest.source":       "",
+				"git.pullRequest.target":       "",
+				"git.pullRequest.webURL":       "",
+				"git.pullRequest.hasConflicts": "false",
+				//
+				"git.branch.name":      "",
+				"git.branch.protected": "false",
+				"git.branch.default":   "false",
+				"git.branch.webURL":    "",
+			}))
+		})
+	})
+
+	When("struct is not empty", func() {
+		It("should have values", func() {
+			Expect(actual).To(Equal(map[string]string{
+				"git.url": "https://github.com/katanomi/pkg",
+				//
+				"git.lastCommit.id":          "abe83942450308432a12e9679519795f938b2bed",
+				"git.lastCommit.shortID":     "abe83942",
+				"git.lastCommit.title":       "Initial commit 406",
+				"git.lastCommit.message":     "Initial commit 406\n",
+				"git.lastCommit.authorEmail": "alauda@github.com",
+				"git.lastCommit.pushedAt":    "2020-01-01 01:02:03 +0000 UTC",
+				"git.lastCommit.webURL":      "https://github.com",
+				//
+				"git.pullRequest.id":           "1",
+				"git.pullRequest.title":        "test-build ==> master",
+				"git.pullRequest.source":       "test-build",
+				"git.pullRequest.target":       "master",
+				"git.pullRequest.webURL":       "https://github.com/katanomi/pkg/merge_requests/1",
+				"git.pullRequest.hasConflicts": "true",
+				//
+				"git.branch.name":      "test-build",
+				"git.branch.protected": "true",
+				"git.branch.default":   "true",
+				"git.branch.webURL":    "https://github.com/katanomi/pkg/tree/test",
+			}))
+		})
+	})
+
+})

@@ -17,8 +17,13 @@ limitations under the License.
 package v1alpha1
 
 import (
+	"context"
 	"encoding/json"
 	"strconv"
+
+	"k8s.io/apimachinery/pkg/util/validation/field"
+
+	ksubstitute "github.com/katanomi/pkg/substitution"
 )
 
 // AssignByGitBranch is used to assign the information from GitBranch
@@ -102,4 +107,68 @@ func (b *BuildGitPullRequestStatus) AssignByGitPullRequest(gitPullRequest *GitPu
 		b.WebURL = content["webURL"]
 	}
 	return b
+}
+
+func (b *BuildRunGitStatus) GetValWithKey(ctx context.Context, path *field.Path) map[string]string {
+	if b == nil {
+		b = &BuildRunGitStatus{}
+	}
+	stringReplacements := map[string]string{}
+	stringVals := map[string]string{}
+	//
+	stringReplacements[path.Child("url").String()] = b.URL
+	//
+	stringVals = b.LastCommit.GetValWithKey(ctx, path.Child("lastCommit"))
+	stringReplacements = ksubstitute.MergeMap(stringReplacements, stringVals)
+	//
+	stringVals = b.PullRequest.GetValWithKey(ctx, path.Child("pullRequest"))
+	stringReplacements = ksubstitute.MergeMap(stringReplacements, stringVals)
+	//
+	stringVals = b.Branch.GetValWithKey(ctx, path.Child("branch"))
+	stringReplacements = ksubstitute.MergeMap(stringReplacements, stringVals)
+	return stringReplacements
+}
+
+func (b *BuildGitCommitStatus) GetValWithKey(ctx context.Context, path *field.Path) map[string]string {
+	if b == nil {
+		b = &BuildGitCommitStatus{}
+	}
+	stringVals := map[string]string{}
+	stringVals[path.Child("shortID").String()] = b.ShortID
+	stringVals[path.Child("id").String()] = b.ID
+	stringVals[path.Child("title").String()] = b.Title
+	stringVals[path.Child("message").String()] = b.Message
+	stringVals[path.Child("authorEmail").String()] = b.AuthorEmail
+	stringVals[path.Child("pushedAt").String()] = ""
+	if b.PushedAt != nil {
+		stringVals[path.Child("pushedAt").String()] = b.PushedAt.UTC().String()
+	}
+	stringVals[path.Child("webURL").String()] = b.WebURL
+	return stringVals
+}
+
+func (b *BuildGitPullRequestStatus) GetValWithKey(ctx context.Context, path *field.Path) map[string]string {
+	if b == nil {
+		b = &BuildGitPullRequestStatus{}
+	}
+	stringVals := map[string]string{}
+	stringVals[path.Child("id").String()] = b.ID
+	stringVals[path.Child("title").String()] = b.Title
+	stringVals[path.Child("source").String()] = b.Source
+	stringVals[path.Child("target").String()] = b.Target
+	stringVals[path.Child("webURL").String()] = b.WebURL
+	stringVals[path.Child("hasConflicts").String()] = strconv.FormatBool(b.HasConflicts)
+	return stringVals
+}
+
+func (b *BuildGitBranchStatus) GetValWithKey(ctx context.Context, path *field.Path) map[string]string {
+	if b == nil {
+		b = &BuildGitBranchStatus{}
+	}
+	stringVals := map[string]string{}
+	stringVals[path.Child("name").String()] = b.Name
+	stringVals[path.Child("protected").String()] = strconv.FormatBool(b.Protected)
+	stringVals[path.Child("default").String()] = strconv.FormatBool(b.Default)
+	stringVals[path.Child("webURL").String()] = b.WebURL
+	return stringVals
 }

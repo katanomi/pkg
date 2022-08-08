@@ -1,0 +1,23 @@
+url: https://github.com/katanomi/pkg
+lastCommit:
+  authorEmail: "alauda@github.com"
+  id: abe83942450308432a12e9679519795f938b2bed
+  message: |
+    Initial commit 406
+  shortID: abe83942
+  title: Initial commit 406
+  webURL: "https://github.com"
+  pushedAt: "2020-01-01T01:02:03Z"
+pullRequest:
+  authorEmail: "alauda@github.com"
+  hasConflicts: true
+  id: "1"
+  source: test-build
+  target: master
+  title: test-build ==> master
+  webURL: https://github.com/katanomi/pkg/merge_requests/1
+branch:
+  default: true
+  name: test-build
+  protected: true
+  webURL: https://github.com/katanomi/pkg/tree/test
