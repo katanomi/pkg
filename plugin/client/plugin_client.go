@@ -25,7 +25,6 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	duckv1 "knative.dev/pkg/apis/duck/v1"
-	ctrlclient "sigs.k8s.io/controller-runtime/pkg/client"
 
 	metav1alpha1 "github.com/katanomi/pkg/apis/meta/v1alpha1"
 	"github.com/katanomi/pkg/client"
@@ -56,17 +55,9 @@ type PluginClient struct {
 	// +optional
 	ClassAddress *duckv1.Addressable
 
-	// ClassObject store the integration class object
-	// +optional
-	ClassObject ctrlclient.Object
-
 	// IntegrationClassName is the name of the integration class
 	// +optional
 	IntegrationClassName string
-
-	// GitRepo Repo base info, such as project, repository
-	// +optional
-	GitRepo metav1alpha1.GitRepo
 }
 
 // BuildOptions Options to build the plugin client
@@ -127,18 +118,8 @@ func (p *PluginClient) WithClassAddress(classAddress *duckv1.Addressable) *Plugi
 	return p
 }
 
-func (p *PluginClient) WithClassObject(object ctrlclient.Object) *PluginClient {
-	p.ClassObject = object
-	return p
-}
-
 func (p *PluginClient) WithIntegrationClassName(integrationClassName string) *PluginClient {
 	p.IntegrationClassName = integrationClassName
-	return p
-}
-
-func (p *PluginClient) WithGitRepo(gitRepo metav1alpha1.GitRepo) *PluginClient {
-	p.GitRepo = gitRepo
 	return p
 }
 
@@ -249,6 +230,11 @@ func (p *PluginClient) HandleError(response *resty.Response, err error) error {
 	}
 
 	return nil
+}
+
+// GitPluginClient convert PluginClient to GitPluginClient
+func (p *PluginClient) GitPluginClient() *GitPluginClient {
+	return &GitPluginClient{PluginClient: p}
 }
 
 // Auth provides an auth methods for clients

@@ -37,7 +37,7 @@ var _ = Describe("Test.GenerateGitPluginClient", func() {
 		gitRepoURL           string
 		integrationClassName string
 		classAddress         *duckv1.Addressable
-		params               *PluginClient
+		gpclient             *GitPluginClient
 		err                  error
 	)
 	BeforeEach(func() {
@@ -50,7 +50,7 @@ var _ = Describe("Test.GenerateGitPluginClient", func() {
 	})
 
 	JustBeforeEach(func() {
-		params, err = GenerateGitPluginClient(ctx, secretRef, gitRepoURL, integrationClassName, classAddress)
+		gpclient, err = GenerateGitPluginClient(ctx, secretRef, gitRepoURL, integrationClassName, classAddress)
 	})
 
 	Context("ctx without client and secretRef is not nil", func() {
@@ -76,15 +76,15 @@ var _ = Describe("Test.GenerateGitPluginClient", func() {
 	Context("valid paramters", func() {
 		It("should generate success", func() {
 			Expect(err).To(BeNil())
-			Expect(params).ToNot(BeNil())
-			Expect(params.meta.BaseURL).To(Equal("https://github.com"))
-			Expect(params.GitRepo).To(Equal(metav1alpha1.GitRepo{
+			Expect(gpclient).ToNot(BeNil())
+			Expect(gpclient.meta.BaseURL).To(Equal("https://github.com"))
+			Expect(gpclient.GitRepo).To(Equal(metav1alpha1.GitRepo{
 				Project:    "katanomi",
 				Repository: "pkg",
 			}))
-			Expect(params.ClassAddress).To(Equal(classAddress))
-			Expect(params.secret).To(Equal(corev1.Secret{}))
-			Expect(params.IntegrationClassName).To(Equal(integrationClassName))
+			Expect(gpclient.ClassAddress).To(Equal(classAddress))
+			Expect(gpclient.secret).To(Equal(corev1.Secret{}))
+			Expect(gpclient.IntegrationClassName).To(Equal(integrationClassName))
 		})
 	})
 })

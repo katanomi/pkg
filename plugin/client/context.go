@@ -38,3 +38,22 @@ func PluginClientValue(ctx context.Context) *PluginClient {
 	pluginClient, _ := PluginClientFrom(ctx)
 	return pluginClient
 }
+
+type gitPluginClientKey struct{}
+
+// WithGitPluginClient returns a copy of parent in which the gitPluginClient value is set
+func WithGitPluginClient(parent context.Context, gitPluginClient *GitPluginClient) context.Context {
+	return context.WithValue(parent, gitPluginClientKey{}, gitPluginClient)
+}
+
+// GitPluginClientFrom returns the value of the gitPluginClient key on the ctx
+func GitPluginClientFrom(ctx context.Context) (*GitPluginClient, bool) {
+	gitPluginClient, ok := ctx.Value(gitPluginClientKey{}).(*GitPluginClient)
+	return gitPluginClient, ok
+}
+
+// GitPluginClientValue returns the value of the gitPluginClient key on the ctx, or the nil if none
+func GitPluginClientValue(ctx context.Context) *GitPluginClient {
+	gitPluginClient, _ := GitPluginClientFrom(ctx)
+	return gitPluginClient
+}

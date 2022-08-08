@@ -25,19 +25,42 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	duckv1 "knative.dev/pkg/apis/duck/v1"
 	"knative.dev/pkg/logging"
+	ctrlclient "sigs.k8s.io/controller-runtime/pkg/client"
 
 	metav1alpha1 "github.com/katanomi/pkg/apis/meta/v1alpha1"
 	kclient "github.com/katanomi/pkg/client"
 	ksecret "github.com/katanomi/pkg/secret"
 )
 
+// GitPluginClient client for plugins
+type GitPluginClient struct {
+	*PluginClient
+
+	// GitRepo Repo base info, such as project, repository
+	GitRepo metav1alpha1.GitRepo
+
+	// ClassObject store the integration class object
+	// +optional
+	ClassObject ctrlclient.Object
+}
+
+func (p *GitPluginClient) WithGitRepo(gitRepo metav1alpha1.GitRepo) *GitPluginClient {
+	p.GitRepo = gitRepo
+	return p
+}
+
+func (p *GitPluginClient) WithClassObject(object ctrlclient.Object) *GitPluginClient {
+	p.ClassObject = object
+	return p
+}
+
 // GenerateGitPluginClient generate git plugin client params
 func GenerateGitPluginClient(ctx context.Context, secretRef *corev1.ObjectReference,
 	gitRepoURL, integrationClassName string, classAddress *duckv1.Addressable) (
-	pclient *PluginClient, err error) {
+	gpclient *GitPluginClient, err error) {
 
 	log := logging.FromContext(ctx)
-	pclient = PluginClientValue(ctx)
+	pclient := PluginClientValue(ctx)
 	if pclient == nil {
 		pclient = NewPluginClient()
 	} else {
@@ -74,13 +97,14 @@ func GenerateGitPluginClient(ctx context.Context, secretRef *corev1.ObjectRefere
 	meta := Meta{
 		BaseURL: gitAddress,
 	}
-	pclient = pclient.
+	gpclient = pclient.
 		WithMeta(meta).
+		GitPluginClient().
 		WithGitRepo(gitRepo)
 
 	log.Debugw("generate git plugin client", "BaseURL", gitAddress, "GitRepo", gitRepo,
 		"ClassAddress", classAddress, "IntegrationClassName", integrationClassName)
-	return pclient, nil
+	return gpclient, nil
 }
 
 // GetGitRepoInfo try to get the project and repository from the git address.

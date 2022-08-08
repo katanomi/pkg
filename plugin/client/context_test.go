@@ -44,3 +44,24 @@ func TestPluginClientContext(t *testing.T) {
 	g.Expect(ok).To(BeTrue())
 	g.Expect(clt).To(Equal(pluginClient))
 }
+
+func TestGitPluginClientContext(t *testing.T) {
+	g := NewGomegaWithT(t)
+	ctrl := gomock.NewController(t)
+
+	defer ctrl.Finish()
+
+	ctx := context.TODO()
+
+	clt, ok := GitPluginClientFrom(ctx)
+	g.Expect(ok).To(BeFalse())
+	g.Expect(clt).To(BeNil())
+
+	gitPluginClient := &GitPluginClient{}
+	ctx = WithGitPluginClient(ctx, gitPluginClient)
+
+	g.Expect(GitPluginClientValue((ctx))).To(Equal(gitPluginClient))
+	clt, ok = GitPluginClientFrom(ctx)
+	g.Expect(ok).To(BeTrue())
+	g.Expect(clt).To(Equal(gitPluginClient))
+}
