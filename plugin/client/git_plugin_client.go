@@ -44,16 +44,6 @@ type GitPluginClient struct {
 	ClassObject ctrlclient.Object
 }
 
-// Clone shallow clone the plugin client
-// used to update some fields without changing the original
-func (p *GitPluginClient) Clone() *GitPluginClient {
-	if p == nil {
-		return nil
-	}
-	p = &(*p)
-	return p
-}
-
 func (p *GitPluginClient) WithGitRepo(gitRepo metav1alpha1.GitRepo) *GitPluginClient {
 	p.GitRepo = gitRepo
 	return p
