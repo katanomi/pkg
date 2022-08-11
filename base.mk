@@ -40,6 +40,7 @@ fmt: ##@Development Run go fmt against code.
 
 vet: ##@Development Run go vet against code.
 	go vet ./...
+	go vet -tags e2e ./...
 
 lint: golangcilint ##@Development Run golangci-lint against code.
 	$(GOLANGCILINT) run
@@ -105,6 +106,10 @@ golangcilint: ##@Setup Download golangci-lint locally if necessary
 YQ = $(TOOLBIN)/yq
 yq: ##@Setup Download yq locally if necessary.
 	$(call go-get-tool,$(YQ),github.com/mikefarah/yq/v4@v4.25.2)
+
+GOMOCK = $(TOOLBIN)/mockgen
+gomock: ## Download gomock locally if necessary.
+	$(call go-get-tool,$(GOMOCK),github.com/golang/mock/mockgen@v1.6.0)
 
 # go-get-tool will 'go get' any package $2 and install it to $1.
 PROJECT_DIR := $(shell dirname $(abspath $(lastword $(MAKEFILE_LIST))))
