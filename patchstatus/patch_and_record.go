@@ -41,9 +41,18 @@ func PatchStatusAndRecordEvent(
 	log := logging.FromContext(ctx)
 	clt := kclient.Client(ctx)
 
-	patch := client.MergeFrom(old)
-	patchData, _ := patch.Data(obj)
+	// makes this casting to patch data in the methods below
+	// there were a few method changes inside controller-runtime
+	// TODO(danielfbm): consider changing the parameter type to avoid this
+	oldObj, oldIsObject := old.(client.Object)
+	if !oldIsObject {
+		log.Warnw("old object could not be patched because it is not a client.Object", "old", old)
+		return
+	}
 	clientObj, _ := obj.(client.Object)
+	patch := client.MergeFrom(oldObj)
+	patchData, _ := patch.Data(clientObj)
+
 	patchErr := clt.Status().Patch(ctx, clientObj, patch)
 	log.Debugw("object patch result", "err", patchErr, "patchData", string(patchData))
 
