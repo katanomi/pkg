@@ -20,7 +20,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-// CopyLabels from the left side object to the righ side
+// CopyLabels from the left side object to the right side
 // will override any existing labels
 func CopyLabels(object, dest metav1.Object) {
 	labels := dest.GetLabels()
@@ -29,7 +29,7 @@ func CopyLabels(object, dest metav1.Object) {
 	dest.SetLabels(labels)
 }
 
-// CopyAnnotations from the left side object to the righ side
+// CopyAnnotations from the left side object to the right side
 // will override any existing values
 func CopyAnnotations(object, dest metav1.Object) {
 	anno := dest.GetAnnotations()
@@ -38,7 +38,7 @@ func CopyAnnotations(object, dest metav1.Object) {
 	dest.SetAnnotations(anno)
 }
 
-// CopyMapStringString copies content from a map to annother
+// CopyMapStringString copies content from a map to another
 func CopyMapStringString(object, dest map[string]string) map[string]string {
 	if object != nil {
 		if dest == nil {
