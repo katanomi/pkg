@@ -25,7 +25,7 @@ import (
 	. "github.com/onsi/gomega"
 )
 
-var _ = P1Case("another-test").Cluster().WithFunc(func(ctx TestContext) {
+var _ = P1Case("another-test").Cluster().DoFunc(func(ctx *TestContext) {
 	// test case
 	BeforeEach(func() {
 		ctx.Debugw("before each in another pkg")
@@ -45,4 +45,4 @@ var _ = P1Case("another-test").Cluster().WithFunc(func(ctx TestContext) {
 			Expect(ctx.Config).ToNot(BeNil())
 		})
 	})
-}).Do()
+})
