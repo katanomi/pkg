@@ -1,0 +1,5 @@
+kind: "SomeKind"
+namespace: "default"
+name: "some-object"
+uid: "41ce460c-cd91-493f-a59c-8f2ccdea9034"
+apiVersion: somegroup/v1alpha1

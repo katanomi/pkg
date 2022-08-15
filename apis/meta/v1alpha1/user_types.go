@@ -17,10 +17,14 @@ limitations under the License.
 package v1alpha1
 
 import (
+	"context"
+
 	"github.com/golang-jwt/jwt"
 	authenticationv1 "k8s.io/api/authentication/v1"
 	authv1 "k8s.io/api/authorization/v1"
+	rbac "k8s.io/api/rbac/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/util/validation/field"
 )
 
 var UserGVK = GroupVersion.WithKind("User")
@@ -109,4 +113,22 @@ func (user *UserInfo) GetEmail() string {
 		return extraValue[0]
 	}
 	return ""
+}
+
+//RBACSubjectValGetter returns the list of keys and values to support variable substitution for
+// rbac.
+func RBACSubjectValGetter(subject *rbac.Subject) func(ctx context.Context, path *field.Path) (values map[string]string) {
+	if subject == nil {
+		subject = &rbac.Subject{}
+	}
+	return func(ctx context.Context, path *field.Path) (values map[string]string) {
+		values = map[string]string{
+			path.String():                    "",
+			path.Child("kind").String():      subject.Kind,
+			path.Child("apiGroup").String():  subject.APIGroup,
+			path.Child("name").String():      subject.Name,
+			path.Child("namespace").String(): subject.Namespace,
+		}
+		return
+	}
 }

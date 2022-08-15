@@ -1,0 +1,5 @@
+user: ""
+user.kind: "ServiceAccount"
+user.apiGroup: "v1"
+user.name: "default"
+user.namespace: "default"

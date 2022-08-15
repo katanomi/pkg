@@ -1,0 +1,29 @@
+user:
+  kind: "ServiceAccount"
+  apiGroup: "v1"
+  name: "default"
+  namespace: "default"
+cloudEvent:
+  id: 5aa832f6-17eb-11ed-9832-1bc8c2fab4b0
+  source: https://github.com/katanomi/spec
+  specversion: "1.0"
+  subject: dc442de0cb4efac54104bc247d387a13432edad8
+  time: "2022-08-09T13:58:36Z"
+  type: dev.katanomi.cloudevents.github.push
+  datacontenttype: application/json
+  extensions:
+    action: create
+    branch: main
+    commit: dc442de0cb4efac54104bc247d387a13432edad8
+    commitmessage: 'fix: buildrun label description (#137)  Co-authored-by: jzli <jzli@alauda.io>'
+    knativearrivaltime: "2022-08-09T13:58:36.60007265Z"
+    reference: refs/heads/main
+    repository: katanomi/spec
+ref:
+  kind: "SomeKind"
+  namespace: "default"
+  name: "some-object"
+  uid: "41ce460c-cd91-493f-a59c-8f2ccdea9034"
+  apiVersion: somegroup/v1alpha1
+triggeredTimestamp: "2022-08-09T13:58:36Z"
+triggeredType: Automated

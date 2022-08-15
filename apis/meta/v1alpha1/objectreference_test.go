@@ -19,11 +19,17 @@ package v1alpha1
 import (
 	"testing"
 
+	"context"
+
+	. "github.com/katanomi/pkg/testing"
+	. "github.com/onsi/ginkgo/v2"
+
 	"github.com/google/go-cmp/cmp"
 	. "github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
+	"k8s.io/apimachinery/pkg/util/validation/field"
 )
 
 func TestObjectReferenceIsTheSame(t *testing.T) {
@@ -138,3 +144,32 @@ func TestGetNamespacedNameFromRef(t *testing.T) {
 		})
 	}
 }
+
+var _ = Describe("ObjectReferenceValGetter.GetValWithKey", func() {
+	var (
+		ctx      context.Context
+		path     *field.Path
+		obj      *corev1.ObjectReference
+		values   map[string]string
+		expected map[string]string
+	)
+	BeforeEach(func() {
+		ctx = context.TODO()
+		path = field.NewPath("ref")
+		obj = &corev1.ObjectReference{}
+		expected = map[string]string{}
+	})
+	JustBeforeEach(func() {
+		values = ObjectReferenceValGetter(obj)(ctx, path)
+	})
+	Context("corev1.ObjectReference with all variables", func() {
+		BeforeEach(func() {
+			Expect(LoadYAML("testdata/objectreference_vars.all.yaml", obj)).To(Succeed())
+			Expect(LoadYAML("testdata/objectreference_vars.all.golden.yaml", &expected)).To(Succeed())
+			Expect(expected).ToNot(BeEmpty())
+		})
+		It("should return the same amount of data", func() {
+			Expect(values).To(Equal(expected))
+		})
+	})
+})
