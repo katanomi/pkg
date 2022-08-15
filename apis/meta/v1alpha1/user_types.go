@@ -20,6 +20,7 @@ import (
 	"context"
 
 	"github.com/golang-jwt/jwt"
+	"github.com/katanomi/pkg/substitution"
 	authenticationv1 "k8s.io/api/authentication/v1"
 	authv1 "k8s.io/api/authorization/v1"
 	rbac "k8s.io/api/rbac/v1"
@@ -117,7 +118,7 @@ func (user *UserInfo) GetEmail() string {
 
 //RBACSubjectValGetter returns the list of keys and values to support variable substitution for
 // rbac.
-func RBACSubjectValGetter(subject *rbac.Subject) func(ctx context.Context, path *field.Path) (values map[string]string) {
+func RBACSubjectValGetter(subject *rbac.Subject) substitution.GetValWithKeyFunc {
 	if subject == nil {
 		subject = &rbac.Subject{}
 	}

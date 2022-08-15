@@ -19,6 +19,7 @@ package v1alpha1
 import (
 	"context"
 
+	"github.com/katanomi/pkg/substitution"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -89,7 +90,7 @@ func ObjectRefWithNamespace() ObjectRefOptionsFunc {
 
 //ObjectReferenceValGetter returns the list of keys and values to support variable substitution for
 // corev1.ObjectReference
-func ObjectReferenceValGetter(obj *corev1.ObjectReference) func(ctx context.Context, path *field.Path) (values map[string]string) {
+func ObjectReferenceValGetter(obj *corev1.ObjectReference) substitution.GetValWithKeyFunc {
 	if obj == nil {
 		obj = &corev1.ObjectReference{}
 	}
