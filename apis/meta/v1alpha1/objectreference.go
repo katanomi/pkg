@@ -17,10 +17,14 @@ limitations under the License.
 package v1alpha1
 
 import (
+	"context"
+
+	"github.com/katanomi/pkg/substitution"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
+	"k8s.io/apimachinery/pkg/util/validation/field"
 )
 
 // IsTheSameObject compares two corev1.ObjectReference comparing:
@@ -81,5 +85,24 @@ func ObjectRefWithUID() ObjectRefOptionsFunc {
 func ObjectRefWithNamespace() ObjectRefOptionsFunc {
 	return func(obj metav1.Object, ref *corev1.ObjectReference) {
 		ref.Namespace = obj.GetNamespace()
+	}
+}
+
+//ObjectReferenceValGetter returns the list of keys and values to support variable substitution for
+// corev1.ObjectReference
+func ObjectReferenceValGetter(obj *corev1.ObjectReference) substitution.GetValWithKeyFunc {
+	if obj == nil {
+		obj = &corev1.ObjectReference{}
+	}
+	return func(ctx context.Context, path *field.Path) (values map[string]string) {
+		values = map[string]string{
+			path.String():                     "",
+			path.Child("kind").String():       obj.Kind,
+			path.Child("apiVersion").String(): obj.APIVersion,
+			path.Child("name").String():       obj.Name,
+			path.Child("namespace").String():  obj.Namespace,
+			path.Child("uid").String():        string(obj.UID),
+		}
+		return
 	}
 }

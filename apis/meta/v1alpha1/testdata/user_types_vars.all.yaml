@@ -1,0 +1,4 @@
+kind: "ServiceAccount"
+apiGroup: "v1"
+name: "default"
+namespace: "default"

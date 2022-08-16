@@ -18,11 +18,13 @@ limitations under the License.
 package substitution
 
 import (
+	"context"
 	"fmt"
 	"regexp"
 	"strings"
 
 	"k8s.io/apimachinery/pkg/util/sets"
+	"k8s.io/apimachinery/pkg/util/validation/field"
 	"knative.dev/pkg/apis"
 )
 
@@ -99,3 +101,6 @@ func matchGroups(matches []string, pattern *regexp.Regexp) map[string]string {
 	}
 	return groups
 }
+
+// GetValWithKeyFunc standard function to extract value maps from objects
+type GetValWithKeyFunc func(ctx context.Context, path *field.Path) map[string]string

@@ -17,12 +17,14 @@ limitations under the License.
 package v1alpha1
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"time"
 
 	cloudevents "github.com/cloudevents/sdk-go/v2"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/util/validation/field"
 )
 
 type CloudEvent struct {
@@ -73,6 +75,28 @@ func (evt *CloudEvent) From(event cloudevents.Event) *CloudEvent {
 		evt.Extensions[key] = str
 	}
 	return evt
+}
+
+// GetValWithKey returns the list of keys and values to support variable substitution
+func (evt *CloudEvent) GetValWithKey(ctx context.Context, path *field.Path) (values map[string]string) {
+	if evt == nil {
+		evt = &CloudEvent{}
+	}
+	values = map[string]string{
+		path.String():                          "",
+		path.Child("id").String():              evt.ID,
+		path.Child("source").String():          evt.Source,
+		path.Child("subject").String():         evt.Subject,
+		path.Child("type").String():            evt.Type,
+		path.Child("time").String():            evt.Time.UTC().Format(time.RFC3339),
+		path.Child("specversion").String():     evt.SpecVersion,
+		path.Child("datacontenttype").String(): evt.DataContentType,
+		path.Child("extensions").String():      "",
+	}
+	for k, v := range evt.Extensions {
+		values[path.Child("extensions", k).String()] = v
+	}
+	return
 }
 
 const (

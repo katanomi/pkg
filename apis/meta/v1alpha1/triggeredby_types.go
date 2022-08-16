@@ -17,7 +17,12 @@ limitations under the License.
 package v1alpha1
 
 import (
+	"context"
 	"encoding/json"
+	"time"
+
+	"github.com/katanomi/pkg/substitution"
+	"k8s.io/apimachinery/pkg/util/validation/field"
 
 	corev1 "k8s.io/api/core/v1"
 	rbacv1 "k8s.io/api/rbac/v1"
@@ -113,4 +118,32 @@ func (by TriggeredBy) SetIntoAnnotation(annotations map[string]string) (map[stri
 	}
 	annotations[TriggeredByAnnotationKey] = string(jsonStr)
 	return annotations, nil
+}
+
+// GetValWithKey returns the list of keys and values to support variable substitution
+func (by *TriggeredBy) GetValWithKey(ctx context.Context, path *field.Path) (values map[string]string) {
+	if by == nil {
+		by = &TriggeredBy{}
+	}
+
+	// user
+	values = substitution.MergeMap(values, RBACSubjectValGetter(by.User)(ctx, path.Child("user")))
+
+	// cloud event
+	values = substitution.MergeMap(values, by.CloudEvent.GetValWithKey(ctx, path.Child("cloudEvent")))
+
+	// ref
+	values = substitution.MergeMap(values, ObjectReferenceValGetter(by.Ref)(ctx, path.Child("ref")))
+
+	// triggered by
+	triggeredTimestamp := ""
+	if by.TriggeredTimestamp != nil {
+		// by.TriggeredTimestamp.UTC().Format(layout string)
+		triggeredTimestamp = by.TriggeredTimestamp.UTC().Format(time.RFC3339)
+	}
+	values = substitution.MergeMap(values, map[string]string{
+		path.Child("triggeredTimestamp").String(): triggeredTimestamp,
+		path.Child("triggeredType").String():      string(by.TriggeredType),
+	})
+	return
 }

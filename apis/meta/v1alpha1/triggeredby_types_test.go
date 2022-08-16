@@ -17,10 +17,15 @@ limitations under the License.
 package v1alpha1
 
 import (
+	"context"
 	"testing"
 
+	. "github.com/katanomi/pkg/testing"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
+	. "github.com/onsi/ginkgo/v2"
+	"k8s.io/apimachinery/pkg/util/validation/field"
 
 	. "github.com/onsi/gomega"
 )
@@ -150,3 +155,42 @@ func TestSetIntoAnnotation(t *testing.T) {
 		g.Expect(len(annotations)).ShouldNot(BeZero())
 	})
 }
+
+var _ = Describe("TriggeredBy.GetValWithKey", func() {
+	var (
+		ctx      context.Context
+		path     *field.Path
+		by       *TriggeredBy
+		values   map[string]string
+		expected map[string]string
+	)
+	BeforeEach(func() {
+		ctx = context.TODO()
+		path = field.NewPath("triggeredBy")
+		by = &TriggeredBy{}
+		expected = map[string]string{}
+	})
+	JustBeforeEach(func() {
+		values = by.GetValWithKey(ctx, path)
+	})
+	Context("triggeredby with all variables", func() {
+		BeforeEach(func() {
+			Expect(LoadYAML("testdata/triggeredby_types_vars.all.yaml", by)).To(Succeed())
+			Expect(LoadYAML("testdata/triggeredby_types_vars.all.golden.yaml", &expected)).To(Succeed())
+			Expect(expected).ToNot(BeEmpty())
+		})
+		It("should return the same amount of data", func() {
+			Expect(values).To(Equal(expected))
+		})
+	})
+	Context("triggeredby nil", func() {
+		BeforeEach(func() {
+			by = nil
+			Expect(LoadYAML("testdata/triggeredby_types_vars.nil.golden.yaml", &expected)).To(Succeed())
+			Expect(expected).ToNot(BeEmpty())
+		})
+		It("should return the same amount of data", func() {
+			Expect(values).To(Equal(expected))
+		})
+	})
+})

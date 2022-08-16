@@ -1,0 +1,6 @@
+ref: ""
+ref.kind: "SomeKind"
+ref.namespace: "default"
+ref.name: "some-object"
+ref.uid: "41ce460c-cd91-493f-a59c-8f2ccdea9034"
+ref.apiVersion: somegroup/v1alpha1
