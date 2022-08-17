@@ -36,6 +36,11 @@ const genericResourceNameErrMsg string = "a resource name must consist of lower 
 
 var genericResourceNameRegexp = regexp.MustCompile("^" + genericResourceNameFmt + "$")
 
+const resourceNameWithChineseFmt = "[-./A-Za-z0-9_\\p{Han}]+"
+const resourceNameWithChineseErrMsg string = "a resource name must consist of lower case alphanumeric characters, Chinese, '_' or '-' or '/' or '.' "
+
+var resourceNameWithChineseRegexp = regexp.MustCompile("^" + resourceNameWithChineseFmt + "$")
+
 // IsDNS1123UnderscoreLabel tests for a string that conforms to the definition of a label in
 // DNS (RFC 1123) but accepting underscores in the middle.
 func IsDNS1123UnderscoreLabel(value string) []string {
@@ -79,5 +84,16 @@ func ValidateGenericResourceName(name string, fld *field.Path) field.ErrorList {
 			errs = append(errs, field.Invalid(fld, name, errStr))
 		}
 	}
+	return errs
+}
+
+func ValidateResourceNameWithChinese(name string, fld *field.Path) field.ErrorList {
+	errs := field.ErrorList{}
+
+	if !resourceNameWithChineseRegexp.MatchString(name) {
+		err := validation.RegexError(resourceNameWithChineseErrMsg, resourceNameWithChineseFmt, "my-name", "abc/123/示例")
+		errs = append(errs, field.Invalid(fld, name, err))
+	}
+
 	return errs
 }
