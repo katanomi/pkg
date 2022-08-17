@@ -126,6 +126,10 @@ func (by *TriggeredBy) GetValWithKey(ctx context.Context, path *field.Path) (val
 		by = &TriggeredBy{}
 	}
 
+	values = map[string]string{
+		path.String(): "",
+	}
+
 	// user
 	values = substitution.MergeMap(values, RBACSubjectValGetter(by.User)(ctx, path.Child("user")))
 
