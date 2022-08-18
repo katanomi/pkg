@@ -17,12 +17,15 @@ limitations under the License.
 package framework
 
 import (
+	"context"
 	"encoding/base64"
 	"net/http"
 	"testing"
 
+	"github.com/katanomi/pkg/apis/meta/v1alpha1"
 	"github.com/katanomi/pkg/plugin/client"
 	. "github.com/onsi/gomega"
+	"go.uber.org/zap"
 
 	"github.com/go-resty/resty/v2"
 )
@@ -51,4 +54,64 @@ func TestRequestWrapAuthMeta(t *testing.T) {
 
 	metaBase64 := base64.StdEncoding.EncodeToString([]byte(`{}`))
 	g.Expect(newReq.Header.Get(client.PluginMetaHeader)).To(Equal(metaBase64))
+}
+
+func TestConvertToAuthSecret(t *testing.T) {
+	g := NewGomegaWithT(t)
+	auth := client.Auth{
+		Type: "xx",
+		Secret: map[string][]byte{
+			"username": []byte("tom"),
+		},
+	}
+	secret := ConvertToAuthSecret(auth)
+	g.Expect(secret.Data).To(Equal(auth.Secret))
+	g.Expect(secret.Annotations[v1alpha1.SecretTypeAnnotationKey]).To(Equal(string(auth.Type)))
+}
+
+type testPlugin struct{}
+
+func (t *testPlugin) Path() string {
+	return "test-plugin"
+}
+
+func (t *testPlugin) Setup(_ context.Context, _ *zap.SugaredLogger) error {
+	return nil
+}
+
+func TestGetPluginAddress(t *testing.T) {
+	g := NewGomegaWithT(t)
+
+	plugin := &testPlugin{}
+	c := &resty.Client{HostURL: "http://127.0.0.1:8888"}
+
+	address, err := GetPluginAddress(c, plugin)
+	g.Expect(err).Should(Succeed())
+	g.Expect(address.URL.String()).Should(Equal("http://127.0.0.1:8888/plugins/v1alpha1/test-plugin"))
+
+	address, err = GetPluginAddress(nil, plugin)
+	g.Expect(err).ShouldNot(Succeed())
+	g.Expect(address).To(BeNil())
+
+	address, err = GetPluginAddress(c, nil)
+	g.Expect(err).ShouldNot(Succeed())
+	g.Expect(address).To(BeNil())
+}
+
+func TestMustGetPluginAddress(t *testing.T) {
+	g := NewGomegaWithT(t)
+
+	plugin := &testPlugin{}
+	c := &resty.Client{HostURL: "http://127.0.0.1:8888"}
+
+	address := MustGetPluginAddress(c, plugin)
+	g.Expect(address.URL.String()).Should(Equal("http://127.0.0.1:8888/plugins/v1alpha1/test-plugin"))
+
+	g.Expect(func() {
+		MustGetPluginAddress(nil, plugin)
+	}).Should(Panic())
+
+	g.Expect(func() {
+		MustGetPluginAddress(c, nil)
+	}).Should(Panic())
 }

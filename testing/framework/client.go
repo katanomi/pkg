@@ -19,9 +19,15 @@ package framework
 import (
 	"encoding/base64"
 	"encoding/json"
+	"errors"
 
 	"github.com/go-resty/resty/v2"
+	"github.com/katanomi/pkg/apis/meta/v1alpha1"
 	"github.com/katanomi/pkg/plugin/client"
+	"github.com/katanomi/pkg/plugin/route"
+	corev1 "k8s.io/api/core/v1"
+	"knative.dev/pkg/apis"
+	duckv1 "knative.dev/pkg/apis/duck/v1"
 )
 
 // RequestWrapAuthMeta wrap auth and meta information into http request
@@ -36,4 +42,38 @@ func RequestWrapAuthMeta(req *resty.Request, auth client.Auth, meta client.Meta)
 
 	client.MetaOpts(meta)(req)
 	return req
+}
+
+// ConvertToAuthSecret convert auth
+func ConvertToAuthSecret(auth client.Auth) (secret corev1.Secret) {
+	secret = corev1.Secret{}
+	secret.Annotations = map[string]string{
+		v1alpha1.SecretTypeAnnotationKey: string(auth.Type),
+	}
+	secret.Data = auth.Secret
+	return secret
+}
+
+// GetPluginAddress get the base url of the plugin
+func GetPluginAddress(client *resty.Client, plugin client.Interface) (address *duckv1.Addressable, err error) {
+	if client == nil || plugin == nil {
+		return nil, errors.New("get address of plugin failed, param error")
+	}
+	var url *apis.URL
+	url, err = apis.ParseURL(client.HostURL)
+	if err != nil {
+		return
+	}
+	url.Path = route.GetPluginWebPath(plugin)
+	address = &duckv1.Addressable{URL: url}
+	return address, nil
+}
+
+// MustGetPluginAddress get the base url or panics if the parse fails.
+func MustGetPluginAddress(client *resty.Client, plugin client.Interface) (address *duckv1.Addressable) {
+	address, err := GetPluginAddress(client, plugin)
+	if err != nil {
+		panic(err)
+	}
+	return address
 }
