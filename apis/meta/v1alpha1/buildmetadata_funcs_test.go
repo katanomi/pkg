@@ -95,8 +95,15 @@ var _ = Describe("Test.BuildRunGitStatus.GetValWithKey", func() {
 
 		It("should have values", func() {
 			Expect(actual).To(Equal(map[string]string{
+				"git":     "",
 				"git.url": "",
 				//
+				"git.revision":      "",
+				"git.revision.raw":  "",
+				"git.revision.id":   "",
+				"git.revision.type": "",
+				//
+				"git.lastCommit":             "",
 				"git.lastCommit.id":          "",
 				"git.lastCommit.shortID":     "",
 				"git.lastCommit.title":       "",
@@ -105,17 +112,26 @@ var _ = Describe("Test.BuildRunGitStatus.GetValWithKey", func() {
 				"git.lastCommit.pushedAt":    "",
 				"git.lastCommit.webURL":      "",
 				//
+				"git.pullRequest":              "",
 				"git.pullRequest.id":           "",
 				"git.pullRequest.title":        "",
 				"git.pullRequest.source":       "",
 				"git.pullRequest.target":       "",
 				"git.pullRequest.webURL":       "",
+				"git.pullRequest.authorEmail":  "",
 				"git.pullRequest.hasConflicts": "false",
-				//
+				// branch
+				"git.branch":           "",
 				"git.branch.name":      "",
 				"git.branch.protected": "false",
 				"git.branch.default":   "false",
 				"git.branch.webURL":    "",
+				// target
+				"git.target":           "",
+				"git.target.name":      "",
+				"git.target.protected": "false",
+				"git.target.default":   "false",
+				"git.target.webURL":    "",
 			}))
 		})
 	})
@@ -123,27 +139,43 @@ var _ = Describe("Test.BuildRunGitStatus.GetValWithKey", func() {
 	When("struct is not empty", func() {
 		It("should have values", func() {
 			Expect(actual).To(Equal(map[string]string{
+				"git":     "",
 				"git.url": "https://github.com/katanomi/pkg",
 				//
+				"git.revision":      "refs/pulls/123/head",
+				"git.revision.raw":  "refs/pulls/123/head",
+				"git.revision.id":   "123",
+				"git.revision.type": "PullRequest",
+				//
+				"git.lastCommit":             "abe83942",
 				"git.lastCommit.id":          "abe83942450308432a12e9679519795f938b2bed",
 				"git.lastCommit.shortID":     "abe83942",
 				"git.lastCommit.title":       "Initial commit 406",
 				"git.lastCommit.message":     "Initial commit 406\n",
 				"git.lastCommit.authorEmail": "alauda@github.com",
-				"git.lastCommit.pushedAt":    "2020-01-01 01:02:03 +0000 UTC",
+				"git.lastCommit.pushedAt":    "2020-01-01T01:02:03Z",
 				"git.lastCommit.webURL":      "https://github.com",
 				//
+				"git.pullRequest":              "1",
 				"git.pullRequest.id":           "1",
 				"git.pullRequest.title":        "test-build ==> master",
 				"git.pullRequest.source":       "test-build",
 				"git.pullRequest.target":       "master",
 				"git.pullRequest.webURL":       "https://github.com/katanomi/pkg/merge_requests/1",
 				"git.pullRequest.hasConflicts": "true",
-				//
+				"git.pullRequest.authorEmail":  "alauda@github.com",
+				// source in pr
+				"git.branch":           "test-build",
 				"git.branch.name":      "test-build",
 				"git.branch.protected": "true",
 				"git.branch.default":   "true",
 				"git.branch.webURL":    "https://github.com/katanomi/pkg/tree/test",
+				// target in pr
+				"git.target":           "release",
+				"git.target.name":      "release",
+				"git.target.protected": "true",
+				"git.target.default":   "false",
+				"git.target.webURL":    "https://github.com/katanomi/pkg/tree/release",
 			}))
 		})
 	})

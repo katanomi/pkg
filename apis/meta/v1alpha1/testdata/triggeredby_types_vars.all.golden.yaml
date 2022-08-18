@@ -1,3 +1,4 @@
+triggeredBy: ""
 triggeredBy.user: ""
 triggeredBy.user.kind: "ServiceAccount"
 triggeredBy.user.apiGroup: "v1"

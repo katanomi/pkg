@@ -88,7 +88,7 @@ func ObjectRefWithNamespace() ObjectRefOptionsFunc {
 	}
 }
 
-//ObjectReferenceValGetter returns the list of keys and values to support variable substitution for
+// ObjectReferenceValGetter returns the list of keys and values to support variable substitution for
 // corev1.ObjectReference
 func ObjectReferenceValGetter(obj *corev1.ObjectReference) substitution.GetValWithKeyFunc {
 	if obj == nil {

@@ -1,4 +1,8 @@
 url: https://github.com/katanomi/pkg
+revision:
+  raw: refs/pulls/123/head
+  id: "123"
+  type: PullRequest
 lastCommit:
   authorEmail: "alauda@github.com"
   id: abe83942450308432a12e9679519795f938b2bed
@@ -21,3 +25,8 @@ branch:
   name: test-build
   protected: true
   webURL: https://github.com/katanomi/pkg/tree/test
+target:
+  default: false
+  name: release
+  protected: true
+  webURL: https://github.com/katanomi/pkg/tree/release

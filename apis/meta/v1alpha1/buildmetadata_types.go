@@ -48,6 +48,12 @@ type BuildRunGitStatus struct {
 	// URL means git repository url of current buildrun
 	// +optional
 	URL string `json:"url,omitempty"`
+
+	// Revision code revision used. uses a git clone format
+	// refs/head/main or refs/pulls/1/head etc
+	// +optional
+	Revision *GitRevision `json:"revision,omitempty"`
+
 	// LastCommit means last commit status of current build
 	// +optional
 	LastCommit *BuildGitCommitStatus `json:"lastCommit,omitempty"`
@@ -57,52 +63,72 @@ type BuildRunGitStatus struct {
 	// Branch status of current build
 	// +optional
 	Branch *BuildGitBranchStatus `json:"branch,omitempty"`
+
+	// Target branch status of current build for Pull requests
+	// +optional
+	Target *BuildGitBranchStatus `json:"target,omitempty"`
 }
 
 // BuildGitBranchStatus represent branch status of build run
 type BuildGitBranchStatus struct {
 	// Name of git branch
-	Name string `json:"name"`
+	// +optional
+	Name string `json:"name,omitempty"`
 	// Protected represent if is the protected branch
-	Protected bool `json:"protected"`
+	// +optional
+	Protected bool `json:"protected,omitempty"`
 	// Default represent if is the protected branch
-	Default bool `json:"default"`
+	// +optional
+	Default bool `json:"default,omitempty"`
 	// WebURL to access the branch
-	WebURL string `json:"webURL"`
+	// +optional
+	WebURL string `json:"webURL,omitempty"`
 }
 
 type BuildGitCommitStatus struct {
 	// ShortID means last commit short id
-	ShortID string `json:"shortID"`
+	// +optional
+	ShortID string `json:"shortID,omitempty"`
 	// ID represent last commit id
-	ID string `json:"id"`
+	// +optional
+	ID string `json:"id,omitempty"`
 	// Title represent last commit title
-	Title string `json:"title"`
+	// +optional
+	Title string `json:"title,omitempty"`
 	// Message of last commit
-	Message string `json:"message"`
+	// +optional
+	Message string `json:"message,omitempty"`
 	// AuthorEmail of last commit
-	AuthorEmail string `json:"authorEmail"`
+	// +optional
+	AuthorEmail string `json:"authorEmail,omitempty"`
 	// PushedAt means push time of last commit
 	// +optional
 	PushedAt *metav1.Time `json:"pushedAt,omitempty"`
 	// webURL access link of the commit
 	// +optional
-	WebURL string `json:"webURL"`
+	WebURL string `json:"webURL,omitempty"`
 }
 
 type BuildGitPullRequestStatus struct {
 	// ID is identity of pull request
-	ID string `json:"id"`
+	// +optional
+	ID string `json:"id,omitempty"`
 	// Title of pullrequest if current build is building a pull request
-	Title string `json:"title"`
+	// +optional
+	Title string `json:"title,omitempty"`
 	// Source of pullrequest if current build is building a pull request
-	Source string `json:"source"`
+	// +optional
+	Source string `json:"source,omitempty"`
 	// Target of pullrequest if current build is building a pull request
-	Target string `json:"target"`
+	// +optional
+	Target string `json:"target,omitempty"`
 	// AuthorEmail of pull request
-	AuthorEmail string `json:"authorEmail"`
+	// +optional
+	AuthorEmail string `json:"authorEmail,omitempty"`
 	// WebURL to access pull request
-	WebURL string `json:"webURL"`
+	// +optional
+	WebURL string `json:"webURL,omitempty"`
 	// HasConflicts represent if has conflicts in pull request
+	// +optional
 	HasConflicts bool `json:"hasConflicts"`
 }

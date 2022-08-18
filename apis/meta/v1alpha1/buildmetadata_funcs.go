@@ -20,6 +20,7 @@ import (
 	"context"
 	"encoding/json"
 	"strconv"
+	"time"
 
 	"k8s.io/apimachinery/pkg/util/validation/field"
 
@@ -114,18 +115,21 @@ func (b *BuildRunGitStatus) GetValWithKey(ctx context.Context, path *field.Path)
 		b = &BuildRunGitStatus{}
 	}
 	stringReplacements := map[string]string{}
-	stringVals := map[string]string{}
+	// adds a blank to have it return empty value when referencing
+	// may return a simplified value in the future
+	stringReplacements[path.String()] = ""
 	//
 	stringReplacements[path.Child("url").String()] = b.URL
 	//
-	stringVals = b.LastCommit.GetValWithKey(ctx, path.Child("lastCommit"))
-	stringReplacements = ksubstitute.MergeMap(stringReplacements, stringVals)
+	stringReplacements = ksubstitute.MergeMap(stringReplacements, b.Revision.GetValWithKey(ctx, path.Child("revision")))
 	//
-	stringVals = b.PullRequest.GetValWithKey(ctx, path.Child("pullRequest"))
-	stringReplacements = ksubstitute.MergeMap(stringReplacements, stringVals)
+	stringReplacements = ksubstitute.MergeMap(stringReplacements, b.LastCommit.GetValWithKey(ctx, path.Child("lastCommit")))
 	//
-	stringVals = b.Branch.GetValWithKey(ctx, path.Child("branch"))
-	stringReplacements = ksubstitute.MergeMap(stringReplacements, stringVals)
+	stringReplacements = ksubstitute.MergeMap(stringReplacements, b.PullRequest.GetValWithKey(ctx, path.Child("pullRequest")))
+	//
+	stringReplacements = ksubstitute.MergeMap(stringReplacements, b.Branch.GetValWithKey(ctx, path.Child("branch")))
+	//
+	stringReplacements = ksubstitute.MergeMap(stringReplacements, b.Target.GetValWithKey(ctx, path.Child("target")))
 	return stringReplacements
 }
 
@@ -133,7 +137,7 @@ func (b *BuildGitCommitStatus) GetValWithKey(ctx context.Context, path *field.Pa
 	if b == nil {
 		b = &BuildGitCommitStatus{}
 	}
-	stringVals := map[string]string{}
+	stringVals := map[string]string{path.String(): b.ShortID}
 	stringVals[path.Child("shortID").String()] = b.ShortID
 	stringVals[path.Child("id").String()] = b.ID
 	stringVals[path.Child("title").String()] = b.Title
@@ -141,7 +145,7 @@ func (b *BuildGitCommitStatus) GetValWithKey(ctx context.Context, path *field.Pa
 	stringVals[path.Child("authorEmail").String()] = b.AuthorEmail
 	stringVals[path.Child("pushedAt").String()] = ""
 	if b.PushedAt != nil {
-		stringVals[path.Child("pushedAt").String()] = b.PushedAt.UTC().String()
+		stringVals[path.Child("pushedAt").String()] = b.PushedAt.UTC().Format(time.RFC3339)
 	}
 	stringVals[path.Child("webURL").String()] = b.WebURL
 	return stringVals
@@ -151,13 +155,14 @@ func (b *BuildGitPullRequestStatus) GetValWithKey(ctx context.Context, path *fie
 	if b == nil {
 		b = &BuildGitPullRequestStatus{}
 	}
-	stringVals := map[string]string{}
+	stringVals := map[string]string{path.String(): b.ID}
 	stringVals[path.Child("id").String()] = b.ID
 	stringVals[path.Child("title").String()] = b.Title
 	stringVals[path.Child("source").String()] = b.Source
 	stringVals[path.Child("target").String()] = b.Target
 	stringVals[path.Child("webURL").String()] = b.WebURL
 	stringVals[path.Child("hasConflicts").String()] = strconv.FormatBool(b.HasConflicts)
+	stringVals[path.Child("authorEmail").String()] = b.AuthorEmail
 	return stringVals
 }
 
@@ -165,7 +170,7 @@ func (b *BuildGitBranchStatus) GetValWithKey(ctx context.Context, path *field.Pa
 	if b == nil {
 		b = &BuildGitBranchStatus{}
 	}
-	stringVals := map[string]string{}
+	stringVals := map[string]string{path.String(): b.Name}
 	stringVals[path.Child("name").String()] = b.Name
 	stringVals[path.Child("protected").String()] = strconv.FormatBool(b.Protected)
 	stringVals[path.Child("default").String()] = strconv.FormatBool(b.Default)
