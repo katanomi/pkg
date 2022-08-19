@@ -415,3 +415,38 @@ type ProjectUserLister interface {
 	Interface
 	ListProjectUsers(ctx context.Context, params metav1alpha1.UserOptions, option metav1alpha1.ListOptions) (*metav1alpha1.UserList, error)
 }
+
+type TestPlanLister interface {
+	Interface
+	ListTestPlans(ctx context.Context, params metav1alpha1.TestProjectOptions, option metav1alpha1.ListOptions) (*metav1alpha1.TestPlanList, error)
+}
+
+type TestPlanGetter interface {
+	Interface
+	GetTestPlan(ctx context.Context, params metav1alpha1.TestProjectOptions) (*metav1alpha1.TestPlan, error)
+}
+
+type TestCaseLister interface {
+	Interface
+	ListTestCases(ctx context.Context, params metav1alpha1.TestProjectOptions, options metav1alpha1.ListOptions) (*metav1alpha1.TestCaseList, error)
+}
+
+type TestCaseGetter interface {
+	Interface
+	GetTestCase(ctx context.Context, params metav1alpha1.TestProjectOptions) (*metav1alpha1.TestCase, error)
+}
+
+type TestModuleLister interface {
+	Interface
+	ListTestModules(ctx context.Context, params metav1alpha1.TestProjectOptions, options metav1alpha1.ListOptions) (*metav1alpha1.TestModuleList, error)
+}
+
+type TestCaseExecutionLister interface {
+	Interface
+	ListTestCaseExecutions(ctx context.Context, params metav1alpha1.TestProjectOptions, options metav1alpha1.ListOptions) (*metav1alpha1.TestCaseExecutionList, error)
+}
+
+type TestCaseExecutionCreator interface {
+	Interface
+	CreateTestCaseExecution(ctx context.Context, params metav1alpha1.TestProjectOptions, payload metav1alpha1.TestCaseExecution) (*metav1alpha1.TestCaseExecution, error)
+}
