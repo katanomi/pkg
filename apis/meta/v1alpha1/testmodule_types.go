@@ -41,9 +41,11 @@ type TestModuleSpec struct {
 	// ParentID is the parent module ID
 	ParentID string `json:"parentID"`
 	// TestCases are the cases included by a module
+	// +optional
 	TestCases []TestModuleCaseRef `json:"testCases"`
 }
 
+// TestModuleCaseRef refers to a test module and its order
 type TestModuleCaseRef struct {
 	// TestObjectRef refers to a test case
 	TestObjectRef `json:"ref"`

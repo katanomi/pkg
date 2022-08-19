@@ -24,6 +24,7 @@ import (
 var TestCaseExecutionGVK = GroupVersion.WithKind("TestCaseExecution")
 var TestCaseExecutionListGVK = GroupVersion.WithKind("TestCaseExecutionList")
 
+// TestCaseExecutionStatus covers possible values of TestcaseExecutionStatus
 type TestCaseExecutionStatus string
 
 // Possible test case execution status below
@@ -48,6 +49,7 @@ type TestCaseExecutionSpec struct {
 	TestPlanID string `json:"testPlanId"`
 
 	// BuildRef refers to the build related to current test case
+	// +optional
 	BuildRef *TestObjectRef `json:"buildRef"`
 
 	// Status is the execution result status

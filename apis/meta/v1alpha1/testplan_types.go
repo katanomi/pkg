@@ -47,6 +47,7 @@ type TestPlanSpec struct {
 	BuildRefs []TestObjectRef `json:"buildRefs"`
 }
 
+// TestObjectRef refers to a test object
 type TestObjectRef struct {
 	// Name is the name of the build
 	Name string `json:"name"`
@@ -54,6 +55,7 @@ type TestObjectRef struct {
 	ID string `json:"id"`
 }
 
+// TestPlanStatus for test plan status
 type TestPlanStatus struct {
 	// Conditions indicates the latest status of TestPlan within a build
 	apis.Conditions `json:"conditions"`
@@ -69,6 +71,7 @@ type TestPlanStatus struct {
 	TestBuildStatus TestBuildStatusInfo `json:"testBuildStatus,omitempty"`
 }
 
+// TestBuildStatusInfo for test build status
 type TestBuildStatusInfo struct {
 	// TotalCases is the total number of cases
 	TotalCases int `json:"totalCases"`
