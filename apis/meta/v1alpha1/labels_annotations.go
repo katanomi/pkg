@@ -48,6 +48,9 @@ const (
 
 	// SecretSyncMutationLabelKey label key to select the suitable secret
 	SecretSyncMutationLabelKey = "integrations.katanomi.dev/integration.mutation"
+
+	// SettingsTypeLabelKey label key to select the settings secret
+	SettingsTypeLabelKey = "settings.katanomi.dev/settingsType"
 )
 
 // Common Annotations
@@ -72,6 +75,10 @@ const (
 	ClusterNameAnnotationKey = "integrations.katanomi.dev/clusterName"
 	// TriggerNameAnnotationKey annotation key to store a friendly trigger name
 	TriggerNameAnnotationKey = "katanomi.dev/triggerName"
+	// SettingsConvertTypesKey annotation key to store the setting types need to be converted
+	SettingsConvertTypesKey = "settings.katanomi.dev/convertTypes"
+	// SettingsAutoGenerateKey annotation key to store whether the secret is automatically generated
+	SettingsAutoGenerateKey = "settings.katanomi.dev/autoGenerate"
 )
 
 // Attribute keys for Integrations
@@ -80,6 +87,7 @@ const (
 	AuthAttributeKey                   = "auth"
 	ReplicationPolicyTypesAttributeKey = "replicationPolicyTypes"
 	ResourceTypesAttributeKey          = "resourceTypes"
+	SettingsTypesAttributeKey          = "settingsTypes"
 	MethodsAttributeKey                = "methods"
 	AllowEmptySecretAttributeKey       = "allowEmptySecret"
 	DefaultProjectTypeAttributeKey     = "defaultProjectSubType"

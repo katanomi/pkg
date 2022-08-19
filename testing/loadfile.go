@@ -17,6 +17,7 @@ limitations under the License.
 package testing
 
 import (
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
 
@@ -26,6 +27,24 @@ import (
 	. "github.com/onsi/gomega"
 	"sigs.k8s.io/yaml"
 )
+
+// LoadJSON loads json
+func LoadJSON(file string, obj interface{}) (err error) {
+	var data []byte
+	if data, err = ioutil.ReadFile(file); err != nil {
+		return
+	}
+	err = json.Unmarshal(data, obj)
+	return
+}
+
+// MustLoadJSON loads json or panics if the parse fails.
+func MustLoadJSON(file string, obj interface{}) {
+	err := LoadJSON(file, obj)
+	if err != nil {
+		panic(fmt.Sprintf("load json file failed, file path: %s, err: %s", file, err))
+	}
+}
 
 // LoadYAML loads yaml
 func LoadYAML(file string, obj interface{}) (err error) {
@@ -41,7 +60,7 @@ func LoadYAML(file string, obj interface{}) (err error) {
 func MustLoadYaml(file string, obj interface{}) {
 	err := LoadYAML(file, obj)
 	if err != nil {
-		panic(fmt.Sprintf("load yaml file failed, file path: %s", file))
+		panic(fmt.Sprintf("load yaml file failed, file path: %s, err: %s", file, err))
 	}
 }
 
