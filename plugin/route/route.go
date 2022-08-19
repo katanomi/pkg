@@ -226,6 +226,27 @@ func match(c client.Interface) []Route {
 	if v, ok := c.(client.ProjectUserLister); ok {
 		routes = append(routes, NewProjectUserList(v))
 	}
+	if v, ok := c.(client.TestPlanLister); ok {
+		routes = append(routes, NewTestPlanList(v))
+	}
+	if v, ok := c.(client.TestPlanGetter); ok {
+		routes = append(routes, NewTestPlanGetter(v))
+	}
+	if v, ok := c.(client.TestCaseLister); ok {
+		routes = append(routes, NewTestCaseLister(v))
+	}
+	if v, ok := c.(client.TestCaseGetter); ok {
+		routes = append(routes, NewTestCaseGetter(v))
+	}
+	if v, ok := c.(client.TestModuleLister); ok {
+		routes = append(routes, NewTestModuleLister(v))
+	}
+	if v, ok := c.(client.TestCaseExecutionLister); ok {
+		routes = append(routes, NewTestCaseExecutionLister(v))
+	}
+	if v, ok := c.(client.TestCaseExecutionCreator); ok {
+		routes = append(routes, NewTestCaseExecutionCreator(v))
+	}
 
 	return routes
 }
@@ -357,6 +378,28 @@ func GetMethods(c client.Interface) []string {
 	if _, ok := c.(client.ProjectUserLister); ok {
 		methods = append(methods, "ListProjectUsers")
 	}
+	if _, ok := c.(client.TestPlanLister); ok {
+		methods = append(methods, "ListTestPlans")
+	}
+	if _, ok := c.(client.TestPlanGetter); ok {
+		methods = append(methods, "GetTestPlan")
+	}
+	if _, ok := c.(client.TestCaseLister); ok {
+		methods = append(methods, "ListTestCases")
+	}
+	if _, ok := c.(client.TestCaseGetter); ok {
+		methods = append(methods, "GetTestCase")
+	}
+	if _, ok := c.(client.TestModuleLister); ok {
+		methods = append(methods, "ListTestModules")
+	}
+	if _, ok := c.(client.TestCaseExecutionLister); ok {
+		methods = append(methods, "ListTestCaseExecutions")
+	}
+	if _, ok := c.(client.TestCaseExecutionCreator); ok {
+		methods = append(methods, "CreateTestCaseExecution")
+	}
+
 	return methods
 }
 
@@ -397,7 +440,7 @@ func NewDefaultService() *restful.WebService {
 	return ws
 }
 
-//NewDocService go restful api doc
+// NewDocService go restful api doc
 func NewDocService(webservices ...*restful.WebService) *restful.WebService {
 	config := restfulspec.Config{
 		WebServices: webservices,

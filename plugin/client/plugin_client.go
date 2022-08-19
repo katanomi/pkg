@@ -401,3 +401,23 @@ func (p *PluginClient) GitRepositoryTag(meta Meta, secret corev1.Secret) ClientG
 func (p *PluginClient) NewGitRepositoryTag() ClientGitRepositoryTag {
 	return newGitRepositoryTag(p, p.meta, p.secret)
 }
+
+// TestPlan get test plan client
+func (p *PluginClient) TestPlan(meta Meta, secret corev1.Secret) ClientTestPlan {
+	return newTestPlan(p, meta, secret)
+}
+
+// TestCase get test case client
+func (p *PluginClient) TestCase(meta Meta, secret corev1.Secret) ClientTestCase {
+	return newTestCase(p, meta, secret)
+}
+
+// TestModule get test module client
+func (p *PluginClient) TestModule(meta Meta, secret corev1.Secret) ClientTestModule {
+	return newTestModule(p, meta, secret)
+}
+
+// TestCaseExecution get test case execution client
+func (p *PluginClient) TestCaseExecution(meta Meta, secret corev1.Secret) ClientTestCaseExecution {
+	return newTestCaseExecution(p, meta, secret)
+}
