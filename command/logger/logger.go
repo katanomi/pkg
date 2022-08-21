@@ -18,20 +18,21 @@ package logger
 
 import (
 	"context"
-	"os"
+
+	"github.com/katanomi/pkg/command/io"
 
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 )
 
-var loggerKey = struct{}{}
+type loggerKey struct{}
 
 // WithLogger set a logger instance into a context
 func WithLogger(ctx context.Context, logger *zap.SugaredLogger) context.Context {
 	if ctx == nil {
 		ctx = context.Background()
 	}
-	return context.WithValue(ctx, loggerKey, logger)
+	return context.WithValue(ctx, loggerKey{}, logger)
 }
 
 // GetLogger get a logger instance form a context
@@ -39,7 +40,7 @@ func GetLogger(ctx context.Context) (logger *zap.SugaredLogger) {
 	if ctx == nil {
 		return nil
 	}
-	val := ctx.Value(loggerKey)
+	val := ctx.Value(loggerKey{})
 	if val == nil {
 		return nil
 	}
@@ -52,10 +53,11 @@ func GetLogger(ctx context.Context) (logger *zap.SugaredLogger) {
 // NewLoggerFromContext similar to `GetLogger`, but return a default logger if there is no
 // logger instance in the context
 func NewLoggerFromContext(ctx context.Context) (logger *zap.SugaredLogger) {
-	if l := GetLogger(ctx); l != nil {
-		return l
+	if logger = GetLogger(ctx); logger == nil {
+		streams := io.MustGetIOStreams(ctx)
+		logger = NewLogger(zapcore.AddSync(streams.ErrOut), zapcore.DebugLevel)
 	}
-	return NewLogger(os.Stderr, zapcore.DebugLevel)
+	return
 }
 
 // NewLogger construct a logger
