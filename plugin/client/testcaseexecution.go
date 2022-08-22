@@ -25,6 +25,7 @@ import (
 	duckv1 "knative.dev/pkg/apis/duck/v1"
 )
 
+// ClientTestCaseExecution client for test case execution
 type ClientTestCaseExecution interface {
 	List(ctx context.Context,
 		baseURL *duckv1.Addressable,

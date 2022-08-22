@@ -25,6 +25,7 @@ import (
 	duckv1 "knative.dev/pkg/apis/duck/v1"
 )
 
+// ClientTestCase for test case
 type ClientTestCase interface {
 	List(ctx context.Context, baseURL *duckv1.Addressable, params metav1alpha1.TestProjectOptions, options ...OptionFunc) (*metav1alpha1.TestCaseList, error)
 	Get(ctx context.Context, baseURL *duckv1.Addressable, params metav1alpha1.TestProjectOptions, options ...OptionFunc) (*metav1alpha1.TestCase, error)

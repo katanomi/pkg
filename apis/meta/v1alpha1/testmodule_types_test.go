@@ -38,7 +38,7 @@ var _ = Describe("TestModule", func() {
 		tm := TestModule{Spec: TestModuleSpec{
 			TestCases: []TestModuleCaseRef{
 				{
-					TestObjectRef: TestObjectRef{ID: "123", Name: "abc"},
+					TestCase: TestObjectRef{ID: "123", Name: "abc"},
 				},
 			},
 		}}

@@ -108,7 +108,7 @@ type TestProjectOptions struct {
 	Search string `json:"search"`
 }
 
-func GetRefByIDFromMap(m map[string]*TestObjectRef, ID string) *TestObjectRef {
+func RefFromMap(m map[string]*TestObjectRef, ID string) *TestObjectRef {
 	if m == nil {
 		return nil
 	}
