@@ -25,6 +25,7 @@ import (
 	duckv1 "knative.dev/pkg/apis/duck/v1"
 )
 
+// ClientTestPlan client for test plan
 type ClientTestPlan interface {
 	List(ctx context.Context,
 		baseURL *duckv1.Addressable,

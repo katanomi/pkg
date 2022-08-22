@@ -48,7 +48,7 @@ type TestModuleSpec struct {
 // TestModuleCaseRef refers to a test module and its order
 type TestModuleCaseRef struct {
 	// TestObjectRef refers to a test case
-	TestObjectRef `json:"ref"`
+	TestCase TestObjectRef `json:"ref"`
 	// Order indicates the ASC order of the object at same level
 	Order int `json:"order"`
 }
@@ -77,7 +77,7 @@ func (tm *TestModule) ContainsTestCaseID(caseID string) bool {
 	}
 
 	for _, tc := range tm.Spec.TestCases {
-		if tc.ID == caseID {
+		if tc.TestCase.ID == caseID {
 			return true
 		}
 	}
