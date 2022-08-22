@@ -1,0 +1,22 @@
+{
+  "kind": "TestCaseExecution",
+  "apiVersion": "meta.katanomi.dev/v1alpha1",
+  "metadata": {
+    "name": "464488",
+    "namespace": "devops",
+    "creationTimestamp": null
+  },
+  "spec": {
+    "testPlanId": "",
+    "buildRef": {
+      "name": "",
+      "id": "1140"
+    },
+    "status": "passed",
+    "createdAt": null,
+    "createdBy": {
+      "name": "admin",
+      "email": "admin@cpaas.io"
+    }
+  }
+}

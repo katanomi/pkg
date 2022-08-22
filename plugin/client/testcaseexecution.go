@@ -66,7 +66,9 @@ func (p *testCaseExecution) List(ctx context.Context,
 		params.TestPlanID,
 		params.TestCaseID,
 	)
-	options = append(options, MetaOpts(p.meta), SecretOpts(p.secret), ResultOpts(list))
+	options = append(options, MetaOpts(p.meta), SecretOpts(p.secret), ResultOpts(list), QueryOpts(map[string]string{
+		"buildID": params.BuildID,
+	}))
 	if err := p.client.Get(ctx, baseURL, uri, options...); err != nil {
 		return nil, err
 	}

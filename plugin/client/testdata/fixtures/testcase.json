@@ -1,0 +1,79 @@
+{
+  "kind": "TestCase",
+  "apiVersion": "v1alpha1",
+  "metadata": {
+    "name": "验证拓扑图内按钮操作正确",
+    "creationTimestamp": "2022-06-14T01:49:23Z"
+  },
+  "spec": {
+    "id": "ACP-82296",
+    "type": "手工",
+    "prerequisite": "",
+    "steps": [
+      {
+        "id": "533916",
+        "description": "\u003cp\u003e点击图例下拉框，查看内容与颜色对应关系\u003c/p\u003e\n",
+        "order": "1",
+        "expect": "\u003cp\u003e1.关联关系：橙色\u003c/p\u003e\n\n\u003cp\u003e2.所属关系：灰色\u003c/p\u003e\n\n\u003cp\u003e3.挂载关系：蓝色\u003c/p\u003e\n\n\u003cp\u003e4.引用关系：紫色\u003c/p\u003e\n\n\u003cp\u003e5.挂载和引用关系：绿色\u003c/p\u003e\n"
+      },
+      {
+        "id": "533917",
+        "description": "\u003cp\u003e点击刷新按钮\u003c/p\u003e\n",
+        "order": "2",
+        "expect": "\u003cp\u003e界面有loading效果\u003c/p\u003e\n"
+      },
+      {
+        "id": "533918",
+        "description": "\u003cp\u003e点击全景视图按钮\u003c/p\u003e\n",
+        "order": "3",
+        "expect": "\u003cp\u003e当前拓扑图中的所有卡片，上下左右居中显示\u003c/p\u003e\n"
+      },
+      {
+        "id": "533919",
+        "description": "\u003cp\u003e点击放大按钮\u003c/p\u003e\n",
+        "order": "4",
+        "expect": "\u003cp\u003e默认为100%，每次点击放大后缩放比例加10%，拓扑图放大\u003c/p\u003e\n"
+      },
+      {
+        "id": "533920",
+        "description": "\u003cp\u003e点击缩小按钮\u003c/p\u003e\n",
+        "order": "5",
+        "expect": "\u003cp\u003e默认为100%，每次点击后缩放比例减10%，拓扑图缩小\u003c/p\u003e\n"
+      },
+      {
+        "id": "533921",
+        "description": "\u003cp\u003e当缩放比例不为100%时，点击1:1\u003c/p\u003e\n",
+        "order": "6",
+        "expect": "\u003cp\u003e缩放比例还原到100%，拓扑图恢复到最初大小\u003c/p\u003e\n"
+      }
+    ],
+    "createdBy": {
+      "id": "36",
+      "name": "myliu"
+    },
+    "priority": "高",
+    "relatedRequirements": [
+      {
+        "title": "REQ-5112",
+        "targetURL": ""
+      }
+    ],
+    "relatedBugs": []
+  },
+  "status": {
+    "lastExecution": {
+      "testPlanId": "387013",
+      "buildRef": {
+        "name": "回归测试",
+        "id": "1140"
+      },
+      "status": "passed",
+      "createdAt": "2022-08-18T07:50:39Z",
+      "createdBy": {
+        "id": "45",
+        "name": "admin",
+        "email": "admin@cpaas.io"
+      }
+    }
+  }
+}

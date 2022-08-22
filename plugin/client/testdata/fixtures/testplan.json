@@ -1,0 +1,42 @@
+{
+  "kind": "TestPlan",
+  "apiVersion": "v1alpha1",
+  "metadata": {
+    "name": "12.6asm交付-回归测试",
+    "creationTimestamp": null
+  },
+  "spec": {
+    "id": "387013",
+    "assignee": {},
+    "createdBy": {},
+    "buildRefs": [
+      {
+        "name": "回归测试",
+        "id": "1140"
+      }
+    ]
+  },
+  "status": {
+    "conditions": [
+      {
+        "type": "Succeeded",
+        "status": "Unknown",
+        "lastTransitionTime": null,
+        "reason": "Running"
+      }
+    ],
+    "buildRef": {
+      "name": "回归测试",
+      "id": "1140"
+    },
+    "executable": true,
+    "testBuildStatus": {
+      "totalCases": 107,
+      "passed": 88,
+      "failed": 0,
+      "blocked": 1,
+      "waiting": 18,
+      "passRate": 0.822429906542056
+    }
+  }
+}

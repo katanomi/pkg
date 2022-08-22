@@ -33,17 +33,7 @@ import (
 )
 
 func TestSecretOpts(t *testing.T) {
-	secretData := map[string][]byte{
-		"username": []byte("123"),
-		"password": []byte("456"),
-	}
-
-	secret := v1.Secret{
-		TypeMeta:   metav1.TypeMeta{},
-		ObjectMeta: metav1.ObjectMeta{},
-		Type:       v1.SecretTypeBasicAuth,
-		Data:       secretData,
-	}
+	secret := secretForTest()
 
 	opt := SecretOpts(secret)
 	request := resty.New().R()
@@ -95,6 +85,21 @@ func TestSecretOptsWithRealFile(t *testing.T) {
 	dataBytes, _ := json.Marshal(secret.Data)
 
 	g.Expect(request.Header.Get(PluginSecretHeader)).To(Equal(base64.StdEncoding.EncodeToString(dataBytes)))
+}
+
+func secretForTest() v1.Secret {
+	secretData := map[string][]byte{
+		"username": []byte("123"),
+		"password": []byte("456"),
+	}
+
+	secret := v1.Secret{
+		TypeMeta:   metav1.TypeMeta{},
+		ObjectMeta: metav1.ObjectMeta{},
+		Type:       v1.SecretTypeBasicAuth,
+		Data:       secretData,
+	}
+	return secret
 }
 
 func parseSecret(path string) v1.Secret {

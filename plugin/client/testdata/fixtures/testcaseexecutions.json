@@ -1,0 +1,87 @@
+{
+  "metadata": {
+    "totalItems": 4
+  },
+  "items": [
+    {
+      "metadata": {
+        "name": "24",
+        "creationTimestamp": null
+      },
+      "spec": {
+        "testPlanId": "36",
+        "buildRef": {
+          "name": "test2version1",
+          "id": "11"
+        },
+        "status": "passed",
+        "createdAt": "2022-08-18T10:23:52Z",
+        "createdBy": {
+          "id": "1",
+          "name": "admin",
+          "email": "admin@cpaas.io"
+        }
+      }
+    },
+    {
+      "metadata": {
+        "name": "23",
+        "creationTimestamp": null
+      },
+      "spec": {
+        "testPlanId": "36",
+        "buildRef": {
+          "name": "test2version1",
+          "id": "11"
+        },
+        "status": "failed",
+        "createdAt": "2022-08-18T10:23:42Z",
+        "createdBy": {
+          "id": "1",
+          "name": "admin",
+          "email": "admin@cpaas.io"
+        }
+      }
+    },
+    {
+      "metadata": {
+        "name": "22",
+        "creationTimestamp": null
+      },
+      "spec": {
+        "testPlanId": "36",
+        "buildRef": {
+          "name": "test2version1",
+          "id": "11"
+        },
+        "status": "blocked",
+        "createdAt": "2022-08-18T10:23:11Z",
+        "createdBy": {
+          "id": "1",
+          "name": "admin",
+          "email": "admin@cpaas.io"
+        }
+      }
+    },
+    {
+      "metadata": {
+        "name": "21",
+        "creationTimestamp": null
+      },
+      "spec": {
+        "testPlanId": "36",
+        "buildRef": {
+          "name": "test2version1",
+          "id": "11"
+        },
+        "status": "failed",
+        "createdAt": "2022-08-18T10:22:59Z",
+        "createdBy": {
+          "id": "1",
+          "name": "admin",
+          "email": "admin@cpaas.io"
+        }
+      }
+    }
+  ]
+}

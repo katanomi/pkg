@@ -19,11 +19,31 @@ package client
 import (
 	"testing"
 
+	"github.com/go-resty/resty/v2"
+	"github.com/jarcoal/httpmock"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 )
+
+var defaultClient *resty.Client
 
 func TestClient(t *testing.T) {
 	RegisterFailHandler(Fail)
 	RunSpecs(t, "Client Suite")
 }
+
+var _ = BeforeSuite(func() {
+	defaultClient = resty.New()
+	defaultClient.SetDebug(true)
+	// block all HTTP requests
+	httpmock.ActivateNonDefault(defaultClient.GetClient())
+})
+
+var _ = BeforeEach(func() {
+	// remove any mocks
+	httpmock.Reset()
+})
+
+var _ = AfterSuite(func() {
+	httpmock.DeactivateAndReset()
+})
