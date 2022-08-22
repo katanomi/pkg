@@ -54,7 +54,11 @@ func PatchStatusAndRecordEvent(
 	patchData, _ := patch.Data(clientObj)
 
 	patchErr := clt.Status().Patch(ctx, clientObj, patch)
-	log.Debugw("object patch result", "err", patchErr, "patchData", string(patchData))
+	if patchErr != nil {
+		log.Warnw("object patch failed", "err", patchErr, "patchData", string(patchData))
+	} else {
+		log.Debugw("object patch success", "patchData", string(patchData))
+	}
 
 	if err != nil {
 		reason := metav1alpha1.ReasonForError(err)
