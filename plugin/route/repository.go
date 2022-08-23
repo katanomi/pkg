@@ -31,7 +31,7 @@ type repositoryList struct {
 	tags []string
 }
 
-//NewRepositoryList create a list repository route with plugin client
+// NewRepositoryList create a list repository route with plugin client
 func NewRepositoryList(impl client.RepositoryLister) Route {
 	return &repositoryList{
 		tags: []string{"projects", "repositories"},

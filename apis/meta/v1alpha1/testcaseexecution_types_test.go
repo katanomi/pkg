@@ -1,5 +1,5 @@
 /*
-Copyright 2021 The Katanomi Authors.
+Copyright 2022 The Katanomi Authors.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -14,36 +14,23 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package client
+package v1alpha1
 
 import (
-	"testing"
-
-	"github.com/go-resty/resty/v2"
-	"github.com/jarcoal/httpmock"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	authv1 "k8s.io/api/authorization/v1"
 )
 
-var defaultClient *resty.Client
-
-func TestClient(t *testing.T) {
-	RegisterFailHandler(Fail)
-	RunSpecs(t, "Client Suite")
-}
-
-var _ = BeforeSuite(func() {
-	defaultClient = resty.New()
-	defaultClient.SetDebug(true)
-	// block all HTTP requests
-	httpmock.ActivateNonDefault(defaultClient.GetClient())
-})
-
-var _ = BeforeEach(func() {
-	// remove any mocks
-	httpmock.Reset()
-})
-
-var _ = AfterSuite(func() {
-	httpmock.DeactivateAndReset()
+var _ = Describe("TestCaseExecution", func() {
+	Context("TestCaseExecutionResourceAttributes", func() {
+		It("should return related attributes", func() {
+			Expect(TestCaseExecutionResourceAttributes("get")).To(Equal(authv1.ResourceAttributes{
+				Group:    GroupVersion.Group,
+				Version:  GroupVersion.Version,
+				Resource: "testcaseexecutions",
+				Verb:     "get",
+			}))
+		})
+	})
 })

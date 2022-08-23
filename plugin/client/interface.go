@@ -155,10 +155,10 @@ type WebhookRegister interface {
 // TODO: need refactor: maybe integration plugin should decided how to generate cloudevents filters
 // up to now, it is not a better solution that relying on plugins to give some events type to GitTriggerReconcile.
 //
-//   PullRequestCloudEventFilter() CloudEventFilters
-//   BranchCloudEventFilter() CloudEventFilters
-//   TagCloudEventFilter() CloudEventFilters
-//   WebHook() WebHook
+//	PullRequestCloudEventFilter() CloudEventFilters
+//	BranchCloudEventFilter() CloudEventFilters
+//	TagCloudEventFilter() CloudEventFilters
+//	WebHook() WebHook
 type GitTriggerRegister interface {
 	GetIntegrationClassName() string
 
@@ -414,4 +414,46 @@ type IssueAttributeGetter interface {
 type ProjectUserLister interface {
 	Interface
 	ListProjectUsers(ctx context.Context, params metav1alpha1.UserOptions, option metav1alpha1.ListOptions) (*metav1alpha1.UserList, error)
+}
+
+// TestPlanLister list test plans
+type TestPlanLister interface {
+	Interface
+	ListTestPlans(ctx context.Context, params metav1alpha1.TestProjectOptions, option metav1alpha1.ListOptions) (*metav1alpha1.TestPlanList, error)
+}
+
+// TestPlanGetter get a test plan
+type TestPlanGetter interface {
+	Interface
+	GetTestPlan(ctx context.Context, params metav1alpha1.TestProjectOptions) (*metav1alpha1.TestPlan, error)
+}
+
+// TestCaseLister list test cases
+type TestCaseLister interface {
+	Interface
+	ListTestCases(ctx context.Context, params metav1alpha1.TestProjectOptions, options metav1alpha1.ListOptions) (*metav1alpha1.TestCaseList, error)
+}
+
+// TestCaseGetter get a test case
+type TestCaseGetter interface {
+	Interface
+	GetTestCase(ctx context.Context, params metav1alpha1.TestProjectOptions) (*metav1alpha1.TestCase, error)
+}
+
+// TestModuleLister list a test module
+type TestModuleLister interface {
+	Interface
+	ListTestModules(ctx context.Context, params metav1alpha1.TestProjectOptions, options metav1alpha1.ListOptions) (*metav1alpha1.TestModuleList, error)
+}
+
+// TestCaseExecutionLister list test case executions
+type TestCaseExecutionLister interface {
+	Interface
+	ListTestCaseExecutions(ctx context.Context, params metav1alpha1.TestProjectOptions, options metav1alpha1.ListOptions) (*metav1alpha1.TestCaseExecutionList, error)
+}
+
+// TestCaseExecutionCreator create a new test case execution
+type TestCaseExecutionCreator interface {
+	Interface
+	CreateTestCaseExecution(ctx context.Context, params metav1alpha1.TestProjectOptions, payload metav1alpha1.TestCaseExecution) (*metav1alpha1.TestCaseExecution, error)
 }
