@@ -42,7 +42,7 @@ func NewTestCaseLister(impl client.TestCaseLister) Route {
 func (r *testCaseLister) Register(ws *restful.WebService) {
 	projectParam := ws.PathParameter("project", "testCase belong to integraion")
 	testPlanIDParam := ws.PathParameter("testplanid", "test plan id")
-	buildIDParam := ws.PathParameter("buildID", "test plan id")
+	buildIDParam := ws.QueryParameter("buildID", "test plan id")
 	ws.Route(
 		ListOptionsDocs(
 			ws.GET("/projects/{project:*}/testplans/{testplanid:*}/testcases").To(r.ListTestCases).
