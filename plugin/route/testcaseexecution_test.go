@@ -26,7 +26,6 @@ import (
 	"testing"
 
 	"github.com/emicklei/go-restful/v3"
-	"github.com/katanomi/integrations-testlink/pkg/response"
 	. "github.com/onsi/gomega"
 
 	metav1alpha1 "github.com/katanomi/pkg/apis/meta/v1alpha1"
@@ -77,7 +76,7 @@ func TestCreateTestCaseExecution(t *testing.T) {
 
 	body := metav1alpha1.TestCaseExecution{
 		Spec: metav1alpha1.TestCaseExecutionSpec{
-			Status: response.TestCaseExecutionStatusPassed,
+			Status: metav1alpha1.TestcaseExecutionStatusPassed,
 		},
 	}
 	bodyMarshal, _ := json.Marshal(body)
