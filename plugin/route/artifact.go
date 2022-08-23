@@ -31,7 +31,7 @@ type artifactList struct {
 	tags []string
 }
 
-//NewArtifactList create a list artifact route with plugin client
+// NewArtifactList create a list artifact route with plugin client
 func NewArtifactList(impl client.ArtifactLister) Route {
 	return &artifactList{
 		tags: []string{"projects", "repositories", "artifacts"},
@@ -163,7 +163,7 @@ type artifactTagDeleter struct {
 	tags []string
 }
 
-//NewArtifactTagDelete create a delete artifact tag route with plugin client
+// NewArtifactTagDelete create a delete artifact tag route with plugin client
 func NewArtifactTagDelete(impl client.ArtifactTagDeleter) Route {
 	return &artifactTagDeleter{
 		tags: []string{"projects", "repositories", "artifacts", "tag"},
@@ -213,7 +213,7 @@ type scanImage struct {
 	tags []string
 }
 
-//NewScanImage create a scan image route with plugin client
+// NewScanImage create a scan image route with plugin client
 func NewScanImage(impl client.ScanImage) Route {
 	return &scanImage{
 		tags: []string{"projects", "repositories", "artifacts"},

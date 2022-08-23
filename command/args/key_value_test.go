@@ -91,7 +91,7 @@ var _ = Describe("GetKeyValues", func() {
 			Expect(result).To(Equal(map[string]string{
 				"this-is-key":         "this-is-value",
 				"this-is-another-key": "this-is-another-value",
-				"key": "with=multiple=equalsigns",
+				"key":                 "with=multiple=equalsigns",
 			}))
 			Expect(ok).To(BeTrue())
 		})

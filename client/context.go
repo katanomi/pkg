@@ -61,7 +61,7 @@ func DirectClient(ctx context.Context) client.Client {
 
 type clientmanagerCtxKey struct{}
 
-//WithManager sets a manager instance into a context
+// WithManager sets a manager instance into a context
 func WithManager(ctx context.Context, mgr *Manager) context.Context {
 	return context.WithValue(ctx, clientmanagerCtxKey{}, mgr)
 }

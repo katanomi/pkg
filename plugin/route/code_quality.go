@@ -33,7 +33,7 @@ type codeQualityGetter struct {
 	tags []string
 }
 
-//NewCodeQualityGetter create a get codeQuality route with plugin client
+// NewCodeQualityGetter create a get codeQuality route with plugin client
 func NewCodeQualityGetter(impl client.CodeQualityGetter) Route {
 	return &codeQualityGetter{
 		tags: []string{"codeQuality"},

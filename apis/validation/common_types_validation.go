@@ -57,7 +57,7 @@ func ValidateObjectReference(objref *corev1.ObjectReference, optional, needsReso
 	return errs
 }
 
-//ValidateCommonObject common validations for objects in katanomi,
+// ValidateCommonObject common validations for objects in katanomi,
 // includes, name, annotations etc.
 func ValidateCommonObject(obj metav1.Object) field.ErrorList {
 	errs := field.ErrorList{}
@@ -72,7 +72,8 @@ func ValidateCommonObject(obj metav1.Object) field.ErrorList {
 }
 
 // ValidateItemName validates a name of an item in a slice. this is used in
-//  Integration resources,  volumes and etc
+//
+//	Integration resources,  volumes and etc
 func ValidateItemName(name string, prefix bool, fld *field.Path) field.ErrorList {
 	errs := field.ErrorList{}
 	errList := apimachineryvalidation.ValidateNamespaceName(name, prefix)

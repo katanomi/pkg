@@ -36,10 +36,11 @@ type Task func() (interface{}, error)
 // eg.
 // result, err :=  P("eg1", f1,f2, f3).Do().Wait()
 // result, err :=  P("eg2", f1,f2, f3).Add(f4).FailFast().Do().Wait()
-// result, err :=  P("eg3", f1,f2, f3).Context(func()context.Context{
-//		ctx, _ := context.WithTimeout(context.Background(), 500*time.Millisecond) // 0.5s will timeout
-//		return ctx
-// }).Do().Wait()
+//
+//	result, err :=  P("eg3", f1,f2, f3).Context(func()context.Context{
+//			ctx, _ := context.WithTimeout(context.Background(), 500*time.Millisecond) // 0.5s will timeout
+//			return ctx
+//	}).Do().Wait()
 type ParallelTasks struct {
 	name string
 
