@@ -38,7 +38,7 @@ func (c *Check) HasApprover() bool {
 
 // IsNotSet Indicates that no approver is set.
 func (c *Check) IsNotSet() bool {
-	return c == nil || c.Approval == nil
+	return c == nil || c.Approval == nil || len(c.Approval.Users) == 0
 }
 
 // ApprovalIsStarted indicates whether the approver is started.

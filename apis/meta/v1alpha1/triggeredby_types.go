@@ -73,12 +73,13 @@ type TriggeredBy struct {
 }
 
 // IsZero basic function returns true when all attributes of the object are empty
-func (by TriggeredBy) IsZero() bool {
-	return by.User == nil &&
-		by.CloudEvent == nil &&
-		by.Ref == nil &&
-		by.TriggeredTimestamp.IsZero() &&
-		by.TriggeredType.String() == ""
+func (by *TriggeredBy) IsZero() bool {
+	return (by == nil) ||
+		(by.User == nil &&
+			by.CloudEvent == nil &&
+			by.Ref == nil &&
+			by.TriggeredTimestamp.IsZero() &&
+			by.TriggeredType.String() == "")
 }
 
 // FromAnnotation will set `by` from annotations
