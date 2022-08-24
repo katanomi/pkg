@@ -45,3 +45,9 @@ func TestString(t *testing.T) {
 	input := ""
 	g.Expect(String(input)).To(Equal(&input))
 }
+
+func TestFloat64(t *testing.T) {
+	g := NewGomegaWithT(t)
+	input := float64(0)
+	g.Expect(Float64(input)).To(Equal(&input))
+}
