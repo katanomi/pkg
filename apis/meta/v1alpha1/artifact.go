@@ -16,14 +16,14 @@ limitations under the License.
 
 package v1alpha1
 
-// ArtifactParameterType type of artifacts parameter enum
-type ArtifactParameterType string
+// ArtifactType type of artifacts parameter enum
+type ArtifactType string
 
 const (
 	// OCIHelmChartArtifactParameterType helm charts as OCI artifact
-	OCIHelmChartArtifactParameterType ArtifactParameterType = "OCIHelmChart"
+	OCIHelmChartArtifactParameterType ArtifactType = "OCIHelmChart"
 	// OCIContainerImageArtifactParameterType runnable container image used to deploy workloads
-	OCIContainerImageArtifactParameterType ArtifactParameterType = "OCIContainerImage"
+	OCIContainerImageArtifactParameterType ArtifactType = "OCIContainerImage"
 )
 
 // ArtifactParameterSpec specs for an strong typed parameter as an artifact
@@ -34,7 +34,7 @@ type ArtifactParameterSpec struct {
 
 	// Type of artifact to be expected in this parameter
 	// +optional
-	Type ArtifactParameterType `json:"type,omitempty"`
+	Type ArtifactType `json:"type,omitempty"`
 
 	// Annotations for the artifact.
 	// +optional
