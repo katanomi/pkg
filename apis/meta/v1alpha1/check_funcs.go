@@ -81,3 +81,13 @@ func (as ApprovalStatuses) GetBySubject(subject rbacv1.Subject) *ApprovalStatus 
 	}
 	return nil
 }
+
+// IsTimeout determine if the current is timeout.
+// Take the current time as a reference, and compare it to the start time and the timeout duration.
+func IsTimeout(startTime *metav1.Time, timeout metav1.Duration) bool {
+	if startTime.IsZero() || timeout.Duration == 0 {
+		return false
+	}
+	runtime := time.Since(startTime.Time)
+	return runtime >= timeout.Duration
+}

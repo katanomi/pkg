@@ -17,9 +17,12 @@ limitations under the License.
 package v1alpha1
 
 import (
+	"time"
+
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	rbacv1 "k8s.io/api/rbac/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 var _ = Describe("Test.Check", func() {
@@ -80,6 +83,41 @@ var _ = Describe("Test.Check", func() {
 				}},
 			},
 			false,
+		),
+	)
+})
+
+var _ = Describe("Test.IsTimeout", func() {
+	DescribeTable("IsTimeout",
+		func(startTime *metav1.Time, timeout time.Duration, expected bool) {
+			v1time := metav1.Duration{Duration: timeout}
+			actual := IsTimeout(startTime, v1time)
+			Expect(actual).To(Equal(expected))
+		},
+		Entry("nil startTime",
+			nil,
+			1*time.Second,
+			false,
+		),
+		Entry("timeout is zero",
+			&metav1.Time{Time: time.Now()},
+			0*time.Second,
+			false,
+		),
+		Entry("not timeout",
+			&metav1.Time{Time: time.Now().Add(1 * time.Minute)},
+			30*time.Second,
+			false,
+		),
+		Entry("timeout",
+			&metav1.Time{Time: time.Now().Add(-1 * time.Minute)},
+			30*time.Second,
+			true,
+		),
+		Entry("just a timeout",
+			&metav1.Time{Time: time.Now().Add(-1 * time.Minute)},
+			60*time.Second,
+			true,
 		),
 	)
 })
