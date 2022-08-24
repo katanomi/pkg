@@ -1,0 +1,58 @@
+/*
+Copyright 2022 The Katanomi Authors.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
+
+package v1alpha1
+
+// ArtifactParameterType type of artifacts parameter enum
+type ArtifactParameterType string
+
+const (
+	// OCIHelmChartArtifactParameterType helm charts as OCI artifact
+	OCIHelmChartArtifactParameterType ArtifactParameterType = "OCIHelmChart"
+	// OCIContainerImageArtifactParameterType runnable container image used to deploy workloads
+	OCIContainerImageArtifactParameterType ArtifactParameterType = "OCIContainerImage"
+)
+
+// ArtifactParameterSpec specs for an strong typed parameter as an artifact
+type ArtifactParameterSpec struct {
+	// URI for artifact, must be a complete identifier, i.e docker.io/katanomi/repository
+	// +optional
+	URI string `json:"uri,omitempty"`
+
+	// Type of artifact to be expected in this parameter
+	// +optional
+	Type ArtifactParameterType `json:"type,omitempty"`
+
+	// Annotations for the artifact.
+	// +optional
+	Annotations map[string]string `json:"annotations,omitempty"`
+
+	// IntegrationClassName is instance name of IntegrationClass.
+	// +optional
+	IntegrationClassName string `json:"integrationClassName,omitempty"`
+}
+
+// NamedValue can use the NamedValue structure to set some special parameters in the artifact.
+// i.e artifact promotion use NamedValue to record artifact detail info.
+type NamedValue struct {
+	// Name parameter name.
+	// +optional
+	Name string `json:"name,omitempty"`
+
+	// Value The specific value of name, you can get the corresponding value according to the name.
+	// +optional
+	Value string `json:"value,omitempty"`
+}
