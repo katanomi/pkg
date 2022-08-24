@@ -62,6 +62,12 @@ type AdditionalWebhookRegister interface {
 	GetWebhookSupport() map[metav1alpha1.WebhookEventSupportType][]string
 }
 
+// ResourcePathFormatter implements a formatter for resource path base on different scene
+type ResourcePathFormatter interface {
+	// GetResourcePathFmt resource path format
+	GetResourcePathFmt() map[metav1alpha1.ResourcePathScene]string
+}
+
 // AuthChecker implements an authorization check method for plugins
 type AuthChecker interface {
 	AuthCheck(ctx context.Context, option metav1alpha1.AuthCheckOptions) (*metav1alpha1.AuthCheck, error)
@@ -155,10 +161,10 @@ type WebhookRegister interface {
 // TODO: need refactor: maybe integration plugin should decided how to generate cloudevents filters
 // up to now, it is not a better solution that relying on plugins to give some events type to GitTriggerReconcile.
 //
-//	PullRequestCloudEventFilter() CloudEventFilters
-//	BranchCloudEventFilter() CloudEventFilters
-//	TagCloudEventFilter() CloudEventFilters
-//	WebHook() WebHook
+// PullRequestCloudEventFilter() CloudEventFilters
+// BranchCloudEventFilter() CloudEventFilters
+// TagCloudEventFilter() CloudEventFilters
+// WebHook() WebHook
 type GitTriggerRegister interface {
 	GetIntegrationClassName() string
 

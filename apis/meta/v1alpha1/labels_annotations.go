@@ -91,6 +91,7 @@ const (
 	MethodsAttributeKey                = "methods"
 	AllowEmptySecretAttributeKey       = "allowEmptySecret"
 	DefaultProjectTypeAttributeKey     = "defaultProjectSubType"
+	ResourcePathFormat                 = "resourcePathFormat"
 	// GitPRRevisionPrefixes allows git related integrations
 	// define custom PR revision prefixes
 	GitPRRevisionPrefixes = "gitPRRevisionPrefixes"
