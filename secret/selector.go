@@ -84,9 +84,11 @@ func NewSecretSelectOption(preferredSecret types.NamespacedName, namespace strin
 }
 
 // SelectToolSecret will select secret according to tool address and resource scope on secret
-//   clientI could be sigs.k8s.io/controller-runtime/pkg/client.Client or k8s.io/client-go/kubernetes.Interface or "k8s.io/client-go/informers".SharedInformerFactory
-//   resourceURL refers resource url lik git http url or harbor http url. eg. https://github.com/example or  build.harbor.com/example
-//   namespaces refers to all namespaces where the secret may exist
+//
+//	clientI could be sigs.k8s.io/controller-runtime/pkg/client.Client or k8s.io/client-go/kubernetes.Interface or "k8s.io/client-go/informers".SharedInformerFactory
+//	resourceURL refers resource url lik git http url or harbor http url. eg. https://github.com/example or  build.harbor.com/example
+//	namespaces refers to all namespaces where the secret may exist
+//
 // if no secret was found, secret will be nil and err is nil
 // if any errors occurred, err will not be nil
 // The meaning of preferred is that if there is a secret with this name, it will be selected first, and preferredNs means the namespace where the secret is located

@@ -17,7 +17,8 @@ limitations under the License.
 // Package hash contains useful functionality for hashing.
 //
 // This package is copied from:
-//   https://github.com/kubernetes/kubernetes/blob/b695d79d4f967c403a96986f1750a35eb75e75f1/pkg/util/hash/hash.go
+//
+//	https://github.com/kubernetes/kubernetes/blob/b695d79d4f967c403a96986f1750a35eb75e75f1/pkg/util/hash/hash.go
 package hash
 
 import (

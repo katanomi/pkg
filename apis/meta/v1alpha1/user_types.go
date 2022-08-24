@@ -116,7 +116,7 @@ func (user *UserInfo) GetEmail() string {
 	return ""
 }
 
-//RBACSubjectValGetter returns the list of keys and values to support variable substitution for
+// RBACSubjectValGetter returns the list of keys and values to support variable substitution for
 // rbac.
 func RBACSubjectValGetter(subject *rbac.Subject) substitution.GetValWithKeyFunc {
 	if subject == nil {

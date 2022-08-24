@@ -33,18 +33,20 @@ func defaultSpanNameFormatter(_ string, r *http.Request) string {
 // rely on *http.Transport, this method must be called after initialization.
 //
 // correct example:
-//		restyClient := resty.New()
-//		restyClient.SetTLSClientConfig(&tls.Config{
-//			InsecureSkipVerify: true,
-//		})
-//		tracing.WrapTransportForRestyClient(restyClient)
+//
+//	restyClient := resty.New()
+//	restyClient.SetTLSClientConfig(&tls.Config{
+//		InsecureSkipVerify: true,
+//	})
+//	tracing.WrapTransportForRestyClient(restyClient)
 //
 // wrong example:
-//		restyClient := resty.New()
-//      tracing.WrapTransportForRestyClient(restyClient)
-//		restyClient.SetTLSClientConfig(&tls.Config{
-//			InsecureSkipVerify: true,
-//		})
+//
+//			restyClient := resty.New()
+//	     tracing.WrapTransportForRestyClient(restyClient)
+//			restyClient.SetTLSClientConfig(&tls.Config{
+//				InsecureSkipVerify: true,
+//			})
 func WrapTransportForRestyClient(client *resty.Client) {
 	if client == nil {
 		return

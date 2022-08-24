@@ -17,9 +17,9 @@ limitations under the License.
 // Package v1alpha1 contains API Schema definitions for the types v1alpha1 API group
 // this group is a duck type only package that hosts common objects and interfaces in katanomi
 // very similar to knative.dev/pkg/apis/duck/v1 or k8s.io/apimachinery/pkg/apis/meta/v1
-//+kubebuilder:object:generate=true
-//+k8s:deepcopy-gen=package
-//+groupName=meta.katanomi.dev
+// +kubebuilder:object:generate=true
+// +k8s:deepcopy-gen=package
+// +groupName=meta.katanomi.dev
 package v1alpha1
 
 import (

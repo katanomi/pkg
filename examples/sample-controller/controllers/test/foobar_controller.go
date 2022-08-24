@@ -51,7 +51,7 @@ func (FooBarReconciler) Name() string {
 	return "sugar"
 }
 
-//Setup will setup webhook and controller
+// Setup will setup webhook and controller
 func (r *FooBarReconciler) Setup(ctx context.Context, mgr ctrl.Manager, logger *zap.SugaredLogger) error {
 	r.Log = logger
 	r.Scheme = mgr.GetScheme()

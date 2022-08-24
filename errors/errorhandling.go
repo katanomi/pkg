@@ -30,7 +30,7 @@ import (
 // RESTClientGroupResource fake GroupResource to use errors api
 var RESTClientGroupResource = schema.GroupResource{Group: "katanomi.dev", Resource: "RESTfulClient"}
 
-//AsAPIError returns an error as a apimachinary api error
+// AsAPIError returns an error as a apimachinary api error
 func AsAPIError(err error) error {
 	reason := errors.ReasonForError(err)
 	if reason == metav1.StatusReasonUnknown {

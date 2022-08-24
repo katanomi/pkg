@@ -19,9 +19,11 @@ package v1alpha1
 import (
 	"context"
 	"testing"
+	"time"
 
 	. "github.com/katanomi/pkg/testing"
 	corev1 "k8s.io/api/core/v1"
+	rbacv1 "k8s.io/api/rbac/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	. "github.com/onsi/ginkgo/v2"
@@ -193,4 +195,53 @@ var _ = Describe("TriggeredBy.GetValWithKey", func() {
 			Expect(values).To(Equal(expected))
 		})
 	})
+})
+
+var _ = Describe("TriggeredBy.IsZero", func() {
+	DescribeTable("TriggeredBy.IsZero",
+		func(input *TriggeredBy, expected bool) {
+			actual := input.IsZero()
+			Expect(actual).To(Equal(expected))
+		},
+		Entry("nil pointer",
+			nil,
+			true,
+		),
+		Entry("no user",
+			&TriggeredBy{},
+			true,
+		),
+		Entry("user is not nil",
+			&TriggeredBy{
+				User: &rbacv1.Subject{
+					Name: "user1",
+				},
+			},
+			false,
+		),
+		Entry("cloudEvent is not nil",
+			&TriggeredBy{
+				CloudEvent: &CloudEvent{},
+			},
+			false,
+		),
+		Entry("ref is not nil",
+			&TriggeredBy{
+				Ref: &corev1.ObjectReference{},
+			},
+			false,
+		),
+		Entry("triggered timestamp is not zero",
+			&TriggeredBy{
+				TriggeredTimestamp: &metav1.Time{Time: time.Now()},
+			},
+			false,
+		),
+		Entry("triggered type is not empty",
+			&TriggeredBy{
+				TriggeredType: DefinitionTriggeredTypeValues.Manual,
+			},
+			false,
+		),
+	)
 })
