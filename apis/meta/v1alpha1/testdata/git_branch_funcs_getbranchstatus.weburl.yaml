@@ -1,0 +1,23 @@
+kind: GitBranch
+apiVersion: v1alpha1
+metadata:
+  name: release-1.7
+  creationTimestamp: null
+spec:
+  project: kubernetes
+  repository: kubernetes
+  name: release-1.7
+  protected: true
+  default: false
+  commit:
+    sha: 347f652944cc2348d59b1c815007e21e062fe597
+    createdAt: null
+  # weburl is in properties
+  webURL: ""
+  downloadURL:
+    zip: https://github.com/kubernetes/kubernetes/archive/refs/heads/release-1.7.zip
+    tar.gz: https://github.com/kubernetes/kubernetes/archive/refs/heads/release-1.7.tar.gz
+    tar.ba2: null
+    tar: null
+  properties:
+    webURL: https://github.com/kubernetes/kubernetes/tree/release-1.7

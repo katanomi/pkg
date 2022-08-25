@@ -1,0 +1,5 @@
+name: release-1.7
+protected: true
+default: false
+webURL: https://github.com/kubernetes/kubernetes/tree/release-1.7
+
