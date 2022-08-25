@@ -79,6 +79,8 @@ const (
 	SettingsConvertTypesKey = "settings.katanomi.dev/convertTypes"
 	// SettingsAutoGenerateKey annotation key to store whether the secret is automatically generated
 	SettingsAutoGenerateKey = "settings.katanomi.dev/autoGenerate"
+	// UIDescriptorsAnnotationKey annotation for storing ui descriptors in resources
+	UIDescriptorsAnnotationKey = "ui.katanomi.dev/descriptors"
 )
 
 // Attribute keys for Integrations
