@@ -16,6 +16,8 @@ limitations under the License.
 
 package v1alpha1
 
+import rbacv1 "k8s.io/api/rbac/v1"
+
 // HasApprover indicates whether the approver exists.
 func (a *Approval) HasApprover() bool {
 	return a != nil && len(a.Users) != 0
@@ -34,4 +36,12 @@ func (a *ApprovalSpec) IsEnabled() bool {
 // TimeoutEnabled indicates whether the timeout is enabled.
 func (a *ApprovalSpec) TimeoutEnabled() bool {
 	return a != nil && a.Timeout.Duration > 0
+}
+
+// GetApprovalUsers returns the users that can approve.
+func (a *ApprovalSpec) GetApprovalUsers() []rbacv1.Subject {
+	if a == nil {
+		return nil
+	}
+	return a.Users
 }
