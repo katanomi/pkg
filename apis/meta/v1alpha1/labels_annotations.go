@@ -81,6 +81,8 @@ const (
 	SettingsAutoGenerateKey = "settings.katanomi.dev/autoGenerate"
 	// UIDescriptorsAnnotationKey annotation for storing ui descriptors in resources
 	UIDescriptorsAnnotationKey = "ui.katanomi.dev/descriptors"
+	// PodAnnotationKeyPrefix uses a prefix for pod annotations in katanomi
+	PodAnnotationKeyPrefix = "pod.katanomi.dev/"
 )
 
 // Attribute keys for Integrations

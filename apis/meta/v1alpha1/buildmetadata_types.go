@@ -76,10 +76,10 @@ type BuildGitBranchStatus struct {
 	Name string `json:"name,omitempty"`
 	// Protected represent if is the protected branch
 	// +optional
-	Protected bool `json:"protected,omitempty"`
+	Protected bool `json:"protected"`
 	// Default represent if is the protected branch
 	// +optional
-	Default bool `json:"default,omitempty"`
+	Default bool `json:"default"`
 	// WebURL to access the branch
 	// +optional
 	WebURL string `json:"webURL,omitempty"`
