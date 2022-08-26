@@ -41,19 +41,26 @@ type GetChecksFromObject func(ctx context.Context, obj runtime.Object) []*metav1
 // WithApprovalOperator adds an approval operator to the object using the request information
 func WithApprovalOperator(getChecksFromObject GetChecksFromObject) kadmission.TransformFunc {
 	return func(ctx context.Context, runtimeObj runtime.Object, req admission.Request) {
-		if req.Operation != admissionv1.Update {
+		if req.Operation != admissionv1.Create && req.Operation != admissionv1.Update {
 			return
 		}
 		log := logging.FromContext(ctx)
-		oldObject := apis.GetBaseline(ctx).(runtime.Object)
 		newChecks := getChecksFromObject(ctx, runtimeObj)
-		oldChecks := getChecksFromObject(ctx, oldObject)
+		var oldChecks []*metav1alpha1.Check
+		if req.Operation == admissionv1.Create {
+			// If it is a the create operation, the base is nil.
+			oldChecks = make([]*metav1alpha1.Check, len(newChecks))
+		} else {
+			base := apis.GetBaseline(ctx)
+			oldObject, _ := base.(runtime.Object)
+			oldChecks = getChecksFromObject(ctx, oldObject)
+		}
 		if len(oldChecks) != len(newChecks) {
 			log.Warnw("unable to add approval operator, length mismatch", "req", req, "old", oldChecks, "new", newChecks)
 			return
 		}
 
-		// log.Debugw("add approval operator", "name", obj.GetName(), "user", req.AdmissionRequest.UserInfo,
+		// log.Debugw("add approval operator", "user", req.AdmissionRequest.UserInfo,
 		// 	"old", req.AdmissionRequest.OldObject, "new", req.AdmissionRequest.Object)
 
 		oldNewChecksPairs := make([]PairOfOldNewCheck, len(oldChecks))
