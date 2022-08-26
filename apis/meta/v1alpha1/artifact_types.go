@@ -17,6 +17,7 @@ limitations under the License.
 package v1alpha1
 
 import (
+	v1 "github.com/opencontainers/image-spec/specs-go/v1"
 	authv1 "k8s.io/api/authorization/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -62,6 +63,46 @@ type ArtifactSpec struct {
 	// Properties extended properties for Artifact
 	// +optional
 	Properties *runtime.RawExtension `json:"properties,omitempty"`
+
+	// Size represent size of artifact
+	Size int64 `json:"size,omitempty"`
+
+	// Tags represent all tags of current artifact
+	// +optional
+	Tags []ArtifactTag `json:"tags,omitempty"`
+
+	// imageconfig represent original container image config
+	ImageConfig v1.ImageConfig `json:"config"`
+}
+
+// ArtifactProperties we should promote all shared field in properties into spec
+// but just defined it before we do the promotion
+type ArtifactProperties struct {
+	// Size represent size of artifact
+	Size int64 `json:"size,omitempty"`
+	// Tags represent all tags of current artifact
+	// +optional
+	Tags       []ArtifactTag      `json:"tags,omitempty"`
+	ExtraAttrs ArtifactExtraAttrs `json:"extra_attrs,omitempty"`
+}
+
+// ArtifactTag represent tag of artifact
+type ArtifactTag struct {
+	Name string `json:"tag,omitempty"`
+}
+
+type ArtifactExtraAttrs struct {
+	// os ar
+	OS           string `json:"os,omitempty"`
+	Architecture string `json:"architecture,omitempty"`
+	Variant      string `json:"Variant",omitempty`
+	// Config represent original container image config
+	Config v1.ImageConfig `json:"config"`
+}
+
+type ArtifactReference struct {
+	ChildDigest string       `json:"child_digest"`
+	Platform    *v1.Platform `json:"platform"`
 }
 
 // ArtifactList list of artifacts

@@ -17,6 +17,8 @@ limitations under the License.
 package v1alpha1
 
 import (
+	"encoding/json"
+
 	"github.com/katanomi/pkg/common"
 )
 
@@ -46,4 +48,23 @@ func (r *ArtifactList) Filter(filter func(artifact Artifact) bool) *ArtifactList
 	}
 
 	return newList
+}
+
+func (a Artifact) ParseProperties() (ArtifactProperties, error) {
+	if a.Spec.Properties == nil {
+		return ArtifactProperties{}, nil
+	}
+
+	bts, err := a.Spec.Properties.Marshal()
+	if err != nil {
+		return ArtifactProperties{}, err
+	}
+
+	p := ArtifactProperties{}
+	err = json.Unmarshal(bts, &p)
+	if err != nil {
+		return ArtifactProperties{}, err
+	}
+
+	return p, nil
 }
