@@ -21,6 +21,24 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
+// ApprovalPolicy indicate the policy of approval
+type ApprovalPolicy string
+
+func (policy ApprovalPolicy) String() string {
+	return string(policy)
+}
+
+const (
+	// ApprovalPolicyAny any one approved it, consider it passed.
+	ApprovalPolicyAny ApprovalPolicy = "Any"
+
+	// ApprovalPolicyAll must be approved by all users, consider it passed.
+	ApprovalPolicyAll ApprovalPolicy = "All"
+
+	// ApprovalPolicyInOrder must be approved by all users in order, consider it passed.
+	ApprovalPolicyInOrder ApprovalPolicy = "InOrder"
+)
+
 // ApprovalSpec Manual approval policy.
 type ApprovalSpec struct {
 	// Users a list of users that can perform approval for the Stage execution
@@ -89,22 +107,3 @@ type ApprovalStatus struct {
 	// Time of approval
 	ApprovalTime *metav1.Time `json:"approvalTime,omitempty"`
 }
-
-// ApprovalPolicy indicate the policy of approval
-type ApprovalPolicy string
-
-func (policy ApprovalPolicy) String() string {
-	return string(policy)
-}
-
-const (
-	// ApprovalPolicyAny any one approved it, consider it passed.
-	ApprovalPolicyAny ApprovalPolicy = "Any"
-
-	// ApprovalPolicyAll must be approved by all users, consider it passed.
-	ApprovalPolicyAll ApprovalPolicy = "All"
-
-	// Not supported at the moment
-	// ApprovalPolicyInOrder must be approved by all users in order, consider it passed.
-	ApprovalPolicyInOrder ApprovalPolicy = "InOrder"
-)
