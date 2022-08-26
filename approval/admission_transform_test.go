@@ -51,7 +51,26 @@ var _ = Describe("Test.addApprovalOperator", func() {
 		addApprovalOperator(ctx, reqUser, checkList)
 	})
 
-	Context("Approval for yourself", func() {
+	Context("Approval for myself", func() {
+		When("old user is empty", func() {
+			BeforeEach(func() {
+				username = "user"
+				old = nil
+				new = []metav1alpha1.UserApproval{
+					{
+						Subject: rbacv1.Subject{Name: "user", Kind: rbacv1.UserKind},
+						Input:   &metav1alpha1.UserApprovalInput{Approved: false},
+						Operator: &rbacv1.Subject{
+							Name: "user",
+							Kind: rbacv1.UserKind,
+						},
+					},
+				}
+			})
+			It("should be clear the operator", func() {
+				Expect(new[0].Operator).To(BeNil())
+			})
+		})
 		When("exists the operator", func() {
 			BeforeEach(func() {
 				username = "user"

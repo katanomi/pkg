@@ -85,7 +85,7 @@ func addApprovalOperator(ctx context.Context, reqUser authenticationv1.UserInfo,
 		// If the approver is someone else, add the real operator of the approval.
 		for i, newUser := range newUsers {
 			oldUser := oldUsers.GetBySubject(newUser.Subject)
-			if oldUser != nil && oldUser.Input == nil && newUser.Input != nil {
+			if (oldUser == nil || oldUser.Input == nil) && newUser.Input != nil {
 				if !matching.IsRightUser(reqUser, newUser.Subject) {
 					ns, _ := namespace.NamespaceFrom(ctx)
 					subject := matching.ConvertUserInfoToSubject(reqUser, ns)

@@ -30,9 +30,9 @@ import (
 )
 
 // ValidateApproval validates the approval according by the approval spec
-// if `allowRepresentOthers` is true, the reqUser can approve on behalf of others.
-// if `allowRepresentOthers` is false, the reqUser can only approve on behalf of himself.
-func ValidateApproval(ctx context.Context, reqUser authenticationv1.UserInfo, allowRepresentOthers bool,
+// if `allowRepresentOthers` is true, the reqUser can approve on behalf of others
+// if `isCreateOperation` is true, the approvalSpec may be nil, skip detection of additional users
+func ValidateApproval(ctx context.Context, reqUser authenticationv1.UserInfo, allowRepresentOthers, isCreateOperation bool,
 	approvalSpecList []*metav1alpha1.ApprovalSpec, checkList []PairOfOldNewCheck) (err error) {
 
 	defer func() {
@@ -51,7 +51,14 @@ func ValidateApproval(ctx context.Context, reqUser authenticationv1.UserInfo, al
 	for i, checks := range checkList {
 		oldUsers := checks[0].GetApprovalUsers()
 		newUsers := checks[1].GetApprovalUsers()
-		err = checkApproval(reqUser, allowRepresentOthers, approvalSpecList[i], oldUsers, newUsers)
+		approvalSpec := approvalSpecList[i]
+		skipAppendCheck := false
+		if approvalSpec == nil && isCreateOperation {
+			// If it is a create operation, ignore the legality of the new user
+			skipAppendCheck = true
+			approvalSpec = &metav1alpha1.ApprovalSpec{}
+		}
+		err = checkApproval(reqUser, allowRepresentOthers, skipAppendCheck, approvalSpec, oldUsers, newUsers)
 		if err != nil {
 			break
 		}
@@ -59,8 +66,12 @@ func ValidateApproval(ctx context.Context, reqUser authenticationv1.UserInfo, al
 	return
 }
 
-func checkApproval(reqUser authenticationv1.UserInfo, allowRepresentOthers bool,
+func checkApproval(reqUser authenticationv1.UserInfo, allowRepresentOthers, skipAppendCheck bool,
 	approvalSpec *metav1alpha1.ApprovalSpec, oldUsers, newUsers metav1alpha1.UserApprovals) (err error) {
+	if approvalSpec == nil {
+		err = fmt.Errorf("approvalSpec is nil")
+		return
+	}
 	// Cannot add duplicate users
 	exists := make(map[rbacv1.Subject]struct{}, len(newUsers))
 	for _, user := range newUsers {
@@ -116,7 +127,8 @@ func checkApproval(reqUser authenticationv1.UserInfo, allowRepresentOthers bool,
 	for _, newUser := range newUsers {
 		// Cannot remove the approver
 		oldUser := oldUsers.GetBySubject(newUser.Subject)
-		if oldUser == nil {
+		// If it is a create operation, ignore the legality of the new user
+		if oldUser == nil && !skipAppendCheck {
 			// Only people in the specified list can add the approval result.
 			if _, ok := exists[newUser.Subject]; !ok {
 				err = fmt.Errorf("%q can not change the approval user list", reqUser.Username)
@@ -124,7 +136,7 @@ func checkApproval(reqUser authenticationv1.UserInfo, allowRepresentOthers bool,
 			}
 		}
 		// Approval requires verification of identity, cannot approve on behalf of others.
-		if ((oldUser != nil && oldUser.Input == nil) && newUser.Input != nil) &&
+		if ((oldUser == nil || oldUser.Input == nil) && newUser.Input != nil) &&
 			!matching.IsRightUser(reqUser, newUser.Subject) {
 			err = fmt.Errorf("%q can not approve for user %q", reqUser.Username, newUser.Subject.Name)
 			return

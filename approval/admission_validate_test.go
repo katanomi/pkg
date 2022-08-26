@@ -33,6 +33,7 @@ var _ = Describe("Test.ValidateApproval", func() {
 	var (
 		reqUser              authenticationv1.UserInfo
 		allowRepresentOthers bool
+		isCreateOperation    bool
 		checkList            []PairOfOldNewCheck
 		approvalSpecList     []*metav1alpha1.ApprovalSpec
 
@@ -47,6 +48,7 @@ var _ = Describe("Test.ValidateApproval", func() {
 		approvalPolicy = metav1alpha1.ApprovalPolicyAny
 		username = "admin"
 		allowRepresentOthers = false
+		isCreateOperation = false
 		approvalSpecUsers = []rbacv1.Subject{}
 	})
 
@@ -65,16 +67,26 @@ var _ = Describe("Test.ValidateApproval", func() {
 			&metav1alpha1.Check{Approval: &metav1alpha1.Approval{Users: old}},
 			&metav1alpha1.Check{Approval: &metav1alpha1.Approval{Users: new}},
 		}}
-		err = ValidateApproval(ctx, reqUser, allowRepresentOthers, approvalSpecList, checkList)
+		err = ValidateApproval(ctx, reqUser, allowRepresentOthers, isCreateOperation, approvalSpecList, checkList)
 	})
 
 	Context("invalid input parameter", func() {
 		It("should return an error", func() {
 			By("approval spec list is nil")
-			err = ValidateApproval(context.TODO(), reqUser, allowRepresentOthers, nil, checkList)
+			err = ValidateApproval(context.TODO(), reqUser, allowRepresentOthers, isCreateOperation, nil, checkList)
 
 			Expect(err).ToNot(BeNil())
 			Expect(err.Error()).To(BeEquivalentTo(`internal error #check != #checkSpec`))
+		})
+	})
+
+	Context("invalid approval spec parameter", func() {
+		It("should return an error", func() {
+			By("approval spec is nil")
+			err = ValidateApproval(context.TODO(), reqUser, allowRepresentOthers, isCreateOperation, []*metav1alpha1.ApprovalSpec{nil}, checkList)
+
+			Expect(err).ToNot(BeNil())
+			Expect(err.Error()).To(BeEquivalentTo(`approvalSpec is nil`))
 		})
 	})
 
@@ -393,6 +405,90 @@ var _ = Describe("Test.ValidateApproval", func() {
 			It("should return an error", func() {
 				Expect(err).ToNot(BeNil())
 				Expect(err.Error()).To(BeEquivalentTo(`Approval policy is "InOrder", "user" can not approve before "admin".`))
+			})
+		})
+
+	})
+
+	Context("normal user, creation operation", func() {
+		BeforeEach(func() {
+			username = "user"
+			isCreateOperation = true
+		})
+
+		Context("approval spec is not present", func() {
+			When("append user but not in spec", func() {
+				BeforeEach(func() {
+					old = []metav1alpha1.UserApproval{
+						{
+							Subject: rbacv1.Subject{Name: "admin", Kind: rbacv1.UserKind},
+							Input:   nil,
+						},
+					}
+					new = []metav1alpha1.UserApproval{
+						{
+							Subject: rbacv1.Subject{Name: "admin", Kind: rbacv1.UserKind},
+							Input:   nil,
+						},
+						{
+							Subject: rbacv1.Subject{Name: "user", Kind: rbacv1.UserKind},
+							Input:   &metav1alpha1.UserApprovalInput{Approved: false},
+						},
+					}
+				})
+				It("should pass", func() {
+					err = ValidateApproval(context.TODO(), reqUser, allowRepresentOthers, isCreateOperation, []*metav1alpha1.ApprovalSpec{nil}, checkList)
+					Expect(err).To(BeNil())
+				})
+			})
+
+			When("approve for other", func() {
+				BeforeEach(func() {
+					old = []metav1alpha1.UserApproval{
+						{
+							Subject: rbacv1.Subject{Name: "admin", Kind: rbacv1.UserKind},
+							Input:   nil,
+						},
+					}
+					new = []metav1alpha1.UserApproval{
+						{
+							Subject: rbacv1.Subject{Name: "admin", Kind: rbacv1.UserKind},
+							Input:   &metav1alpha1.UserApprovalInput{Approved: false},
+						},
+					}
+				})
+				It("should return an error", func() {
+					Expect(err).ToNot(BeNil())
+					Expect(err.Error()).To(BeEquivalentTo(`"user" can not approve for user "admin"`))
+				})
+			})
+		})
+
+		Context("approval spec is present", func() {
+			When("append myself but not in spec", func() {
+				BeforeEach(func() {
+					approvalSpecUsers = []rbacv1.Subject{}
+					old = []metav1alpha1.UserApproval{
+						{
+							Subject: rbacv1.Subject{Name: "admin", Kind: rbacv1.UserKind},
+							Input:   nil,
+						},
+					}
+					new = []metav1alpha1.UserApproval{
+						{
+							Subject: rbacv1.Subject{Name: "admin", Kind: rbacv1.UserKind},
+							Input:   nil,
+						},
+						{
+							Subject: rbacv1.Subject{Name: "user", Kind: rbacv1.UserKind},
+							Input:   &metav1alpha1.UserApprovalInput{Approved: false},
+						},
+					}
+				})
+				It("should return an error", func() {
+					Expect(err).ToNot(BeNil())
+					Expect(err.Error()).To(BeEquivalentTo(`"user" can not change the approval user list`))
+				})
 			})
 		})
 
