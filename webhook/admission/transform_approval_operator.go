@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package approval
+package admission
 
 import (
 	"context"
@@ -29,7 +29,6 @@ import (
 	metav1alpha1 "github.com/katanomi/pkg/apis/meta/v1alpha1"
 	"github.com/katanomi/pkg/namespace"
 	"github.com/katanomi/pkg/user/matching"
-	kadmission "github.com/katanomi/pkg/webhook/admission"
 )
 
 // ChecksGetter gets the checks from the runtime object
@@ -41,7 +40,7 @@ type ChecksGetter interface {
 type PairOfOldNewCheck [2]*metav1alpha1.Check
 
 // WithApprovalOperator adds an approval operator to the object using the request information
-func WithApprovalOperator(getter ChecksGetter) kadmission.TransformFunc {
+func WithApprovalOperator(getter ChecksGetter) TransformFunc {
 	return func(ctx context.Context, runtimeObj runtime.Object, req admission.Request) {
 		if req.Operation != admissionv1.Create && req.Operation != admissionv1.Update {
 			return

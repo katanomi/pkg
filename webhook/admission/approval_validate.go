@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package approval
+package admission
 
 import (
 	"context"
@@ -28,6 +28,8 @@ import (
 	metav1alpha1 "github.com/katanomi/pkg/apis/meta/v1alpha1"
 	"github.com/katanomi/pkg/user/matching"
 )
+
+type ValidateApprovalFunc func(context.Context, authenticationv1.UserInfo, bool, bool, []*metav1alpha1.ApprovalSpec, []PairOfOldNewCheck) error
 
 // ValidateApproval validates the approval according by the approval spec
 // if `allowRepresentOthers` is true, the reqUser can approve on behalf of others
