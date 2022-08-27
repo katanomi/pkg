@@ -28,6 +28,13 @@ import (
 	metav1alpha1 "github.com/katanomi/pkg/apis/meta/v1alpha1"
 )
 
+func generateUserSubject(name string) rbacv1.Subject {
+	return rbacv1.Subject{
+		Name: name,
+		Kind: rbacv1.UserKind,
+	}
+}
+
 var _ = Describe("Test.ValidateApproval", func() {
 
 	var (
@@ -42,6 +49,11 @@ var _ = Describe("Test.ValidateApproval", func() {
 		old, new          metav1alpha1.UserApprovals
 		approvalPolicy    metav1alpha1.ApprovalPolicy
 		approvalSpecUsers []rbacv1.Subject
+
+		userSubject   = generateUserSubject("user")
+		adminSubject  = generateUserSubject("admin")
+		approvedInput = &metav1alpha1.UserApprovalInput{Approved: true}
+		rejectedInput = &metav1alpha1.UserApprovalInput{Approved: false}
 	)
 
 	BeforeEach(func() {
@@ -50,6 +62,13 @@ var _ = Describe("Test.ValidateApproval", func() {
 		allowRepresentOthers = false
 		isCreateOperation = false
 		approvalSpecUsers = []rbacv1.Subject{}
+
+		old = []metav1alpha1.UserApproval{{
+			Subject: userSubject,
+		}}
+		new = []metav1alpha1.UserApproval{{
+			Subject: userSubject,
+		}}
 	})
 
 	JustBeforeEach(func() {
@@ -81,12 +100,25 @@ var _ = Describe("Test.ValidateApproval", func() {
 	})
 
 	Context("invalid approval spec parameter", func() {
-		It("should return an error", func() {
-			By("approval spec is nil")
-			err = ValidateApproval(context.TODO(), reqUser, allowRepresentOthers, isCreateOperation, []*metav1alpha1.ApprovalSpec{nil}, checkList)
-
-			Expect(err).ToNot(BeNil())
-			Expect(err.Error()).To(BeEquivalentTo(`approvalSpec is nil`))
+		BeforeEach(func() {
+			isCreateOperation = false
+		})
+		When("user is user", func() {
+			It("should return an error", func() {
+				By("approval spec is nil")
+				allowRepresentOthers = false
+				err = ValidateApproval(context.TODO(), reqUser, allowRepresentOthers, isCreateOperation, []*metav1alpha1.ApprovalSpec{nil}, checkList)
+				Expect(err).ToNot(BeNil())
+				Expect(err.Error()).To(BeEquivalentTo(`approval spec is nil`))
+			})
+		})
+		When("user is admin", func() {
+			It("should not return an error", func() {
+				By("approval spec is nil")
+				allowRepresentOthers = true
+				err = ValidateApproval(context.TODO(), reqUser, allowRepresentOthers, isCreateOperation, []*metav1alpha1.ApprovalSpec{nil}, checkList)
+				Expect(err).To(BeNil())
+			})
 		})
 	})
 
@@ -99,16 +131,10 @@ var _ = Describe("Test.ValidateApproval", func() {
 		When("there is no change in approval", func() {
 			BeforeEach(func() {
 				old = []metav1alpha1.UserApproval{
-					{
-						Subject: rbacv1.Subject{Name: "user", Kind: rbacv1.UserKind},
-						Input:   &metav1alpha1.UserApprovalInput{Approved: false},
-					},
+					{Subject: userSubject, Input: rejectedInput},
 				}
 				new = []metav1alpha1.UserApproval{
-					{
-						Subject: rbacv1.Subject{Name: "user", Kind: rbacv1.UserKind},
-						Input:   &metav1alpha1.UserApprovalInput{Approved: false},
-					},
+					{Subject: userSubject, Input: rejectedInput},
 				}
 			})
 			It("should pass", func() {
@@ -119,20 +145,11 @@ var _ = Describe("Test.ValidateApproval", func() {
 		When("append approval", func() {
 			BeforeEach(func() {
 				old = []metav1alpha1.UserApproval{
-					{
-						Subject: rbacv1.Subject{Name: "user", Kind: rbacv1.UserKind},
-						Input:   nil,
-					},
+					{Subject: userSubject},
 				}
 				new = []metav1alpha1.UserApproval{
-					{
-						Subject: rbacv1.Subject{Name: "user", Kind: rbacv1.UserKind},
-						Input:   nil,
-					},
-					{
-						Subject: rbacv1.Subject{Name: "admin", Kind: rbacv1.UserKind},
-						Input:   &metav1alpha1.UserApprovalInput{Approved: false},
-					},
+					{Subject: userSubject},
+					{Subject: adminSubject, Input: rejectedInput},
 				}
 			})
 			It("should pass", func() {
@@ -143,16 +160,10 @@ var _ = Describe("Test.ValidateApproval", func() {
 		When("approves directly", func() {
 			BeforeEach(func() {
 				old = []metav1alpha1.UserApproval{
-					{
-						Subject: rbacv1.Subject{Name: "admin", Kind: rbacv1.UserKind},
-						Input:   nil,
-					},
+					{Subject: adminSubject},
 				}
 				new = []metav1alpha1.UserApproval{
-					{
-						Subject: rbacv1.Subject{Name: "admin", Kind: rbacv1.UserKind},
-						Input:   &metav1alpha1.UserApprovalInput{Approved: false},
-					},
+					{Subject: adminSubject, Input: rejectedInput},
 				}
 			})
 			It("should pass", func() {
@@ -163,20 +174,11 @@ var _ = Describe("Test.ValidateApproval", func() {
 		When("approves for others", func() {
 			BeforeEach(func() {
 				old = []metav1alpha1.UserApproval{
-					{
-						Subject: rbacv1.Subject{Name: "user", Kind: rbacv1.UserKind},
-						Input:   nil,
-					},
+					{Subject: userSubject},
 				}
 				new = []metav1alpha1.UserApproval{
-					{
-						Subject: rbacv1.Subject{Name: "user", Kind: rbacv1.UserKind},
-						Input:   &metav1alpha1.UserApprovalInput{Approved: false},
-					},
-					{
-						Subject: rbacv1.Subject{Name: "user-1", Kind: rbacv1.UserKind},
-						Input:   &metav1alpha1.UserApprovalInput{Approved: false},
-					},
+					{Subject: userSubject, Input: rejectedInput},
+					{Subject: generateUserSubject("other"), Input: rejectedInput},
 				}
 			})
 			It("should pass", func() {
@@ -188,14 +190,8 @@ var _ = Describe("Test.ValidateApproval", func() {
 			BeforeEach(func() {
 				old = []metav1alpha1.UserApproval{}
 				new = []metav1alpha1.UserApproval{
-					{
-						Subject: rbacv1.Subject{Name: "user", Kind: rbacv1.UserKind},
-						Input:   &metav1alpha1.UserApprovalInput{Approved: true},
-					},
-					{
-						Subject: rbacv1.Subject{Name: "user", Kind: rbacv1.UserKind},
-						Input:   &metav1alpha1.UserApprovalInput{Approved: true},
-					},
+					{Subject: userSubject, Input: approvedInput},
+					{Subject: userSubject, Input: approvedInput},
 				}
 			})
 			It("should return an error", func() {
@@ -207,16 +203,10 @@ var _ = Describe("Test.ValidateApproval", func() {
 		When("change the approval result", func() {
 			BeforeEach(func() {
 				old = []metav1alpha1.UserApproval{
-					{
-						Subject: rbacv1.Subject{Name: "user", Kind: rbacv1.UserKind},
-						Input:   &metav1alpha1.UserApprovalInput{Approved: false},
-					},
+					{Subject: userSubject, Input: rejectedInput},
 				}
 				new = []metav1alpha1.UserApproval{
-					{
-						Subject: rbacv1.Subject{Name: "user", Kind: rbacv1.UserKind},
-						Input:   &metav1alpha1.UserApprovalInput{Approved: true},
-					},
+					{Subject: userSubject, Input: approvedInput},
 				}
 			})
 			It("should return an error", func() {
@@ -228,10 +218,7 @@ var _ = Describe("Test.ValidateApproval", func() {
 		When("remove approver from list", func() {
 			BeforeEach(func() {
 				old = []metav1alpha1.UserApproval{
-					{
-						Subject: rbacv1.Subject{Name: "user", Kind: rbacv1.UserKind},
-						Input:   &metav1alpha1.UserApprovalInput{Approved: false},
-					},
+					{Subject: userSubject, Input: rejectedInput},
 				}
 				new = []metav1alpha1.UserApproval{{}}
 			})
@@ -252,22 +239,12 @@ var _ = Describe("Test.ValidateApproval", func() {
 		When("approves directly", func() {
 			BeforeEach(func() {
 				old = []metav1alpha1.UserApproval{
-					{
-						Subject: rbacv1.Subject{Name: "admin", Kind: rbacv1.UserKind},
-					},
-					{
-						Subject: rbacv1.Subject{Name: "user", Kind: rbacv1.UserKind},
-						Input:   nil,
-					},
+					{Subject: adminSubject},
+					{Subject: userSubject, Input: nil},
 				}
 				new = []metav1alpha1.UserApproval{
-					{
-						Subject: rbacv1.Subject{Name: "user", Kind: rbacv1.UserKind},
-						Input:   &metav1alpha1.UserApprovalInput{Approved: false},
-					},
-					{
-						Subject: rbacv1.Subject{Name: "admin", Kind: rbacv1.UserKind},
-					},
+					{Subject: userSubject, Input: rejectedInput},
+					{Subject: adminSubject},
 				}
 			})
 			It("should pass", func() {
@@ -278,20 +255,11 @@ var _ = Describe("Test.ValidateApproval", func() {
 		When("append user but not in spec", func() {
 			BeforeEach(func() {
 				old = []metav1alpha1.UserApproval{
-					{
-						Subject: rbacv1.Subject{Name: "admin", Kind: rbacv1.UserKind},
-						Input:   nil,
-					},
+					{Subject: adminSubject, Input: nil},
 				}
 				new = []metav1alpha1.UserApproval{
-					{
-						Subject: rbacv1.Subject{Name: "admin", Kind: rbacv1.UserKind},
-						Input:   nil,
-					},
-					{
-						Subject: rbacv1.Subject{Name: "user", Kind: rbacv1.UserKind},
-						Input:   &metav1alpha1.UserApprovalInput{Approved: false},
-					},
+					{Subject: adminSubject, Input: nil},
+					{Subject: userSubject, Input: rejectedInput},
 				}
 			})
 			It("should return an error", func() {
@@ -304,20 +272,11 @@ var _ = Describe("Test.ValidateApproval", func() {
 			BeforeEach(func() {
 				approvalSpecUsers = []rbacv1.Subject{{Name: "user", Kind: rbacv1.UserKind}}
 				old = []metav1alpha1.UserApproval{
-					{
-						Subject: rbacv1.Subject{Name: "admin", Kind: rbacv1.UserKind},
-						Input:   nil,
-					},
+					{Subject: adminSubject, Input: nil},
 				}
 				new = []metav1alpha1.UserApproval{
-					{
-						Subject: rbacv1.Subject{Name: "admin", Kind: rbacv1.UserKind},
-						Input:   nil,
-					},
-					{
-						Subject: rbacv1.Subject{Name: "user", Kind: rbacv1.UserKind},
-						Input:   &metav1alpha1.UserApprovalInput{Approved: false},
-					},
+					{Subject: adminSubject, Input: nil},
+					{Subject: userSubject, Input: rejectedInput},
 				}
 			})
 			It("should pass", func() {
@@ -328,16 +287,10 @@ var _ = Describe("Test.ValidateApproval", func() {
 		When("approve for other", func() {
 			BeforeEach(func() {
 				old = []metav1alpha1.UserApproval{
-					{
-						Subject: rbacv1.Subject{Name: "admin", Kind: rbacv1.UserKind},
-						Input:   nil,
-					},
+					{Subject: adminSubject, Input: nil},
 				}
 				new = []metav1alpha1.UserApproval{
-					{
-						Subject: rbacv1.Subject{Name: "admin", Kind: rbacv1.UserKind},
-						Input:   &metav1alpha1.UserApprovalInput{Approved: false},
-					},
+					{Subject: adminSubject, Input: rejectedInput},
 				}
 			})
 			It("should return an error", func() {
@@ -358,22 +311,12 @@ var _ = Describe("Test.ValidateApproval", func() {
 		When("approves in order", func() {
 			BeforeEach(func() {
 				old = []metav1alpha1.UserApproval{
-					{
-						Subject: rbacv1.Subject{Name: "user", Kind: rbacv1.UserKind},
-						Input:   nil,
-					},
-					{
-						Subject: rbacv1.Subject{Name: "admin", Kind: rbacv1.UserKind},
-					},
+					{Subject: userSubject, Input: nil},
+					{Subject: adminSubject},
 				}
 				new = []metav1alpha1.UserApproval{
-					{
-						Subject: rbacv1.Subject{Name: "user", Kind: rbacv1.UserKind},
-						Input:   &metav1alpha1.UserApprovalInput{Approved: true},
-					},
-					{
-						Subject: rbacv1.Subject{Name: "admin", Kind: rbacv1.UserKind},
-					},
+					{Subject: userSubject, Input: approvedInput},
+					{Subject: adminSubject},
 				}
 			})
 			It("should pass", func() {
@@ -384,27 +327,28 @@ var _ = Describe("Test.ValidateApproval", func() {
 		When("approves out of order", func() {
 			BeforeEach(func() {
 				old = []metav1alpha1.UserApproval{
-					{
-						Subject: rbacv1.Subject{Name: "admin", Kind: rbacv1.UserKind},
-					},
-					{
-						Subject: rbacv1.Subject{Name: "user", Kind: rbacv1.UserKind},
-						Input:   nil,
-					},
+					{Subject: adminSubject},
+					{Subject: userSubject, Input: nil},
 				}
 				new = []metav1alpha1.UserApproval{
-					{
-						Subject: rbacv1.Subject{Name: "admin", Kind: rbacv1.UserKind},
-					},
-					{
-						Subject: rbacv1.Subject{Name: "user", Kind: rbacv1.UserKind},
-						Input:   &metav1alpha1.UserApprovalInput{Approved: true},
-					},
+					{Subject: adminSubject},
+					{Subject: userSubject, Input: approvedInput},
 				}
 			})
-			It("should return an error", func() {
-				Expect(err).ToNot(BeNil())
-				Expect(err.Error()).To(BeEquivalentTo(`Approval policy is "InOrder", "user" can not approve before "admin".`))
+			When("user is user", func() {
+				BeforeEach(func() {
+					username = "user"
+					allowRepresentOthers = false
+				})
+				It("should return an error", func() {
+					Expect(err).NotTo(BeNil())
+					Expect(err.Error()).To(BeEquivalentTo(`Approval policy is "InOrder", "user" can not approve before "admin".`))
+				})
+			})
+			When("user is admin", func() {
+				It("should not return an error", func() {
+					Expect(err).To(BeNil())
+				})
 			})
 		})
 
@@ -420,20 +364,11 @@ var _ = Describe("Test.ValidateApproval", func() {
 			When("append user but not in spec", func() {
 				BeforeEach(func() {
 					old = []metav1alpha1.UserApproval{
-						{
-							Subject: rbacv1.Subject{Name: "admin", Kind: rbacv1.UserKind},
-							Input:   nil,
-						},
+						{Subject: adminSubject, Input: nil},
 					}
 					new = []metav1alpha1.UserApproval{
-						{
-							Subject: rbacv1.Subject{Name: "admin", Kind: rbacv1.UserKind},
-							Input:   nil,
-						},
-						{
-							Subject: rbacv1.Subject{Name: "user", Kind: rbacv1.UserKind},
-							Input:   &metav1alpha1.UserApprovalInput{Approved: false},
-						},
+						{Subject: adminSubject, Input: nil},
+						{Subject: userSubject, Input: rejectedInput},
 					}
 				})
 				It("should pass", func() {
@@ -445,16 +380,10 @@ var _ = Describe("Test.ValidateApproval", func() {
 			When("approve for other", func() {
 				BeforeEach(func() {
 					old = []metav1alpha1.UserApproval{
-						{
-							Subject: rbacv1.Subject{Name: "admin", Kind: rbacv1.UserKind},
-							Input:   nil,
-						},
+						{Subject: adminSubject, Input: nil},
 					}
 					new = []metav1alpha1.UserApproval{
-						{
-							Subject: rbacv1.Subject{Name: "admin", Kind: rbacv1.UserKind},
-							Input:   &metav1alpha1.UserApprovalInput{Approved: false},
-						},
+						{Subject: adminSubject, Input: rejectedInput},
 					}
 				})
 				It("should return an error", func() {
@@ -469,20 +398,11 @@ var _ = Describe("Test.ValidateApproval", func() {
 				BeforeEach(func() {
 					approvalSpecUsers = []rbacv1.Subject{}
 					old = []metav1alpha1.UserApproval{
-						{
-							Subject: rbacv1.Subject{Name: "admin", Kind: rbacv1.UserKind},
-							Input:   nil,
-						},
+						{Subject: adminSubject, Input: nil},
 					}
 					new = []metav1alpha1.UserApproval{
-						{
-							Subject: rbacv1.Subject{Name: "admin", Kind: rbacv1.UserKind},
-							Input:   nil,
-						},
-						{
-							Subject: rbacv1.Subject{Name: "user", Kind: rbacv1.UserKind},
-							Input:   &metav1alpha1.UserApprovalInput{Approved: false},
-						},
+						{Subject: adminSubject, Input: nil},
+						{Subject: userSubject, Input: rejectedInput},
 					}
 				})
 				It("should return an error", func() {
