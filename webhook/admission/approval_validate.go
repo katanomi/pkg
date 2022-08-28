@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package approval
+package admission
 
 import (
 	"context"
@@ -28,6 +28,8 @@ import (
 	metav1alpha1 "github.com/katanomi/pkg/apis/meta/v1alpha1"
 	"github.com/katanomi/pkg/user/matching"
 )
+
+type ValidateApprovalFunc func(context.Context, authenticationv1.UserInfo, bool, bool, []*metav1alpha1.ApprovalSpec, []PairOfOldNewCheck) error
 
 // ValidateApproval validates the approval according by the approval spec
 // if `allowRepresentOthers` is true, the reqUser can approve on behalf of others
@@ -58,7 +60,7 @@ func ValidateApproval(ctx context.Context, reqUser authenticationv1.UserInfo, al
 			skipAppendCheck = true
 			approvalSpec = &metav1alpha1.ApprovalSpec{}
 		}
-		err = checkApproval(reqUser, allowRepresentOthers, skipAppendCheck, approvalSpec, oldUsers, newUsers)
+		err = checkApproval(ctx, reqUser, allowRepresentOthers, skipAppendCheck, approvalSpec, oldUsers, newUsers)
 		if err != nil {
 			break
 		}
@@ -66,12 +68,14 @@ func ValidateApproval(ctx context.Context, reqUser authenticationv1.UserInfo, al
 	return
 }
 
-func checkApproval(reqUser authenticationv1.UserInfo, allowRepresentOthers, skipAppendCheck bool,
+func checkApproval(ctx context.Context, reqUser authenticationv1.UserInfo, allowRepresentOthers, skipAppendCheck bool,
 	approvalSpec *metav1alpha1.ApprovalSpec, oldUsers, newUsers metav1alpha1.UserApprovals) (err error) {
-	if approvalSpec == nil {
-		err = fmt.Errorf("approvalSpec is nil")
-		return
+	log := logging.FromContext(ctx)
+	if len(oldUsers) == 0 && len(newUsers) == 0 {
+		log.Debugw("in check approval, no approvalSpec, no approvals, skip checking")
+		return nil
 	}
+
 	// Cannot add duplicate users
 	exists := make(map[rbacv1.Subject]struct{}, len(newUsers))
 	for _, user := range newUsers {
@@ -95,9 +99,24 @@ func checkApproval(reqUser authenticationv1.UserInfo, allowRepresentOthers, skip
 		}
 	}
 
+	// If allow to represent others, no need to check whether the approval behavior is legal.
+	if allowRepresentOthers {
+		return
+	}
+
+	if approvalSpec == nil {
+		err = fmt.Errorf("approval spec is nil")
+		return
+	}
+
 	// If it is in-order policy, need to be approved in order.
 	approvalPolicy := approvalSpec.Policy
 	if approvalPolicy == metav1alpha1.ApprovalPolicyInOrder {
+		// general user is not allowed to modify the order
+		if orderChanged(oldUsers, newUsers) {
+			err = fmt.Errorf("Approval policy is %q, %q cannot change the order of approvers.", approvalPolicy, reqUser.Username)
+			return
+		}
 		var skippedUser *metav1alpha1.UserApproval
 		for i, newUser := range newUsers {
 			if skippedUser == nil && newUser.Input == nil {
@@ -111,11 +130,6 @@ func checkApproval(reqUser authenticationv1.UserInfo, allowRepresentOthers, skip
 				return
 			}
 		}
-	}
-
-	// If allow to represent others, no need to check whether the approval behavior is legal.
-	if allowRepresentOthers {
-		return
 	}
 
 	// Prepare a list of legitimate approved users
@@ -144,4 +158,19 @@ func checkApproval(reqUser authenticationv1.UserInfo, allowRepresentOthers, skip
 	}
 
 	return
+}
+
+// orderChanged returns true if the order of the old and new users is different.
+func orderChanged(oldUsers, newUsers metav1alpha1.UserApprovals) bool {
+	i, j := 0, 0
+	oLen, nLen := len(oldUsers), len(newUsers)
+	for i < oLen && j < nLen {
+		if oldUsers[i].Subject == newUsers[j].Subject {
+			i++
+			j++
+		} else {
+			j++
+		}
+	}
+	return oLen != 0 && i < oLen
 }

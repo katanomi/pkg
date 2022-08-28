@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package approval
+package admission
 
 import (
 	"context"
@@ -29,23 +29,24 @@ import (
 	metav1alpha1 "github.com/katanomi/pkg/apis/meta/v1alpha1"
 	"github.com/katanomi/pkg/namespace"
 	"github.com/katanomi/pkg/user/matching"
-	kadmission "github.com/katanomi/pkg/webhook/admission"
 )
+
+// ChecksGetter gets the checks from the runtime object
+type ChecksGetter interface {
+	GetChecks(runtime.Object) []*metav1alpha1.Check
+}
 
 // PairOfOldNewCheck is a pair of old and new check
 type PairOfOldNewCheck [2]*metav1alpha1.Check
 
-// GetChecksFromObject gets the checks from the runtime object
-type GetChecksFromObject func(ctx context.Context, obj runtime.Object) []*metav1alpha1.Check
-
 // WithApprovalOperator adds an approval operator to the object using the request information
-func WithApprovalOperator(getChecksFromObject GetChecksFromObject) kadmission.TransformFunc {
+func WithApprovalOperator(getter ChecksGetter) TransformFunc {
 	return func(ctx context.Context, runtimeObj runtime.Object, req admission.Request) {
 		if req.Operation != admissionv1.Create && req.Operation != admissionv1.Update {
 			return
 		}
 		log := logging.FromContext(ctx)
-		newChecks := getChecksFromObject(ctx, runtimeObj)
+		newChecks := getter.GetChecks(runtimeObj)
 		var oldChecks []*metav1alpha1.Check
 		if req.Operation == admissionv1.Create {
 			// If it is a the create operation, the base is nil.
@@ -53,7 +54,7 @@ func WithApprovalOperator(getChecksFromObject GetChecksFromObject) kadmission.Tr
 		} else {
 			base := apis.GetBaseline(ctx)
 			oldObject, _ := base.(runtime.Object)
-			oldChecks = getChecksFromObject(ctx, oldObject)
+			oldChecks = getter.GetChecks(oldObject)
 		}
 		if len(oldChecks) != len(newChecks) {
 			log.Warnw("unable to add approval operator, length mismatch", "req", req, "old", oldChecks, "new", newChecks)
