@@ -40,16 +40,18 @@ import (
 	mockclient "github.com/katanomi/pkg/testing/mock/sigs.k8s.io/controller-runtime/pkg/client"
 )
 
-var _ = Context("Test.Approving.Webhook", func() {
+var _ = Context("Test.Approving.Handle", func() {
 	DescribeTable("approval webhook",
 		func(create bool, advanced bool, validatePassed bool, modifiedOthers bool, expected bool) {
 			mockCtrl := gomock.NewController(GinkgoT())
 			defer mockCtrl.Finish()
 
+			mockClient := mockclient.NewMockClient(mockCtrl)
 			ctx := logging.WithLogger(context.Background(), logger)
-			ctx = kclient.WithClient(ctx, mockclient.NewMockClient(mockCtrl))
+			ctx = kclient.WithClient(ctx, mockClient)
 
-			approving := generateApproving(ctx, mockCtrl, advanced, validatePassed, modifiedOthers)
+			// Create a new webhook
+			approving := generateApproving(ctx, mockCtrl, mockClient, advanced, validatePassed, modifiedOthers)
 
 			req := baseRequest
 			if create {
@@ -58,6 +60,7 @@ var _ = Context("Test.Approving.Webhook", func() {
 				req.Operation = admissionv1.Update
 			}
 
+			// Test the handle method
 			response := approving.Handle(ctx, req)
 			Expect(response.Allowed).To(Equal(expected), "expected allowed to be %v", expected)
 		},
@@ -80,10 +83,21 @@ var _ = Context("Test.Approving.Webhook", func() {
 	)
 })
 
-var (
-	advancedAccess = authv1.LocalSubjectAccessReview{Status: authv1.SubjectAccessReviewStatus{Allowed: true}}
-	generalAccess  = authv1.LocalSubjectAccessReview{Status: authv1.SubjectAccessReviewStatus{Allowed: false}}
+func validateApprovalPassed(ctx context.Context, reqUser authenticationv1.UserInfo, allowRepresentOthers, isCreateOperation bool,
+	approvalSpecList []*metav1alpha1.ApprovalSpec, checkList []PairOfOldNewCheck) (err error) {
+	return nil
+}
 
+func validateApprovalRejected(ctx context.Context, reqUser authenticationv1.UserInfo, allowRepresentOthers, isCreateOperation bool,
+	approvalSpecList []*metav1alpha1.ApprovalSpec, checkList []PairOfOldNewCheck) (err error) {
+	return fmt.Errorf("rejected")
+}
+
+func getResourceAttributes(verb string) authv1.ResourceAttributes {
+	return authv1.ResourceAttributes{}
+}
+
+var (
 	baseRequest = admission.Request{
 		AdmissionRequest: admissionv1.AdmissionRequest{
 			Operation: admissionv1.Update,
@@ -113,61 +127,26 @@ var (
 	}
 )
 
-func validateApprovalPassed(ctx context.Context, reqUser authenticationv1.UserInfo, allowRepresentOthers, isCreateOperation bool,
-	approvalSpecList []*metav1alpha1.ApprovalSpec, checkList []PairOfOldNewCheck) (err error) {
-	return nil
-}
-
-func validateApprovalRejected(ctx context.Context, reqUser authenticationv1.UserInfo, allowRepresentOthers, isCreateOperation bool,
-	approvalSpecList []*metav1alpha1.ApprovalSpec, checkList []PairOfOldNewCheck) (err error) {
-	return fmt.Errorf("rejected")
-}
-
-func generateApproving(ctx context.Context, mockCtrl *gomock.Controller, advanced bool, validatePassed bool, modifiedOthers bool) *approvingHandler {
-	var (
-		mockClient   *mockclient.MockClient
-		mockApproval *mockadmission.MockApproval
-
-		approving *approvingHandler
-		role      *authv1.LocalSubjectAccessReview
-
-		getResourceAttributes = func(verb string) authv1.ResourceAttributes {
-			return authv1.ResourceAttributes{}
-		}
-	)
-
+func generateApproving(ctx context.Context, mockCtrl *gomock.Controller, mockClient *mockclient.MockClient,
+	advanced bool, validatePassed bool, modifiedOthers bool) *approvingHandler {
 	// starts mock controller
-	mockClient = mockclient.NewMockClient(mockCtrl)
-	mockApproval = mockadmission.NewMockApproval(mockCtrl)
-
+	mockApproval := mockadmission.NewMockApproval(mockCtrl)
 	mockApproval.EXPECT().DeepCopyObject().Return(&corev1.Pod{}).AnyTimes()
 	mockApproval.EXPECT().GetApprovalSpecs(gomock.Any()).Return(nil).AnyTimes()
 	mockApproval.EXPECT().GetChecks(gomock.Any()).Return(nil).AnyTimes()
+	mockApproval.EXPECT().ModifiedOthers(gomock.Any(), gomock.Any()).Return(modifiedOthers).AnyTimes()
 
 	decoder, err := admission.NewDecoder(scheme.Scheme)
 	Expect(err).NotTo(HaveOccurred())
 	Expect(decoder).NotTo(BeNil())
 
 	webhook := ApprovingWebhookFor(ctx, mockApproval, getResourceAttributes)
-	approving, _ = webhook.Handler.(*approvingHandler)
+	approving, _ := webhook.Handler.(*approvingHandler)
 	Expect(approving).NotTo(BeNil())
 
-	approving.client = mockClient
 	approving.InjectDecoder(decoder)
+	approving.client = mockClient
 
-	if advanced {
-		role = &advancedAccess
-	} else {
-		role = &generalAccess
-	}
-
-	if validatePassed {
-		approving.validateApproval = validateApprovalPassed
-	} else {
-		approving.validateApproval = validateApprovalRejected
-	}
-
-	mockApproval.EXPECT().ModifiedOthers(gomock.Any(), gomock.Any()).Return(modifiedOthers).AnyTimes()
 	mockClient.EXPECT().Create(gomock.Any(), gomock.Any(), gomock.Any()).DoAndReturn(
 		func(_ context.Context, obj client.Object, _ ...client.CreateOption) error {
 			// update the .status.allowed field
@@ -176,11 +155,17 @@ func generateApproving(ctx context.Context, mockCtrl *gomock.Controller, advance
 			if status.IsValid() {
 				allowed := status.FieldByName("Allowed")
 				if allowed.IsValid() {
-					allowed.SetBool(role.Status.Allowed)
+					allowed.SetBool(advanced)
 				}
 			}
 			return nil
 		}).AnyTimes()
+
+	if validatePassed {
+		approving.validateApproval = validateApprovalPassed
+	} else {
+		approving.validateApproval = validateApprovalRejected
+	}
 
 	return approving
 }

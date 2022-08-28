@@ -35,6 +35,12 @@ func generateUserSubject(name string) rbacv1.Subject {
 	}
 }
 
+func generateUserApproval(name string) metav1alpha1.UserApproval {
+	return metav1alpha1.UserApproval{
+		Subject: generateUserSubject(name),
+	}
+}
+
 var _ = Describe("Test.ValidateApproval", func() {
 
 	var (
@@ -119,6 +125,18 @@ var _ = Describe("Test.ValidateApproval", func() {
 				err = ValidateApproval(context.TODO(), reqUser, allowRepresentOthers, isCreateOperation, []*metav1alpha1.ApprovalSpec{nil}, checkList)
 				Expect(err).To(BeNil())
 			})
+		})
+	})
+
+	Context("old and new users both empty", func() {
+		It("should not return an error", func() {
+			checkList = []PairOfOldNewCheck{{
+				&metav1alpha1.Check{Approval: &metav1alpha1.Approval{}},
+				&metav1alpha1.Check{Approval: &metav1alpha1.Approval{}},
+			}}
+			err = ValidateApproval(context.TODO(), reqUser, allowRepresentOthers, isCreateOperation, []*metav1alpha1.ApprovalSpec{nil}, checkList)
+
+			Expect(err).To(BeNil())
 		})
 	})
 
@@ -352,6 +370,34 @@ var _ = Describe("Test.ValidateApproval", func() {
 			})
 		})
 
+		When("approves order is changed", func() {
+			BeforeEach(func() {
+				old = []metav1alpha1.UserApproval{
+					{Subject: adminSubject},
+					{Subject: userSubject, Input: nil},
+				}
+				new = []metav1alpha1.UserApproval{
+					{Subject: userSubject, Input: nil},
+					{Subject: adminSubject},
+				}
+			})
+			When("user is user", func() {
+				BeforeEach(func() {
+					username = "user"
+					allowRepresentOthers = false
+				})
+				It("should return an error", func() {
+					Expect(err).NotTo(BeNil())
+					Expect(err.Error()).To(BeEquivalentTo(`Approval policy is "InOrder", "user" cannot change the order of approvers.`))
+				})
+			})
+			When("user is admin", func() {
+				It("should not return an error", func() {
+					Expect(err).To(BeNil())
+				})
+			})
+		})
+
 	})
 
 	Context("normal user, creation operation", func() {
@@ -414,4 +460,72 @@ var _ = Describe("Test.ValidateApproval", func() {
 
 	})
 
+})
+
+var _ = Describe("Test.orderChanged", func() {
+	DescribeTable("orderChanged",
+		func(oldUsers, newUsers metav1alpha1.UserApprovals, expected bool) {
+			actual := orderChanged(oldUsers, newUsers)
+			Expect(actual).To(Equal(expected), "oldUsers: %v, newUsers: %v", oldUsers, newUsers)
+		},
+
+		Entry("old users is empty",
+			[]metav1alpha1.UserApproval{},
+			[]metav1alpha1.UserApproval{generateUserApproval("user-1")},
+			false,
+		),
+		Entry("new users is empty",
+			[]metav1alpha1.UserApproval{generateUserApproval("user-1")},
+			[]metav1alpha1.UserApproval{},
+			true,
+		),
+		Entry("order not changed",
+			[]metav1alpha1.UserApproval{
+				generateUserApproval("user-1"),
+				generateUserApproval("user-2"),
+			},
+			[]metav1alpha1.UserApproval{
+				generateUserApproval("user-1"),
+				generateUserApproval("user-2"),
+			},
+			false,
+		),
+		Entry("order not changed",
+			[]metav1alpha1.UserApproval{
+				generateUserApproval("user-1"),
+				generateUserApproval("user-2"),
+			},
+			[]metav1alpha1.UserApproval{
+				generateUserApproval("user-1"),
+				generateUserApproval("user-x"),
+				generateUserApproval("user-y"),
+				generateUserApproval("user-2"),
+			},
+			false,
+		),
+		Entry("order changed",
+			[]metav1alpha1.UserApproval{
+				generateUserApproval("user-1"),
+				generateUserApproval("user-2"),
+			},
+			[]metav1alpha1.UserApproval{
+				generateUserApproval("user-2"),
+				generateUserApproval("user-1"),
+			},
+			true,
+		),
+		Entry("order changed",
+			[]metav1alpha1.UserApproval{
+				generateUserApproval("user-1"),
+				generateUserApproval("user-2"),
+			},
+			[]metav1alpha1.UserApproval{
+				generateUserApproval("user-2"),
+				generateUserApproval("user-x"),
+				generateUserApproval("user-y"),
+				generateUserApproval("user-1"),
+			},
+			true,
+		),
+	)
 })

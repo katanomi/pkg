@@ -112,7 +112,11 @@ func checkApproval(ctx context.Context, reqUser authenticationv1.UserInfo, allow
 	// If it is in-order policy, need to be approved in order.
 	approvalPolicy := approvalSpec.Policy
 	if approvalPolicy == metav1alpha1.ApprovalPolicyInOrder {
-		// TODO(qingliu): general users are not allowed to modify the order
+		// general user is not allowed to modify the order
+		if orderChanged(oldUsers, newUsers) {
+			err = fmt.Errorf("Approval policy is %q, %q cannot change the order of approvers.", approvalPolicy, reqUser.Username)
+			return
+		}
 		var skippedUser *metav1alpha1.UserApproval
 		for i, newUser := range newUsers {
 			if skippedUser == nil && newUser.Input == nil {
@@ -154,4 +158,19 @@ func checkApproval(ctx context.Context, reqUser authenticationv1.UserInfo, allow
 	}
 
 	return
+}
+
+// orderChanged returns true if the order of the old and new users is different.
+func orderChanged(oldUsers, newUsers metav1alpha1.UserApprovals) bool {
+	i, j := 0, 0
+	oLen, nLen := len(oldUsers), len(newUsers)
+	for i < oLen && j < nLen {
+		if oldUsers[i].Subject == newUsers[j].Subject {
+			i++
+			j++
+		} else {
+			j++
+		}
+	}
+	return oLen != 0 && i < oLen
 }
