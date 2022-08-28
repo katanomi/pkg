@@ -26,6 +26,7 @@ import (
 )
 
 type ClientArtifact interface {
+	Get(ctx context.Context, baseURL *duckv1.Addressable, project string, repository string, artifact string, options ...OptionFunc) (*metav1alpha1.Artifact, error)
 	List(ctx context.Context, baseURL *duckv1.Addressable, project string, repository string, options ...OptionFunc) (*metav1alpha1.ArtifactList, error)
 	Delete(ctx context.Context, baseURL *duckv1.Addressable, project string, repository string, artifact string, options ...OptionFunc) error
 	DeleteTag(ctx context.Context, baseURL *duckv1.Addressable, project string, repository string, artifact string, tag string, options ...OptionFunc) error
@@ -60,6 +61,23 @@ func (p *artifact) List(ctx context.Context,
 	}
 
 	return list, nil
+}
+
+// Get get artifact using plugin
+func (p *artifact) Get(ctx context.Context,
+	baseURL *duckv1.Addressable,
+	project, repository, artifactName string,
+	options ...OptionFunc) (*metav1alpha1.Artifact, error) {
+
+	artifact := &metav1alpha1.Artifact{}
+
+	uri := fmt.Sprintf("projects/%s/repositories/%s/artifacts/%s", project, repository, artifactName)
+	options = append(options, MetaOpts(p.meta), SecretOpts(p.secret), ResultOpts(artifact))
+	if err := p.client.Get(ctx, baseURL, uri, options...); err != nil {
+		return nil, err
+	}
+
+	return artifact, nil
 }
 
 // Delete artifact using plugin
