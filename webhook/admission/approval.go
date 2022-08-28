@@ -160,10 +160,10 @@ func (h *approvingHandler) Handle(ctx context.Context, req admission.Request) ad
 
 	err = h.client.Create(ctx, localAccessReview, &client.CreateOptions{})
 	if err != nil {
-		log.Warnw("LOCAL ACCESS REVIEW FOR UPDATE", "error", err)
+		log.Warnw("LOCAL ACCESS REVIEW FOR UPDATE", "resource", resource, "error", err)
 		return admission.Denied(err.Error())
 	}
-	log.Debugw("LOCAL ACCESS REVIEW FOR UPDATE", "status", localAccessReview.Status)
+	log.Debugw("LOCAL ACCESS REVIEW FOR UPDATE", "resource", resource, "status", localAccessReview.Status)
 	advancedPermissions := localAccessReview.Status.Allowed
 
 	isCreateOperation := (req.Operation == admissionv1.Create)
