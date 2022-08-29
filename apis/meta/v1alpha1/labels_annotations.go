@@ -37,6 +37,9 @@ const (
 	// RepositoryLabelKey for integration resources
 	RepositoryLabelKey = "integrations.katanomi.dev/repository"
 
+	// IntegrationAutoGenerateAnnotation annotation key to store generate flag.
+	IntegrationAutoGenerateAnnotation = "integrations.katanomi.dev/resourceScope.autoGenerate"
+
 	// IntegrationAddressAnnotation annotation key to store integration server address
 	IntegrationAddressAnnotation = "integrations.katanomi.dev/integration.address"
 
