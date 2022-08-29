@@ -40,6 +40,18 @@ var _ = Describe("GitBranch.GetBranchStatus", func() {
 	JustBeforeEach(func() {
 		result = branch.GetBranchStatus()
 	})
+	When("struct is nil", func() {
+		BeforeEach(func() {
+			branch = nil
+			LoadYAML("testdata/git_branch_funcs_getbranchstatus.nil.golden.yaml", expected)
+		})
+		It("should return full BuildRunGitStatus", func() {
+			Expect(result).ToNot(BeNil())
+
+			diff := cmp.Diff(result, expected)
+			Expect(diff).To(BeEmpty())
+		})
+	})
 	When("struct has all data", func() {
 		BeforeEach(func() {
 			LoadYAML("testdata/git_branch_funcs_getbranchstatus.full.yaml", branch)
