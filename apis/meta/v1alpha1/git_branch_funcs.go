@@ -23,6 +23,9 @@ import (
 // GetBranchStatus return git branch status
 func (b *GitBranch) GetBranchStatus() (status *BuildGitBranchStatus) {
 	status = &BuildGitBranchStatus{}
+	if b == nil {
+		b = &GitBranch{}
+	}
 	status.Name = b.Name
 	status.Default = false
 	if b.Spec.Default != nil {
