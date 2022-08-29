@@ -24,6 +24,7 @@ import (
 
 	metav1alpha1 "github.com/katanomi/pkg/apis/meta/v1alpha1"
 
+	. "github.com/onsi/gomega"
 	"k8s.io/apimachinery/pkg/types"
 
 	corev1 "k8s.io/api/core/v1"
@@ -39,7 +40,6 @@ func TestSelect(t *testing.T) {
 			Type:     secretType,
 			TypeMeta: metav1.TypeMeta{},
 			ObjectMeta: metav1.ObjectMeta{
-
 				Name:      name,
 				Namespace: namespace,
 				Annotations: map[string]string{
@@ -47,6 +47,7 @@ func TestSelect(t *testing.T) {
 					metav1alpha1.IntegrationSecretApplyNamespaces: strings.Join(applyNamespaces, ","),
 					metav1alpha1.IntegrationResourceScope:         strings.Join(scopes, ","),
 				},
+				CreationTimestamp: metav1.Now(),
 			},
 		}
 	}
@@ -237,7 +238,8 @@ func TestSelect(t *testing.T) {
 			t.Errorf("should not be nil")
 		}
 
-		if secret.Name != "secret-basic" {
+		// secret-basic2 is latest create.
+		if secret.Name != "secret-basic2" {
 			t.Errorf("find wrong secret")
 		}
 	})
@@ -332,4 +334,30 @@ func TestSortSecretList(t *testing.T) {
 		var secrets []corev1.Secret
 		secrets = sortSecretList(secrets)
 	})
+}
+
+func Test_findNewestSecret(t *testing.T) {
+	g := NewGomegaWithT(t)
+
+	secrets := []corev1.Secret{
+		{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:              "a",
+				CreationTimestamp: metav1.Now(),
+			},
+		},
+		{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:              "b",
+				CreationTimestamp: metav1.Now(),
+			},
+		},
+	}
+
+	g.Expect(findNewestSecret(secrets)).To(Equal(1))
+
+	secrets[0].CreationTimestamp = metav1.Now()
+	g.Expect(findNewestSecret(secrets)).To(Equal(0))
+
+	g.Expect(findNewestSecret([]corev1.Secret{})).To(Equal(-1))
 }
