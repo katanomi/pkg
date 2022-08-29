@@ -17,6 +17,9 @@ limitations under the License.
 package v1alpha1
 
 import (
+	"reflect"
+	"testing"
+
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	authv1 "k8s.io/api/authorization/v1"
@@ -34,3 +37,42 @@ var _ = Describe("TestCaseExecution", func() {
 		})
 	})
 })
+
+func Test_executorFromNote(t *testing.T) {
+	tests := []struct {
+		name string
+		note string
+		want *UserSpec
+	}{
+		{
+			name: "empty string",
+			note: "",
+			want: nil,
+		},
+		{
+			name: "invalid string format",
+			note: "xxxxxx",
+			want: nil,
+		},
+		{
+			name: "invalid user string",
+			note: "[createdBy: xxx!!!xxx]",
+			want: nil,
+		},
+		{
+			name: "valid user string",
+			note: "[createdBy: xxx|xxx@xx.x]",
+			want: &UserSpec{
+				Name:  "xxx",
+				Email: "xxx@xx.x",
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := UserSpecFromNote(tt.note); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("UserSpecFromNote() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
