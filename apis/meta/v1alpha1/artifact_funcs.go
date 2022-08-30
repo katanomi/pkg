@@ -17,6 +17,9 @@ limitations under the License.
 package v1alpha1
 
 import (
+	"encoding/json"
+	"strings"
+
 	"github.com/katanomi/pkg/common"
 )
 
@@ -46,4 +49,42 @@ func (r *ArtifactList) Filter(filter func(artifact Artifact) bool) *ArtifactList
 	}
 
 	return newList
+}
+
+// ParseProperties will parse spec.properties to ArtifactProperties
+func (a Artifact) ParseProperties() (ArtifactProperties, error) {
+	if a.Spec.Properties == nil {
+		return ArtifactProperties{}, nil
+	}
+
+	bts, err := a.Spec.Properties.MarshalJSON()
+	if err != nil {
+		return ArtifactProperties{}, err
+	}
+
+	p := ArtifactProperties{}
+	err = json.Unmarshal(bts, &p)
+	if err != nil {
+		return ArtifactProperties{}, err
+	}
+
+	return p, nil
+}
+
+// ParseEnvs will parse string array to map, like from [ "a=b", "c=d" ] to {a:b, c:d}
+func ParseEnvs(env []string) map[string]string {
+	if len(env) == 0 {
+		return nil
+	}
+
+	res := map[string]string{}
+
+	for _, item := range env {
+		index := strings.Index(item, "=")
+		if index <= 0 {
+			continue
+		}
+		res[item[0:index]] = item[index+1:]
+	}
+	return res
 }

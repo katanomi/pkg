@@ -17,6 +17,9 @@ limitations under the License.
 package v1alpha1
 
 import (
+	"fmt"
+
+	v1 "github.com/opencontainers/image-spec/specs-go/v1"
 	authv1 "k8s.io/api/authorization/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -62,6 +65,61 @@ type ArtifactSpec struct {
 	// Properties extended properties for Artifact
 	// +optional
 	Properties *runtime.RawExtension `json:"properties,omitempty"`
+}
+
+// ArtifactProperties we should promote all shared field in properties into spec
+// but just defined it before we do the promotion
+// +k8s:deepcopy-gen=false
+type ArtifactProperties struct {
+	// Size represent size of artifact
+	Size int64 `json:"size,omitempty"`
+	// Tags represent all tags of current artifact
+	// +optional
+	Tags []ArtifactTag `json:"tags,omitempty"`
+
+	//ExtraAttrs artifact extra attributes
+	// +optional
+	ExtraAttrs ArtifactExtraAttrs `json:"extra_attrs,omitempty"`
+	//References artifact references
+	References []ArtifactReference `json:"references,omitempty"`
+}
+
+// ArtifactTag represent tag of artifact
+// +k8s:deepcopy-gen=false
+type ArtifactTag struct {
+	// Name artifact tag name
+	Name string `json:"name,omitempty"`
+}
+
+// ArtifactExtraAttrs represents artifact extra attributes like os
+// +k8s:deepcopy-gen=false
+type ArtifactExtraAttrs struct {
+	// OS system os type
+	OS string `json:"os,omitempty"`
+	// Architecture artifact arch
+	Architecture string `json:"architecture,omitempty"`
+	// Variant system variant
+	Variant string `json:"Variant,omitempty"`
+	// Config represent original container image config
+	Config v1.ImageConfig `json:"config,omitempty"`
+}
+
+// ArtifactReference represents reference of artifact
+// +k8s:deepcopy-gen=false
+type ArtifactReference struct {
+	// ChildDigest child artifact digests
+	ChildDigest string `json:"child_digest"`
+	// Platform artifact platform
+	Platform *v1.Platform `json:"platform"`
+}
+
+// PlatformString will return format os/arch
+func (ref ArtifactReference) PlatformString() string {
+	if ref.Platform == nil {
+		return ""
+	}
+
+	return fmt.Sprintf("%s/%s", ref.Platform.OS, ref.Platform.Architecture)
 }
 
 // ArtifactList list of artifacts
