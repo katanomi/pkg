@@ -67,6 +67,30 @@ func Test_executorFromNote(t *testing.T) {
 				Email: "xxx@xx.x",
 			},
 		},
+		{
+			name: "allow email is not valid",
+			note: "[createdBy: xxx|xxxxx]",
+			want: &UserSpec{
+				Name:  "xxx",
+				Email: "xxxxx",
+			},
+		},
+		{
+			name: "allow email is empty",
+			note: "[createdBy: xxx|]",
+			want: &UserSpec{
+				Name:  "xxx",
+				Email: "",
+			},
+		},
+		{
+			name: "allow both is empty",
+			note: "[createdBy: |]",
+			want: &UserSpec{
+				Name:  "",
+				Email: "",
+			},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
