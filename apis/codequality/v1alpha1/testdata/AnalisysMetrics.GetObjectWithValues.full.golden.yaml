@@ -1,0 +1,32 @@
+branch:
+  coverage:
+    new: "56"
+    total: "30"
+  duplications:
+    new: "0.34"
+    total: "43"
+target:
+  coverage:
+    new: "76.2"
+    total: "30"
+  duplications:
+    new: "1.43"
+    total: "23"
+ratings:
+  reliability:
+    rate: A
+    issues: 123
+  vulnerability:
+    rate: D
+    issues: 321
+  maintainability:
+    rate: E
+    issues: 512
+  securityHotspots:
+    rate: B
+    issues: 2
+languages:
+- java
+- go
+codeSize:
+  linesOfCode: 1234

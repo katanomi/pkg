@@ -81,3 +81,11 @@ func LoadObjectReferenceOrDie(g *WithT, file string, obj *corev1.ObjectReference
 	}
 	return obj
 }
+
+// MustLoadReturnObjectFromYAML loads and object from yaml file and returns as interface{}
+// if any loading errors happen will panic
+// TO BE USED IN TESTS, DO NOT USE IN PRODUCTION CODE
+func MustLoadReturnObjectFromYAML(file string, obj interface{}) interface{} {
+	MustLoadYaml(file, obj)
+	return obj
+}
