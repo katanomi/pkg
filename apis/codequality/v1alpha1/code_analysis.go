@@ -22,7 +22,7 @@ package v1alpha1
 // metrics
 type AnalysisResult struct {
 	// Result of the code analysis:
-	//  - Succeeded: sucessful code analysis with passing quality gates
+	//  - Succeeded: successful code analysis with passing quality gates
 	//  - Failed: failed code analysis
 	//  - Canceled: canceled code analysis due to canceled task
 	// +optional

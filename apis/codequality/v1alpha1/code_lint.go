@@ -19,7 +19,7 @@ package v1alpha1
 // CodeLintResult stores code linting results
 type CodeLintResult struct {
 	// Result for the linting process
-	//  - Succeeded: sucessful code linting with passing quality gates
+	//  - Succeeded: successful code linting with passing quality gates
 	//  - Failed: failed code linting
 	//  - Canceled: canceled code linting due to canceled task
 	Result string `json:"result"`
