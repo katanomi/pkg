@@ -20,3 +20,4 @@ package mock
 //go:generate mockgen -package=client -destination=./sigs.k8s.io/controller-runtime/pkg/client/client.go sigs.k8s.io/controller-runtime/pkg/client Client
 //go:generate mockgen -package=manager -destination=./sigs.k8s.io/controller-runtime/pkg/manager/manager.go sigs.k8s.io/controller-runtime/pkg/manager Manager
 //go:generate mockgen -package=apis -destination=./knative.dev/pkg/apis/condition_manager.go knative.dev/pkg/apis ConditionManager
+//go:generate mockgen -package=kubernetes -destination=./k8s.io/client-go/kubernetes/clientset.go k8s.io/client-go/kubernetes Interface
