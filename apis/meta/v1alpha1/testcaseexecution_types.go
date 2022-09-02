@@ -17,6 +17,9 @@ limitations under the License.
 package v1alpha1
 
 import (
+	"regexp"
+	"strings"
+
 	authv1 "k8s.io/api/authorization/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -78,4 +81,23 @@ func TestCaseExecutionResourceAttributes(verb string) authv1.ResourceAttributes 
 		Resource: "testcaseexecutions",
 		Verb:     verb,
 	}
+}
+
+func UserSpecFromNote(note string) *UserSpec {
+	if note == "" {
+		return nil
+	}
+
+	reg, _ := regexp.Compile("\\[createdBy: ([\\w@.\\-_]*\\|[\\w@.\\-_]*)]")
+	matches := reg.FindStringSubmatch(note)
+	if len(matches) > 1 {
+		splits := strings.Split(matches[1], "|")
+		if len(splits) == 2 {
+			return &UserSpec{
+				Name:  splits[0],
+				Email: splits[1],
+			}
+		}
+	}
+	return nil
 }

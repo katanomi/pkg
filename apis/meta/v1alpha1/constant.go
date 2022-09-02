@@ -50,6 +50,8 @@ const (
 	ErrorReason = "Error"
 	// StartedReason resource started to be reconciled
 	StartedReason = "Started"
+	// BlockedReason a testPlan was blocked
+	BlockedReason = "Blocked"
 )
 
 const (

@@ -22,6 +22,8 @@ import (
 	"knative.dev/pkg/apis"
 )
 
+const DefaultTestPlansPerPage = 20
+
 var TestPlanGVK = GroupVersion.WithKind("TestPlan")
 var TestPlanListGVK = GroupVersion.WithKind("TestPlanList")
 
