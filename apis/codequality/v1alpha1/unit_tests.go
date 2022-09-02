@@ -16,7 +16,13 @@ limitations under the License.
 
 package v1alpha1
 
-// "fmt"
+// NamedUnitTestsResult adds name over integrated UnitTestsResult
+type NamedUnitTestsResult struct {
+	// Name of a specific unit tests result
+	Name string `json:"name,omitempty"`
+
+	UnitTestsResult `json:",inline"`
+}
 
 // UnitTestsResult unit tests results encapsulating
 // coverage and number of passed, failed and skipped tests

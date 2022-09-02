@@ -1,0 +1,6 @@
+- url: "registry.katanomi.dev/abc/def"
+  type: ContainerImage
+  digest: sha256:b51bf41c3f3c64c818a8649156847d6b285d0c19f4bf0490378229b02ce5dafe
+  versions:
+  - latest
+  - "v1.0.1"

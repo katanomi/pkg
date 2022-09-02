@@ -16,6 +16,14 @@ limitations under the License.
 
 package v1alpha1
 
+// NamedAnalysisResult adds name over integrated AnalysisResult
+type NamedAnalysisResult struct {
+	// Name of a specific analsysis result
+	Name string `json:"name,omitempty"`
+
+	AnalysisResult `json:",inline"`
+}
+
 // AnalysisResult stores the result of a code analysis performed
 // storing the specific Result, the remote report address,
 // the specific task id used for the project id, with optional
