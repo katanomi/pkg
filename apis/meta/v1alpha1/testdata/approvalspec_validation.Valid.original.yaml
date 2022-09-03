@@ -1,0 +1,9 @@
+approvalOverflow: true
+policy: All
+requiresDifferentApprover: true
+timeout: 0s
+users:
+  - kind: User
+    name: admin@cpaas.io
+  - kind: User
+    name: test
