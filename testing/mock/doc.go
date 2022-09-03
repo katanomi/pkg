@@ -21,3 +21,4 @@ package mock
 //go:generate mockgen -package=manager -destination=./sigs.k8s.io/controller-runtime/pkg/manager/manager.go sigs.k8s.io/controller-runtime/pkg/manager Manager
 //go:generate mockgen -package=apis -destination=./knative.dev/pkg/apis/condition_manager.go knative.dev/pkg/apis ConditionManager
 //go:generate mockgen -package=kubernetes -destination=./k8s.io/client-go/kubernetes/clientset.go k8s.io/client-go/kubernetes Interface
+//go:generate mockgen -package=sharedmain -destination=./github.com/katanomi/pkg/watcher.go github.com/katanomi/pkg/sharedmain DefaultingWatcherWithOnChange

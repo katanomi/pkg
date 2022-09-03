@@ -26,7 +26,7 @@ import (
 
 	"github.com/katanomi/pkg/tracing"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	cminformer "knative.dev/pkg/configmap/informer"
+	"knative.dev/pkg/configmap"
 
 	"go.uber.org/zap"
 	corev1 "k8s.io/api/core/v1"
@@ -117,7 +117,7 @@ func GetLoggingConfig(ctx context.Context) (*logging.Config, error) {
 // WatchLoggingConfigOrDie establishes a watch of the logging config or dies by
 // calling log.Fatalw. Note, if the config does not exist, it will be defaulted
 // and this method will not die.
-func WatchLoggingConfigOrDie(ctx context.Context, cmw *cminformer.InformedWatcher, logger *zap.SugaredLogger, lvlMGR *klogging.LevelManager) {
+func WatchLoggingConfigOrDie(ctx context.Context, cmw configmap.Watcher, logger *zap.SugaredLogger, lvlMGR *klogging.LevelManager) {
 	if _, err := kubeclient.Get(ctx).CoreV1().ConfigMaps(system.Namespace()).Get(ctx, logging.ConfigMapName(),
 		metav1.GetOptions{}); err == nil {
 		cmw.Watch(logging.ConfigMapName(), lvlMGR.Update())

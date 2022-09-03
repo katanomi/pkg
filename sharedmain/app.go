@@ -53,7 +53,6 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/rest"
 	kubeclient "knative.dev/pkg/client/injection/kube/client"
-	cminformer "knative.dev/pkg/configmap/informer"
 	"knative.dev/pkg/injection"
 	"knative.dev/pkg/injection/sharedmain"
 	"knative.dev/pkg/logging"
@@ -103,7 +102,7 @@ type AppBuilder struct {
 	Manager ctrl.Manager
 
 	// ConfigWatch
-	ConfigMapWatcher *cminformer.InformedWatcher
+	ConfigMapWatcher DefaultingWatcherWithOnChange
 
 	// Profiling
 	ProfilingServer *http.Server
