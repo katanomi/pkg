@@ -20,15 +20,14 @@ import (
 	"go.uber.org/zap"
 	corev1 "k8s.io/api/core/v1"
 	"knative.dev/pkg/configmap"
-	cminformer "knative.dev/pkg/configmap/informer"
 )
 
-func NewWatcher(watcherName string, informer *cminformer.InformedWatcher) *watcher {
+func NewWatcher(watcherName string, informer configmap.DefaultingWatcher) *watcher {
 	logger, _ := zap.NewDevelopment()
 
 	w := &watcher{}
 	w.name = watcherName
-	w.InformedWatcher = informer
+	w.DefaultingWatcher = informer
 	w.constructors = make(map[string]interface{})
 	w.defaults = make(map[string]corev1.ConfigMap)
 	w.logger = logger.Sugar()
@@ -37,7 +36,7 @@ func NewWatcher(watcherName string, informer *cminformer.InformedWatcher) *watch
 
 // watcher describe configmap watcher
 type watcher struct {
-	*cminformer.InformedWatcher
+	configmap.DefaultingWatcher
 
 	name         string
 	constructors map[string]interface{}
@@ -57,7 +56,7 @@ func (d *watcher) WithLogger(logger *zap.SugaredLogger) *watcher {
 
 // AddWatch watch the configmap based on the given name
 // If there is no configmap specified in the current namespace,
-// the default configuration you provide will be used, if not, `InformedWatcher` will exit
+// the default configuration you provide will be used, if not, `DefaultingWatcher` will exit
 func (d *watcher) AddWatch(cmName string, c ConfigConstructor) {
 	if c.CmName() != "" {
 		cmName = c.CmName()
@@ -92,11 +91,11 @@ func (d *watcher) Run() {
 	configStore.WatchConfigs(d)
 }
 
-// Watch register the watcher to InformedWatcher
+// Watch register the watcher to DefaultingWatcher
 func (d *watcher) Watch(name string, obs ...configmap.Observer) {
 	if cm, ok := d.defaults[name]; ok {
-		d.InformedWatcher.WatchWithDefault(cm, obs...)
+		d.DefaultingWatcher.WatchWithDefault(cm, obs...)
 	} else {
-		d.InformedWatcher.Watch(name, obs...)
+		d.DefaultingWatcher.Watch(name, obs...)
 	}
 }

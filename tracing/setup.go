@@ -17,10 +17,11 @@ limitations under the License.
 package tracing
 
 import (
-	"github.com/katanomi/pkg/storage/configmap"
 	v1 "k8s.io/api/core/v1"
-	cminformer "knative.dev/pkg/configmap/informer"
+	"knative.dev/pkg/configmap"
 	"knative.dev/pkg/system"
+
+	kconfigmap "github.com/katanomi/pkg/storage/configmap"
 )
 
 func defaultConfigMap(name string) *v1.ConfigMap {
@@ -35,7 +36,7 @@ func defaultConfigMap(name string) *v1.ConfigMap {
 // just ensures that if generated, they are collected appropriately. This is normally done by using
 // tracing.HTTPSpanMiddleware as a middleware HTTP handler. The configuration will be dynamically
 // updated when the ConfigMap is updated.
-func SetupDynamicPublishing(tracing *Tracing, configMapWatcher *cminformer.InformedWatcher) error {
+func SetupDynamicPublishing(tracing *Tracing, configMapWatcher configmap.DefaultingWatcher) error {
 	tracerUpdater := func(cm *v1.ConfigMap) {
 		cfg, err := newTracingConfigFromConfigMap(cm)
 		if err != nil {
@@ -46,8 +47,8 @@ func SetupDynamicPublishing(tracing *Tracing, configMapWatcher *cminformer.Infor
 
 	// Set up our config store.
 	dftCm := defaultConfigMap(tracing.ConfigMapName)
-	w := configmap.NewWatcher("config-tracing-store", configMapWatcher).WithLogger(tracing.logger)
-	w.AddWatch(dftCm.GetName(), configmap.NewConfigConstructor(dftCm, func(cm *v1.ConfigMap) {
+	w := kconfigmap.NewWatcher("config-tracing-store", configMapWatcher).WithLogger(tracing.logger)
+	w.AddWatch(dftCm.GetName(), kconfigmap.NewConfigConstructor(dftCm, func(cm *v1.ConfigMap) {
 		tracerUpdater(cm)
 	}))
 	w.Run()

@@ -1,0 +1,13 @@
+approval:
+  users:
+    - input:
+        approved: true
+      kind: User
+      name: name
+      operator:
+        kind: User
+        name: admin@cpaas.io
+    - input:
+        approved: false
+      kind: User
+      name: admin@cpaas.io

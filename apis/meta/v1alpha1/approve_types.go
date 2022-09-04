@@ -44,9 +44,9 @@ type ApprovalSpec struct {
 	// Users a list of users that can perform approval for the Stage execution
 	Users []rbacv1.Subject `json:"users,omitempty"`
 
-	// Policy defines the policy of approval, such as `Any`, `All`. (Defaults is `Any`)
+	// Policy defines the policy of approval, such as `Any`, `All`, `InOrder`. (Defaults is `Any`)
 	// +kubebuilder:default="Any"
-	// +kubebuilder:validation:Enum={"Any","All"}
+	// +kubebuilder:validation:Enum={"Any","All","InOrder"}
 	Policy ApprovalPolicy `json:"policy"`
 
 	// Timeout duration for approval. Once the StageRun starts approval,

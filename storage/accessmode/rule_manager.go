@@ -21,11 +21,11 @@ import (
 	"os"
 	"sync"
 
-	"github.com/katanomi/pkg/storage/configmap"
+	kconfigmap "github.com/katanomi/pkg/storage/configmap"
 	"go.uber.org/zap"
 	corev1 "k8s.io/api/core/v1"
 	storagev1 "k8s.io/api/storage/v1"
-	cminformer "knative.dev/pkg/configmap/informer"
+	"knative.dev/pkg/configmap"
 	"knative.dev/pkg/system"
 )
 
@@ -60,7 +60,7 @@ type AccessModeManager interface {
 }
 
 // NewDynamicAccessModeManager helper function for constructing AccessModeManager
-func NewDynamicAccessModeManager(logger *zap.SugaredLogger, informer *cminformer.InformedWatcher) AccessModeManager {
+func NewDynamicAccessModeManager(logger *zap.SugaredLogger, informer configmap.DefaultingWatcher) AccessModeManager {
 	dftRules := dftAccessModeRules()
 
 	d := &dynamicAccessModeManager{}
@@ -69,8 +69,8 @@ func NewDynamicAccessModeManager(logger *zap.SugaredLogger, informer *cminformer
 	d.dftRules = dftRules
 
 	dftCM := dftCm()
-	watcher := configmap.NewWatcher("accessmode-rules-cm", informer)
-	watcher.AddWatch(dftCM.GetName(), configmap.NewConfigConstructor(dftCM, func(cm *corev1.ConfigMap) {
+	watcher := kconfigmap.NewWatcher("accessmode-rules-cm", informer)
+	watcher.AddWatch(dftCM.GetName(), kconfigmap.NewConfigConstructor(dftCM, func(cm *corev1.ConfigMap) {
 		d.applyConfig(cm)
 	}))
 	watcher.Run()

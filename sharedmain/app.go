@@ -29,6 +29,7 @@ import (
 	"sync"
 	"time"
 
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	utilyaml "k8s.io/apimachinery/pkg/util/yaml"
 	_ "sigs.k8s.io/controller-runtime/pkg/metrics"
 
@@ -49,16 +50,14 @@ import (
 	"github.com/katanomi/pkg/tracing"
 	"go.uber.org/zap"
 	"golang.org/x/sync/errgroup"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/rest"
 	kubeclient "knative.dev/pkg/client/injection/kube/client"
-	cminformer "knative.dev/pkg/configmap/informer"
 	"knative.dev/pkg/injection"
 	"knative.dev/pkg/injection/sharedmain"
 	"knative.dev/pkg/logging"
-
 	"knative.dev/pkg/system"
+
 	ctrl "sigs.k8s.io/controller-runtime"
 	ctrlclient "sigs.k8s.io/controller-runtime/pkg/client"
 	ctrlcluster "sigs.k8s.io/controller-runtime/pkg/cluster"
@@ -103,7 +102,7 @@ type AppBuilder struct {
 	Manager ctrl.Manager
 
 	// ConfigWatch
-	ConfigMapWatcher *cminformer.InformedWatcher
+	ConfigMapWatcher DefaultingWatcherWithOnChange
 
 	// Profiling
 	ProfilingServer *http.Server
