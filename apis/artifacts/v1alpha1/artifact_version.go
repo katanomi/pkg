@@ -18,6 +18,8 @@ package v1alpha1
 
 import (
 	"context"
+	"fmt"
+
 	// "regexp"
 	"strings"
 )
@@ -81,7 +83,7 @@ func GetContainerImageObjectFromURLValues(ctx context.Context, url, digest strin
 
 // GetContainerImageFromValues return a list of container image artifacts using url, digest and tags
 func GetContainerImageFromValues(ctx context.Context, array []string) (versions []ArtifactVersion) {
-	// will use the digest as an index
+	// will use the url@digest as an index
 	// to attach tags to the same artifact
 	// must provide the same digest otherwise will consider to be
 	// different artifacts
@@ -94,18 +96,20 @@ func GetContainerImageFromValues(ctx context.Context, array []string) (versions 
 			URL:    url,
 			Digest: digest,
 		}
-		idx, hasDigest := digestIndex[digest]
-		if digest != "" && hasDigest {
+
+		key := fmt.Sprintf("%s@%s", url, digest)
+		idx, hasKey := digestIndex[key]
+		if digest != "" && hasKey {
 			artifact = versions[idx]
 		}
 		if tag != "" {
 			artifact.Versions = append(artifact.Versions, tag)
 		}
-		if hasDigest {
+		if hasKey {
 			versions[idx] = artifact
 		} else {
 			if digest != "" {
-				digestIndex[digest] = len(versions)
+				digestIndex[key] = len(versions)
 			}
 			versions = append(versions, artifact)
 		}

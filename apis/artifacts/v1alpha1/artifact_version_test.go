@@ -157,6 +157,7 @@ func TestArtifactVersionGetContainerImageFromValues(t *testing.T) {
 				"registry.katanomi.dev/project/repository:v1@sha256:b51bf41c3f3c64c818a8649156847d6b285d0c19f4bf0490378229b02ce5dzzz",
 				"registry.katanomi.dev/project/repository:v2",
 				"registry.katanomi.dev/project/repository:v1.1@sha256:b51bf41c3f3c64c818a8649156847d6b285d0c19f4bf0490378229b02ce5dzzz",
+				"registry.katanomi.dev/project/repository2:v1@sha256:b51bf41c3f3c64c818a8649156847d6b285d0c19f4bf0490378229b02ce5dzzz",
 
 				// ip address with port
 				"192.168.1.1:32001/repo/test:tag",
