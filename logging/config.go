@@ -46,7 +46,7 @@ type ControllerLevel struct {
 // LevelManager a manager for level. BaseLevel will be used when can't find level in ControllerLevelMap
 type LevelManager struct {
 	BaseLevel          zap.AtomicLevel
-	ControllerLevelMap map[string]ControllerLevel
+	ControllerLevelMap map[string]*ControllerLevel
 	Locker             *sync.Mutex
 	Name               string
 
@@ -57,7 +57,7 @@ type LevelManager struct {
 func NewLevelManager(ctx context.Context, name string) LevelManager {
 	return LevelManager{
 		BaseLevel:          zap.NewAtomicLevel(),
-		ControllerLevelMap: map[string]ControllerLevel{},
+		ControllerLevelMap: map[string]*ControllerLevel{},
 		Locker:             &sync.Mutex{},
 		Name:               name,
 		// most probably will init with a fallback logger
@@ -129,7 +129,7 @@ func (l *LevelManager) Update() func(configMap *corev1.ConfigMap) {
 		for k, v := range config.LoggingLevel {
 			if controllerLevel, ok := l.ControllerLevelMap[k]; !ok {
 				l.Infow("adding new log level. Obs: This change only takes effect after restaring the pod", "name", k, "level", v)
-				l.ControllerLevelMap[k] = ControllerLevel{Inherit: false, Level: zap.NewAtomicLevelAt(v)}
+				l.ControllerLevelMap[k] = &ControllerLevel{Inherit: false, Level: zap.NewAtomicLevelAt(v)}
 			} else {
 				controllerLevel.Inherit = false
 				if controllerLevel.Level.String() != v.String() {
@@ -139,8 +139,11 @@ func (l *LevelManager) Update() func(configMap *corev1.ConfigMap) {
 			}
 		}
 
-		for _, v := range l.ControllerLevelMap {
+		for k, v := range l.ControllerLevelMap {
 			if v.Inherit {
+				if v.Level.String() != level.String() {
+					l.Infow("updating log level", "name", k, "old", v, "current", level)
+				}
 				v.Level.SetLevel(level)
 			}
 		}
@@ -152,7 +155,7 @@ func (l *LevelManager) Get(name string) zap.AtomicLevel {
 	l.Locker.Lock()
 	defer l.Locker.Unlock()
 	if _, ok := l.ControllerLevelMap[name]; !ok {
-		l.ControllerLevelMap[name] = ControllerLevel{
+		l.ControllerLevelMap[name] = &ControllerLevel{
 			Inherit: true,
 			Level:   zap.NewAtomicLevelAt(l.BaseLevel.Level()),
 		}
