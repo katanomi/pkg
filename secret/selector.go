@@ -187,15 +187,18 @@ func selectToolSecret(logger *zap.SugaredLogger, secretList []corev1.Secret, glo
 		return &usableSecrets[secretIndex], nil
 	}
 
+	// get the latest secret.
+	if newestIndex := findNewestSecret(usableSecrets); newestIndex > -1 {
+		return &usableSecrets[newestIndex], nil
+	}
+
 	return &usableSecrets[0], nil
 }
 
 func selectToolSecretFrom(logger *zap.SugaredLogger, secretList []corev1.Secret, isGlobal bool, resourceURL *neturl.URL, option SelectSecretOption) []corev1.Secret {
-
-	sortedSecrets := sortSecretList(secretList)
 	usableSecrets := make([]corev1.Secret, 0)
 
-	for _, _secret := range sortedSecrets {
+	for _, _secret := range secretList {
 		var sec = _secret
 
 		if len(option.SecretTypes) != 0 && !option.SecretTypes.Contains(sec.Type) {
@@ -245,8 +248,9 @@ func selectToolSecretFrom(logger *zap.SugaredLogger, secretList []corev1.Secret,
 				continue
 			}
 			p := strings.ToLower(resourceURL.Path)
-			if strings.HasPrefix(p, strings.ToLower(scope)) {
+			if scope == "/" || strings.HasPrefix(p, strings.ToLower(scope)) {
 				usableSecrets = append(usableSecrets, sec)
+				break
 			}
 		}
 	}
@@ -263,6 +267,19 @@ func findPreferredSecret(secrets []corev1.Secret, preferredNs, preferred string)
 		}
 	}
 	return false, -1
+}
+
+func findNewestSecret(secrets []corev1.Secret) (index int) {
+	newestTime := metav1.Time{}
+	newestIndex := -1
+	for index := range secrets {
+		if !secrets[index].CreationTimestamp.Before(&newestTime) {
+			newestTime = secrets[index].CreationTimestamp
+			newestIndex = index
+		}
+	}
+
+	return newestIndex
 }
 
 func containsInArray(items []string, value string) bool {
