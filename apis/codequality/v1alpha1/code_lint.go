@@ -16,6 +16,14 @@ limitations under the License.
 
 package v1alpha1
 
+// NamedCodeLintResult adds name over integrated CodeLintResult
+type NamedCodeLintResult struct {
+	// Name of a specific lint result
+	Name string `json:"name,omitempty"`
+
+	CodeLintResult `json:",inline"`
+}
+
 // CodeLintResult stores code linting results
 type CodeLintResult struct {
 	// Result for the linting process

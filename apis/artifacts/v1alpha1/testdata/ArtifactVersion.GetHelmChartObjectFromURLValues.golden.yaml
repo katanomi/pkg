@@ -1,0 +1,5 @@
+- url: "registry.katanomi.dev/abc/def"
+  type: HelmChart
+  versions:
+  - latest
+  - "v1.0.1"
