@@ -28,6 +28,17 @@ import (
 	"sigs.k8s.io/yaml"
 )
 
+// MustLoadFileString loads a file as string
+// will panic if if failes
+// ONLY FOR TEST USAGE
+func MustLoadFileString(file string, content *string) {
+	data, err := ioutil.ReadFile(file)
+	if err != nil {
+		panic(err)
+	}
+	*content = string(data)
+}
+
 // LoadJSON loads json
 func LoadJSON(file string, obj interface{}) (err error) {
 	var data []byte
