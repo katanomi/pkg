@@ -22,6 +22,11 @@ import (
 	"k8s.io/apimachinery/pkg/util/validation/field"
 )
 
+// IsEmpty returns true if the struct is empty
+func (a CodeLintResult) IsEmpty() bool {
+	return a.Result == "" && a.Issues == nil
+}
+
 // GetObjectWithValues inits an object based on a json.path values map
 // returns nil if values is nil
 func (CodeLintResult) GetObjectWithValues(ctx context.Context, path *field.Path, values map[string]string) (result *CodeLintResult) {

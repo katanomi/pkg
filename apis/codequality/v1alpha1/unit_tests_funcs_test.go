@@ -79,3 +79,40 @@ func TestUnitTestsResultGetObjectWithValues(t *testing.T) {
 		})
 	}
 }
+
+func TestUnitTestsResultIsEmpty(t *testing.T) {
+	t.Run("is empty struct", func(t *testing.T) {
+		g := gomega.NewGomegaWithT(t)
+		object := UnitTestsResult{}
+
+		g.Expect(object.IsEmpty()).To(gomega.BeTrue())
+	})
+
+	t.Run("has non nil coverage but empty", func(t *testing.T) {
+		g := gomega.NewGomegaWithT(t)
+		object := UnitTestsResult{Coverage: &TestCoverage{}}
+
+		g.Expect(object.IsEmpty()).To(gomega.BeTrue())
+	})
+
+	t.Run("has non nil results with empty values nil coverage", func(t *testing.T) {
+		g := gomega.NewGomegaWithT(t)
+		object := UnitTestsResult{TestResult: &TestResult{}}
+
+		g.Expect(object.IsEmpty()).To(gomega.BeTrue())
+	})
+
+	t.Run("has results with nil coverage", func(t *testing.T) {
+		g := gomega.NewGomegaWithT(t)
+		object := UnitTestsResult{TestResult: &TestResult{Passed: 1}}
+
+		g.Expect(object.IsEmpty()).To(gomega.BeFalse())
+	})
+
+	t.Run("nil results with coverage", func(t *testing.T) {
+		g := gomega.NewGomegaWithT(t)
+		object := UnitTestsResult{Coverage: &TestCoverage{Lines: "1"}}
+
+		g.Expect(object.IsEmpty()).To(gomega.BeFalse())
+	})
+}

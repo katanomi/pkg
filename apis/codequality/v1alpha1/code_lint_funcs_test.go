@@ -71,3 +71,26 @@ func TestCodeLintResultGetObjectWithValues(t *testing.T) {
 		})
 	}
 }
+
+func TestCodeLintResultIsEmpty(t *testing.T) {
+	t.Run("is empty struct", func(t *testing.T) {
+		g := gomega.NewGomegaWithT(t)
+		object := CodeLintResult{}
+
+		g.Expect(object.IsEmpty()).To(gomega.BeTrue())
+	})
+
+	t.Run("has issues but empty/zero", func(t *testing.T) {
+		g := gomega.NewGomegaWithT(t)
+		object := CodeLintResult{Issues: &CodeLintIssues{}}
+
+		g.Expect(object.IsEmpty()).To(gomega.BeFalse())
+	})
+
+	t.Run("has any attribute with nil issues", func(t *testing.T) {
+		g := gomega.NewGomegaWithT(t)
+		object := CodeLintResult{Result: "a"}
+
+		g.Expect(object.IsEmpty()).To(gomega.BeFalse())
+	})
+}

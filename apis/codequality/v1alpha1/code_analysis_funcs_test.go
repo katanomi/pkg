@@ -188,3 +188,33 @@ func TestAnalisysMetricsGetObjectWithValues(t *testing.T) {
 		})
 	}
 }
+
+func TestAnalaysisResultIsEmpty(t *testing.T) {
+	t.Run("is empty struct", func(t *testing.T) {
+		g := gomega.NewGomegaWithT(t)
+		object := AnalysisResult{}
+
+		g.Expect(object.IsEmpty()).To(gomega.BeTrue())
+	})
+
+	t.Run("has metrics but empty", func(t *testing.T) {
+		g := gomega.NewGomegaWithT(t)
+		object := AnalysisResult{Metrics: &AnalisysMetrics{}}
+
+		g.Expect(object.IsEmpty()).To(gomega.BeTrue())
+	})
+
+	t.Run("has any attribute with nil metrics", func(t *testing.T) {
+		g := gomega.NewGomegaWithT(t)
+		object := AnalysisResult{Result: "a"}
+
+		g.Expect(object.IsEmpty()).To(gomega.BeFalse())
+	})
+
+	t.Run("has only metrics", func(t *testing.T) {
+		g := gomega.NewGomegaWithT(t)
+		object := AnalysisResult{Metrics: &AnalisysMetrics{Languages: []string{"a"}}}
+
+		g.Expect(object.IsEmpty()).To(gomega.BeFalse())
+	})
+}
