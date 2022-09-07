@@ -24,6 +24,15 @@ import (
 	"k8s.io/apimachinery/pkg/util/validation/field"
 )
 
+// IsEmpty returns true if the struct is empty
+func (a AnalysisResult) IsEmpty() bool {
+	attributesEmpty := (a.ProjectID == "" &&
+		a.ReportURL == "" &&
+		a.Result == "" &&
+		a.TaskID == "")
+	return attributesEmpty && a.Metrics.IsEmpty()
+}
+
 // GetObjectWithValues inits an object based on a json.path values map
 // returns nil if values is nil
 func (AnalysisResult) GetObjectWithValues(ctx context.Context, path *field.Path, values map[string]string) (result *AnalysisResult) {
@@ -37,6 +46,14 @@ func (AnalysisResult) GetObjectWithValues(ctx context.Context, path *field.Path,
 		}
 	}
 	return
+}
+
+// IsEmpty returns true if is nil or is empty
+func (a *AnalisysMetrics) IsEmpty() bool {
+	if a == nil {
+		return true
+	}
+	return a.Branch == nil && a.Target == nil && len(a.Ratings) == 0 && len(a.Languages) == 0 && a.CodeSize == nil
 }
 
 // GetObjectWithValues inits an object based on a json.path values map

@@ -23,6 +23,11 @@ import (
 	"k8s.io/apimachinery/pkg/util/validation/field"
 )
 
+// IsEmpty returns true if the struct is empty
+func (u UnitTestsResult) IsEmpty() bool {
+	return u.Coverage.IsEmpty() && u.TestResult.IsEmpty()
+}
+
 // GetObjectWithValues inits an object based on a json.path values map
 // returns nil if values is nil
 func (UnitTestsResult) GetObjectWithValues(ctx context.Context, path *field.Path, values map[string]string) (result *UnitTestsResult) {
@@ -35,6 +40,14 @@ func (UnitTestsResult) GetObjectWithValues(ctx context.Context, path *field.Path
 	return
 }
 
+// IsEmpty returns true if the struct is empty
+func (c *TestCoverage) IsEmpty() bool {
+	if c == nil {
+		return true
+	}
+	return c.Branches == "" && c.Lines == ""
+}
+
 // GetObjectWithValues inits an object based on a json.path values map
 // returns nil if values is nil
 func (TestCoverage) GetObjectWithValues(ctx context.Context, path *field.Path, values map[string]string) (result *TestCoverage) {
@@ -45,6 +58,14 @@ func (TestCoverage) GetObjectWithValues(ctx context.Context, path *field.Path, v
 		}
 	}
 	return
+}
+
+// IsEmpty returns true if the struct is empty
+func (t *TestResult) IsEmpty() bool {
+	if t == nil {
+		return true
+	}
+	return t.Failed+t.Passed+t.Skipped == 0
 }
 
 // GetObjectWithValues inits an object based on a json.path values map
