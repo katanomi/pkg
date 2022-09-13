@@ -16,10 +16,12 @@ limitations under the License.
 
 package v1alpha1
 
+type ArtifactFilterRegexList []string
+
 // ArtifactTagFilter contains regular expressions used to match the artifact's tag.
 type ArtifactTagFilter struct {
 	// Regex regular expressions matches tag
-	Regex []string `json:"regex,omitempty"`
+	Regex ArtifactFilterRegexList `json:"regex,omitempty"`
 }
 
 // ArtifactEnvFilter contains name and regular expressions used to match the artifact's env.
@@ -27,7 +29,7 @@ type ArtifactEnvFilter struct {
 	// Name represent env name
 	Name string `json:"name,omitempty"`
 	// Regex regular expressions matches env
-	Regex []string `json:"regex,omitempty"`
+	Regex ArtifactFilterRegexList `json:"regex,omitempty"`
 }
 
 // ArtifactLabelFilter contains name and regular expressions used to match the artifact's label.
@@ -35,7 +37,7 @@ type ArtifactLabelFilter struct {
 	// Name represent label name
 	Name string `json:"name,omitempty"`
 	// Regex regular expressions matches label
-	Regex []string `json:"regex,omitempty"`
+	Regex ArtifactFilterRegexList `json:"regex,omitempty"`
 }
 
 // ArtifactFilter artifact filter.
