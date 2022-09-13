@@ -17,6 +17,8 @@ limitations under the License.
 package v1alpha1
 
 import (
+	"strings"
+
 	authv1 "k8s.io/api/authorization/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -58,8 +60,12 @@ func (r ProjectSubType) Validate(fld *field.Path) field.ErrorList {
 		TestProjectSubType:            {},
 	}
 
-	if _, exist := supportedTypes[r]; !exist {
-		errs = append(errs, field.Invalid(fld, r, "resource subtype is invalid"))
+	types := strings.Split(r.String(), ",")
+
+	for _, t := range types {
+		if _, exist := supportedTypes[ProjectSubType(t)]; !exist {
+			errs = append(errs, field.Invalid(fld, r, "resource subtype is invalid"))
+		}
 	}
 
 	return errs

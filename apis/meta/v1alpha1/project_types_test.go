@@ -18,9 +18,14 @@ package v1alpha1
 
 import (
 	"reflect"
+	"strings"
 	"testing"
 
 	authv1 "k8s.io/api/authorization/v1"
+	"k8s.io/apimachinery/pkg/util/validation/field"
+
+	. "github.com/onsi/ginkgo/v2"
+	. "github.com/onsi/gomega"
 )
 
 func TestProjectResourceAttributes(t *testing.T) {
@@ -42,3 +47,33 @@ func TestProjectResourceAttributes(t *testing.T) {
 		})
 	}
 }
+
+var _ = Describe("ProjectSubType", func() {
+	var t ProjectSubType
+	var f *field.Path
+
+	BeforeEach(func() {
+		f = field.NewPath("foo", "bar")
+	})
+	Context("Validate invalid type", func() {
+		It("return error", func() {
+			t = "ProjectXXX"
+			Expect(t.Validate(f)).NotTo(BeEmpty())
+		})
+	})
+
+	Context("Validate valid single type", func() {
+		It("return error", func() {
+			t = ImageRegistryProjectSubType
+			Expect(t.Validate(f)).To(BeEmpty())
+		})
+	})
+
+	Context("Validate valid multiple type", func() {
+		It("return error", func() {
+			t = ProjectSubType(strings.Join([]string{ImageRegistryProjectSubType.String(),
+				TestProjectSubType.String()}, ","))
+			Expect(t.Validate(f)).To(BeEmpty())
+		})
+	})
+})
