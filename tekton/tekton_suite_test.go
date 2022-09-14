@@ -1,5 +1,5 @@
 /*
-Copyright 2021 The Katanomi Authors.
+Copyright 2022 The Katanomi Authors.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -14,12 +14,16 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package sharedmain
+package tekton
 
 import (
-	"github.com/katanomi/pkg/watcher"
+	"testing"
+
+	. "github.com/onsi/ginkgo/v2"
+	. "github.com/onsi/gomega"
 )
 
-// DefaultingWatcherWithOnChange is a configmap.DefaultingWatcher that also has an OnChange callback.
-// Deprecated: please use watcher.DefaultWatcherWithOnChange
-type DefaultingWatcherWithOnChange watcher.DefaultingWatcherWithOnChange
+func TestTekton(t *testing.T) {
+	RegisterFailHandler(Fail)
+	RunSpecs(t, "Tekton Suite")
+}
