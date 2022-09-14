@@ -155,10 +155,10 @@ func TestValidatorCreate(t *testing.T) {
 			diff := cmp.Diff(returned, test.Response)
 			t.Logf("diff is: \n%s\n %#v == %#v", diff, test.Response, returned)
 			if diff != "" {
-				t.Failed()
+				t.Fail()
 			}
 			if returned.Allowed != test.Response.Allowed {
-				t.Failed()
+				t.Fail()
 			}
 		})
 	}
@@ -244,10 +244,10 @@ func TestValidatorUpdate(t *testing.T) {
 			diff := cmp.Diff(returned, test.Response)
 			t.Logf("diff is: \n%s\n %#v == %#v", diff, test.Response, returned)
 			if diff != "" {
-				t.Failed()
+				t.Fail()
 			}
 			if returned.Allowed != test.Response.Allowed {
-				t.Failed()
+				t.Fail()
 			}
 		})
 	}
@@ -321,10 +321,10 @@ func TestValidatorDelete(t *testing.T) {
 			diff := cmp.Diff(returned, test.Response)
 			t.Logf("diff is: \n%s\n %#v == %#v", diff, test.Response, returned)
 			if diff != "" {
-				t.Failed()
+				t.Fail()
 			}
 			if returned.Allowed != test.Response.Allowed {
-				t.Failed()
+				t.Fail()
 			}
 		})
 	}
