@@ -44,6 +44,7 @@ type Approval interface {
 //go:generate mockgen -package=admission -destination=../../testing/mock/github.com/katanomi/pkg/webhook/admission/triggeredbygetter.go github.com/katanomi/pkg/webhook/admission TriggeredByGetter
 
 // TriggeredByGetter get the triggerd by from the runtime object
+// This interface should be implemented when `requiresDifferentApprover` is enabled.
 type TriggeredByGetter interface {
 	GetTriggeredBy(runtime.Object) *metav1alpha1.TriggeredBy
 }
