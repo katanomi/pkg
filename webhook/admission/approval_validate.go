@@ -62,7 +62,8 @@ func ValidateApproval(ctx context.Context, reqUser authenticationv1.UserInfo, al
 			skipAppendCheck = true
 			approvalSpec = &metav1alpha1.ApprovalSpec{}
 		}
-		err = checkApproval(ctx, reqUser, allowRepresentOthers, skipAppendCheck, approvalSpec, oldUsers, newUsers, triggeredBy)
+		c := &checkApproval{ctx, reqUser, allowRepresentOthers, skipAppendCheck, approvalSpec, oldUsers, newUsers, triggeredBy}
+		err = c.Check()
 		if err != nil {
 			break
 		}
@@ -70,18 +71,29 @@ func ValidateApproval(ctx context.Context, reqUser authenticationv1.UserInfo, al
 	return
 }
 
-func checkApproval(ctx context.Context, reqUser authenticationv1.UserInfo, allowRepresentOthers, skipAppendCheck bool,
-	approvalSpec *metav1alpha1.ApprovalSpec, oldUsers, newUsers metav1alpha1.UserApprovals,
-	triggeredBy *metav1alpha1.TriggeredBy) (err error) {
-	log := logging.FromContext(ctx)
-	if len(oldUsers) == 0 && len(newUsers) == 0 {
+// checkApproval is a helper struct for checking approval
+type checkApproval struct {
+	ctx                  context.Context
+	reqUser              authenticationv1.UserInfo
+	allowRepresentOthers bool
+	skipAppendCheck      bool
+
+	approvalSpec       *metav1alpha1.ApprovalSpec
+	oldUsers, newUsers metav1alpha1.UserApprovals
+	triggeredBy        *metav1alpha1.TriggeredBy
+}
+
+// Check checks the approval
+func (c *checkApproval) Check() (err error) {
+	log := logging.FromContext(c.ctx)
+	if len(c.oldUsers) == 0 && len(c.newUsers) == 0 {
 		log.Debugw("in check approval, no approvalSpec, no approvals, skip checking")
 		return nil
 	}
 
 	// Cannot add duplicate users
-	exists := make(map[rbacv1.Subject]struct{}, len(newUsers))
-	for _, user := range newUsers {
+	exists := make(map[rbacv1.Subject]struct{}, len(c.newUsers))
+	for _, user := range c.newUsers {
 		if _, ok := exists[user.Subject]; ok {
 			err = fmt.Errorf("approver %q cannot be repeated", user.Subject.Name)
 			return
@@ -90,8 +102,8 @@ func checkApproval(ctx context.Context, reqUser authenticationv1.UserInfo, allow
 	}
 
 	// Approval users cannot be deleted, and approval results cannot be changed
-	for _, oldUser := range oldUsers {
-		newUser := newUsers.GetBySubject(oldUser.Subject)
+	for _, oldUser := range c.oldUsers {
+		newUser := c.newUsers.GetBySubject(oldUser.Subject)
 		if newUser == nil {
 			err = fmt.Errorf("cannot remove %q from the approval list", oldUser.Subject.Name)
 			return
@@ -103,27 +115,27 @@ func checkApproval(ctx context.Context, reqUser authenticationv1.UserInfo, allow
 	}
 
 	// If allow to represent others, no need to check whether the approval behavior is legal.
-	if allowRepresentOthers {
+	if c.allowRepresentOthers {
 		return
 	}
 
-	if approvalSpec == nil {
+	if c.approvalSpec == nil {
 		err = fmt.Errorf("approval spec is nil")
 		return
 	}
 
 	// If it is in-order policy, need to be approved in order.
-	approvalPolicy := approvalSpec.Policy
+	approvalPolicy := c.approvalSpec.Policy
 	if approvalPolicy == metav1alpha1.ApprovalPolicyInOrder {
 		// general user is not allowed to modify the order
-		if orderChanged(oldUsers, newUsers) {
-			err = fmt.Errorf("Approval policy is %q, %q cannot change the order of approvers.", approvalPolicy, reqUser.Username)
+		if orderChanged(c.oldUsers, c.newUsers) {
+			err = fmt.Errorf("Approval policy is %q, %q cannot change the order of approvers.", approvalPolicy, c.reqUser.Username)
 			return
 		}
 		var skippedUser *metav1alpha1.UserApproval
-		for i, newUser := range newUsers {
+		for i, newUser := range c.newUsers {
 			if skippedUser == nil && newUser.Input == nil {
-				skippedUser = &newUsers[i]
+				skippedUser = &c.newUsers[i]
 				continue
 			}
 			// After skipping, the approved user is found again
@@ -136,31 +148,31 @@ func checkApproval(ctx context.Context, reqUser authenticationv1.UserInfo, allow
 	}
 
 	// Prepare a list of legitimate approved users
-	exists = make(map[rbacv1.Subject]struct{}, len(approvalSpec.GetApprovalUsers()))
-	for _, user := range approvalSpec.GetApprovalUsers() {
+	exists = make(map[rbacv1.Subject]struct{}, len(c.approvalSpec.GetApprovalUsers()))
+	for _, user := range c.approvalSpec.GetApprovalUsers() {
 		exists[user] = struct{}{}
 	}
 
-	for _, newUser := range newUsers {
+	for _, newUser := range c.newUsers {
 		// Cannot remove the approver
-		oldUser := oldUsers.GetBySubject(newUser.Subject)
+		oldUser := c.oldUsers.GetBySubject(newUser.Subject)
 		// If it is a create operation, ignore the legality of the new user
-		if oldUser == nil && !skipAppendCheck {
+		if oldUser == nil && !c.skipAppendCheck {
 			// Only people in the specified list can add the approval result.
 			if _, ok := exists[newUser.Subject]; !ok {
-				err = fmt.Errorf("%q can not change the approval user list", reqUser.Username)
+				err = fmt.Errorf("%q can not change the approval user list", c.reqUser.Username)
 				return
 			}
 		}
 		// Approval requires verification of identity, cannot approve on behalf of others.
 		if ((oldUser == nil || oldUser.Input == nil) && newUser.Input != nil) &&
-			!matching.IsRightUser(reqUser, newUser.Subject) {
-			err = fmt.Errorf("%q can not approve for user %q", reqUser.Username, newUser.Subject.Name)
+			!matching.IsRightUser(c.reqUser, newUser.Subject) {
+			err = fmt.Errorf("%q can not approve for user %q", c.reqUser.Username, newUser.Subject.Name)
 			return
 		}
 		// RequiresDifferentApprover if set to true, the user who triggered the StageRun cannot approve, unless an admin
-		if approvalSpec.RequiresDifferentApprover &&
-			triggeredBy != nil && triggeredBy.User != nil && *triggeredBy.User == newUser.Subject {
+		if c.approvalSpec.RequiresDifferentApprover &&
+			c.triggeredBy != nil && c.triggeredBy.User != nil && *c.triggeredBy.User == newUser.Subject {
 			err = fmt.Errorf("requiresDifferentApprover is enabled, %q can not approve.", newUser.Subject.Name)
 			return
 		}
