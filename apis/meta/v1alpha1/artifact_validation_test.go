@@ -19,8 +19,9 @@ package v1alpha1
 import (
 	"context"
 	"fmt"
-	"k8s.io/apimachinery/pkg/util/validation/field"
 	"testing"
+
+	"k8s.io/apimachinery/pkg/util/validation/field"
 
 	. "github.com/onsi/gomega"
 )

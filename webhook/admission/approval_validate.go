@@ -29,13 +29,15 @@ import (
 	"github.com/katanomi/pkg/user/matching"
 )
 
-type ValidateApprovalFunc func(context.Context, authenticationv1.UserInfo, bool, bool, []*metav1alpha1.ApprovalSpec, []PairOfOldNewCheck) error
+type ValidateApprovalFunc func(ctx context.Context, reqUser authenticationv1.UserInfo,
+	allowRepresentOthers bool, skipAppendCheck bool, approvalSpecList []*metav1alpha1.ApprovalSpec,
+	checkList []PairOfOldNewCheck, triggeredBy *metav1alpha1.TriggeredBy) error
 
 // ValidateApproval validates the approval according by the approval spec
 // if `allowRepresentOthers` is true, the reqUser can approve on behalf of others
 // if `isCreateOperation` is true, the approvalSpec may be nil, skip detection of additional users
 func ValidateApproval(ctx context.Context, reqUser authenticationv1.UserInfo, allowRepresentOthers, isCreateOperation bool,
-	approvalSpecList []*metav1alpha1.ApprovalSpec, checkList []PairOfOldNewCheck) (err error) {
+	approvalSpecList []*metav1alpha1.ApprovalSpec, checkList []PairOfOldNewCheck, triggeredBy *metav1alpha1.TriggeredBy) (err error) {
 
 	defer func() {
 		if err != nil {
@@ -60,7 +62,7 @@ func ValidateApproval(ctx context.Context, reqUser authenticationv1.UserInfo, al
 			skipAppendCheck = true
 			approvalSpec = &metav1alpha1.ApprovalSpec{}
 		}
-		err = checkApproval(ctx, reqUser, allowRepresentOthers, skipAppendCheck, approvalSpec, oldUsers, newUsers)
+		err = checkApproval(ctx, reqUser, allowRepresentOthers, skipAppendCheck, approvalSpec, oldUsers, newUsers, triggeredBy)
 		if err != nil {
 			break
 		}
@@ -69,7 +71,8 @@ func ValidateApproval(ctx context.Context, reqUser authenticationv1.UserInfo, al
 }
 
 func checkApproval(ctx context.Context, reqUser authenticationv1.UserInfo, allowRepresentOthers, skipAppendCheck bool,
-	approvalSpec *metav1alpha1.ApprovalSpec, oldUsers, newUsers metav1alpha1.UserApprovals) (err error) {
+	approvalSpec *metav1alpha1.ApprovalSpec, oldUsers, newUsers metav1alpha1.UserApprovals,
+	triggeredBy *metav1alpha1.TriggeredBy) (err error) {
 	log := logging.FromContext(ctx)
 	if len(oldUsers) == 0 && len(newUsers) == 0 {
 		log.Debugw("in check approval, no approvalSpec, no approvals, skip checking")
@@ -153,6 +156,12 @@ func checkApproval(ctx context.Context, reqUser authenticationv1.UserInfo, allow
 		if ((oldUser == nil || oldUser.Input == nil) && newUser.Input != nil) &&
 			!matching.IsRightUser(reqUser, newUser.Subject) {
 			err = fmt.Errorf("%q can not approve for user %q", reqUser.Username, newUser.Subject.Name)
+			return
+		}
+		// RequiresDifferentApprover if set to true, the user who triggered the StageRun cannot approve, unless an admin
+		if approvalSpec.RequiresDifferentApprover &&
+			triggeredBy != nil && triggeredBy.User != nil && *triggeredBy.User == newUser.Subject {
+			err = fmt.Errorf("requiresDifferentApprover is enabled, %q can not approve.", newUser.Subject.Name)
 			return
 		}
 	}

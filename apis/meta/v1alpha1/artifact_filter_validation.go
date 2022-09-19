@@ -17,10 +17,11 @@ limitations under the License.
 package v1alpha1
 
 import (
+	"regexp"
+
 	"github.com/katanomi/pkg/apis/validation"
 	kvalidation "k8s.io/apimachinery/pkg/util/validation"
 	"k8s.io/apimachinery/pkg/util/validation/field"
-	"regexp"
 )
 
 func (a ArtifactFilterRegexList) Validate(path *field.Path) (errs field.ErrorList) {

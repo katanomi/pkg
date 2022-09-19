@@ -84,12 +84,12 @@ var _ = Context("Test.Approving.Handle", func() {
 })
 
 func validateApprovalPassed(ctx context.Context, reqUser authenticationv1.UserInfo, allowRepresentOthers, isCreateOperation bool,
-	approvalSpecList []*metav1alpha1.ApprovalSpec, checkList []PairOfOldNewCheck) (err error) {
+	approvalSpecList []*metav1alpha1.ApprovalSpec, checkList []PairOfOldNewCheck, triggeredBy *metav1alpha1.TriggeredBy) (err error) {
 	return nil
 }
 
 func validateApprovalRejected(ctx context.Context, reqUser authenticationv1.UserInfo, allowRepresentOthers, isCreateOperation bool,
-	approvalSpecList []*metav1alpha1.ApprovalSpec, checkList []PairOfOldNewCheck) (err error) {
+	approvalSpecList []*metav1alpha1.ApprovalSpec, checkList []PairOfOldNewCheck, triggeredBy *metav1alpha1.TriggeredBy) (err error) {
 	return fmt.Errorf("rejected")
 }
 
@@ -130,11 +130,12 @@ var (
 func generateApproving(ctx context.Context, mockCtrl *gomock.Controller, mockClient *mockclient.MockClient,
 	advanced bool, validatePassed bool, modifiedOthers bool) *approvingHandler {
 	// starts mock controller
-	mockApproval := mockadmission.NewMockApproval(mockCtrl)
+	mockApproval := mockadmission.NewMockApprovalWithTriggeredByGetter(mockCtrl)
 	mockApproval.EXPECT().DeepCopyObject().Return(&corev1.Pod{}).AnyTimes()
 	mockApproval.EXPECT().GetApprovalSpecs(gomock.Any()).Return(nil).AnyTimes()
 	mockApproval.EXPECT().GetChecks(gomock.Any()).Return(nil).AnyTimes()
 	mockApproval.EXPECT().ModifiedOthers(gomock.Any(), gomock.Any()).Return(modifiedOthers).AnyTimes()
+	mockApproval.EXPECT().GetTriggeredBy(gomock.Any()).Return(nil).AnyTimes()
 
 	decoder, err := admission.NewDecoder(scheme.Scheme)
 	Expect(err).NotTo(HaveOccurred())
