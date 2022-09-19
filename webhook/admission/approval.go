@@ -152,6 +152,11 @@ func (h *approvingHandler) Handle(ctx context.Context, req admission.Request) ad
 
 	oldChecks := h.approval.GetChecks(old)
 	newChecks := h.approval.GetChecks(new)
+	if len(oldChecks) == 0 && len(newChecks) != 0 {
+		// If the old check is empty, maybe the controller is initialized based on the spec information.
+		// In order to pass the validation, the old check is initialized here to be empty.
+		oldChecks = make([]*metav1alpha1.Check, len(newChecks))
+	}
 	oldNewChecksPairs := make([]PairOfOldNewCheck, len(oldChecks))
 	for i := 0; i < len(oldChecks); i++ {
 		oldNewChecksPairs[i] = PairOfOldNewCheck{oldChecks[i], newChecks[i]}

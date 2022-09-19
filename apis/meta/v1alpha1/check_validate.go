@@ -36,7 +36,8 @@ func (r *Check) ValidateChange(ctx context.Context, old *Check, path *field.Path
 		errs = append(errs, field.Forbidden(path, `cannot be unset after creation`))
 	}
 	if r != nil && old == nil {
-		errs = append(errs, field.Forbidden(path, `cannot be set after creation`))
+		// Allow adding fields, the webhook will be check the permissions.
+		// If the check is empty, the controller maybe initialize the check based on the spec information.
 	}
 	if r != nil && old != nil {
 		errs = append(errs, r.Approval.ValidateChange(ctx, old.Approval, path.Child("approval"))...)

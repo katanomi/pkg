@@ -39,16 +39,17 @@ type ValidateApprovalFunc func(ctx context.Context, reqUser authenticationv1.Use
 func ValidateApproval(ctx context.Context, reqUser authenticationv1.UserInfo, allowRepresentOthers, isCreateOperation bool,
 	approvalSpecList []*metav1alpha1.ApprovalSpec, checkList []PairOfOldNewCheck, triggeredBy *metav1alpha1.TriggeredBy) (err error) {
 
+	log := logging.FromContext(ctx)
 	defer func() {
 		if err != nil {
-			log := logging.FromContext(ctx)
-			log.Debugw("approval exception detected", "error", err)
+			log.Infow("approval exception detected", "error", err)
 		}
 	}()
 
 	// check needs to be consistent with the number of spec
 	if len(checkList) != len(approvalSpecList) {
 		err = fmt.Errorf("internal error #check != #checkSpec")
+		log.Warnw("validate approval failed", "check", checkList, "checkSpec", approvalSpecList, "error", err)
 		return
 	}
 
