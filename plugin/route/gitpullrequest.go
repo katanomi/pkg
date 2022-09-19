@@ -18,6 +18,7 @@ package route
 
 import (
 	"fmt"
+	"github.com/katanomi/pkg/plugin/path"
 	"net/http"
 	"strconv"
 
@@ -69,8 +70,8 @@ func (a *gitPullRequestHandler) Register(ws *restful.WebService) {
 
 // ListGitPullRequest list pr info
 func (a *gitPullRequestHandler) ListGitPullRequest(request *restful.Request, response *restful.Response) {
-	repo := handlePathParamHasSlash(request.PathParameter("repository"))
-	project := request.PathParameter("project")
+	repo := path.Parameter(request, "repository")
+	project := path.Parameter(request, "project")
 	_state := request.QueryParameter("state")
 	state := metav1alpha1.String2PullRequestState(_state)
 
@@ -89,14 +90,14 @@ func (a *gitPullRequestHandler) ListGitPullRequest(request *restful.Request, res
 
 // GetGitPullRequest get pr info
 func (a *gitPullRequestHandler) GetGitPullRequest(request *restful.Request, response *restful.Response) {
-	indexStr := request.PathParameter("index")
+	indexStr := path.Parameter(request, "index")
 	index, err := strconv.Atoi(indexStr)
 	if err != nil {
 		kerrors.HandleError(request, response, err)
 		return
 	}
-	repo := handlePathParamHasSlash(request.PathParameter("repository"))
-	project := request.PathParameter("project")
+	repo := path.Parameter(request, "repository")
+	project := path.Parameter(request, "project")
 	option := metav1alpha1.GitPullRequestOption{
 		GitRepo: metav1alpha1.GitRepo{Repository: repo, Project: project},
 		Index:   index,
@@ -111,8 +112,8 @@ func (a *gitPullRequestHandler) GetGitPullRequest(request *restful.Request, resp
 
 // CreateGitPullRequest create a pr
 func (a *gitPullRequestHandler) CreateGitPullRequest(request *restful.Request, response *restful.Response) {
-	repo := handlePathParamHasSlash(request.PathParameter("repository"))
-	project := request.PathParameter("project")
+	repo := path.Parameter(request, "repository")
+	project := path.Parameter(request, "project")
 	var params metav1alpha1.CreatePullRequestPayload
 	if err := request.ReadEntity(&params); err != nil {
 		kerrors.HandleError(request, response, err)
@@ -155,9 +156,9 @@ func (a *gitPullRequestNoteCreator) Register(ws *restful.WebService) {
 
 // CreateGitPullRequestNote create pr note
 func (a *gitPullRequestNoteCreator) CreateGitPullRequestNote(request *restful.Request, response *restful.Response) {
-	repo := handlePathParamHasSlash(request.PathParameter("repository"))
-	project := request.PathParameter("project")
-	indexStr := request.PathParameter("index")
+	repo := path.Parameter(request, "repository")
+	project := path.Parameter(request, "project")
+	indexStr := path.Parameter(request, "index")
 	index, err := strconv.Atoi(indexStr)
 	if err != nil {
 		kerrors.HandleError(request, response, err)
@@ -209,16 +210,16 @@ func (a *gitPullRequestNoteUpdater) Register(ws *restful.WebService) {
 
 // UpdateGitPullRequestNote updates pr note
 func (a *gitPullRequestNoteUpdater) UpdateGitPullRequestNote(request *restful.Request, response *restful.Response) {
-	repo := handlePathParamHasSlash(request.PathParameter("repository"))
-	project := request.PathParameter("project")
-	indexStr := request.PathParameter("index")
+	repo := path.Parameter(request, "repository")
+	project := path.Parameter(request, "project")
+	indexStr := path.Parameter(request, "index")
 	index, err := strconv.Atoi(indexStr)
 	if err != nil {
 		kerrors.HandleError(request, response, err)
 		return
 	}
 
-	noteIdStr := request.PathParameter("noteid")
+	noteIdStr := path.Parameter(request, "noteid")
 	noteId, err := strconv.Atoi(noteIdStr)
 	if err != nil {
 		kerrors.HandleError(request, response, err)
@@ -271,9 +272,9 @@ func (a *gitPullRequestCommentLister) Register(ws *restful.WebService) {
 
 // ListGitPullRequestNote List pr note
 func (a *gitPullRequestCommentLister) ListPullRequestComment(request *restful.Request, response *restful.Response) {
-	repo := handlePathParamHasSlash(request.PathParameter("repository"))
-	project := request.PathParameter("project")
-	indexStr := request.PathParameter("index")
+	repo := path.Parameter(request, "repository")
+	project := path.Parameter(request, "project")
+	indexStr := path.Parameter(request, "index")
 	index, err := strconv.Atoi(indexStr)
 	if err != nil {
 		kerrors.HandleError(request, response, err)

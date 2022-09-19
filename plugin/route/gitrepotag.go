@@ -17,6 +17,7 @@ limitations under the License.
 package route
 
 import (
+	"github.com/katanomi/pkg/plugin/path"
 	"net/http"
 
 	restfulspec "github.com/emicklei/go-restful-openapi/v2"
@@ -54,8 +55,8 @@ func (a *gitRepositoryTagLister) Register(ws *restful.WebService) {
 
 // ListGitRepositoryTag list repo tags
 func (a *gitRepositoryTagLister) ListGitRepositoryTag(request *restful.Request, response *restful.Response) {
-	repository := handlePathParamHasSlash(request.PathParameter("repository"))
-	project := request.PathParameter("project")
+	repository := path.Parameter(request, "repository")
+	project := path.Parameter(request, "project")
 	listOption := GetListOptionsFromRequest(request)
 	tagList, err := a.impl.ListGitRepositoryTag(request.Request.Context(),
 		metav1alpha1.GitRepositoryTagListOption{
@@ -97,9 +98,9 @@ func (a *gitRepositoryTagGetter) Register(ws *restful.WebService) {
 
 // GetGitRepositoryTag get repo tag
 func (a *gitRepositoryTagGetter) GetGitRepositoryTag(request *restful.Request, response *restful.Response) {
-	project := request.PathParameter("project")
-	repo := handlePathParamHasSlash(request.PathParameter("repository"))
-	tag := request.PathParameter("tag")
+	project := path.Parameter(request, "project")
+	repo := path.Parameter(request, "repository")
+	tag := path.Parameter(request, "tag")
 	repoInfo, err := a.impl.GetGitRepositoryTag(request.Request.Context(),
 		metav1alpha1.GitRepositoryTagOption{
 			GitRepo: metav1alpha1.GitRepo{Repository: repo, Project: project},

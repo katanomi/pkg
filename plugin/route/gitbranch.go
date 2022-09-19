@@ -17,6 +17,7 @@ limitations under the License.
 package route
 
 import (
+	"github.com/katanomi/pkg/plugin/path"
 	"net/http"
 
 	kerrors "github.com/katanomi/pkg/errors"
@@ -56,8 +57,8 @@ func (a *gitBranchLister) Register(ws *restful.WebService) {
 // ListBranch list branch by repo
 func (a *gitBranchLister) ListBranch(request *restful.Request, response *restful.Response) {
 	option := GetListOptionsFromRequest(request)
-	repo := handlePathParamHasSlash(request.PathParameter("repository"))
-	project := request.PathParameter("project")
+	repo := path.Parameter(request, "repository")
+	project := path.Parameter(request, "project")
 	keyword := request.QueryParameter("keyword")
 	branchList, err := a.impl.ListGitBranch(
 		request.Request.Context(),
@@ -96,8 +97,8 @@ func (a *gitBranchCreator) Register(ws *restful.WebService) {
 
 // CreateBranch create branch
 func (a *gitBranchCreator) CreateBranch(request *restful.Request, response *restful.Response) {
-	repo := handlePathParamHasSlash(request.PathParameter("repository"))
-	project := request.PathParameter("project")
+	repo := path.Parameter(request, "repository")
+	project := path.Parameter(request, "project")
 	var params metav1alpha1.CreateBranchParams
 	if err := request.ReadEntity(&params); err != nil {
 		kerrors.HandleError(request, response, err)
@@ -140,9 +141,9 @@ func (a *gitBranchGetter) Register(ws *restful.WebService) {
 
 // ListBranch list branch by repo
 func (a *gitBranchGetter) GetGitBranch(request *restful.Request, response *restful.Response) {
-	repo := handlePathParamHasSlash(request.PathParameter("repository"))
-	project := request.PathParameter("project")
-	branch := handlePathParamHasSlash(request.PathParameter("branch"))
+	repo := path.Parameter(request, "repository")
+	project := path.Parameter(request, "project")
+	branch := path.Parameter(request, "branch")
 	branchObj, err := a.impl.GetGitBranch(request.Request.Context(), metav1alpha1.GitRepo{Repository: repo, Project: project}, branch)
 	if err != nil {
 		kerrors.HandleError(request, response, err)

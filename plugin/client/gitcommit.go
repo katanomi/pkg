@@ -18,7 +18,7 @@ package client
 
 import (
 	"context"
-	"fmt"
+	"github.com/katanomi/pkg/plugin/path"
 	"time"
 
 	metav1alpha1 "github.com/katanomi/pkg/apis/meta/v1alpha1"
@@ -59,7 +59,7 @@ func (g *gitCommit) Get(ctx context.Context, baseURL *duckv1.Addressable, option
 		return nil, errors.NewBadRequest("sha is empty string")
 	}
 	sha := *option.SHA
-	uri := fmt.Sprintf("projects/%s/coderepositories/%s/commit/%s", option.Project, handlePathParamHasSlash(option.Repository), sha)
+	uri := path.Format("projects/%s/coderepositories/%s/commit/%s", option.Project, option.Repository, sha)
 	if err := g.client.Get(ctx, baseURL, uri, options...); err != nil {
 		return nil, err
 	}
@@ -81,7 +81,7 @@ func (g *gitCommit) List(ctx context.Context, baseURL *duckv1.Addressable, optio
 		query["until"] = option.Until.Format(time.RFC3339)
 	}
 	options = append(options, QueryOpts(query))
-	uri := fmt.Sprintf("projects/%s/coderepositories/%s/commits", option.Project, option.Repository)
+	uri := path.Format("projects/%s/coderepositories/%s/commits", option.Project, option.Repository)
 	if err := g.client.Get(ctx, baseURL, uri, options...); err != nil {
 		return nil, err
 	}

@@ -18,7 +18,7 @@ package client
 
 import (
 	"context"
-	"fmt"
+	"github.com/katanomi/pkg/plugin/path"
 
 	metav1alpha1 "github.com/katanomi/pkg/apis/meta/v1alpha1"
 	corev1 "k8s.io/api/core/v1"
@@ -56,7 +56,7 @@ func (g *gitRepositoryTag) Get(ctx context.Context, baseURL *duckv1.Addressable,
 		return nil, errors.NewBadRequest("tag is null")
 	}
 	tagName := option.Tag
-	uri := fmt.Sprintf("projects/%s/coderepositories/%s/tags/%s", option.Project, handlePathParamHasSlash(option.Repository), tagName)
+	uri := path.Format("projects/%s/coderepositories/%s/tags/%s", option.Project, option.Repository, tagName)
 	if err := g.client.Get(ctx, baseURL, uri, options...); err != nil {
 		return nil, err
 	}
@@ -70,7 +70,7 @@ func (g *gitRepositoryTag) List(ctx context.Context, baseURL *duckv1.Addressable
 		return nil, errors.NewBadRequest("repo is empty string")
 	}
 	options = append(options, MetaOpts(g.meta), SecretOpts(g.secret), ResultOpts(result))
-	uri := fmt.Sprintf("projects/%s/coderepositories/%s/tags", option.Project, option.Repository)
+	uri := path.Format("projects/%s/coderepositories/%s/tags", option.Project, option.Repository)
 	if err := g.client.Get(ctx, baseURL, uri, options...); err != nil {
 		return nil, err
 	}

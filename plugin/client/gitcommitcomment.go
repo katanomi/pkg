@@ -18,7 +18,7 @@ package client
 
 import (
 	"context"
-	"fmt"
+	"github.com/katanomi/pkg/plugin/path"
 
 	metav1alpha1 "github.com/katanomi/pkg/apis/meta/v1alpha1"
 	corev1 "k8s.io/api/core/v1"
@@ -56,7 +56,7 @@ func (g *gitCommitComment) List(ctx context.Context, baseURL *duckv1.Addressable
 		return nil, errors.NewBadRequest("unknown sha for commit")
 	}
 	sha := *option.SHA
-	uri := fmt.Sprintf("/projects/%s/coderepositories/%s/commit/%s/comments", option.Project, handlePathParamHasSlash(option.Repository), sha)
+	uri := path.Format("/projects/%s/coderepositories/%s/commit/%s/comments", option.Project, option.Repository, sha)
 	if err := g.client.Get(ctx, baseURL, uri, options...); err != nil {
 		return nil, err
 	}
@@ -74,7 +74,7 @@ func (g *gitCommitComment) Create(ctx context.Context, baseURL *duckv1.Addressab
 		return nil, errors.NewBadRequest("unknown sha for commit")
 	}
 	sha := *payload.SHA
-	uri := fmt.Sprintf("/projects/%s/coderepositories/%s/commit/%s/comments", payload.Project, handlePathParamHasSlash(payload.Repository), sha)
+	uri := path.Format("/projects/%s/coderepositories/%s/commit/%s/comments", payload.Project, payload.Repository, sha)
 	if err := g.client.Post(ctx, baseURL, uri, options...); err != nil {
 		return nil, err
 	}

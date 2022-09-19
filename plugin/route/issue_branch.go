@@ -17,6 +17,7 @@ limitations under the License.
 package route
 
 import (
+	"github.com/katanomi/pkg/plugin/path"
 	"net/http"
 
 	restfulspec "github.com/emicklei/go-restful-openapi/v2"
@@ -55,8 +56,8 @@ func (b *branchList) Register(ws *restful.WebService) {
 func (b *branchList) ListIssueBranches(request *restful.Request, response *restful.Response) {
 	option := GetListOptionsFromRequest(request)
 	pathParams := metav1alpha1.IssueOptions{
-		Identity: request.PathParameter("project"),
-		IssueId:  request.PathParameter("issue"),
+		Identity: path.Parameter(request, "project"),
+		IssueId:  path.Parameter(request, "issue"),
 	}
 	branches, err := b.impl.ListIssueBranches(request.Request.Context(), pathParams, option)
 	if err != nil {
@@ -93,8 +94,8 @@ func (b *branchCreator) Register(ws *restful.WebService) {
 
 func (b *branchCreator) CreateIssueBranch(request *restful.Request, response *restful.Response) {
 	pathParams := metav1alpha1.IssueOptions{
-		Identity: request.PathParameter("project"),
-		IssueId:  request.PathParameter("issue"),
+		Identity: path.Parameter(request, "project"),
+		IssueId:  path.Parameter(request, "issue"),
 	}
 
 	payload := &metav1alpha1.Branch{}
@@ -138,9 +139,9 @@ func (b *branchDeleter) Register(ws *restful.WebService) {
 func (b *branchDeleter) DeleteIssueBranch(request *restful.Request, response *restful.Response) {
 	option := GetListOptionsFromRequest(request)
 	pathParams := metav1alpha1.IssueOptions{
-		Identity: request.PathParameter("project"),
-		IssueId:  request.PathParameter("issue"),
-		Branch:   request.PathParameter("branch"),
+		Identity: path.Parameter(request, "project"),
+		IssueId:  path.Parameter(request, "issue"),
+		Branch:   path.Parameter(request, "branch"),
 	}
 
 	if err := b.impl.DeleteIssueBranch(request.Request.Context(), pathParams, option); err != nil {

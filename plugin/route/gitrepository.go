@@ -17,10 +17,9 @@ limitations under the License.
 package route
 
 import (
-	"net/http"
-	"strings"
-
+	"github.com/katanomi/pkg/plugin/path"
 	"k8s.io/apimachinery/pkg/api/errors"
+	"net/http"
 
 	kerrors "github.com/katanomi/pkg/errors"
 
@@ -29,11 +28,6 @@ import (
 	metav1alpha1 "github.com/katanomi/pkg/apis/meta/v1alpha1"
 	"github.com/katanomi/pkg/plugin/client"
 )
-
-func handlePathParamHasSlash(param string) (result string) {
-	result = strings.Replace(param, "%2F", "/", -1)
-	return result
-}
 
 type gitRepositoryLister struct {
 	impl client.GitRepositoryLister
@@ -63,7 +57,7 @@ func (a *gitRepositoryLister) Register(ws *restful.WebService) {
 
 // ListGitRepository list repo info
 func (a *gitRepositoryLister) ListGitRepository(request *restful.Request, response *restful.Response) {
-	project := request.PathParameter("project")
+	project := path.Parameter(request, "project")
 	keyword := request.QueryParameter("keyword")
 	subtype := request.QueryParameter("subtype")
 	kind := metav1alpha1.ProjectSubType(subtype)
@@ -107,8 +101,8 @@ func (a *gitRepositoryGetter) Register(ws *restful.WebService) {
 
 // GetGitRepository get repo info
 func (a *gitRepositoryGetter) GetGitRepository(request *restful.Request, response *restful.Response) {
-	project := request.PathParameter("project")
-	repo := handlePathParamHasSlash(request.PathParameter("repository"))
+	project := path.Parameter(request, "project")
+	repo := path.Parameter(request, "repository")
 	repoInfo, err := a.impl.GetGitRepository(request.Request.Context(), metav1alpha1.GitRepo{Repository: repo, Project: project})
 	if err != nil {
 		if errors.IsNotFound(err) {
