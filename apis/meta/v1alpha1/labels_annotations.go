@@ -20,6 +20,8 @@ package v1alpha1
 const (
 	// SourceLabelKey indicates the source of the resource
 	SourceLabelKey = "katanomi.dev/source"
+	// ManagerByLabelKey indicates the manager of the resource
+	ManagerByLabelKey = "katanomi.dev/managedBy"
 
 	// SecretLabelKey secret resource name
 	SecretLabelKey = "core.kubernetes.io/secret" //nolint:gosec
@@ -104,10 +106,12 @@ const (
 	GitPRRevisionPrefixes = "gitPRRevisionPrefixes"
 )
 
-// Attribute values for label source
+// Attribute values for label source or manager
 const (
 	LabelSourceSystem = "system"
 	LabelSourceUser   = "user"
+
+	LabelKatanomi = "katanomi"
 )
 
 // Annotation keys for artifact parameter

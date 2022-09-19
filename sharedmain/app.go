@@ -29,6 +29,8 @@ import (
 	"sync"
 	"time"
 
+	"github.com/katanomi/pkg/config"
+
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	utilyaml "k8s.io/apimachinery/pkg/util/yaml"
 	_ "sigs.k8s.io/controller-runtime/pkg/metrics"
@@ -238,6 +240,17 @@ func (a *AppBuilder) Tracing(ops ...tracing.TraceOption) *AppBuilder {
 		log.Fatal("Error reading/parsing tracing configuration: ", err)
 	}
 	a.filters = append(a.filters, tracing.RestfulFilter(a.Name, healthzRoutePath, readyzRoutePath))
+	return a
+}
+
+// ConfigManager add katanomi manager to app context
+func (a *AppBuilder) ConfigManager() *AppBuilder {
+	a.init()
+
+	name := config.Name()
+	configMGR := config.NewManager(a.ConfigMapWatcher, a.Logger, name)
+	a.Context = config.WithKatanomiConfigManager(a.Context, configMGR)
+
 	return a
 }
 
