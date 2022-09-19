@@ -25,7 +25,6 @@ import (
 	admissionv1 "k8s.io/api/admission/v1"
 	authv1 "k8s.io/api/authorization/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/runtime"
 	"knative.dev/pkg/logging"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/webhook/admission"
@@ -33,24 +32,6 @@ import (
 	metav1alpha1 "github.com/katanomi/pkg/apis/meta/v1alpha1"
 	kclient "github.com/katanomi/pkg/client"
 )
-
-//go:generate mockgen -package=admission -destination=../../testing/mock/github.com/katanomi/pkg/webhook/admission/approval.go  github.com/katanomi/pkg/webhook/admission Approval
-
-// Approval defines functions for approving resources
-type Approval interface {
-	runtime.Object
-	metav1.Object
-
-	// ChecksGetter gets the checks from the runtime object
-	ChecksGetter
-
-	// GetApprovalSpecs returns the list of ApprovalSpecs for the given object.
-	// Used to determine if advanced permissions are available
-	GetApprovalSpecs(runtime.Object) []*metav1alpha1.ApprovalSpec
-
-	// ModifiedOthers returns true if the object has also modified other content.
-	ModifiedOthers(runtime.Object, runtime.Object) bool
-}
 
 // GetResourceAttributes returns the specified verb of resouce attributes.
 type GetResourceAttributes func(string) authv1.ResourceAttributes
@@ -176,8 +157,13 @@ func (h *approvingHandler) Handle(ctx context.Context, req admission.Request) ad
 		oldNewChecksPairs[i] = PairOfOldNewCheck{oldChecks[i], newChecks[i]}
 	}
 
+	var triggeredBy *metav1alpha1.TriggeredBy
+	if getter, ok := h.approval.(TriggeredByGetter); ok {
+		triggeredBy = getter.GetTriggeredBy(new)
+	}
+
 	// Determine whether the approval act is legal
-	err = h.validateApproval(ctx, req.UserInfo, advancedPermissions, isCreateOperation, approvalSpecList, oldNewChecksPairs)
+	err = h.validateApproval(ctx, req.UserInfo, advancedPermissions, isCreateOperation, approvalSpecList, oldNewChecksPairs, triggeredBy)
 	if err != nil {
 		return admission.Denied(err.Error())
 	}

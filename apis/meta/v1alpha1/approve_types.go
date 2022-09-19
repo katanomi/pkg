@@ -53,6 +53,11 @@ type ApprovalSpec struct {
 	// its execution will wait until it is approved.
 	// Once the timeout duration is reached it will automatically fail the StageRun
 	Timeout metav1.Duration `json:"timeout"`
+
+	// RequiresDifferentApprover If set to true will remove permission from a specific user to
+	// approve if himself is the one who triggered the resource
+	// +optional
+	RequiresDifferentApprover bool `json:"requiresDifferentApprover"`
 }
 
 type UserApprovals []UserApproval

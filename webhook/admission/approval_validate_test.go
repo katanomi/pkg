@@ -49,12 +49,14 @@ var _ = Describe("Test.ValidateApproval", func() {
 		isCreateOperation    bool
 		checkList            []PairOfOldNewCheck
 		approvalSpecList     []*metav1alpha1.ApprovalSpec
+		triggeredBy          *metav1alpha1.TriggeredBy
 
-		err               error
-		username          string
-		old, new          metav1alpha1.UserApprovals
-		approvalPolicy    metav1alpha1.ApprovalPolicy
-		approvalSpecUsers []rbacv1.Subject
+		err                       error
+		username                  string
+		old, new                  metav1alpha1.UserApprovals
+		approvalPolicy            metav1alpha1.ApprovalPolicy
+		requiresDifferentApprover bool
+		approvalSpecUsers         []rbacv1.Subject
 
 		userSubject   = generateUserSubject("user")
 		adminSubject  = generateUserSubject("admin")
@@ -63,7 +65,9 @@ var _ = Describe("Test.ValidateApproval", func() {
 	)
 
 	BeforeEach(func() {
+		triggeredBy = nil
 		approvalPolicy = metav1alpha1.ApprovalPolicyAny
+		requiresDifferentApprover = false
 		username = "admin"
 		allowRepresentOthers = false
 		isCreateOperation = false
@@ -84,21 +88,22 @@ var _ = Describe("Test.ValidateApproval", func() {
 		}
 		approvalSpecList = []*metav1alpha1.ApprovalSpec{
 			{
-				Policy: approvalPolicy,
-				Users:  approvalSpecUsers,
+				Policy:                    approvalPolicy,
+				RequiresDifferentApprover: requiresDifferentApprover,
+				Users:                     approvalSpecUsers,
 			},
 		}
 		checkList = []PairOfOldNewCheck{{
 			&metav1alpha1.Check{Approval: &metav1alpha1.Approval{Users: old}},
 			&metav1alpha1.Check{Approval: &metav1alpha1.Approval{Users: new}},
 		}}
-		err = ValidateApproval(ctx, reqUser, allowRepresentOthers, isCreateOperation, approvalSpecList, checkList)
+		err = ValidateApproval(ctx, reqUser, allowRepresentOthers, isCreateOperation, approvalSpecList, checkList, triggeredBy)
 	})
 
 	Context("invalid input parameter", func() {
 		It("should return an error", func() {
 			By("approval spec list is nil")
-			err = ValidateApproval(context.TODO(), reqUser, allowRepresentOthers, isCreateOperation, nil, checkList)
+			err = ValidateApproval(context.TODO(), reqUser, allowRepresentOthers, isCreateOperation, nil, checkList, triggeredBy)
 
 			Expect(err).ToNot(BeNil())
 			Expect(err.Error()).To(BeEquivalentTo(`internal error #check != #checkSpec`))
@@ -113,7 +118,7 @@ var _ = Describe("Test.ValidateApproval", func() {
 			It("should return an error", func() {
 				By("approval spec is nil")
 				allowRepresentOthers = false
-				err = ValidateApproval(context.TODO(), reqUser, allowRepresentOthers, isCreateOperation, []*metav1alpha1.ApprovalSpec{nil}, checkList)
+				err = ValidateApproval(context.TODO(), reqUser, allowRepresentOthers, isCreateOperation, []*metav1alpha1.ApprovalSpec{nil}, checkList, triggeredBy)
 				Expect(err).ToNot(BeNil())
 				Expect(err.Error()).To(BeEquivalentTo(`approval spec is nil`))
 			})
@@ -122,7 +127,7 @@ var _ = Describe("Test.ValidateApproval", func() {
 			It("should not return an error", func() {
 				By("approval spec is nil")
 				allowRepresentOthers = true
-				err = ValidateApproval(context.TODO(), reqUser, allowRepresentOthers, isCreateOperation, []*metav1alpha1.ApprovalSpec{nil}, checkList)
+				err = ValidateApproval(context.TODO(), reqUser, allowRepresentOthers, isCreateOperation, []*metav1alpha1.ApprovalSpec{nil}, checkList, triggeredBy)
 				Expect(err).To(BeNil())
 			})
 		})
@@ -134,7 +139,7 @@ var _ = Describe("Test.ValidateApproval", func() {
 				&metav1alpha1.Check{Approval: &metav1alpha1.Approval{}},
 				&metav1alpha1.Check{Approval: &metav1alpha1.Approval{}},
 			}}
-			err = ValidateApproval(context.TODO(), reqUser, allowRepresentOthers, isCreateOperation, []*metav1alpha1.ApprovalSpec{nil}, checkList)
+			err = ValidateApproval(context.TODO(), reqUser, allowRepresentOthers, isCreateOperation, []*metav1alpha1.ApprovalSpec{nil}, checkList, triggeredBy)
 
 			Expect(err).To(BeNil())
 		})
@@ -418,7 +423,7 @@ var _ = Describe("Test.ValidateApproval", func() {
 					}
 				})
 				It("should pass", func() {
-					err = ValidateApproval(context.TODO(), reqUser, allowRepresentOthers, isCreateOperation, []*metav1alpha1.ApprovalSpec{nil}, checkList)
+					err = ValidateApproval(context.TODO(), reqUser, allowRepresentOthers, isCreateOperation, []*metav1alpha1.ApprovalSpec{nil}, checkList, triggeredBy)
 					Expect(err).To(BeNil())
 				})
 			})
@@ -455,6 +460,44 @@ var _ = Describe("Test.ValidateApproval", func() {
 					Expect(err).ToNot(BeNil())
 					Expect(err.Error()).To(BeEquivalentTo(`"user" can not change the approval user list`))
 				})
+			})
+		})
+
+	})
+
+	Context("requires different approver", func() {
+		BeforeEach(func() {
+			username = "user"
+			requiresDifferentApprover = true
+			triggeredBy = &metav1alpha1.TriggeredBy{}
+			triggeredBy.User = &userSubject
+			approvalSpecUsers = []rbacv1.Subject{userSubject}
+			old = []metav1alpha1.UserApproval{
+				{Subject: userSubject},
+			}
+			new = []metav1alpha1.UserApproval{
+				{Subject: userSubject, Input: rejectedInput},
+			}
+		})
+
+		When("allow to represent others", func() {
+			BeforeEach(func() {
+				allowRepresentOthers = true
+			})
+
+			It("should Not return an error", func() {
+				Expect(err).To(BeNil())
+			})
+		})
+
+		When("cannot to represent others", func() {
+			BeforeEach(func() {
+				allowRepresentOthers = false
+			})
+
+			It("should return an error", func() {
+				Expect(err).ToNot(BeNil())
+				Expect(err.Error()).To(BeEquivalentTo(`requiresDifferentApprover is enabled, "user" can not approve.`))
 			})
 		})
 
