@@ -50,6 +50,8 @@ type TriggeredByGetter interface {
 }
 
 //go:generate mockgen -package=admission -destination=../../testing/mock/github.com/katanomi/pkg/webhook/admission/approval_with_triggeredbygetter.go github.com/katanomi/pkg/webhook/admission ApprovalWithTriggeredByGetter
+
+// ApprovalWithTriggeredByGetter defines functions for approving resources and enables `requiresDifferentApprover`
 type ApprovalWithTriggeredByGetter interface {
 	Approval
 	TriggeredByGetter
