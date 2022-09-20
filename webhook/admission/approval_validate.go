@@ -166,16 +166,17 @@ func (c *checkApproval) Check() (err error) {
 			}
 		}
 		// Approval requires verification of identity, cannot approve on behalf of others.
-		if ((oldUser == nil || oldUser.Input == nil) && newUser.Input != nil) &&
-			!matching.IsRightUser(c.reqUser, newUser.Subject) {
-			err = fmt.Errorf("%q can not approve for user %q", c.reqUser.Username, newUser.Subject.Name)
-			return
-		}
-		// RequiresDifferentApprover if set to true, the user who triggered the StageRun cannot approve, unless an admin
-		if c.approvalSpec.RequiresDifferentApprover &&
-			c.triggeredBy != nil && c.triggeredBy.User != nil && *c.triggeredBy.User == newUser.Subject {
-			err = fmt.Errorf("requiresDifferentApprover is enabled, %q can not approve.", newUser.Subject.Name)
-			return
+		if (oldUser == nil || oldUser.Input == nil) && newUser.Input != nil {
+			if !matching.IsRightUser(c.reqUser, newUser.Subject) {
+				err = fmt.Errorf("%q can not approve for user %q", c.reqUser.Username, newUser.Subject.Name)
+				return
+			}
+			// RequiresDifferentApprover if set to true, the user who triggered the StageRun cannot approve, unless an admin
+			if c.approvalSpec.RequiresDifferentApprover &&
+				c.triggeredBy != nil && c.triggeredBy.User != nil && *c.triggeredBy.User == newUser.Subject {
+				err = fmt.Errorf("requiresDifferentApprover is enabled, %q can not approve.", newUser.Subject.Name)
+				return
+			}
 		}
 	}
 
