@@ -34,6 +34,10 @@ func TestPathEscape(t *testing.T) {
 			want: "a%252Fb",
 		},
 		{
+			path: "a/b/c",
+			want: "a%252Fb%252Fc",
+		},
+		{
 			path: "a.b",
 			want: "a.b",
 		},

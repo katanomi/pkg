@@ -28,7 +28,7 @@ import (
 // url.PathEscape will encode "/" to "%2F", but go-restful will decode it to "/" and return 405 error.
 // so should replace special characters (including /) with %XX sequences first.
 func Escape(path string) string {
-	path = strings.Replace(path, "/", "%2F", 1)
+	path = strings.ReplaceAll(path, "/", "%2F")
 	return url.PathEscape(path)
 }
 
@@ -45,5 +45,5 @@ func Format(tmpl string, params ...string) string {
 // Parameter gets the path parameter from the request
 func Parameter(request *restful.Request, key string) string {
 	path := request.PathParameter(key)
-	return strings.Replace(path, "%2F", "/", 1)
+	return strings.ReplaceAll(path, "%2F", "/")
 }
