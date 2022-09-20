@@ -17,6 +17,7 @@ limitations under the License.
 package route
 
 import (
+	"github.com/katanomi/pkg/plugin/path"
 	"net/http"
 	"time"
 
@@ -60,9 +61,9 @@ func (a *gitCommitGetter) Register(ws *restful.WebService) {
 
 // GitCommit get commit info
 func (a *gitCommitGetter) GetCommit(request *restful.Request, response *restful.Response) {
-	sha := request.PathParameter("sha")
-	repo := handlePathParamHasSlash(request.PathParameter("repository"))
-	project := request.PathParameter("project")
+	sha := path.Parameter(request, "sha")
+	repo := path.Parameter(request, "repository")
+	project := path.Parameter(request, "project")
 	commitOption := metav1alpha1.GitCommitOption{
 		GitRepo:            metav1alpha1.GitRepo{Repository: repo, Project: project},
 		GitCommitBasicInfo: metav1alpha1.GitCommitBasicInfo{SHA: &sha},
@@ -117,8 +118,8 @@ func (a *gitCommitLister) Register(ws *restful.WebService) {
 
 // ListCommit get commit info
 func (a *gitCommitLister) ListCommit(request *restful.Request, response *restful.Response) {
-	repo := handlePathParamHasSlash(request.PathParameter("repository"))
-	project := request.PathParameter("project")
+	repo := path.Parameter(request, "repository")
+	project := path.Parameter(request, "project")
 	ref := request.QueryParameter("ref")
 	option := GetListOptionsFromRequest(request)
 	commitOption := metav1alpha1.GitCommitListOption{

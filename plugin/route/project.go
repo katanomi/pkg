@@ -18,6 +18,7 @@ package route
 
 import (
 	"context"
+	"github.com/katanomi/pkg/plugin/path"
 	"net/http"
 
 	restfulspec "github.com/emicklei/go-restful-openapi/v2"
@@ -130,7 +131,7 @@ func (p *projectGet) Register(ws *restful.WebService) {
 
 // GetProject http handler for get project
 func (p *projectGet) GetProject(request *restful.Request, response *restful.Response) {
-	id := request.PathParameter("project")
+	id := path.Parameter(request, "project")
 	projectSubtype := request.QueryParameter("type")
 
 	ctx := context.WithValue(request.Request.Context(), metav1alpha1.KeyForSubType, projectSubtype)

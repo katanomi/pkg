@@ -18,7 +18,7 @@ package client
 
 import (
 	"context"
-	"fmt"
+	"github.com/katanomi/pkg/plugin/path"
 	"strconv"
 
 	corev1 "k8s.io/api/core/v1"
@@ -75,7 +75,7 @@ func (g *gitRepositoryFileTree) GetGitRepositoryFileTree(
 	} else if option.Path == "" {
 		return nil, errors.NewBadRequest("file path is empty string")
 	}
-	uri := fmt.Sprintf("projects/%s/coderepositories/%s/tree", option.Project, handlePathParamHasSlash(option.Repository))
+	uri := path.Format("projects/%s/coderepositories/%s/tree", option.Project, option.Repository)
 	if err := g.client.Get(ctx, baseURL, uri, options...); err != nil {
 		return nil, err
 	}

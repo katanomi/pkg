@@ -18,7 +18,7 @@ package client
 
 import (
 	"context"
-	"fmt"
+	"github.com/katanomi/pkg/plugin/path"
 
 	metav1alpha1 "github.com/katanomi/pkg/apis/meta/v1alpha1"
 	corev1 "k8s.io/api/core/v1"
@@ -54,7 +54,7 @@ func (g *gitBranch) List(ctx context.Context, baseURL *duckv1.Addressable, repo 
 	if repo.Repository == "" {
 		return nil, errors.NewBadRequest("repo is empty string")
 	}
-	uri := fmt.Sprintf("projects/%s/coderepositories/%s/branches", repo.Project, handlePathParamHasSlash(repo.Repository))
+	uri := path.Format("projects/%s/coderepositories/%s/branches", repo.Project, repo.Repository)
 	if err := g.client.Get(ctx, baseURL, uri, options...); err != nil {
 		return nil, err
 	}
@@ -68,7 +68,7 @@ func (g *gitBranch) Create(ctx context.Context, baseURL *duckv1.Addressable, pay
 	if payload.Repository == "" {
 		return nil, errors.NewBadRequest("repo is empty string")
 	}
-	uri := fmt.Sprintf("projects/%s/coderepositories/%s/branches", payload.Project, handlePathParamHasSlash(payload.Repository))
+	uri := path.Format("projects/%s/coderepositories/%s/branches", payload.Project, payload.Repository)
 	if err := g.client.Post(ctx, baseURL, uri, options...); err != nil {
 		return nil, err
 	}
@@ -83,7 +83,7 @@ func (g *gitBranch) Get(ctx context.Context, baseURL *duckv1.Addressable, repo m
 	if repo.Repository == "" {
 		return nil, errors.NewBadRequest("repo is empty string")
 	}
-	uri := fmt.Sprintf("projects/%s/coderepositories/%s/branches/%s", repo.Project, handlePathParamHasSlash(repo.Repository), handlePathParamHasSlash(branch))
+	uri := path.Format("projects/%s/coderepositories/%s/branches/%s", repo.Project, repo.Repository, branch)
 	if err := g.client.Get(ctx, baseURL, uri, options...); err != nil {
 		return nil, err
 	}

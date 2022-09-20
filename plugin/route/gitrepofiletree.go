@@ -17,6 +17,7 @@ limitations under the License.
 package route
 
 import (
+	"github.com/katanomi/pkg/plugin/path"
 	"net/http"
 
 	kerrors "github.com/katanomi/pkg/errors"
@@ -64,8 +65,8 @@ func (g *gitRepositoryFileTreeGetter) Register(ws *restful.WebService) {
 
 // GetGitRepositoryFileTree get repo file tree
 func (g *gitRepositoryFileTreeGetter) GetGitRepositoryFileTree(request *restful.Request, response *restful.Response) {
-	repo := handlePathParamHasSlash(request.PathParameter("repository"))
-	project := request.PathParameter("project")
+	repo := path.Parameter(request, "repository")
+	project := path.Parameter(request, "project")
 	path := request.QueryParameter("path")
 	recursive := request.QueryParameter("recursive")
 	recursiveValue := recursive == "true"

@@ -18,7 +18,7 @@ package client
 
 import (
 	"context"
-	"fmt"
+	"github.com/katanomi/pkg/plugin/path"
 	"strconv"
 
 	metav1alpha1 "github.com/katanomi/pkg/apis/meta/v1alpha1"
@@ -99,7 +99,7 @@ func (g *gitPullRequest) Create(
 ) (*metav1alpha1.GitPullRequest, error) {
 	prObj := &metav1alpha1.GitPullRequest{}
 	options = append(options, MetaOpts(g.meta), SecretOpts(g.secret), BodyOpts(payload), ResultOpts(prObj))
-	uri := fmt.Sprintf("projects/%s/coderepositories/%s/pulls", payload.Source.Project, handlePathParamHasSlash(payload.Source.Repository))
+	uri := path.Format("projects/%s/coderepositories/%s/pulls", payload.Source.Project, payload.Source.Repository)
 	if err := g.client.Post(ctx, baseURL, uri, options...); err != nil {
 		return nil, err
 	}
@@ -123,7 +123,7 @@ func (g *gitPullRequest) List(
 	if option.Repository == "" {
 		return nil, errors.NewBadRequest("repo is empty string")
 	}
-	uri := fmt.Sprintf("projects/%s/coderepositories/%s/pulls", option.Project, handlePathParamHasSlash(option.Repository))
+	uri := path.Format("projects/%s/coderepositories/%s/pulls", option.Project, option.Repository)
 	if err := g.client.Get(ctx, baseURL, uri, options...); err != nil {
 		return nil, err
 	}
@@ -146,7 +146,7 @@ func (g *gitPullRequest) Get(
 		return nil, errors.NewBadRequest("pr's index is unknown")
 	}
 	index := strconv.Itoa(option.Index)
-	uri := fmt.Sprintf("projects/%s/coderepositories/%s/pulls/%s", option.Project, handlePathParamHasSlash(option.Repository), index)
+	uri := path.Format("projects/%s/coderepositories/%s/pulls/%s", option.Project, option.Repository, index)
 	if err := g.client.Get(ctx, baseURL, uri, options...); err != nil {
 		return nil, err
 	}
@@ -169,7 +169,7 @@ func (g *gitPullRequest) CreateNote(
 		return nil, errors.NewBadRequest("pr's index is unknown")
 	}
 	index := strconv.Itoa(payload.Index)
-	uri := fmt.Sprintf("projects/%s/coderepositories/%s/pulls/%s/note", payload.Project, handlePathParamHasSlash(payload.Repository), index)
+	uri := path.Format("projects/%s/coderepositories/%s/pulls/%s/note", payload.Project, payload.Repository, index)
 	if err := g.client.Post(ctx, baseURL, uri, options...); err != nil {
 		return nil, err
 	}
@@ -195,7 +195,7 @@ func (g *gitPullRequest) UpdateNote(
 	}
 	index := strconv.Itoa(payload.Index)
 	commentID := strconv.Itoa(payload.CommentID)
-	uri := fmt.Sprintf("projects/%s/coderepositories/%s/pulls/%s/note/%s", payload.Project, handlePathParamHasSlash(payload.Repository), index, commentID)
+	uri := path.Format("projects/%s/coderepositories/%s/pulls/%s/note/%s", payload.Project, payload.Repository, index, commentID)
 	if err := g.client.Put(ctx, baseURL, uri, options...); err != nil {
 		return nil, err
 	}
@@ -218,7 +218,7 @@ func (g *gitPullRequest) ListNote(
 		return nil, errors.NewBadRequest("pr's index is unknown")
 	}
 	index := strconv.Itoa(option.Index)
-	uri := fmt.Sprintf("projects/%s/coderepositories/%s/pulls/%s/note", option.Project, handlePathParamHasSlash(option.Repository), index)
+	uri := path.Format("projects/%s/coderepositories/%s/pulls/%s/note", option.Project, option.Repository, index)
 	if err := g.client.Get(ctx, baseURL, uri, options...); err != nil {
 		return nil, err
 	}

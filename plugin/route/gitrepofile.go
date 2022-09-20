@@ -17,11 +17,9 @@ limitations under the License.
 package route
 
 import (
-	"net/http"
-	"net/url"
-	"strings"
-
 	kerrors "github.com/katanomi/pkg/errors"
+	"github.com/katanomi/pkg/plugin/path"
+	"net/http"
 
 	restfulspec "github.com/emicklei/go-restful-openapi/v2"
 	"github.com/emicklei/go-restful/v3"
@@ -58,15 +56,9 @@ func (a *gitRepoFileGetter) Register(ws *restful.WebService) {
 
 // GetGitRepoFile get repo file
 func (a *gitRepoFileGetter) GetGitRepoFile(request *restful.Request, response *restful.Response) {
-	repo := handlePathParamHasSlash(request.PathParameter("repository"))
-	project := request.PathParameter("project")
-	filePath, err := url.PathUnescape(request.PathParameter("path"))
-	if err != nil {
-		kerrors.HandleError(request, response, err)
-		return
-	}
-	filePath = strings.Replace(filePath, "%2E", ".", -1)
-	filePath = strings.Replace(filePath, "%2F", "/", -1)
+	repo := path.Parameter(request, "repository")
+	project := path.Parameter(request, "project")
+	filePath := path.Parameter(request, "path")
 	gitRepoFileParams := metav1alpha1.GitRepoFileOption{
 		GitRepo: metav1alpha1.GitRepo{Repository: repo, Project: project},
 		Ref:     request.QueryParameter("ref"),
@@ -108,15 +100,9 @@ func (a *gitRepoFileCreator) Register(ws *restful.WebService) {
 
 // CreateGitRepoFile create file in repo's one branch
 func (a *gitRepoFileCreator) CreateGitRepoFile(request *restful.Request, response *restful.Response) {
-	repo := handlePathParamHasSlash(request.PathParameter("repository"))
-	project := request.PathParameter("project")
-	filePath, err := url.PathUnescape(request.PathParameter("filepath"))
-	if err != nil {
-		kerrors.HandleError(request, response, err)
-		return
-	}
-	filePath = strings.Replace(filePath, "%2E", ".", -1)
-	filePath = strings.Replace(filePath, "%2F", "/", -1)
+	repo := path.Parameter(request, "repository")
+	project := path.Parameter(request, "project")
+	filePath := path.Parameter(request, "filepath")
 	var params metav1alpha1.CreateRepoFileParams
 	if err := request.ReadEntity(&params); err != nil {
 		kerrors.HandleError(request, response, err)

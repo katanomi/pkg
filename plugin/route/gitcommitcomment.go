@@ -17,6 +17,7 @@ limitations under the License.
 package route
 
 import (
+	"github.com/katanomi/pkg/plugin/path"
 	"net/http"
 
 	kerrors "github.com/katanomi/pkg/errors"
@@ -56,9 +57,9 @@ func (a *gitCommitCommentLister) Register(ws *restful.WebService) {
 // ListGitCommitComment List commit info
 func (a *gitCommitCommentLister) ListGitCommitComment(request *restful.Request, response *restful.Response) {
 	option := GetListOptionsFromRequest(request)
-	sha := request.PathParameter("sha")
-	repo := handlePathParamHasSlash(request.PathParameter("repository"))
-	project := request.PathParameter("project")
+	sha := path.Parameter(request, "sha")
+	repo := path.Parameter(request, "repository")
+	project := path.Parameter(request, "project")
 	commitOption := metav1alpha1.GitCommitOption{
 		GitRepo:            metav1alpha1.GitRepo{Repository: repo, Project: project},
 		GitCommitBasicInfo: metav1alpha1.GitCommitBasicInfo{SHA: &sha},
@@ -99,9 +100,9 @@ func (a *gitCommitCommentCreator) Register(ws *restful.WebService) {
 
 // CreateGitCommitComment create commit info
 func (a *gitCommitCommentCreator) CreateGitCommitComment(request *restful.Request, response *restful.Response) {
-	sha := request.PathParameter("sha")
-	repo := handlePathParamHasSlash(request.PathParameter("repository"))
-	project := request.PathParameter("project")
+	sha := path.Parameter(request, "sha")
+	repo := path.Parameter(request, "repository")
+	project := path.Parameter(request, "project")
 	var params metav1alpha1.CreateCommitCommentParam
 	if err := request.ReadEntity(&params); err != nil {
 		kerrors.HandleError(request, response, err)

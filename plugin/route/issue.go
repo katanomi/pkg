@@ -17,6 +17,7 @@ limitations under the License.
 package route
 
 import (
+	"github.com/katanomi/pkg/plugin/path"
 	"net/http"
 
 	restfulspec "github.com/emicklei/go-restful-openapi/v2"
@@ -54,7 +55,7 @@ func (i *issueList) Register(ws *restful.WebService) {
 func (i *issueList) ListIssues(request *restful.Request, response *restful.Response) {
 	option := GetListOptionsFromRequest(request)
 	pathParams := metav1alpha1.IssueOptions{
-		Identity: request.PathParameter("project"),
+		Identity: path.Parameter(request, "project"),
 	}
 	issues, err := i.impl.ListIssues(request.Request.Context(), pathParams, option)
 	if err != nil {
@@ -92,8 +93,8 @@ func (i *issueGetter) Register(ws *restful.WebService) {
 func (i *issueGetter) GetIssue(request *restful.Request, response *restful.Response) {
 	option := GetListOptionsFromRequest(request)
 	pathParams := metav1alpha1.IssueOptions{
-		Identity: request.PathParameter("project"),
-		IssueId:  request.PathParameter("issue"),
+		Identity: path.Parameter(request, "project"),
+		IssueId:  path.Parameter(request, "issue"),
 	}
 	issue, err := i.impl.GetIssue(request.Request.Context(), pathParams, option)
 	if err != nil {
@@ -131,7 +132,7 @@ func (i *issueAttributeGetter) Register(ws *restful.WebService) {
 func (i *issueAttributeGetter) GetAttributes(request *restful.Request, response *restful.Response) {
 	option := GetListOptionsFromRequest(request)
 	pathParams := metav1alpha1.IssueOptions{
-		Identity: request.PathParameter("project"),
+		Identity: path.Parameter(request, "project"),
 	}
 	attribute, err := i.impl.GetIssueAttribute(request.Request.Context(), pathParams, option)
 	if err != nil {

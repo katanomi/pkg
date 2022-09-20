@@ -17,6 +17,7 @@ limitations under the License.
 package route
 
 import (
+	"github.com/katanomi/pkg/plugin/path"
 	"net/http"
 
 	restfulspec "github.com/emicklei/go-restful-openapi/v2"
@@ -57,9 +58,9 @@ func (a *artifactList) ListArtifacts(request *restful.Request, response *restful
 	option := GetListOptionsFromRequest(request)
 	pathParams := metav1alpha1.ArtifactOptions{
 		RepositoryOptions: metav1alpha1.RepositoryOptions{
-			Project: request.PathParameter("project"),
+			Project: path.Parameter(request, "project"),
 		},
-		Repository: request.PathParameter("repository"),
+		Repository: path.Parameter(request, "repository"),
 	}
 	artifacts, err := a.impl.ListArtifacts(request.Request.Context(), pathParams, option)
 	if err != nil {
@@ -100,10 +101,10 @@ func (a *artifactGetter) Register(ws *restful.WebService) {
 func (a *artifactGetter) GetArtifact(request *restful.Request, response *restful.Response) {
 	pathParams := metav1alpha1.ArtifactOptions{
 		RepositoryOptions: metav1alpha1.RepositoryOptions{
-			Project: request.PathParameter("project"),
+			Project: path.Parameter(request, "project"),
 		},
-		Repository: request.PathParameter("repository"),
-		Artifact:   request.PathParameter("artifact"),
+		Repository: path.Parameter(request, "repository"),
+		Artifact:   path.Parameter(request, "artifact"),
 	}
 	artifact, err := a.impl.GetArtifact(request.Request.Context(), pathParams)
 	if err != nil {
@@ -144,10 +145,10 @@ func (a *artifactDeleter) Register(ws *restful.WebService) {
 func (a *artifactDeleter) DeleteArtifact(request *restful.Request, response *restful.Response) {
 	pathParams := metav1alpha1.ArtifactOptions{
 		RepositoryOptions: metav1alpha1.RepositoryOptions{
-			Project: request.PathParameter("project"),
+			Project: path.Parameter(request, "project"),
 		},
-		Repository: request.PathParameter("repository"),
-		Artifact:   request.PathParameter("artifact"),
+		Repository: path.Parameter(request, "repository"),
+		Artifact:   path.Parameter(request, "artifact"),
 	}
 	err := a.impl.DeleteArtifact(request.Request.Context(), pathParams)
 	if err != nil {
@@ -191,12 +192,12 @@ func (a *artifactTagDeleter) DeleteArtifactTag(request *restful.Request, respons
 	pathParams := metav1alpha1.ArtifactTagOptions{
 		ArtifactOptions: metav1alpha1.ArtifactOptions{
 			RepositoryOptions: metav1alpha1.RepositoryOptions{
-				Project: request.PathParameter("project"),
+				Project: path.Parameter(request, "project"),
 			},
-			Repository: request.PathParameter("repository"),
-			Artifact:   request.PathParameter("artifact"),
+			Repository: path.Parameter(request, "repository"),
+			Artifact:   path.Parameter(request, "artifact"),
 		},
-		Tag: request.PathParameter("tag"),
+		Tag: path.Parameter(request, "tag"),
 	}
 
 	err := a.impl.DeleteArtifactTag(request.Request.Context(), pathParams)
@@ -238,10 +239,10 @@ func (s *scanImage) Register(ws *restful.WebService) {
 func (s *scanImage) ScanImage(request *restful.Request, response *restful.Response) {
 	pathParams := metav1alpha1.ArtifactOptions{
 		RepositoryOptions: metav1alpha1.RepositoryOptions{
-			Project: request.PathParameter("project"),
+			Project: path.Parameter(request, "project"),
 		},
-		Repository: request.PathParameter("repository"),
-		Artifact:   request.PathParameter("artifact"),
+		Repository: path.Parameter(request, "repository"),
+		Artifact:   path.Parameter(request, "artifact"),
 	}
 	err := s.impl.ScanImage(request.Request.Context(), pathParams)
 	if err != nil {
@@ -282,10 +283,10 @@ func (i *imageConfigGetter) Register(ws *restful.WebService) {
 func (i *imageConfigGetter) GetImageConfig(request *restful.Request, response *restful.Response) {
 	pathParams := metav1alpha1.ArtifactOptions{
 		RepositoryOptions: metav1alpha1.RepositoryOptions{
-			Project: request.PathParameter("project"),
+			Project: path.Parameter(request, "project"),
 		},
-		Repository: request.PathParameter("repository"),
-		Artifact:   request.PathParameter("artifact"),
+		Repository: path.Parameter(request, "repository"),
+		Artifact:   path.Parameter(request, "artifact"),
 	}
 	config, err := i.impl.GetImageConfig(request.Request.Context(), pathParams)
 	if err != nil {

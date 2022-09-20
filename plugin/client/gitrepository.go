@@ -18,7 +18,7 @@ package client
 
 import (
 	"context"
-	"fmt"
+	"github.com/katanomi/pkg/plugin/path"
 
 	metav1alpha1 "github.com/katanomi/pkg/apis/meta/v1alpha1"
 	corev1 "k8s.io/api/core/v1"
@@ -52,7 +52,7 @@ func (g *gitRepository) List(ctx context.Context, baseURL *duckv1.Addressable, p
 	if project == "" {
 		return nil, errors.NewBadRequest("project is empty string")
 	}
-	uri := fmt.Sprintf("projects/%s/coderepositories", project)
+	uri := path.Format("projects/%s/coderepositories", project)
 	if err := g.client.Get(ctx, baseURL, uri, options...); err != nil {
 		return nil, err
 	}
@@ -68,7 +68,7 @@ func (g *gitRepository) Get(ctx context.Context, baseURL *duckv1.Addressable, pr
 	if repo == "" {
 		return nil, errors.NewBadRequest("repo is empty string")
 	}
-	uri := fmt.Sprintf("projects/%s/coderepositories/%s", project, handlePathParamHasSlash(repo))
+	uri := path.Format("projects/%s/coderepositories/%s", project, repo)
 	if err := g.client.Get(ctx, baseURL, uri, options...); err != nil {
 		return nil, err
 	}

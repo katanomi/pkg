@@ -17,6 +17,7 @@ limitations under the License.
 package route
 
 import (
+	"github.com/katanomi/pkg/plugin/path"
 	"net/http"
 
 	restfulspec "github.com/emicklei/go-restful-openapi/v2"
@@ -59,7 +60,7 @@ func (r *repositoryList) ListRepositories(request *restful.Request, response *re
 	subType := request.QueryParameter("subType")
 
 	pathParams := metav1alpha1.RepositoryOptions{
-		Project: request.PathParameter("project"),
+		Project: path.Parameter(request, "project"),
 		SubType: metav1alpha1.ProjectSubType(subType),
 	}
 	repositories, err := r.impl.ListRepositories(request.Request.Context(), pathParams, option)

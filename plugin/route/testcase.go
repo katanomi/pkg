@@ -17,6 +17,7 @@ limitations under the License.
 package route
 
 import (
+	"github.com/katanomi/pkg/plugin/path"
 	"net/http"
 
 	restfulspec "github.com/emicklei/go-restful-openapi/v2"
@@ -62,8 +63,8 @@ func (r *testCaseLister) ListTestCases(request *restful.Request, response *restf
 	option := GetListOptionsFromRequest(request)
 
 	pathParams := metav1alpha1.TestProjectOptions{
-		Project:    request.PathParameter("project"),
-		TestPlanID: request.PathParameter("testplanid"),
+		Project:    path.Parameter(request, "project"),
+		TestPlanID: path.Parameter(request, "testplanid"),
 		BuildID:    request.QueryParameter("buildID"),
 	}
 	testCases, err := r.impl.ListTestCases(request.Request.Context(), pathParams, option)
@@ -111,9 +112,9 @@ func (r *testCaseGetter) Register(ws *restful.WebService) {
 // GetTestCase http handler for getting testCase
 func (r *testCaseGetter) GetTestCase(request *restful.Request, response *restful.Response) {
 	pathParams := metav1alpha1.TestProjectOptions{
-		Project:    request.PathParameter("project"),
-		TestPlanID: request.PathParameter("testplanid"),
-		TestCaseID: request.PathParameter("testcaseid"),
+		Project:    path.Parameter(request, "project"),
+		TestPlanID: path.Parameter(request, "testplanid"),
+		TestCaseID: path.Parameter(request, "testcaseid"),
 		BuildID:    request.QueryParameter("buildID"),
 	}
 	testCase, err := r.impl.GetTestCase(request.Request.Context(), pathParams)

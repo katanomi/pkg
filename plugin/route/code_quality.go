@@ -17,6 +17,7 @@ limitations under the License.
 package route
 
 import (
+	"github.com/katanomi/pkg/plugin/path"
 	"net/http"
 	"time"
 
@@ -89,7 +90,7 @@ func (c *codeQualityGetter) Register(ws *restful.WebService) {
 
 // GetCodeQuality http handler for get code quality
 func (c *codeQualityGetter) GetCodeQuality(request *restful.Request, response *restful.Response) {
-	projectKey := request.PathParameter("project-key")
+	projectKey := path.Parameter(request, "project-key")
 	codeQuality, err := c.impl.GetCodeQuality(request.Request.Context(), projectKey)
 	if err != nil {
 		kerrors.HandleError(request, response, err)
@@ -101,8 +102,8 @@ func (c *codeQualityGetter) GetCodeQuality(request *restful.Request, response *r
 
 // GetCodeQuality http handler for get code quality
 func (c *codeQualityGetter) GetCodeQualityOverviewByBranch(request *restful.Request, response *restful.Response) {
-	projectKey := request.PathParameter("project-key")
-	branchKey := request.PathParameter("branch")
+	projectKey := path.Parameter(request, "project-key")
+	branchKey := path.Parameter(request, "branch")
 	codeQuality, err := c.impl.GetCodeQualityOverviewByBranch(request.Request.Context(), metav1alpha1.CodeQualityBaseOption{ProjectKey: projectKey, BranchKey: branchKey})
 	if err != nil {
 		kerrors.HandleError(request, response, err)
@@ -114,8 +115,8 @@ func (c *codeQualityGetter) GetCodeQualityOverviewByBranch(request *restful.Requ
 
 // GetCodeQuality http handler for get code quality
 func (c *codeQualityGetter) GetCodeQualityLineCharts(request *restful.Request, response *restful.Response) {
-	projectKey := request.PathParameter("project-key")
-	branchKey := request.PathParameter("branch")
+	projectKey := path.Parameter(request, "project-key")
+	branchKey := path.Parameter(request, "branch")
 	metricKeys := request.QueryParameter("metricKeys")
 	startTime := request.QueryParameter("startTime")
 	endTime := request.QueryParameter("completionTime")
@@ -163,7 +164,7 @@ func (c *codeQualityGetter) GetOverview(request *restful.Request, response *rest
 }
 
 func (c *codeQualityGetter) GetSummaryByTaskID(request *restful.Request, response *restful.Response) {
-	taskID := request.PathParameter("task-id")
+	taskID := path.Parameter(request, "task-id")
 	projectKey := request.QueryParameter("project-key")
 	branch := request.QueryParameter("branch")
 	pullRequest := request.QueryParameter("pullRequest")

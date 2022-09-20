@@ -1,5 +1,5 @@
 /*
-Copyright 2021 The Katanomi Authors.
+Copyright 2022 The Katanomi Authors.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -14,15 +14,5 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package client
-
-import (
-	"net/url"
-	"strings"
-)
-
-func handlePathParamHasSlash(param string) string {
-	param = strings.Replace(param, "/", "%2F", 1)
-	param = url.PathEscape(param)
-	return param
-}
+// Package path provides helper functions for handling url path
+package path
