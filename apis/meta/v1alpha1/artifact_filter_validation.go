@@ -25,6 +25,10 @@ import (
 )
 
 func (a ArtifactFilterRegexList) Validate(path *field.Path) (errs field.ErrorList) {
+	if len(a) == 0 {
+		errs = append(errs, field.Required(path, kvalidation.EmptyError()))
+	}
+
 	for i, regex := range a {
 		if regex == "" {
 			errs = append(errs, field.Required(path.Index(i), kvalidation.EmptyError()))
@@ -43,18 +47,14 @@ func (a *ArtifactTagFilter) Validate(path *field.Path) (errs field.ErrorList) {
 }
 
 func (a *ArtifactEnvFilter) Validate(path *field.Path) (errs field.ErrorList) {
-	if a.Name == "" {
-		errs = append(errs, field.Required(path.Child("name"), kvalidation.EmptyError()))
-	} else {
-		errs = append(errs, validation.ValidateItemName(a.Name, false, path.Child("name"))...)
-	}
+	errs = append(errs, validateName(a.Name, path.Child("name"))...)
 	errs = append(errs, a.Regex.Validate(path.Child("regex"))...)
 
 	return
 }
 
 func (a *ArtifactLabelFilter) Validate(path *field.Path) (errs field.ErrorList) {
-	errs = append(errs, validation.ValidateItemName(a.Name, false, path.Child("name"))...)
+	errs = append(errs, validateName(a.Name, path.Child("name"))...)
 	errs = append(errs, a.Regex.Validate(path.Child("regex"))...)
 
 	return
@@ -87,6 +87,16 @@ func (a *ArtifactFilterSet) Validate(path *field.Path) (errs field.ErrorList) {
 
 	for i, filter := range a.All {
 		errs = append(errs, filter.Validate(path.Child("all").Index(i))...)
+	}
+
+	return
+}
+
+func validateName(name string, path *field.Path) (errs field.ErrorList) {
+	if name == "" {
+		errs = append(errs, field.Required(path, kvalidation.EmptyError()))
+	} else {
+		errs = append(errs, validation.ValidateGenericResourceName(name, path)...)
 	}
 
 	return

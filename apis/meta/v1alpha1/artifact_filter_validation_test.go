@@ -17,6 +17,7 @@ limitations under the License.
 package v1alpha1
 
 import (
+	"fmt"
 	"testing"
 
 	. "github.com/onsi/gomega"
@@ -28,6 +29,8 @@ func TestArtifactFilterRegexList_Validate(t *testing.T) {
 		list ArtifactFilterRegexList
 		g    = NewGomegaWithT(t)
 	)
+
+	g.Expect(list.Validate(field.NewPath("test"))).To(HaveLen(1))
 
 	list = ArtifactFilterRegexList{
 		"abc",
@@ -52,85 +55,278 @@ func TestArtifactFilterRegexList_Validate(t *testing.T) {
 
 func TestArtifactEnvFilter_Validate(t *testing.T) {
 	var (
-		filter ArtifactEnvFilter
-		g      = NewGomegaWithT(t)
+		g     = NewGomegaWithT(t)
+		tests = []struct {
+			name     string
+			regex    ArtifactFilterRegexList
+			evaluate func(g *GomegaWithT, errs field.ErrorList)
+		}{
+			{
+				evaluate: func(g *GomegaWithT, errs field.ErrorList) {
+					g.Expect(errs).To(HaveLen(2))
+				},
+			},
+			{
+				name: "test",
+				evaluate: func(g *GomegaWithT, errs field.ErrorList) {
+					g.Expect(errs).To(HaveLen(1))
+				},
+			},
+			{
+				regex: ArtifactFilterRegexList{
+					"abc",
+					"abc def",
+					"^abc$",
+					"abc+?",
+					"abc*",
+					"(abc)",
+					"[abc]",
+					`\d\w`,
+				},
+				evaluate: func(g *GomegaWithT, errs field.ErrorList) {
+					g.Expect(errs).To(HaveLen(1))
+				},
+			},
+			{
+				name: "test",
+				regex: ArtifactFilterRegexList{
+					"abc",
+				},
+				evaluate: func(g *GomegaWithT, errs field.ErrorList) {
+					g.Expect(errs).To(BeEmpty())
+				},
+			},
+			{
+				name: "TEST",
+				regex: ArtifactFilterRegexList{
+					"abc",
+				},
+				evaluate: func(g *GomegaWithT, errs field.ErrorList) {
+					g.Expect(errs).To(BeEmpty())
+				},
+			},
+			{
+				name: "?!#",
+				regex: ArtifactFilterRegexList{
+					"abc",
+				},
+				evaluate: func(g *GomegaWithT, errs field.ErrorList) {
+					g.Expect(errs).To(HaveLen(1))
+				},
+			},
+			{
+				name: "test",
+				regex: ArtifactFilterRegexList{
+					"abc",
+					"[",
+					"(",
+				},
+				evaluate: func(g *GomegaWithT, errs field.ErrorList) {
+					g.Expect(errs).To(HaveLen(2))
+				},
+			},
+			{
+				name: "?!#",
+				regex: ArtifactFilterRegexList{
+					"abc",
+					"[",
+					"(",
+				},
+				evaluate: func(g *GomegaWithT, errs field.ErrorList) {
+					g.Expect(errs).To(HaveLen(3))
+				},
+			},
+		}
 	)
 
-	g.Expect(filter.Validate(field.NewPath("test"))).NotTo(BeEmpty())
+	for i, item := range tests {
+		t.Run(fmt.Sprintf("%d", i+1), func(t *testing.T) {
+			filter := ArtifactEnvFilter{
+				Name:  item.name,
+				Regex: item.regex,
+			}
 
-	filter.Name = "test"
-	g.Expect(filter.Validate(field.NewPath("test"))).To(BeEmpty())
-
-	filter.Regex = ArtifactFilterRegexList{
-		"abc",
-		"abc def",
-		"^abc$",
-		"abc+?",
-		"abc*",
-		"(abc)",
-		"[abc]",
-		`\d\w`,
+			errs := filter.Validate(field.NewPath("test"))
+			item.evaluate(g, errs)
+		})
 	}
-
-	g.Expect(filter.Validate(field.NewPath("test"))).To(BeEmpty())
 }
 
 func TestArtifactTagFilter_Validate(t *testing.T) {
 	var (
-		filter ArtifactTagFilter
-		g      = NewGomegaWithT(t)
+		g     = NewGomegaWithT(t)
+		tests = []struct {
+			regex    ArtifactFilterRegexList
+			evaluate func(g *GomegaWithT, errs field.ErrorList)
+		}{
+			{
+				evaluate: func(g *GomegaWithT, errs field.ErrorList) {
+					g.Expect(errs).To(HaveLen(1))
+				},
+			},
+			{
+				regex: ArtifactFilterRegexList{
+					"abc",
+					"abc def",
+					"^abc$",
+					"abc+?",
+					"abc*",
+					"(abc)",
+					"[abc]",
+					`\d\w`,
+				},
+				evaluate: func(g *GomegaWithT, errs field.ErrorList) {
+					g.Expect(errs).To(BeEmpty())
+				},
+			},
+			{
+				regex: ArtifactFilterRegexList{
+					"abc",
+					"[",
+					"(",
+				},
+				evaluate: func(g *GomegaWithT, errs field.ErrorList) {
+					g.Expect(errs).To(HaveLen(2))
+				},
+			},
+		}
 	)
 
-	g.Expect(filter.Validate(field.NewPath("test"))).To(BeEmpty())
+	for i, item := range tests {
+		t.Run(fmt.Sprintf("%d", i+1), func(t *testing.T) {
+			filter := ArtifactTagFilter{
+				Regex: item.regex,
+			}
 
-	filter.Regex = ArtifactFilterRegexList{
-		"abc",
-		"abc def",
-		"^abc$",
-		"abc+?",
-		"abc*",
-		"(abc)",
-		"[abc]",
-		`\d\w`,
+			errs := filter.Validate(field.NewPath("test"))
+			item.evaluate(g, errs)
+		})
 	}
-
-	g.Expect(filter.Validate(field.NewPath("test"))).To(BeEmpty())
-
-	filter.Regex = ArtifactFilterRegexList{
-		"abc",
-		"[",
-	}
-	g.Expect(filter.Validate(field.NewPath("test"))).To(HaveLen(1))
 }
 
 func TestArtifactLabelFilter_Validate(t *testing.T) {
 	var (
-		filter ArtifactLabelFilter
-		g      = NewGomegaWithT(t)
+		g     = NewGomegaWithT(t)
+		tests = []struct {
+			name     string
+			regex    ArtifactFilterRegexList
+			evaluate func(g *GomegaWithT, errs field.ErrorList)
+		}{
+			{
+				evaluate: func(g *GomegaWithT, errs field.ErrorList) {
+					g.Expect(errs).To(HaveLen(2))
+				},
+			},
+			{
+				name: "test",
+				evaluate: func(g *GomegaWithT, errs field.ErrorList) {
+					g.Expect(errs).To(HaveLen(1))
+				},
+			},
+			{
+				regex: ArtifactFilterRegexList{
+					"abc",
+					"abc def",
+					"^abc$",
+					"abc+?",
+					"abc*",
+					"(abc)",
+					"[abc]",
+					`\d\w`,
+				},
+				evaluate: func(g *GomegaWithT, errs field.ErrorList) {
+					g.Expect(errs).To(HaveLen(1))
+				},
+			},
+			{
+				name: "test",
+				regex: ArtifactFilterRegexList{
+					"abc",
+				},
+				evaluate: func(g *GomegaWithT, errs field.ErrorList) {
+					g.Expect(errs).To(BeEmpty())
+				},
+			},
+			{
+				name: "TEST",
+				regex: ArtifactFilterRegexList{
+					"abc",
+				},
+				evaluate: func(g *GomegaWithT, errs field.ErrorList) {
+					g.Expect(errs).To(BeEmpty())
+				},
+			},
+			{
+				name: "?!#",
+				regex: ArtifactFilterRegexList{
+					"abc",
+				},
+				evaluate: func(g *GomegaWithT, errs field.ErrorList) {
+					g.Expect(errs).To(HaveLen(1))
+				},
+			},
+			{
+				name: "test",
+				regex: ArtifactFilterRegexList{
+					"abc",
+					"[",
+					"(",
+				},
+				evaluate: func(g *GomegaWithT, errs field.ErrorList) {
+					g.Expect(errs).To(HaveLen(2))
+				},
+			},
+			{
+				name: "?!#",
+				regex: ArtifactFilterRegexList{
+					"abc",
+					"[",
+					"(",
+				},
+				evaluate: func(g *GomegaWithT, errs field.ErrorList) {
+					g.Expect(errs).To(HaveLen(3))
+				},
+			},
+		}
 	)
 
-	g.Expect(filter.Validate(field.NewPath("test"))).NotTo(BeEmpty())
+	for i, item := range tests {
+		t.Run(fmt.Sprintf("%d", i+1), func(t *testing.T) {
+			filter := ArtifactLabelFilter{
+				Name:  item.name,
+				Regex: item.regex,
+			}
 
-	filter.Name = "test"
-	g.Expect(filter.Validate(field.NewPath("test"))).To(BeEmpty())
-
-	filter.Regex = ArtifactFilterRegexList{
-		"abc",
-		"abc def",
-		"^abc$",
-		"abc+?",
-		"abc*",
-		"(abc)",
-		"[abc]",
-		`\d\w`,
+			errs := filter.Validate(field.NewPath("test"))
+			item.evaluate(g, errs)
+		})
 	}
+}
 
-	g.Expect(filter.Validate(field.NewPath("test"))).To(BeEmpty())
+func TestArtifactFilterSet_Validate(t *testing.T) {
+	var (
+		g      = NewGomegaWithT(t)
+		path   = field.NewPath("test")
+		filter ArtifactFilterSet
+	)
 
-	filter.Name = ""
-	filter.Regex = ArtifactFilterRegexList{
-		"abc",
-		"[",
+	filter.Any = nil
+	filter.All = []ArtifactFilter{
+		{},
 	}
-	g.Expect(filter.Validate(field.NewPath("test"))).To(HaveLen(2))
+	g.Expect(filter.Validate(path)).To(BeEmpty())
+
+	filter.All = nil
+	filter.Any = []ArtifactFilter{
+		{},
+	}
+	g.Expect(filter.Validate(path)).To(BeEmpty())
+
+	filter.All = []ArtifactFilter{
+		{},
+	}
+	filter.Any = []ArtifactFilter{
+		{},
+	}
+	g.Expect(filter.Validate(path)).To(HaveLen(1))
 }
