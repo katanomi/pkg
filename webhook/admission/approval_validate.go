@@ -39,16 +39,17 @@ type ValidateApprovalFunc func(ctx context.Context, reqUser authenticationv1.Use
 func ValidateApproval(ctx context.Context, reqUser authenticationv1.UserInfo, allowRepresentOthers, isCreateOperation bool,
 	approvalSpecList []*metav1alpha1.ApprovalSpec, checkList []PairOfOldNewCheck, triggeredBy *metav1alpha1.TriggeredBy) (err error) {
 
+	log := logging.FromContext(ctx)
 	defer func() {
 		if err != nil {
-			log := logging.FromContext(ctx)
-			log.Debugw("approval exception detected", "error", err)
+			log.Infow("approval exception detected", "error", err)
 		}
 	}()
 
 	// check needs to be consistent with the number of spec
 	if len(checkList) != len(approvalSpecList) {
 		err = fmt.Errorf("internal error #check != #checkSpec")
+		log.Warnw("validate approval failed", "check", checkList, "checkSpec", approvalSpecList, "error", err)
 		return
 	}
 
@@ -165,16 +166,17 @@ func (c *checkApproval) Check() (err error) {
 			}
 		}
 		// Approval requires verification of identity, cannot approve on behalf of others.
-		if ((oldUser == nil || oldUser.Input == nil) && newUser.Input != nil) &&
-			!matching.IsRightUser(c.reqUser, newUser.Subject) {
-			err = fmt.Errorf("%q can not approve for user %q", c.reqUser.Username, newUser.Subject.Name)
-			return
-		}
-		// RequiresDifferentApprover if set to true, the user who triggered the StageRun cannot approve, unless an admin
-		if c.approvalSpec.RequiresDifferentApprover &&
-			c.triggeredBy != nil && c.triggeredBy.User != nil && *c.triggeredBy.User == newUser.Subject {
-			err = fmt.Errorf("requiresDifferentApprover is enabled, %q can not approve.", newUser.Subject.Name)
-			return
+		if (oldUser == nil || oldUser.Input == nil) && newUser.Input != nil {
+			if !matching.IsRightUser(c.reqUser, newUser.Subject) {
+				err = fmt.Errorf("%q can not approve for user %q", c.reqUser.Username, newUser.Subject.Name)
+				return
+			}
+			// RequiresDifferentApprover if set to true, the user who triggered the StageRun cannot approve, unless an admin
+			if c.approvalSpec.RequiresDifferentApprover &&
+				c.triggeredBy != nil && c.triggeredBy.User != nil && *c.triggeredBy.User == newUser.Subject {
+				err = fmt.Errorf("requiresDifferentApprover is enabled, %q can not approve.", newUser.Subject.Name)
+				return
+			}
 		}
 	}
 

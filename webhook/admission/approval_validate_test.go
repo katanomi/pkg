@@ -501,6 +501,17 @@ var _ = Describe("Test.ValidateApproval", func() {
 			})
 		})
 
+		When("cannot to represent others but no changed", func() {
+			BeforeEach(func() {
+				allowRepresentOthers = false
+				new = old
+			})
+
+			It("should NOT return an error", func() {
+				Expect(err).To(BeNil())
+			})
+		})
+
 	})
 
 })

@@ -92,11 +92,8 @@ var _ = Describe("Test.Check.ValidateChange", func() {
 			old = nil
 		})
 
-		It("should return validation error", func() {
-			Expect(errs).ToNot(BeNil(), "should return an error")
-			// Filter removes items from the ErrorList that match the provided fns.
-			Expect(errs.Filter(field.NewErrorTypeMatcher(field.ErrorTypeForbidden))).To(HaveLen(0))
-			Expect(errs).To(HaveLen(1))
+		It("should NOT return validation error", func() {
+			Expect(errs).To(BeNil(), "should NOT return an error")
 		})
 	})
 
