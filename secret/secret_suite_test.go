@@ -19,13 +19,12 @@ package secret
 import (
 	"testing"
 
+	"k8s.io/apimachinery/pkg/runtime"
+
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
 	corev1 "k8s.io/api/core/v1"
-	"k8s.io/client-go/kubernetes/scheme"
-	"sigs.k8s.io/controller-runtime/pkg/client"
-	"sigs.k8s.io/controller-runtime/pkg/envtest"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 )
@@ -35,31 +34,17 @@ func TestSecret(t *testing.T) {
 	RunSpecs(t, "Secret Suite")
 }
 
-var testNamespace = "default"
-var testK8sClient client.Client
-var testEnv *envtest.Environment
+var scheme = runtime.NewScheme()
+
+func init() {
+	corev1.AddToScheme(scheme)
+}
+
 var testLogger = zap.NewRaw(zap.WriteTo(GinkgoWriter), zap.UseDevMode(true)).Sugar()
 
 var _ = BeforeSuite(func() {
 	logf.SetLogger(zap.New(zap.WriteTo(GinkgoWriter), zap.UseDevMode(true)))
-
-	By("bootstrapping test environment")
-	testEnv = &envtest.Environment{}
-
-	cfg, err := testEnv.Start()
-	Expect(err).NotTo(HaveOccurred())
-	Expect(cfg).NotTo(BeNil())
-
-	err = corev1.AddToScheme(scheme.Scheme)
-	Expect(err).NotTo(HaveOccurred())
-
-	// +kubebuilder:scaffold:scheme
-	testK8sClient, err = client.New(cfg, client.Options{Scheme: scheme.Scheme})
-	Expect(err).NotTo(HaveOccurred())
-	Expect(testK8sClient).NotTo(BeNil())
 })
 
 var _ = AfterSuite(func() {
-	err := testEnv.Stop()
-	Expect(err).NotTo(HaveOccurred())
 })
