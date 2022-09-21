@@ -87,8 +87,7 @@ func ManagerFilter(ctx context.Context, mgr *Manager) restful.FilterFunction {
 		step := time.Now()
 		if err != nil {
 			log.Debugw("manager filter config get error", "err", err)
-			err = kerrors.AsAPIError(err)
-			resp.WriteHeaderAndJson(kerrors.AsStatusCode(err), err, restful.MIME_JSON)
+			kerrors.HandleError(req, resp, err)
 			return
 		}
 
@@ -105,8 +104,7 @@ func ManagerFilter(ctx context.Context, mgr *Manager) restful.FilterFunction {
 		step = time.Now()
 		if err != nil {
 			log.Debugw("manager filter direct client create error", "err", err)
-			err = kerrors.AsAPIError(err)
-			resp.WriteHeaderAndJson(kerrors.AsStatusCode(err), err, restful.MIME_JSON)
+			kerrors.HandleError(req, resp, err)
 			return
 		}
 		ctx = WithClient(ctx, directClient)
@@ -115,8 +113,7 @@ func ManagerFilter(ctx context.Context, mgr *Manager) restful.FilterFunction {
 		log.Debugw("ManagerFilter, got dynamic client", "totalElapsed", time.Since(start).String(), "elapsed", time.Since(step).String())
 		if err != nil {
 			log.Debugw("manager filter dynamic client create error", "err", err)
-			err = kerrors.AsAPIError(err)
-			resp.WriteHeaderAndJson(kerrors.AsStatusCode(err), err, restful.MIME_JSON)
+			kerrors.HandleError(req, resp, err)
 			return
 		}
 		ctx = WithDynamicClient(ctx, dynamicClient)
