@@ -20,6 +20,10 @@ import (
 	"strings"
 	"testing"
 
+	"k8s.io/apimachinery/pkg/selection"
+
+	"k8s.io/apimachinery/pkg/labels"
+
 	"go.uber.org/zap"
 
 	metav1alpha1 "github.com/katanomi/pkg/apis/meta/v1alpha1"
@@ -29,6 +33,7 @@ import (
 
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	ctrlclientfake "sigs.k8s.io/controller-runtime/pkg/client/fake"
 )
 
 func TestSelect(t *testing.T) {
@@ -47,6 +52,7 @@ func TestSelect(t *testing.T) {
 					metav1alpha1.IntegrationSecretApplyNamespaces: strings.Join(applyNamespaces, ","),
 					metav1alpha1.IntegrationResourceScope:         strings.Join(scopes, ","),
 				},
+				Labels:            map[string]string{},
 				CreationTimestamp: metav1.Now(),
 			},
 		}
@@ -185,7 +191,7 @@ func TestSelect(t *testing.T) {
 		}
 	})
 
-	t.Run("only basicAuth type secret can be selected", func(t *testing.T) {
+	t.Run("when include basic auth secret, it should just selected this secret", func(t *testing.T) {
 		sList := []corev1.Secret{
 			buildSecret("secret-basic", "default", "https://1.2.3.4/",
 				corev1.SecretTypeBasicAuth, []string{"/devops/"}, []string{""}, false),
@@ -294,6 +300,27 @@ func TestSelect(t *testing.T) {
 		}
 	})
 
+	t.Run("when labels selector passed, it should only selected secret that matches these labels selector", func(t *testing.T) {
+		secret1 := buildSecret("secret-basic", "default", "https://1.2.3.4/",
+			corev1.SecretTypeBasicAuth, []string{"/devops0/"}, []string{""}, false)
+		secret1.Labels[metav1alpha1.SecretSyncMutationLabelKey] = "true"
+		secret2 := buildSecret("secret-basic-1", "default", "https://1.2.3.4/",
+			corev1.SecretTypeBasicAuth, []string{"/devops0/"}, []string{""}, false)
+
+		client := ctrlclientfake.NewClientBuilder().WithObjects(&secret1, &secret2).Build()
+
+		selector := labels.NewSelector()
+		req, _ := labels.NewRequirement(metav1alpha1.SecretSyncMutationLabelKey, selection.DoesNotExist, nil)
+
+		option := SelectSecretOption{LabelSelector: selector.Add(*req)}
+		secret, err := SelectToolSecret(log, client, "https://1.2.3.4/devops0/test.git", option)
+		if err != nil {
+			t.Errorf("should be nil")
+		}
+		if secret.Name != "secret-basic-1" {
+			t.Errorf("expect seclect secret secret-basic-1, but %s", secret.Name)
+		}
+	})
 }
 
 func TestSortSecretList(t *testing.T) {

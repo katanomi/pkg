@@ -44,10 +44,10 @@ var _ = Describe("Test.GetSecretByRefOrLabel", func() {
 	BeforeEach(func() {
 		ctx = context.TODO()
 		ref = &corev1.ObjectReference{
-			Namespace: testNamespace,
+			Namespace: "default",
 			Name:      "secret-name",
 		}
-		clt = fake.NewClientBuilder().WithScheme(testK8sClient.Scheme()).Build()
+		clt = fake.NewClientBuilder().WithScheme(scheme).Build()
 		ctx = pkgClient.WithClient(context.Background(), clt)
 	})
 
@@ -79,7 +79,7 @@ var _ = Describe("Test.GetSecretByRefOrLabel", func() {
 		When("ref namespace is empty", func() {
 			BeforeEach(func() {
 				ref.Namespace = ""
-				ctx = pkgnamespace.WithNamespace(ctx, testNamespace)
+				ctx = pkgnamespace.WithNamespace(ctx, "default")
 			})
 			It("should return secret", func() {
 				Expect(err).Should(BeNil())

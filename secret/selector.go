@@ -61,6 +61,9 @@ type SelectSecretOption struct {
 	// it is not public to all namespace only until it is bind to one project(namespace)
 	// the secret will be searched in this namespace
 	GlobalCredentialsNamespace string
+
+	// LabelSelector is label selector when select secret, default will be everything
+	LabelSelector labels.Selector
 }
 
 type SecretTypeList []corev1.SecretType
@@ -118,14 +121,25 @@ func SelectToolSecret(logger *zap.SugaredLogger, clientI interface{}, resourceUR
 			if ns != "" {
 				listOpts = append(listOpts, ctrlclient.InNamespace(ns))
 			}
+			if option.LabelSelector != nil {
+				listOpts = append(listOpts, ctrlclient.MatchingLabelsSelector{Selector: option.LabelSelector})
+			}
 
 			err := client.List(context.Background(), secretList, listOpts...)
 			return secretList, err
 		case kubernetes.Interface:
-			secretList, err := client.CoreV1().Secrets(ns).List(context.Background(), metav1.ListOptions{ResourceVersion: "0"})
+			listOpts := metav1.ListOptions{ResourceVersion: "0"}
+			if option.LabelSelector != nil {
+				listOpts.LabelSelector = option.LabelSelector.String()
+			}
+			secretList, err := client.CoreV1().Secrets(ns).List(context.Background(), listOpts)
 			return secretList, err
 		case k8sinformers.SharedInformerFactory:
-			list, err := client.Core().V1().Secrets().Lister().Secrets(ns).List(labels.Everything())
+			selector := labels.Everything()
+			if option.LabelSelector != nil {
+				selector = option.LabelSelector
+			}
+			list, err := client.Core().V1().Secrets().Lister().Secrets(ns).List(selector)
 			if err != nil {
 				return secretList, err
 			}
