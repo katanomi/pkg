@@ -17,9 +17,10 @@ limitations under the License.
 package env
 
 import (
-	. "github.com/onsi/gomega"
 	"os"
 	"testing"
+
+	. "github.com/onsi/gomega"
 )
 
 func TestClusterName(t *testing.T) {

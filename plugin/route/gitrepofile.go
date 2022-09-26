@@ -17,9 +17,10 @@ limitations under the License.
 package route
 
 import (
+	"net/http"
+
 	kerrors "github.com/katanomi/pkg/errors"
 	"github.com/katanomi/pkg/plugin/path"
-	"net/http"
 
 	restfulspec "github.com/emicklei/go-restful-openapi/v2"
 	"github.com/emicklei/go-restful/v3"

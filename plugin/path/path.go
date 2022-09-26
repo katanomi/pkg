@@ -18,9 +18,10 @@ package path
 
 import (
 	"fmt"
-	"github.com/emicklei/go-restful/v3"
 	"net/url"
 	"strings"
+
+	"github.com/emicklei/go-restful/v3"
 )
 
 // Escape escapes the string, so it can be safely placed inside a URL path segment

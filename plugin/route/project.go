@@ -18,8 +18,9 @@ package route
 
 import (
 	"context"
-	"github.com/katanomi/pkg/plugin/path"
 	"net/http"
+
+	"github.com/katanomi/pkg/plugin/path"
 
 	restfulspec "github.com/emicklei/go-restful-openapi/v2"
 	"github.com/emicklei/go-restful/v3"

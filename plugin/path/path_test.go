@@ -16,8 +16,11 @@ limitations under the License.
 
 package path
 
-import "testing"
-import . "github.com/onsi/gomega"
+import (
+	"testing"
+
+	. "github.com/onsi/gomega"
+)
 
 func TestPathEscape(t *testing.T) {
 	g := NewGomegaWithT(t)
