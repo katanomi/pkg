@@ -17,8 +17,10 @@ limitations under the License.
 package route
 
 import (
-	"github.com/katanomi/pkg/plugin/path"
+	"fmt"
 	"net/http"
+
+	"github.com/katanomi/pkg/plugin/path"
 
 	kerrors "github.com/katanomi/pkg/errors"
 
@@ -144,6 +146,7 @@ func (a *gitBranchGetter) GetGitBranch(request *restful.Request, response *restf
 	repo := path.Parameter(request, "repository")
 	project := path.Parameter(request, "project")
 	branch := path.Parameter(request, "branch")
+	fmt.Printf("debug-getgitbranch, params branch: %s", branch)
 	branchObj, err := a.impl.GetGitBranch(request.Request.Context(), metav1alpha1.GitRepo{Repository: repo, Project: project}, branch)
 	if err != nil {
 		kerrors.HandleError(request, response, err)

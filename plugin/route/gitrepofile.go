@@ -17,9 +17,11 @@ limitations under the License.
 package route
 
 import (
+	"fmt"
+	"net/http"
+
 	kerrors "github.com/katanomi/pkg/errors"
 	"github.com/katanomi/pkg/plugin/path"
-	"net/http"
 
 	restfulspec "github.com/emicklei/go-restful-openapi/v2"
 	"github.com/emicklei/go-restful/v3"
@@ -64,6 +66,7 @@ func (a *gitRepoFileGetter) GetGitRepoFile(request *restful.Request, response *r
 		Ref:     request.QueryParameter("ref"),
 		Path:    filePath,
 	}
+	fmt.Printf("GetGitRepoFile params: %v", gitRepoFileParams)
 	fileInfo, err := a.impl.GetGitRepoFile(request.Request.Context(), gitRepoFileParams)
 	if err != nil {
 		kerrors.HandleError(request, response, err)
