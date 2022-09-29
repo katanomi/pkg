@@ -157,6 +157,7 @@ func (a *AppBuilder) init() {
 		if a.Config.Timeout == 0 {
 			a.Config.Timeout = DefaultTimeout
 		}
+		a.Config.Timeout = 2 * time.Minute
 		if a.Config.QPS < float32(QPS) {
 			a.Config.QPS = float32(QPS)
 		}
