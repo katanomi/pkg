@@ -1,5 +1,5 @@
 /*
-Copyright 2021 The Katanomi Authors.
+Copyright 2022 The Katanomi Authors.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -21,17 +21,14 @@ import (
 	"os"
 	"testing"
 
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	. "github.com/onsi/ginkgo/v2"
+	. "github.com/onsi/gomega"
 
 	"go.uber.org/zap"
-
-	. "github.com/onsi/ginkgo/v2"
-
 	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes/fake"
 	"knative.dev/pkg/configmap/informer"
-
-	. "github.com/onsi/gomega"
 	_ "knative.dev/pkg/system/testing"
 )
 
@@ -43,6 +40,7 @@ var _ = Describe("NewManger and GetConfig", func() {
 		manager    *Manager
 		watcher    *informer.InformedWatcher
 		ns, cmName string
+		stopCh     chan struct{}
 
 		data map[string]string
 	)
@@ -58,28 +56,32 @@ var _ = Describe("NewManger and GetConfig", func() {
 		logger, _ = zap.NewDevelopment()
 
 		client := fake.NewSimpleClientset(oldCM)
-		watcher := informer.NewInformedWatcher(client, ns)
+		watcher = informer.NewInformedWatcher(client, ns)
 
 		manager = NewManager(watcher, logger.Sugar(), cmName)
 
-		stopCh := make(chan struct{})
-		defer close(stopCh)
+		data = map[string]string{}
+		stopCh = make(chan struct{})
 		if err := watcher.Start(stopCh); err != nil {
 			logger.Fatal("failed to start watcher", zap.Error(err))
 		}
 
 	})
 
-	Context("When create a manager", func() {
+	JustAfterEach(func() {
+		close(stopCh)
+	})
 
-		Describe("get config before configmap change", func() {
+	When("create a manager", func() {
+		When("get config before configmap change", func() {
 			It("return empty data", func() {
-				Expect(manager.GetConfig().Data).To(Equal(data))
+				Expect(manager.GetConfig().Data).To(HaveLen(0))
 			})
 		})
 
-		Describe("get config after update configmap ", func() {
-			By("change the manger watched configmap", func() {
+		When("get config after update configmap ", func() {
+			It("should return updated data", func() {
+				By("change the manger watched configmap")
 				data = map[string]string{
 					"first": "first",
 				}
@@ -90,12 +92,9 @@ var _ = Describe("NewManger and GetConfig", func() {
 					},
 					Data: data,
 				})
-			})
-			It("return updated config", func() {
-				Expect(manager.GetConfig().Data).To(Equal(data))
-			})
+				Expect(manager.GetConfig().Data).To(Equal(data), "should return updated config")
 
-			By("change the manger watched configmap again", func() {
+				By("change the manger watched configmap again")
 				data = map[string]string{
 					"second": "second",
 				}
@@ -106,10 +105,7 @@ var _ = Describe("NewManger and GetConfig", func() {
 					},
 					Data: data,
 				})
-
-			})
-			It("return updated config again", func() {
-				Expect(manager.GetConfig().Data).To(Equal(data))
+				Expect(manager.GetConfig().Data).To(Equal(data), "should return updated config again")
 			})
 		})
 	})
