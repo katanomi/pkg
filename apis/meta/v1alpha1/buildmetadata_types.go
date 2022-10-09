@@ -67,6 +67,10 @@ type BuildRunGitStatus struct {
 	// Target branch status of current build for Pull requests
 	// +optional
 	Target *BuildGitBranchStatus `json:"target,omitempty"`
+
+	// Version is the version generated for this git revision
+	// +optional
+	Version string `json:"version,omitempty"`
 }
 
 // BuildGitBranchStatus represent branch status of build run

@@ -20,6 +20,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"sync"
 
 	"github.com/katanomi/pkg/watcher"
 
@@ -45,6 +46,7 @@ type Config struct {
 type Manager struct {
 	Informer watcher.DefaultingWatcherWithOnChange
 	Logger   *zap.SugaredLogger
+	lock     sync.RWMutex
 	*Config
 }
 
@@ -71,6 +73,11 @@ func NewManager(informer watcher.DefaultingWatcherWithOnChange, logger *zap.Suga
 
 // GetConfig will return the config of manager
 func (manager *Manager) GetConfig() *Config {
+	if manager == nil {
+		return nil
+	}
+	manager.lock.Lock()
+	defer manager.lock.Unlock()
 	return manager.Config
 }
 
@@ -79,7 +86,12 @@ func (manager *Manager) applyConfig(cm *corev1.ConfigMap) {
 		manager.Logger.Errorw("configmap or configmap.data is null", "configmap", fmt.Sprintf("%s/%s", cm.Namespace, cm.Name))
 		return
 	}
-	manager.Data = cm.Data
+	manager.lock.Lock()
+	defer manager.lock.Unlock()
+	// whole replacement
+	manager.Config = &Config{
+		Data: cm.Data,
+	}
 }
 
 // Name return config name for configuration
