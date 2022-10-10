@@ -67,6 +67,9 @@ type ListOptions struct {
 	// Page desired to be returned
 	Page int `json:"page"`
 
+	// All if true, return all items
+	All bool `json:"all"`
+
 	// Custom search options
 	// +optional
 	Search map[string][]string `json:",inline"`

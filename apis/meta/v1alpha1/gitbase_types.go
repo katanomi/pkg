@@ -16,7 +16,11 @@ limitations under the License.
 
 package v1alpha1
 
-import metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+import (
+	"fmt"
+
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+)
 
 // GitUserBaseInfo user base info
 type GitUserBaseInfo struct {
@@ -31,6 +35,14 @@ type GitRepo struct {
 	Project string `json:"project,omitempty" yaml:"project,omitempty"`
 	// Repository is different between platforms. gitlab is number;github,gogs,gitea is repo name
 	Repository string `json:"repository,omitempty" yaml:"repository,omitempty"`
+}
+
+// ProjectID return the project id of the repo
+func (in *GitRepo) ProjectID() string {
+	if in == nil {
+		return ""
+	}
+	return fmt.Sprintf("%s/%s", in.Project, in.Repository)
 }
 
 // GitOperateLogBaseInfo a simple log for operate
