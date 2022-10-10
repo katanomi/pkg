@@ -14,22 +14,46 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package sharedmain_test
+package sharedmain
 
 import (
-	"github.com/katanomi/pkg/sharedmain"
+	"flag"
+	"time"
+
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 )
 
-var _ = Describe("Sharedmain", func() {
-	Context("ParseFlag should work as except", func() {
-		It("If flag is not provided,should return the default value", func() {
-			sharedmain.ParseFlag()
-			Expect(sharedmain.QPS).To(Equal(float64(sharedmain.DefaultQPS)))
-			Expect(sharedmain.Burst).To(Equal(sharedmain.DefaultBurst))
-			Expect(sharedmain.ConfigFile).To(Equal(""))
+var _ = BeforeSuite(func() {
+	ParseFlag()
+})
 
+var _ = Describe("ParseFlag", func() {
+
+	When("flag not provided", func() {
+		It("return default values", func() {
+			Expect(QPS).To(Equal(float64(DefaultQPS)))
+			Expect(Burst).To(Equal(DefaultBurst))
+			Expect(Timeout).To(Equal(DefaultTimeout))
+			Expect(ConfigFile).To(Equal(""))
 		})
 	})
+
+	When("flag proviede", func() {
+		BeforeEach(func() {
+			flag.CommandLine.Parse([]string{
+				"--kube-api-timeout", "20s",
+				"--kube-api-qps", "80",
+				"--kube-api-burst", "90",
+				"--config", "config",
+			})
+		})
+		It("return configured values", func() {
+			Expect(QPS).To(Equal(float64(80)))
+			Expect(Burst).To(Equal(90))
+			Expect(Timeout).To(Equal(20 * time.Second))
+			Expect(ConfigFile).To(Equal("config"))
+		})
+	})
+
 })
