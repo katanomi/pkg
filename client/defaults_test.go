@@ -14,30 +14,30 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package check
+package client
 
 import (
-	"context"
+	"os"
 	"testing"
+	"time"
 
 	. "github.com/onsi/gomega"
-	"sigs.k8s.io/controller-runtime/pkg/client/fake"
 )
 
-func TestInstalledTekton(t *testing.T) {
-	testCases := []struct {
-		clt  *fake.ClientBuilder
-		want bool
-	}{
-		{
-			clt:  fake.NewClientBuilder(),
-			want: false,
-		},
-	}
+func TestNewDefaultClientWithTimeOut(t *testing.T) {
 	g := NewGomegaWithT(t)
-	for _, tt := range testCases {
-		client := tt.clt.Build()
-		result := InstalledTekton(context.TODO(), client)
-		g.Expect(result).To(Equal(tt.want))
-	}
+
+	os.Setenv("HTTP_CLIENT_TIMEOUT", "20")
+	client := NewHTTPClient()
+
+	g.Expect(client.Timeout).To(Equal(20 * time.Second))
+}
+
+func TestNewDefaultClientWithDefaultTimeOut(t *testing.T) {
+	g := NewGomegaWithT(t)
+
+	os.Unsetenv("HTTP_CLIENT_TIMEOUT")
+	client := NewHTTPClient()
+
+	g.Expect(client.Timeout).To(Equal(30 * time.Second))
 }
