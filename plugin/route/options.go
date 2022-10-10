@@ -35,6 +35,7 @@ const (
 	SortQueryKey         = "sortBy"
 	SinceQueryKey        = "since"
 	UntilQueryKey        = "until"
+	FetchAllQueryKey     = "all"
 )
 
 // GetListOptionsFromRequest returns ListOptions based on a request
@@ -49,8 +50,12 @@ func GetListOptionsFromRequest(req *restful.Request) (opts metav1alpha1.ListOpti
 	}
 
 	opts.Search = req.Request.URL.Query()
+	if _, exist := opts.Search[FetchAllQueryKey]; exist {
+		opts.All = true
+	}
 	delete(opts.Search, PageQueryKey)
 	delete(opts.Search, ItemsPerPageQueryKey)
+	delete(opts.Search, FetchAllQueryKey)
 
 	subResourcesHeader := req.HeaderParameter(pclient.PluginSubresourcesHeader)
 	if strings.TrimSpace(subResourcesHeader) != "" {
