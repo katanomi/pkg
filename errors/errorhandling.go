@@ -77,8 +77,10 @@ func AsStatusError(response *resty.Response, grs ...schema.GroupResource) error 
 func HandleError(req *restful.Request, resp *restful.Response, err error) {
 	err = AsAPIError(err)
 	log.Printf("error massage AsAPIError: %s", err.Error())
+	log.Printf("error massage AsAPIError: %v", err)
 	status := AsStatusCode(err)
 
+	log.Printf("error massage status: %v", status)
 	if statusErr, ok := err.(errors.APIStatus); ok {
 		resp.WriteHeaderAndEntity(status, statusErr.Status())
 	} else {
