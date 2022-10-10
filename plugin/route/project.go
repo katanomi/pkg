@@ -18,8 +18,10 @@ package route
 
 import (
 	"context"
-	"github.com/katanomi/pkg/plugin/path"
+	"log"
 	"net/http"
+
+	"github.com/katanomi/pkg/plugin/path"
 
 	restfulspec "github.com/emicklei/go-restful-openapi/v2"
 	"github.com/emicklei/go-restful/v3"
@@ -98,6 +100,7 @@ func (p *projectCreate) CreateProject(request *restful.Request, response *restfu
 
 	resp, err := p.impl.CreateProject(request.Request.Context(), project)
 	if err != nil {
+		log.Printf("plugin err massage: %s", err.Error())
 		kerrors.HandleError(request, response, err)
 		return
 	}

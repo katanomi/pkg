@@ -18,6 +18,7 @@ package errors
 
 import (
 	goerrors "errors"
+	"log"
 	"net/http"
 
 	"github.com/emicklei/go-restful/v3"
@@ -75,6 +76,7 @@ func AsStatusError(response *resty.Response, grs ...schema.GroupResource) error 
 // HandleError handles error in requests
 func HandleError(req *restful.Request, resp *restful.Response, err error) {
 	err = AsAPIError(err)
+	log.Printf("error massage AsAPIError: %s", err.Error())
 	status := AsStatusCode(err)
 
 	if statusErr, ok := err.(errors.APIStatus); ok {
