@@ -76,6 +76,7 @@ var (
 	DefaultTimeout = kclient.DefaultTimeout
 	DefaultQPS     = kclient.DefaultQPS
 	DefaultBurst   = kclient.DefaultBurst
+	Timeout        time.Duration
 	Burst          int
 	QPS            float64
 	ConfigFile     string
@@ -129,6 +130,9 @@ type AppBuilder struct {
 
 // ParseFlag parse flag needed for App
 func ParseFlag() {
+	flag.DurationVar(&Timeout, "kube-api-timeout", DefaultTimeout,
+		"The maximum length of time to wait before giving up on a server request."+
+			"A value of zero means no timeout. DefaultTimeOut: 10s")
 	flag.Float64Var(&QPS, "kube-api-qps", float64(DefaultQPS),
 		"qps indicates the maximum QPS to the master from this client."+
 			"If it's zero, the created RESTClient will use DefaultQPS: 50")
@@ -154,9 +158,8 @@ func (a *AppBuilder) init() {
 		ParseFlag()
 		a.Context = ctrl.SetupSignalHandler()
 		a.Context, a.Config = GetConfigOrDie(a.Context)
-		if a.Config.Timeout == 0 {
-			a.Config.Timeout = DefaultTimeout
-		}
+		a.Config.Timeout = Timeout
+
 		if a.Config.QPS < float32(QPS) {
 			a.Config.QPS = float32(QPS)
 		}
