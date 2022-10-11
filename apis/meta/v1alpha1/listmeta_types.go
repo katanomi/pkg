@@ -17,6 +17,8 @@ limitations under the License.
 package v1alpha1
 
 import (
+	"regexp"
+
 	"github.com/katanomi/pkg/common"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -85,7 +87,7 @@ type ListOptions struct {
 }
 
 // GetSearchFirstElement get first element by key that in search map
-func (opt ListOptions) GetSearchFirstElement(key string) (value string) {
+func (opt *ListOptions) GetSearchFirstElement(key string) (value string) {
 	if valueList, ok := opt.Search[key]; ok {
 		if len(valueList) != 0 {
 			value = valueList[0]
@@ -103,6 +105,33 @@ func (opt *ListOptions) DefaultPager() {
 	if opt.Page < 1 {
 		opt.Page = common.DefaultPage
 	}
+}
+
+// MatchSearchValue match search value
+func (opt *ListOptions) MatchSearchValue(name string) bool {
+	values, ok := opt.Search[SearchValueKey]
+	if !ok || len(values) == 0 {
+		return true
+	}
+	for _, value := range values {
+		if match, _ := regexp.MatchString(value, name); match {
+			return true
+		}
+	}
+	return false
+}
+
+// MatchSubResource match subresource
+func (opt *ListOptions) MatchSubResource(name string) bool {
+	if len(opt.SubResources) == 0 {
+		return true
+	}
+	for _, sub := range opt.SubResources {
+		if sub == name {
+			return true
+		}
+	}
+	return false
 }
 
 // SortOptions options for sort
@@ -161,4 +190,19 @@ type UserOptions struct {
 
 	// User indentity
 	UserId string `json:"userId"`
+}
+
+// GetSearchValue get search value from option
+// use `searchValue` instead of `name`
+func GetSearchValue(option ListOptions) string {
+	if value := option.GetSearchFirstElement(SearchValueKey); value != "" {
+		return value
+	}
+
+	// Deprecated
+	if value := option.GetSearchFirstElement("name"); value != "" {
+		return value
+	}
+
+	return ""
 }
