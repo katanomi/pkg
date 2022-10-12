@@ -17,9 +17,10 @@ limitations under the License.
 package route
 
 import (
-	"github.com/katanomi/pkg/plugin/path"
 	"net/http"
 	"time"
+
+	"github.com/katanomi/pkg/plugin/path"
 
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 

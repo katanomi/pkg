@@ -17,9 +17,10 @@ limitations under the License.
 package route
 
 import (
-	"github.com/katanomi/pkg/plugin/path"
 	"net/http"
 	"time"
+
+	"github.com/katanomi/pkg/plugin/path"
 
 	restfulspec "github.com/emicklei/go-restful-openapi/v2"
 	"github.com/emicklei/go-restful/v3"
