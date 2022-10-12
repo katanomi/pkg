@@ -25,34 +25,12 @@ import (
 )
 
 func (p *ArtifactParameterSpec) Validate(ctx context.Context, path *field.Path) (errs field.ErrorList) {
-	types := []string{
-		string(OCIHelmChartArtifactParameterType),
-		string(OCIContainerImageArtifactParameterType),
-	}
-
-	t := path.Child("type")
-	if p.Type == "" {
-		errs = append(errs, field.Required(t, validation.EmptyError()))
-	} else {
-		hasType := false
-		for _, t := range types {
-			if string(p.Type) == t {
-				hasType = true
-				break
-			}
-		}
-		if !hasType {
-			errs = append(errs, field.NotSupported(path.Child("type"), p.Type, types))
-		}
-	}
-
 	uri := path.Child("URI")
 	if p.URI == "" {
 		errs = append(errs, field.Required(uri, validation.EmptyError()))
 	} else {
 		errs = append(errs, validateURI(p.URI, uri)...)
 	}
-
 	return
 }
 
