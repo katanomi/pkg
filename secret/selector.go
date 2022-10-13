@@ -19,6 +19,7 @@ package secret
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	neturl "net/url"
 	"sort"
@@ -43,6 +44,10 @@ import (
 
 // SelectSecretOption encapsulate the configuration related to selecting secrets
 type SelectSecretOption struct {
+
+	// Scene indicates resource url format in different scenario
+	Scene string
+
 	// PerferredSecret will return the secret if it is be selected
 	PerferredSecret types.NamespacedName
 
@@ -261,12 +266,23 @@ func selectToolSecretFrom(logger *zap.SugaredLogger, secretList []corev1.Secret,
 
 		logger.Debugw("secret scopes", "scopes", scopes)
 		scopeItems := strings.Split(scopes, ",")
+		pathFmtJson := sec.Annotations[metav1alpha1.IntegrationSecretResourcePathFmt]
+		subPathFmtJson := sec.Annotations[metav1alpha1.IntegrationSecretSubResourcePathFmt]
 		for _, scope := range scopeItems {
 			if scope == "" {
 				continue
 			}
-			p := strings.ToLower(resourceURL.Path)
-			if scope == "/" || strings.HasPrefix(p, strings.ToLower(scope)) {
+
+			acceptableResourceUrl := joinScopeToResourceURL(scope, pathFmtJson, subPathFmtJson, option.Scene)
+
+			inputResourceURL := strings.ToLower(resourceURL.Path)
+			if strings.HasSuffix(inputResourceURL, ".git") {
+				inputResourceURL = strings.TrimSuffix(inputResourceURL, ".git")
+			}
+			if !strings.HasSuffix(inputResourceURL, "/") {
+				inputResourceURL = inputResourceURL + "/"
+			}
+			if acceptableResourceUrl == "/" || strings.HasPrefix(inputResourceURL, strings.ToLower(acceptableResourceUrl)) {
 				usableSecrets = append(usableSecrets, sec)
 				break
 			}
@@ -274,6 +290,59 @@ func selectToolSecretFrom(logger *zap.SugaredLogger, secretList []corev1.Secret,
 	}
 
 	return usableSecrets
+}
+
+func joinScopeToResourceURL(scope string, pathFmtJson string, subPathFmtJson string, scene string) string {
+
+	var parsed = func(fmtJson string) string {
+		if fmtJson == "" {
+			return ""
+		}
+		pathFmtMap := map[string]string{}
+		err := json.Unmarshal([]byte(fmtJson), &pathFmtMap)
+
+		if err != nil {
+			fmt.Printf("resource path format error: %s, json: %s", err.Error(), pathFmtJson)
+			return ""
+		} else {
+			return pathFmtMap[scene]
+		}
+	}
+
+	pathFmt := parsed(pathFmtJson)
+	if pathFmt == "" {
+		pathFmt = "/%s/"
+	}
+	if !strings.HasSuffix(pathFmt, "/") {
+		pathFmt = pathFmt + "/"
+	}
+	subPathFmt := parsed(subPathFmtJson)
+	if subPathFmt == "" {
+		subPathFmt = "/%s/%s/"
+	}
+	if !strings.HasSuffix(subPathFmt, "/") {
+		subPathFmt = subPathFmt + "/"
+	}
+
+	_segments := strings.Split(scope, "/")
+	var segments = []string{}
+	for _, item := range _segments {
+		if item == "" {
+			continue
+		}
+		segments = append(segments, item)
+	}
+	if len(segments) == 0 {
+		return "/"
+	}
+	if len(segments) == 1 {
+		return fmt.Sprintf(pathFmt, segments[0])
+	}
+
+	resource := segments[0]
+	subRes := strings.Join(segments[1:], "/")
+
+	return fmt.Sprintf(subPathFmt, resource, subRes)
 }
 
 func findPreferredSecret(secrets []corev1.Secret, preferredNs, preferred string) (find bool, index int) {

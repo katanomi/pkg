@@ -24,4 +24,6 @@ const (
 	ResourcePathSceneAPI ResourcePathScene = "api"
 	// ResourcePathSceneWebConsole resource path scene for web page
 	ResourcePathSceneWebConsole ResourcePathScene = "web-console"
+	// ResourcePathSceneHttpClone resource path scene for http clone url for git
+	ResourcePathSceneHttpClone ResourcePathScene = "http-clone"
 )
