@@ -76,6 +76,8 @@ func TestSelect(t *testing.T) {
 				"", []string{"/devops-1/"}, []string{}, false),
 			buildSecret("secret-2", "project-2", "https://gitlab.com/",
 				"", []string{"/devops-2/"}, []string{}, false),
+			buildSecret("secret-3", "project-2", "https://demo.git.com/",
+				"", []string{"/"}, []string{}, false),
 		}
 		actual, err := selectToolSecret(log, secrets, []corev1.Secret{}, "https://gitlab.com/devops-2/demo", SelectSecretOption{
 			PerferredSecret:            types.NamespacedName{},
@@ -84,6 +86,11 @@ func TestSelect(t *testing.T) {
 			GlobalCredentialsNamespace: "global-credentials",
 		})
 		expect(err, actual, "project-2", "secret-2")
+
+		actual, err = selectToolSecret(log, secrets, []corev1.Secret{}, "https://demo.git.com/devops-2/demo", SelectSecretOption{
+			Namespace: "project-2",
+		})
+		expect(err, actual, "project-2", "secret-3")
 	})
 
 	t.Run("has namespaced credentials and correct scopes and perferred secret", func(t *testing.T) {
@@ -319,6 +326,57 @@ func TestSelect(t *testing.T) {
 		}
 		if secret.Name != "secret-basic-1" {
 			t.Errorf("expect seclect secret secret-basic-1, but %s", secret.Name)
+		}
+	})
+
+	t.Run("when subresource has some prefix or suffix, it should matched accored resourcePathFmt", func(t *testing.T) {
+		secret1 := buildSecret("secret-basic-1", "default", "https://1.2.3.4/",
+			corev1.SecretTypeBasicAuth, []string{"/devops0/", "/devops1/demo1"}, []string{""}, false)
+		secret1.Annotations[metav1alpha1.IntegrationSecretResourcePathFmt] = `{
+			"http-clone": "/scm/%s/"
+		}`
+		secret1.Annotations[metav1alpha1.IntegrationSecretSubResourcePathFmt] = `{
+			"http-clone": "/scm/%s/repository/%s"
+		}`
+		secret2 := buildSecret("secret-basic-2", "default", "https://1.2.3.4/",
+			corev1.SecretTypeBasicAuth, []string{"/devops0/"}, []string{""}, false)
+
+		client := ctrlclientfake.NewClientBuilder().WithObjects(&secret1, &secret2).Build()
+
+		option := SelectSecretOption{}
+		secret, err := SelectToolSecret(log, client, "https://1.2.3.4/devops0/test.git", option)
+		if err != nil {
+			t.Errorf("should be nil")
+		}
+		if secret.Name != "secret-basic-2" {
+			t.Errorf("expect seclect secret secret-basic-2, but %s", secret.Name)
+		}
+
+		option = SelectSecretOption{Scene: "http-clone"}
+		secret, err = SelectToolSecret(log, client, "https://1.2.3.4/scm/devops0/repository/test.git", option)
+		if err != nil {
+			t.Errorf("should be nil")
+		}
+		if secret.Name != "secret-basic-1" {
+			t.Errorf("expect seclect secret secret-basic-2, but %s", secret.Name)
+		}
+
+		option = SelectSecretOption{Scene: "http-clone"}
+		secret, err = SelectToolSecret(log, client, "https://1.2.3.4/scm/devops1/repository/demo1.git", option)
+		if err != nil {
+			t.Errorf("should be nil")
+		}
+		if secret.Name != "secret-basic-1" {
+			t.Errorf("expect seclect secret secret-basic-2, but %s", secret.Name)
+		}
+
+		option = SelectSecretOption{Scene: "http-clone"}
+		secret, err = SelectToolSecret(log, client, "https://1.2.3.4/scm/devops1/repository/demo1-not", option)
+		if err != nil {
+			t.Errorf("should be nil")
+		}
+		if secret != nil {
+			t.Errorf("should not select any secret")
 		}
 	})
 }
