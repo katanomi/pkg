@@ -192,7 +192,6 @@ func selectToolSecret(logger *zap.SugaredLogger, secretList []corev1.Secret, glo
 	usableSecrets := []corev1.Secret{}
 	usableSecrets = append(usableSecrets, selectToolSecretFrom(logger, secretList, false, resourceU, option)...)
 	usableSecrets = append(usableSecrets, selectToolSecretFrom(logger, globalSecretList, true, resourceU, option)...)
-
 	if len(usableSecrets) == 0 {
 		return nil, nil
 	}
@@ -214,38 +213,43 @@ func selectToolSecretFrom(logger *zap.SugaredLogger, secretList []corev1.Secret,
 
 	for _, _secret := range secretList {
 		var sec = _secret
+		logger := logger.With("secret", sec.Namespace+"/"+sec.Name)
 
 		if len(option.SecretTypes) != 0 && !option.SecretTypes.Contains(sec.Type) {
+			logger.Debugw("secret type mismatch")
 			continue
 		}
 		if len(option.ExcludedSecretTypes) != 0 && option.ExcludedSecretTypes.Contains(sec.Type) {
+			logger.Debugw("secret type is excluded")
 			continue
 		}
 
 		address := sec.Annotations[metav1alpha1.IntegrationAddressAnnotation]
 		if address == "" {
+			logger.Debugw("secret address annotation is empty")
 			continue
 		}
 
 		toolAddress, err := neturl.Parse(address)
 		if err != nil {
-			logger.Infow("integration address is invalid", "address", address, "sec", sec.Namespace+"/"+sec.Name)
+			logger.Infow("integration address is invalid", "address", address)
 			continue
 		}
 
 		if resourceURL.Host != toolAddress.Host {
-			logger.Debugw("skip select secret, host not same", "secret", sec.Name, "resourceHost", resourceURL.Host, "annotationAddressHost", toolAddress.Host)
+			logger.Debugw("skip select secret, host not same", "resourceHost", resourceURL.Host, "annotationAddressHost", toolAddress.Host)
 			continue
 		}
 
 		scopes := sec.Annotations[metav1alpha1.IntegrationResourceScope]
 		if scopes == "" {
-			logger.Debugw("skip select secret, scopes is empty", "secret", sec.Name)
+			logger.Debugw("skip select secret, scopes is empty")
 			continue
 		}
 
 		if isGlobal {
 			if sec.Annotations[metav1alpha1.IntegrationSecretApplyNamespaces] == "" {
+				logger.Debugw("secret apply namespaces is empty")
 				continue
 			}
 			applyNamespaces := strings.Split(sec.Annotations[metav1alpha1.IntegrationSecretApplyNamespaces], ",")
@@ -255,7 +259,7 @@ func selectToolSecretFrom(logger *zap.SugaredLogger, secretList []corev1.Secret,
 			}
 		}
 
-		logger.Debugw("secret scopes", "scopes", scopes, "secret", sec.Namespace+"/"+sec.Name)
+		logger.Debugw("secret scopes", "scopes", scopes)
 		scopeItems := strings.Split(scopes, ",")
 		for _, scope := range scopeItems {
 			if scope == "" {
