@@ -17,8 +17,9 @@ limitations under the License.
 package validation
 
 import (
-	duckv1 "knative.dev/pkg/apis/duck/v1"
 	"testing"
+
+	duckv1 "knative.dev/pkg/apis/duck/v1"
 
 	. "github.com/onsi/gomega"
 	"k8s.io/apimachinery/pkg/util/validation/field"
