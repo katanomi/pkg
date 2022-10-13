@@ -1,0 +1,4 @@
+url: "https://github.com/katanomi/spec"
+SecretRef:
+  name: "name"
+  namespace: "default"

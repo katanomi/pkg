@@ -51,13 +51,16 @@ type ResourceURL struct {
 
 	// SecretRef stores a reference to a secret object
 	// that contain authentication data for the described resource
-	SecretRef *corev1.ObjectReference `json:"secretRef"`
+	// If not specified, it will automatically match based on the url.
+	// If not matched, it will cause the failed state.
+	// +optional
+	SecretRef *corev1.ObjectReference `json:"secretRef,omitempty"`
 }
 
 // Validate basic validation for ResourceURL
 func (r *ResourceURL) Validate(path *field.Path) field.ErrorList {
 	errs := field.ErrorList{}
 	errs = append(errs, kvalidation.ValidateURL(r.URL, path.Child("url"))...)
-	errs = append(errs, kvalidation.ValidateObjectReference(r.SecretRef, false, false, path.Child("secretRef"))...)
+	errs = append(errs, kvalidation.ValidateObjectReference(r.SecretRef, true, false, path.Child("secretRef"))...)
 	return errs
 }
