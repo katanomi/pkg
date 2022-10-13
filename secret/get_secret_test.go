@@ -86,6 +86,16 @@ var _ = Describe("Test.GetSecretByRefOrLabel", func() {
 				Expect(secret.GetName()).Should(Equal("secret-name"))
 			})
 		})
+		When("ref and ctx namespace both empty", func() {
+			BeforeEach(func() {
+				ref.Namespace = ""
+				ctx = pkgnamespace.WithNamespace(ctx, "")
+			})
+			It("should return error", func() {
+				Expect(err).ShouldNot(BeNil())
+				Expect(err).Should(Equal(namespaceIsEmpty))
+			})
+		})
 	})
 
 	Context("get secret by labels", func() {

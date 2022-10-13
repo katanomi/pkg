@@ -18,6 +18,7 @@ package secret
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	pkgnamespace "github.com/katanomi/pkg/namespace"
@@ -31,6 +32,10 @@ import (
 	kerrors "github.com/katanomi/pkg/errors"
 )
 
+var (
+	namespaceIsEmpty = errors.New("namespace is empty")
+)
+
 // GetSecretByRefOrLabel retrieves an secret
 // If the ref.namespace is empty, it will use the namespace from the ctx.
 // If the resource does not exist, it will try to match according to the label.
@@ -40,11 +45,18 @@ func GetSecretByRefOrLabel(ctx context.Context, clt client.Client, ref *corev1.O
 	}
 
 	log := logging.FromContext(ctx)
-	obj = &corev1.Secret{}
-	objKey := client.ObjectKey{Namespace: ref.Namespace, Name: ref.Name}
-	if objKey.Namespace == "" {
-		objKey.Namespace = pkgnamespace.NamespaceValue(ctx)
+	ns := pkgnamespace.NamespaceValue(ctx)
+	if ns == "" {
+		ns = ref.Namespace
 	}
+	if ns == "" {
+		return nil, namespaceIsEmpty
+	}
+	objKey := metav1alpha1.GetNamespacedNameFromRef(ref)
+	if objKey.Namespace == "" {
+		objKey.Namespace = ns
+	}
+	obj = &corev1.Secret{}
 	if err = clt.Get(ctx, objKey, obj); err == nil {
 		return obj, nil
 	} else if !apierrors.IsNotFound(err) {
@@ -71,7 +83,7 @@ func GetSecretByRefOrLabel(ctx context.Context, clt client.Client, ref *corev1.O
 	}
 
 	secretList := &corev1.SecretList{}
-	if err = clt.List(ctx, secretList, client.InNamespace(objKey.Namespace), client.MatchingLabelsSelector{Selector: selector}); err != nil {
+	if err = clt.List(ctx, secretList, client.InNamespace(ns), client.MatchingLabelsSelector{Selector: selector}); err != nil {
 		return nil, err
 	}
 
