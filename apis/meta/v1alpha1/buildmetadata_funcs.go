@@ -121,6 +121,8 @@ func (b *BuildRunGitStatus) GetValWithKey(ctx context.Context, path *field.Path)
 	//
 	stringReplacements[path.Child("url").String()] = b.URL
 	//
+	stringReplacements[path.Child("version").String()] = b.Version
+	//
 	stringReplacements = ksubstitute.MergeMap(stringReplacements, b.Revision.GetValWithKey(ctx, path.Child("revision")))
 	//
 	stringReplacements = ksubstitute.MergeMap(stringReplacements, b.LastCommit.GetValWithKey(ctx, path.Child("lastCommit")))
