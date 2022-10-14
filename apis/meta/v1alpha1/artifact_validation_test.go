@@ -34,26 +34,14 @@ func TestArtifactParameterSpec_Validate(t *testing.T) {
 	}{
 		{
 			init: func(a *ArtifactParameterSpec) {
-				a.Type = ""
 			},
 			evaluate: func(g *GomegaWithT, errs field.ErrorList) {
 				g.Expect(errs[0].Error()).To(ContainSubstring("Required"))
-				g.Expect(errs[1].Error()).To(ContainSubstring("Required"))
 			},
 		},
 		{
 			init: func(a *ArtifactParameterSpec) {
 				a.URI = "127.0.0.1"
-				a.Type = "abc"
-			},
-			evaluate: func(g *GomegaWithT, errs field.ErrorList) {
-				g.Expect(errs[0].Error()).To(ContainSubstring("Unsupported"))
-			},
-		},
-		{
-			init: func(a *ArtifactParameterSpec) {
-				a.URI = "127.0.0.1"
-				a.Type = OCIHelmChartArtifactParameterType
 			},
 			evaluate: func(g *GomegaWithT, errs field.ErrorList) {
 				g.Expect(errs).To(BeEmpty())
@@ -62,7 +50,16 @@ func TestArtifactParameterSpec_Validate(t *testing.T) {
 		{
 			init: func(a *ArtifactParameterSpec) {
 				a.URI = "127.0.0.1"
-				a.Type = OCIContainerImageArtifactParameterType
+				a.IntegrationClassName = "harbor"
+			},
+			evaluate: func(g *GomegaWithT, errs field.ErrorList) {
+				g.Expect(errs).To(BeEmpty())
+			},
+		},
+		{
+			init: func(a *ArtifactParameterSpec) {
+				a.URI = "127.0.0.1/repo/dest"
+				a.IntegrationClassName = ""
 			},
 			evaluate: func(g *GomegaWithT, errs field.ErrorList) {
 				g.Expect(errs).To(BeEmpty())
@@ -71,7 +68,7 @@ func TestArtifactParameterSpec_Validate(t *testing.T) {
 		{
 			init: func(a *ArtifactParameterSpec) {
 				a.URI = " 127.0.0.1"
-				a.Type = OCIContainerImageArtifactParameterType
+				a.IntegrationClassName = "docker-registry"
 			},
 			evaluate: func(g *GomegaWithT, errs field.ErrorList) {
 				g.Expect(errs[0].Error()).To(ContainSubstring("invalid"))

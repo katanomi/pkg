@@ -18,8 +18,9 @@ package client
 
 import (
 	"context"
-	"github.com/katanomi/pkg/plugin/path"
 	"time"
+
+	"github.com/katanomi/pkg/plugin/path"
 
 	metav1alpha1 "github.com/katanomi/pkg/apis/meta/v1alpha1"
 	corev1 "k8s.io/api/core/v1"

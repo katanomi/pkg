@@ -17,8 +17,9 @@ limitations under the License.
 package route
 
 import (
-	"github.com/katanomi/pkg/plugin/path"
 	"net/http"
+
+	"github.com/katanomi/pkg/plugin/path"
 
 	kerrors "github.com/katanomi/pkg/errors"
 
