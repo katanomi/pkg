@@ -56,6 +56,9 @@ const (
 
 	// SettingsTypeLabelKey label key to select the settings secret
 	SettingsTypeLabelKey = "settings.katanomi.dev/settingsType"
+
+	// SecretSyncGeneratorLabelKey The name of the secret is the integration credentials that are automatically synced to the namespace
+	SecretSyncGeneratorLabelKey = "integrations.katanomi.dev/integration.secretsync"
 )
 
 // Common Annotations
