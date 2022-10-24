@@ -51,6 +51,11 @@ const (
 	// IntegrationSecretApplyNamespaces annotation key to store apply namespace for current secret
 	IntegrationSecretApplyNamespaces = "integrations.katanomi.dev/secret.applyNamespaces"
 
+	// IntegrationSecretResourcePathFmt annotation indicates resource path format for current secret
+	IntegrationSecretResourcePathFmt = "integrations.katanomi.dev/secret.resourcePathFmt"
+	// IntegrationSecretSubResourcePathFmt annotation indicates sub resource path format for current secret
+	IntegrationSecretSubResourcePathFmt = "integrations.katanomi.dev/secret.subResourcePathFmt"
+
 	// SecretSyncMutationLabelKey label key to select the suitable secret
 	SecretSyncMutationLabelKey = "integrations.katanomi.dev/integration.mutation"
 
@@ -103,7 +108,22 @@ const (
 	MethodsAttributeKey                = "methods"
 	AllowEmptySecretAttributeKey       = "allowEmptySecret"
 	DefaultProjectTypeAttributeKey     = "defaultProjectSubType"
-	ResourcePathFormat                 = "resourcePathFormat"
+	// ResourcePathFormat indicates project path format,
+	// eg. maven project access url is /repository/maven
+	// the value should be a json string like
+	// {
+	// 	"web-console": "/repository/%s",
+	// 	"api": "/api/repository/%s",
+	// }
+	ResourcePathFormatAttributeKey = "resourcePathFormat"
+	// SubResourcePathFormat indicates sub resource path format,
+	// eg. bitbucket project access url is /scm/devops/demo
+	// the value should be a json string like
+	// {
+	// 	"http-clone": "/scm/%s/%s",
+	// 	"web-console": "/projects/%s/repo/%s",
+	// }
+	SubResourcePathFormatAttributeKey = "subResourcePathFormat"
 	// GitPRRevisionPrefixes allows git related integrations
 	// define custom PR revision prefixes
 	GitPRRevisionPrefixes = "gitPRRevisionPrefixes"

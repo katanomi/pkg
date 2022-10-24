@@ -66,6 +66,8 @@ type AdditionalWebhookRegister interface {
 type ResourcePathFormatter interface {
 	// GetResourcePathFmt resource path format
 	GetResourcePathFmt() map[metav1alpha1.ResourcePathScene]string
+	// GetSubResourcePathFmt resource path format
+	GetSubResourcePathFmt() map[metav1alpha1.ResourcePathScene]string
 }
 
 // AuthChecker implements an authorization check method for plugins
