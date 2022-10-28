@@ -20,6 +20,8 @@ import (
 	"context"
 	"testing"
 
+	"k8s.io/apimachinery/pkg/util/validation/field"
+
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	"github.com/spf13/pflag"
@@ -101,7 +103,7 @@ var _ = Describe("Test.RegisterSetup", func() {
 	})
 })
 
-func TestCommandOption_Setup(t *testing.T) {
+func TestCommandOption(t *testing.T) {
 	g := NewGomegaWithT(t)
 	ctx := context.Background()
 	obj := struct {
@@ -124,7 +126,29 @@ func TestCommandOption_Setup(t *testing.T) {
 	}))
 }
 
-func TestCommandOption_AddFlags(t *testing.T) {
+func TestDependencyReposOption(t *testing.T) {
+	g := NewGomegaWithT(t)
+	obj := DependencyReposOption{}
+	root := field.NewPath("root")
+	err := obj.Setup(context.Background(), nil, []string{
+		"--dependencies-repositories",
+		"repo1",
+		"repo2",
+		"htt:// abc",
+	})
+
+	g.Expect(err).Should(Succeed())
+	g.Expect(obj.DependencyRepos).To(Equal([]string{
+		"repo1",
+		"repo2",
+		"htt:// abc",
+	}))
+	validateErr := obj.Validate(root)
+	g.Expect(validateErr).To(HaveLen(1))
+	g.Expect(validateErr.ToAggregate().Error()).To(ContainSubstring("dependency repository is not a valid url"))
+}
+
+func TestOption_AddFlags(t *testing.T) {
 	g := NewGomegaWithT(t)
 	obj := struct {
 		CommandOption
@@ -134,6 +158,7 @@ func TestCommandOption_AddFlags(t *testing.T) {
 		QualityGateOption
 		ReportPathOption
 		ToolImageOption
+		ContextOption
 	}{}
 	flagSet := pflag.NewFlagSet("test", pflag.ContinueOnError)
 	RegisterFlags(&obj, flagSet)
@@ -148,6 +173,7 @@ func TestCommandOption_AddFlags(t *testing.T) {
 		"--enable-quality-gate",
 		"--report-path", "report-path-value",
 		"--tool-image", "tool-image-value",
+		"--context", "context-value",
 	})
 	g.Expect(err).Should(Succeed())
 	g.Expect(obj.Command).To(Equal("command-value"))
@@ -159,4 +185,5 @@ func TestCommandOption_AddFlags(t *testing.T) {
 	g.Expect(obj.QualityGate).To(Equal(true))
 	g.Expect(obj.ReportPath).To(Equal("report-path-value"))
 	g.Expect(obj.ToolImage).To(Equal("tool-image-value"))
+	g.Expect(obj.Context).To(Equal("context-value"))
 }

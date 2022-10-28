@@ -18,6 +18,7 @@ package options
 
 import (
 	"github.com/spf13/pflag"
+	"k8s.io/apimachinery/pkg/util/validation/field"
 )
 
 // ToolImageOption describe tool image option
@@ -27,4 +28,12 @@ type ToolImageOption struct {
 
 func (p *ToolImageOption) AddFlags(flags *pflag.FlagSet) {
 	flags.StringVar(&p.ToolImage, "tool-image", "", `image to be used as scan environment`)
+}
+
+// Validate check if command is empty
+func (p *ToolImageOption) Validate(path *field.Path) (errs field.ErrorList) {
+	if p.ToolImage == "" {
+		errs = append(errs, field.Required(path.Child("tool-image"), "tool-image is required"))
+	}
+	return errs
 }

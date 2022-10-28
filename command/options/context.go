@@ -21,20 +21,20 @@ import (
 	"k8s.io/apimachinery/pkg/util/validation/field"
 )
 
-// ReportPathOption describe report path option
-type ReportPathOption struct {
-	ReportPath string
+// ContextOption describe the work dir to execute the command
+type ContextOption struct {
+	Context string
 }
 
 // AddFlags add flags to options
-func (m *ReportPathOption) AddFlags(flags *pflag.FlagSet) {
-	flags.StringVar(&m.ReportPath, "report-path", "", `the path contains report`)
+func (p *ContextOption) AddFlags(flags *pflag.FlagSet) {
+	flags.StringVar(&p.Context, "context", "", `the work dir to execute the command`)
 }
 
 // Validate check if command is empty
-func (m *ReportPathOption) Validate(path *field.Path) (errs field.ErrorList) {
-	if m.ReportPath == "" {
-		errs = append(errs, field.Required(path.Child("report-path"), "report-path is required"))
+func (p *ContextOption) Validate(path *field.Path) (errs field.ErrorList) {
+	if p.Context == "" {
+		errs = append(errs, field.Required(path.Child("context"), "context is required"))
 	}
 	return errs
 }
