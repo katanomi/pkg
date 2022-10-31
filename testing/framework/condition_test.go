@@ -93,4 +93,22 @@ var _ = Describe("TestCondition", func() {
 		})
 	})
 
+	Context("rollback but resouce not found", func() {
+		cm := NewTestConfigMap("aa", "default", nil)
+
+		When("rollback action", func() {
+			It("should rollback successfully", func() {
+				key := types.NamespacedName{
+					Namespace: cm.Namespace,
+					Name:      cm.Name,
+				}
+				newCm := &corev1.ConfigMap{}
+				err := testCtx.Client.Get(testCtx.Context, key, newCm)
+				Expect(errors.IsNotFound(err)).To(BeTrue())
+
+				MustRollback(testCtx, cm)
+			})
+		})
+	})
+
 })
