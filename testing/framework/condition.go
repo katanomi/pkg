@@ -166,6 +166,7 @@ func MustRollback(testCtx *TestContext, obj client.Object, opts ...client.Delete
 	Expect(obj).NotTo(BeNil())
 
 	err := testCtx.Client.Delete(testCtx.Context, obj, opts...)
+	err = client.IgnoreNotFound(err)
 	Expect(err).To(Succeed())
 
 	WaitRollback(testCtx, obj)
