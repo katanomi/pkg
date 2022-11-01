@@ -18,6 +18,7 @@ package options
 
 import (
 	"github.com/spf13/pflag"
+	"k8s.io/apimachinery/pkg/util/validation/field"
 )
 
 // CommandOption describe command option
@@ -28,4 +29,12 @@ type CommandOption struct {
 // AddFlags add flags to options
 func (m *CommandOption) AddFlags(flags *pflag.FlagSet) {
 	flags.StringVar(&m.Command, "command", "", `command to execute`)
+}
+
+// Validate check if command is empty
+func (m *CommandOption) Validate(path *field.Path) (errs field.ErrorList) {
+	if m.Command == "" {
+		errs = append(errs, field.Required(path.Child("command"), "command is required"))
+	}
+	return errs
 }
