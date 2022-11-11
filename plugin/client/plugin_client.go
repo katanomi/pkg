@@ -22,19 +22,18 @@ import (
 	"strings"
 
 	"github.com/go-resty/resty/v2"
-	corev1 "k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/api/errors"
-	duckv1 "knative.dev/pkg/apis/duck/v1"
-
 	metav1alpha1 "github.com/katanomi/pkg/apis/meta/v1alpha1"
 	"github.com/katanomi/pkg/client"
 	perrors "github.com/katanomi/pkg/errors"
 	"github.com/katanomi/pkg/tracing"
+	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	duckv1 "knative.dev/pkg/apis/duck/v1"
 )
 
 var (
 	defaultOptions = []OptionFunc{
-		ErrorOpts(&errors.StatusError{}),
+		ErrorOpts(&metav1.Status{}),
 		HeaderOpts("Content-Type", "application/json"),
 	}
 )
