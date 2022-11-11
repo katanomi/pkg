@@ -82,10 +82,16 @@ func (manager *Manager) GetConfig() *Config {
 }
 
 func (manager *Manager) applyConfig(cm *corev1.ConfigMap) {
-	if cm == nil || cm.Data == nil {
-		manager.Logger.Errorw("configmap or configmap.data is null", "configmap", fmt.Sprintf("%s/%s", cm.Namespace, cm.Name))
+	// Almost never reach here since applyConfig will be called
+	// only after the watched configmap has been transformed
+	if cm == nil {
 		return
 	}
+	if cm.Data == nil {
+		manager.Logger.Errorw("config manager configmap data is nil", "configmap", fmt.Sprintf("%s/%s", cm.Namespace, cm.Name))
+		return
+	}
+
 	manager.lock.Lock()
 	defer manager.lock.Unlock()
 	// whole replacement

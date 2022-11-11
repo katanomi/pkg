@@ -36,6 +36,7 @@ var _ = Describe("ParseFlag", func() {
 			Expect(Burst).To(Equal(DefaultBurst))
 			Expect(Timeout).To(Equal(DefaultTimeout))
 			Expect(ConfigFile).To(Equal(""))
+			Expect(InsecureSkipVerify).To(Equal(false))
 		})
 	})
 
@@ -46,6 +47,7 @@ var _ = Describe("ParseFlag", func() {
 				"--kube-api-qps", "80",
 				"--kube-api-burst", "90",
 				"--config", "config",
+				"--insecure-skip-tls-verify", "true",
 			})
 		})
 		It("return configured values", func() {
@@ -53,6 +55,7 @@ var _ = Describe("ParseFlag", func() {
 			Expect(Burst).To(Equal(90))
 			Expect(Timeout).To(Equal(20 * time.Second))
 			Expect(ConfigFile).To(Equal("config"))
+			Expect(InsecureSkipVerify).To(Equal(true))
 		})
 	})
 

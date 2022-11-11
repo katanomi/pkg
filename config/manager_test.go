@@ -35,7 +35,7 @@ import (
 var _ = Describe("NewManger and GetConfig", func() {
 
 	var (
-		oldCM      *corev1.ConfigMap
+		configmap      *corev1.ConfigMap
 		logger     *zap.Logger
 		manager    *Manager
 		watcher    *informer.InformedWatcher
@@ -47,7 +47,7 @@ var _ = Describe("NewManger and GetConfig", func() {
 	BeforeEach(func() {
 		ns = "default"
 		cmName = "cm"
-		oldCM = &corev1.ConfigMap{
+		configmap = &corev1.ConfigMap{
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      cmName,
 				Namespace: ns,
@@ -55,7 +55,7 @@ var _ = Describe("NewManger and GetConfig", func() {
 		}
 		logger, _ = zap.NewDevelopment()
 
-		client := fake.NewSimpleClientset(oldCM)
+		client := fake.NewSimpleClientset(configmap)
 		watcher = informer.NewInformedWatcher(client, ns)
 
 		manager = NewManager(watcher, logger.Sugar(), cmName)
@@ -65,7 +65,6 @@ var _ = Describe("NewManger and GetConfig", func() {
 		if err := watcher.Start(stopCh); err != nil {
 			logger.Fatal("failed to start watcher", zap.Error(err))
 		}
-
 	})
 
 	JustAfterEach(func() {
