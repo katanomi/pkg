@@ -1,0 +1,24 @@
+targets:
+  - uri: aquasec/trivy:latest
+    highCount: 10
+    lowCount: 10
+    mediumCount: 10
+    unknownCount: 10
+    criticalCount: 10
+    cvss:
+      source: Nvd
+      severity: Critical
+      score: 7.3
+    type: Image
+  - highCount: 10
+    type: Image
+    mediumCount: 10
+    criticalCount: 10
+    uri: ubuntu:22.04@sha265:aaaaaaaaaaaaaa
+    lowCount: 10
+    unknownCount: 10
+    cvss:
+      source: Nvd
+      score: 7.3
+      severity: Critical
+result: Succeeded
