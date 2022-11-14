@@ -89,6 +89,7 @@ func (c *CodeLinterOption) ValidateQualityGate(ctx context.Context) (errs field.
 	logger := logger.NewLoggerFromContext(ctx)
 
 	if !c.QualityGate {
+		logger.Infow("==> 📢  quality gate disabled, skip checking.")
 		return
 	}
 

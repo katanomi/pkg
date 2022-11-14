@@ -20,10 +20,8 @@ import (
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
-
 	"github.com/katanomi/pkg/encoding"
 	testing2 "github.com/katanomi/pkg/testing"
-	"github.com/onsi/gomega"
 	. "github.com/onsi/gomega"
 )
 
@@ -40,7 +38,7 @@ func TestVulnScanResult_IsEmpty(t *testing.T) {
 
 func TestVulnScanResult_decode(t *testing.T) {
 	g := NewGomegaWithT(t)
-	result := VulnScanResult{}
+	result := VulnScanResultShadow{}
 
 	m := make(map[string]string)
 	testing2.MustLoadYaml("./testdata/VulnScanResult.decode.yaml", &m)
@@ -49,18 +47,18 @@ func TestVulnScanResult_decode(t *testing.T) {
 	goldenData := VulnScanResult{}
 	testing2.MustLoadYaml("./testdata/VulnScanResult.decode.golden.yaml", &goldenData)
 
-	diff := cmp.Diff(goldenData, result)
-	g.Expect(diff).To(gomega.BeEmpty())
+	diff := cmp.Diff(goldenData, result.ToVulnScanResult())
+	g.Expect(diff).To(BeEmpty())
 }
 
 func TestVulnScanResult_encode(t *testing.T) {
 	g := NewGomegaWithT(t)
 	result := VulnScanResult{}
 	testing2.MustLoadYaml("./testdata/VulnScanResult.decode.golden.yaml", &result)
-	encodeData := encoding.NewJsonPath().Encode(&result)
+	encodeData := encoding.NewJsonPath().Encode(result.ToVulnScanResultShadow())
 
 	goldenData := make(map[string]string)
 	testing2.MustLoadYaml("./testdata/VulnScanResult.decode.yaml", &goldenData)
 	diff := cmp.Diff(encodeData, goldenData)
-	g.Expect(diff).To(gomega.BeEmpty())
+	g.Expect(diff).To(BeEmpty())
 }

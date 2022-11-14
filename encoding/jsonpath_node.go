@@ -100,6 +100,10 @@ func (n *Node) Json() string {
 	return ""
 }
 
+func (n *Node) Set(path string, value string) {
+	assignNodeValue(strings.Split(path, "."), value, n)
+}
+
 func (n *Node) Get(paths []string) *Node {
 	if n == nil {
 		return nil
