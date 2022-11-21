@@ -49,6 +49,7 @@ func AsStatusCode(err error) int {
 
 // AsStatusError transform resty response to status error
 func AsStatusError(response *resty.Response, grs ...schema.GroupResource) error {
+
 	// adding GroupResource as a "optional" parameter only
 	// should never provide more than one
 	gr := RESTClientGroupResource
@@ -66,7 +67,9 @@ func AsStatusError(response *resty.Response, grs ...schema.GroupResource) error 
 	)
 
 	if err, ok := response.Error().(error); ok {
-		statusError.ErrStatus.Message = err.Error()
+		if originalErr := err.Error(); originalErr != "" {
+			statusError.ErrStatus.Message = originalErr
+		}
 	}
 
 	return statusError
