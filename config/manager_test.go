@@ -35,7 +35,7 @@ import (
 var _ = Describe("NewManger and GetConfig", func() {
 
 	var (
-		configmap      *corev1.ConfigMap
+		configmap  *corev1.ConfigMap
 		logger     *zap.Logger
 		manager    *Manager
 		watcher    *informer.InformedWatcher
