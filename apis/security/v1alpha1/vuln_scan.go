@@ -200,7 +200,7 @@ type CVSS struct {
 	Severity string `json:"severity"`
 
 	// Score the score of the highest vulnerability
-	Score float64 `json:"score"`
+	Score string `json:"score"`
 }
 
 // VulnStatistic Describes the vulnerability statistic

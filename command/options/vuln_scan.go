@@ -22,6 +22,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"strconv"
 
 	securityv1alpha1 "github.com/katanomi/pkg/apis/security/v1alpha1"
 	"github.com/katanomi/pkg/command/logger"
@@ -126,8 +127,9 @@ func (c *VulnScanOption) ValidateQualityGate(ctx context.Context) (errs field.Er
 	maxScore := 0.0
 	maxSeverity := ""
 	for _, target := range c.Targets {
-		if target.Cvss.Score > maxScore {
-			maxScore = target.Cvss.Score
+		score, _ := strconv.ParseFloat(target.Cvss.Score, 64)
+		if score > maxScore {
+			maxScore = score
 			maxSeverity = target.Cvss.Severity
 		}
 	}

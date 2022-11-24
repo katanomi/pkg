@@ -8,7 +8,7 @@ targets:
     cvss:
       source: Nvd
       severity: Critical
-      score: 7.3
+      score: "7.3"
     type: Image
   - uri: ubuntu:22.04@sha265:aaaaaaaaaaaaaa
     type: Image
@@ -19,6 +19,6 @@ targets:
     unknownCount: 14
     cvss:
       source: Nvd
-      score: 7.3
+      score: "7.3"
       severity: Critical
 result: Succeeded
