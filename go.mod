@@ -31,7 +31,7 @@ require (
 	k8s.io/apimachinery v0.25.3
 	k8s.io/apiserver v0.25.2
 	k8s.io/client-go v0.25.3
-	knative.dev/pkg v0.0.0-20221011175852-714b7630a836
+	knative.dev/pkg v0.0.0-20221123011842-b78020c16606
 	sigs.k8s.io/controller-runtime v0.11.2
 	sigs.k8s.io/yaml v1.3.0
 	yunion.io/x/log v0.0.0-20201210064738-43181789dc74 // indirect
