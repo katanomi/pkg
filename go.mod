@@ -152,6 +152,5 @@ require (
 
 replace (
 	github.com/opencontainers/image-spec => github.com/opencontainers/image-spec v1.0.2-0.20210819154149-5ad6f50d6283
-	github.com/tektoncd/pipeline v0.41.0 => github.com/katanomi/pipeline v0.41.1-0.20221123115217-29fd1bcac305
 	go.uber.org/zap => github.com/katanomi/zap v1.18.2 // indirect
 )
