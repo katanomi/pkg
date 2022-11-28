@@ -31,4 +31,10 @@ const (
 	ArtifactTypeBinary ArtifactType = "Binary"
 	// ArtifactTypeMaven maven artifact
 	ArtifactTypeMaven ArtifactType = "Maven"
+
+	// OCIHelmMediaType media type used for OCI helm chart artifact
+	OCIHelmMediaType = "application/vnd.cncf.helm.config.v1+json"
+	// OCIHelmChartContentType content type for a chart tar file when using OCI
+	// registry as storage
+	OCIHelmChartContentType = "application/vnd.cncf.helm.chart.content.v1.tar+gzip"
 )

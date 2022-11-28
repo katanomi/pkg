@@ -16,7 +16,14 @@ limitations under the License.
 
 package options
 
-import "github.com/spf13/pflag"
+import (
+	"context"
+	"os/exec"
+
+	"github.com/katanomi/pkg/command/io"
+	"github.com/spf13/pflag"
+	"k8s.io/apimachinery/pkg/util/validation/field"
+)
 
 const (
 	PathKtnSettingCli = "ktn-settings"
@@ -54,4 +61,37 @@ func (p *KatanomiPathOption) AddFlags(flags *pflag.FlagSet) {
 	flags.StringVar(&p.SharePath, "share-path", "/katanomi/data", `the path shared between steps`)
 	flags.StringVar(&p.BinPath, "bin-path", "/katanomi/bin", `the path contains binaries`)
 	flags.StringVar(&p.ConfigPath, "config-path", "", `the path contains configs`)
+}
+
+// CLIPathOption adds a generic option to store different cli paths
+type CLIPathOption struct {
+	// Name of the program
+	// i.e yq, helm etc.
+	Name string
+	// CLIPath direct path for CLI
+	// used to store the default value
+	CLIPath string
+	// FlagName to be used to store
+	FlagName string
+}
+
+// AddFlags adds flags for option
+func (p *CLIPathOption) AddFlags(flags *pflag.FlagSet) {
+	flags.StringVar(&p.CLIPath, p.FlagName, p.CLIPath, `the path for `+p.Name)
+}
+
+// Validate if values are given
+func (p *CLIPathOption) Validate(path *field.Path) (errs field.ErrorList) {
+	if p.CLIPath == "" {
+		errs = append(errs, field.Required(path.Child(p.FlagName), `path for `+p.Name+` is necessary`))
+	} else if !io.IsExist(p.CLIPath) {
+		errs = append(errs, field.Required(path.Child(p.FlagName), `path "`+p.CLIPath+`" for `+p.Name+` does not exist`))
+	}
+	return
+}
+
+// Execute executes code given a context
+func (p *CLIPathOption) Execute(ctx context.Context, args ...string) ([]byte, error) {
+	cmd := exec.CommandContext(ctx, p.CLIPath, args...)
+	return cmd.CombinedOutput()
 }

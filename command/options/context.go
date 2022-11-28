@@ -17,13 +17,15 @@ limitations under the License.
 package options
 
 import (
+	"github.com/katanomi/pkg/command/io"
 	"github.com/spf13/pflag"
 	"k8s.io/apimachinery/pkg/util/validation/field"
 )
 
 // ContextOption describe the work dir to execute the command
 type ContextOption struct {
-	Context string
+	Context               string
+	ValidateContextExists bool
 }
 
 // AddFlags add flags to options
@@ -35,6 +37,9 @@ func (p *ContextOption) AddFlags(flags *pflag.FlagSet) {
 func (p *ContextOption) Validate(path *field.Path) (errs field.ErrorList) {
 	if p.Context == "" {
 		errs = append(errs, field.Required(path.Child("context"), "context is required"))
+	}
+	if p.ValidateContextExists && !io.IsDir(p.Context) {
+		errs = append(errs, field.Invalid(path.Child("context"), p.Context, `context is not a folder`))
 	}
 	return errs
 }

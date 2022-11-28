@@ -66,6 +66,8 @@ var _ = Describe("Test.RegisterFlags", func() {
 var _ = Describe("Test.RegisterSetup", func() {
 	type testStruct struct {
 		QualityGateRulesOption
+		AbcValues KeyValueListOption
+		DefValues KeyValueListOption
 	}
 
 	var (
@@ -74,13 +76,20 @@ var _ = Describe("Test.RegisterSetup", func() {
 	)
 
 	BeforeEach(func() {
-		obj = testStruct{}
+		obj = testStruct{
+			AbcValues: KeyValueListOption{FlagName: "abc-values"},
+			DefValues: KeyValueListOption{FlagName: "def-values"},
+		}
 		ctx = context.Background()
 	})
 
 	When("provide expected flags", func() {
 		JustBeforeEach(func() {
-			err := RegisterSetup(&obj, ctx, nil, []string{"--quality-gate-rules", "a=b", "c=d"})
+			err := RegisterSetup(&obj, ctx, nil, []string{
+				"--quality-gate-rules", "a=b", "c=d",
+				"--abc-values", "abc=123", "abd=321",
+				"--def-values", "def=xyz", "deg=abc",
+			})
 			Expect(err).Should(Succeed())
 		})
 
@@ -88,6 +97,14 @@ var _ = Describe("Test.RegisterSetup", func() {
 			Expect(obj.QualityGateRules).Should(Equal(map[string]string{
 				"a": "b",
 				"c": "d",
+			}))
+			Expect(obj.AbcValues.KeyValues).Should(Equal(map[string]string{
+				"abc": "123",
+				"abd": "321",
+			}))
+			Expect(obj.DefValues.KeyValues).Should(Equal(map[string]string{
+				"def": "xyz",
+				"deg": "abc",
 			}))
 		})
 	})
@@ -99,6 +116,8 @@ var _ = Describe("Test.RegisterSetup", func() {
 		})
 		It("should get empty value", func() {
 			Expect(obj.QualityGateRules).Should(Equal(map[string]string{}))
+			Expect(obj.AbcValues.KeyValues).Should(Equal(map[string]string{}))
+			Expect(obj.DefValues.KeyValues).Should(Equal(map[string]string{}))
 		})
 	})
 })
@@ -159,7 +178,9 @@ func TestOption_AddFlags(t *testing.T) {
 		ReportPathOption
 		ToolImageOption
 		ContextOption
+		CLIPathOption
 	}{}
+	obj.CLIPathOption.FlagName = "cli-flag"
 	flagSet := pflag.NewFlagSet("test", pflag.ContinueOnError)
 	RegisterFlags(&obj, flagSet)
 
@@ -174,6 +195,7 @@ func TestOption_AddFlags(t *testing.T) {
 		"--report-path", "report-path-value",
 		"--tool-image", "tool-image-value",
 		"--context", "context-value",
+		"--cli-flag", "/some/cli",
 	})
 	g.Expect(err).Should(Succeed())
 	g.Expect(obj.Command).To(Equal("command-value"))
@@ -186,4 +208,5 @@ func TestOption_AddFlags(t *testing.T) {
 	g.Expect(obj.ReportPath).To(Equal("report-path-value"))
 	g.Expect(obj.ToolImage).To(Equal("tool-image-value"))
 	g.Expect(obj.Context).To(Equal("context-value"))
+	g.Expect(obj.CLIPath).To(Equal("/some/cli"))
 }

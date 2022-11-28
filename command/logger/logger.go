@@ -20,19 +20,19 @@ import (
 	"context"
 
 	"github.com/katanomi/pkg/command/io"
+	"knative.dev/pkg/logging"
 
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 )
-
-type loggerKey struct{}
 
 // WithLogger set a logger instance into a context
 func WithLogger(ctx context.Context, logger *zap.SugaredLogger) context.Context {
 	if ctx == nil {
 		ctx = context.Background()
 	}
-	return context.WithValue(ctx, loggerKey{}, logger)
+	// reusing knative method
+	return logging.WithLogger(ctx, logger)
 }
 
 // GetLogger get a logger instance form a context
@@ -40,14 +40,8 @@ func GetLogger(ctx context.Context) (logger *zap.SugaredLogger) {
 	if ctx == nil {
 		return nil
 	}
-	val := ctx.Value(loggerKey{})
-	if val == nil {
-		return nil
-	}
-	if l, ok := val.(*zap.SugaredLogger); ok {
-		return l
-	}
-	return nil
+	// reusing method from knative
+	return logging.FromContext(ctx)
 }
 
 // NewLoggerFromContext similar to `GetLogger`, but return a default logger if there is no
@@ -63,13 +57,37 @@ func NewLoggerFromContext(ctx context.Context) (logger *zap.SugaredLogger) {
 // NewLogger construct a logger
 func NewLogger(writer zapcore.WriteSyncer, level zapcore.LevelEnabler, opts ...zap.Option) *zap.SugaredLogger {
 	encoderCfg := zapcore.EncoderConfig{
-		MessageKey:     "msg",
-		LevelKey:       "level",
-		NameKey:        "logger",
-		EncodeLevel:    zapcore.LowercaseLevelEncoder,
+		MessageKey: "msg",
+		LevelKey:   "level",
+		NameKey:    "logger",
+		// EncodeLevel:    zapcore.LowercaseLevelEncoder,
+		// EncodeLevel:    EmojiLevelEncoder,
 		EncodeTime:     zapcore.ISO8601TimeEncoder,
 		EncodeDuration: zapcore.StringDurationEncoder,
 	}
+
 	core := zapcore.NewCore(zapcore.NewConsoleEncoder(encoderCfg), writer, level)
 	return zap.New(core, opts...).Sugar()
+}
+
+// EmojiLevelEncoder prints an emoji instead of the log level
+// ❌ for Panic, Error and Fatal levels
+// 🐛 for Debug
+// ❗️ for Warning
+// 📢 for Info and everything else
+func EmojiLevelEncoder(l zapcore.Level, enc zapcore.PrimitiveArrayEncoder) {
+	value := "==> "
+	switch l {
+	case zapcore.DPanicLevel, zapcore.PanicLevel, zapcore.ErrorLevel, zapcore.FatalLevel:
+		value += "❌"
+	case zap.DebugLevel:
+		value += "🐛"
+	case zap.WarnLevel:
+		value += "❗️"
+	case zap.InfoLevel:
+		fallthrough
+	default:
+		value += "📢"
+	}
+	enc.AppendString(value)
 }

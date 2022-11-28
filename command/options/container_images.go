@@ -20,7 +20,8 @@ import (
 	"context"
 
 	metav1alpha1 "github.com/katanomi/pkg/apis/meta/v1alpha1"
-	"github.com/katanomi/pkg/artifacts"
+	// "github.com/katanomi/pkg/artifacts"
+	artifacts "github.com/katanomi/pkg/apis/artifacts/v1alpha1"
 	pkgargs "github.com/katanomi/pkg/command/args"
 	"github.com/spf13/cobra"
 	"k8s.io/apimachinery/pkg/util/validation/field"
@@ -78,6 +79,7 @@ func (m *ContainerImagesOption) SetWithoutDigest(required bool) *ContainerImages
 
 // ValidateReferences check if the container images is valid
 func (m *ContainerImagesOption) ValidateReferences(path *field.Path, references []artifacts.URI) (errs field.ErrorList) {
+	path = path.Child("container-images")
 	if m.requiredValue && len(references) == 0 {
 		errs = append(errs, field.Required(path, "container-images must be set"))
 	}

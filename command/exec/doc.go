@@ -1,5 +1,5 @@
 /*
-Copyright 2022 The Katanomi Authors.
+Copyright 2019 The Kubernetes Authors.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-// Package artifacts provide functions to artifacts
-//
-// Deprecated: use pkg/apis/artifacts/v1alpha1 instead
-package artifacts
+// Package exec contains an interface for executing commands, along with helpers
+// TODO(bentheelder): add standardized timeout functionality & a default timeout
+// so that commands cannot hang indefinitely (!)
+package exec
