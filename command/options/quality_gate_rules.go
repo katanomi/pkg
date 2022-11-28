@@ -56,3 +56,13 @@ func (m *QualityGateRulesOption) GetRuleValueInt(key string) (value int, exist b
 	value, err = strconv.Atoi(v)
 	return value, true, err
 }
+
+// GetRuleValueFloat get rule value as float64
+func (m *QualityGateRulesOption) GetRuleValueFloat(key string) (value float64, exist bool, err error) {
+	v, exist := m.GetRuleValue(key)
+	if !exist {
+		return 0, false, nil
+	}
+	value, err = strconv.ParseFloat(v, 64)
+	return value, true, err
+}
