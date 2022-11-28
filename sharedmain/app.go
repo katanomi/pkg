@@ -32,6 +32,7 @@ import (
 	utilyaml "k8s.io/apimachinery/pkg/util/yaml"
 	// load sigs.k8s.io/controller-runtime@v0.8.3/pkg/metrics/workqueue.go:99  workqueue.SetProvider(workqueueMetricsProvider{}) firstly
 	// avoid knative-pkg@v0.0.0-20220128061436-ff5a1e531de2/controller/stats_reporter.go:95 loading  firstly
+
 	"sigs.k8s.io/controller-runtime/pkg/leaderelection"
 	_ "sigs.k8s.io/controller-runtime/pkg/metrics"
 	"sigs.k8s.io/controller-runtime/pkg/recorder"
@@ -53,6 +54,7 @@ import (
 	"github.com/katanomi/pkg/plugin/route"
 	"github.com/katanomi/pkg/restclient"
 	kscheme "github.com/katanomi/pkg/scheme"
+	"github.com/katanomi/pkg/watcher"
 	"go.uber.org/zap"
 	"golang.org/x/sync/errgroup"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -133,6 +135,8 @@ type AppBuilder struct {
 
 	// newResourceLock override the default resourcelock of controller-runtime.
 	newResourceLock ResourceLockFunc
+
+	cw *watcher.CertWatcher
 }
 
 // ParseFlag parse flag needed for App
@@ -173,13 +177,6 @@ func (a *AppBuilder) init() {
 		}
 		a.Context, a.startInformers = injection.EnableInjectionOrDie(a.Context, a.Config)
 
-		restyClient := resty.NewWithClient(kclient.NewHTTPClient())
-		restyClient.SetDisableWarn(true)
-		restyClient.SetTLSClientConfig(&tls.Config{
-			InsecureSkipVerify: InsecureSkipVerify, // nolint: gosec // G402: TLS InsecureSkipVerify set true.
-		})
-		a.Context = restclient.WithRESTClient(a.Context, restyClient)
-
 		a.ConfigMapWatcher = sharedmain.SetupConfigMapWatchOrDie(a.Context, a.Logger)
 		a.startFunc = append(a.startFunc, func(ctx context.Context) error {
 			return a.ConfigMapWatcher.Start(ctx.Done())
@@ -191,6 +188,37 @@ func (a *AppBuilder) init() {
 		a.container.Router(restful.RouterJSR311{})
 		a.Context, a.ClientManager = GetClientManager(a.Context)
 		a.filters = []restful.FilterFunction{}
+
+		// restyHttpClient := resty.NewWithClient(kclient.NewHTTPClient())
+		// restyHttpClient.SetDisableWarn(true)
+		// restyHttpClient.SetTLSClientConfig(&tls.Config{
+		// 	InsecureSkipVerify: InsecureSkipVerify, // nolint: gosec // G402: TLS InsecureSkipVerify set true.
+		// })
+		// a.Context = restclient.WithHttpRESTClient(a.Context, restyHttpClient)
+
+		restyClient := resty.NewWithClient(kclient.NewHTTPClient())
+		restyClient.SetDisableWarn(true)
+		restyClient.SetTLSClientConfig(&tls.Config{
+			InsecureSkipVerify: InsecureSkipVerify, // nolint: gosec // G402: TLS InsecureSkipVerify set true.
+		})
+		a.Context = restclient.WithRESTClient(a.Context, restyClient)
+
+		if !InsecureSkipVerify {
+			// restyClient := resty.NewWithClient(kclient.NewHTTPClient())
+			// restyClient.SetDisableWarn(true)
+			a.cw = watcher.NewCertWatcher(a.Context, a.Config, a.container, "/tmp/katanomi/cert")
+
+			// certs := x509.NewCertPool()
+			// if ok := certs.AppendCertsFromPEM(a.cw.GetCA()); !ok {
+			// 	a.Logger.Fatalw("failed to parse root certificate")
+			// }
+			// restyClient.SetTLSClientConfig(&tls.Config{
+			// 	RootCAs:    certs,
+			// 	MinVersion: tls.VersionTLS12,
+			// })
+			// a.Context = restclient.WithRESTClient(a.Context, restyClient)
+		}
+
 	})
 }
 
@@ -524,14 +552,21 @@ func (a *AppBuilder) Run() error {
 		}
 	}()
 
-	// adds a http server if there are any endpoints registered
-	if a.container != nil {
-		// adds profiling and health checks
-		a.container.Add(route.NewDefaultService())
-
-		if len(a.container.RegisteredWebServices()) > 0 {
-			a.container.Add(route.NewDocService(a.container.RegisteredWebServices()...))
+	// handle healthz and readiness api
+	a.startFunc = append(a.startFunc, func(ctx context.Context) error {
+		defaultContainer := restful.NewContainer()
+		defaultContainer.Add(route.NewDefaultService())
+		port := 8100
+		srv := &http.Server{
+			Addr:    fmt.Sprintf(":%d", port),
+			Handler: defaultContainer,
 		}
+		return srv.ListenAndServe()
+	})
+
+	// adds a http server if there are any endpoints registered
+	if a.container != nil && len(a.container.RegisteredWebServices()) > 0 {
+		a.container.Add(route.NewDocService(a.container.RegisteredWebServices()...))
 
 		a.startFunc = append(a.startFunc, func(ctx context.Context) error {
 			// TODO: find a better way to get this configuration
@@ -539,12 +574,17 @@ func (a *AppBuilder) Run() error {
 				a.container.Filter(filter)
 			}
 
-			port := 8100
-			srv := &http.Server{
-				Addr:    fmt.Sprintf(":%d", port),
-				Handler: a.container,
+			a.cw.SetContainer(a.container)
+			if err := a.cw.Start(); err != nil {
+				a.Logger.Errorw("error to start listen secret", "error", err)
+				return err
 			}
-			return srv.ListenAndServe()
+			if err := a.cw.WaitCertFilesCreation(); err != nil {
+				a.Logger.Errorw("unable to write cert key file", "error", err)
+				return err
+			}
+
+			return nil
 		})
 	}
 
