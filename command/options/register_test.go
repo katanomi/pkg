@@ -182,6 +182,7 @@ func TestOption_AddFlags(t *testing.T) {
 		ContextOption
 		CLIPathOption
 	}{}
+	obj.CLIPathOption.FlagName = "cli-flag"
 	flagSet := pflag.NewFlagSet("test", pflag.ContinueOnError)
 	RegisterFlags(&obj, flagSet)
 
