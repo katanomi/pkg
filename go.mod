@@ -42,6 +42,8 @@ require (
 	yunion.io/x/pkg v0.0.0-20210218105412-13a69f60034c
 )
 
+require github.com/fvbock/endless v0.0.0-20170109170031-447134032cb6
+
 require (
 	contrib.go.opencensus.io/exporter/ocagent v0.7.1-0.20200907061046-05415f1de66d // indirect
 	contrib.go.opencensus.io/exporter/prometheus v0.3.0 // indirect

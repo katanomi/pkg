@@ -25,14 +25,30 @@ import (
 
 type clientCtxKey struct{}
 
-// WithRESTClient sets a client instance into a context
+// WithRESTClient sets a https client instance into a context
 func WithRESTClient(ctx context.Context, clt *resty.Client) context.Context {
 	return context.WithValue(ctx, clientCtxKey{}, clt)
 }
 
-// RESTClient returns a client.Client in a given context. Returns nil if not found
+// RESTClient returns a https client.Client in a given context. Returns nil if not found
 func RESTClient(ctx context.Context) *resty.Client {
 	val := ctx.Value(clientCtxKey{})
+	if val == nil {
+		return nil
+	}
+	return val.(*resty.Client)
+}
+
+type httpClientCtxKey struct{}
+
+// WithHttpRESTClient sets a http client instance into a context
+func WithHttpRESTClient(ctx context.Context, clt *resty.Client) context.Context {
+	return context.WithValue(ctx, httpClientCtxKey{}, clt)
+}
+
+// HttpRESTClient returns a http client.Client in a given context. Returns nil if not found
+func HttpRESTClient(ctx context.Context) *resty.Client {
+	val := ctx.Value(httpClientCtxKey{})
 	if val == nil {
 		return nil
 	}
