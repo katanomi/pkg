@@ -27,6 +27,10 @@ type NamedUnitTestsResult struct {
 // UnitTestsResult unit tests results encapsulating
 // coverage and number of passed, failed and skipped tests
 type UnitTestsResult struct {
+	// Type identifies the type of 'unitedTest' related results reusing UnitTestsResult.
+	// +optional
+	Type string `json:"type,omitempty"`
+
 	// Coverage represent unit test coverage of current build
 	Coverage *TestCoverage `json:"coverage"`
 	// TODO: add BuildRunUnitTestStatus
