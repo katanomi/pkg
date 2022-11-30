@@ -1,0 +1,13 @@
+{
+  "name": "tom",
+  "struct_slice_key[0].int": "1",
+  "struct_slice_key[0].string": "test-string",
+  "struct_slice_key[0].float64": "1.234",
+  "struct_slice_key[0].slice_path[0]": "value1",
+  "struct_slice_key[0].slice_path[1]": "value2",
+  "struct_slice_key[1].int": "2",
+  "struct_slice_key[1].string": "test-string2",
+  "struct_slice_key[1].float64": "2.234",
+  "struct_slice_key[1].slice_path[0]": "value21",
+  "struct_slice_key[1].slice_path[1]": "value22"
+}

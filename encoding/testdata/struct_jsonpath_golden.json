@@ -1,0 +1,22 @@
+{
+  "struct_slice_key": [
+    {
+      "int": 1,
+      "string": "test-string",
+      "float64": 1.234,
+      "slice_path": [
+        "value1",
+        "value2"
+      ]
+    },
+    {
+      "int": 2,
+      "string": "test-string2",
+      "float64": 2.234,
+      "slice_path": [
+        "value21",
+        "value22"
+      ]
+    }
+  ]
+}

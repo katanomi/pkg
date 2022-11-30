@@ -254,3 +254,45 @@ func TestMetric_ValidateInt(t *testing.T) {
 		g.Expect(len(errs) > 0).To(Equal(tt.wantErrs))
 	}
 }
+
+func TestMetric_ValidateStringEnums(t *testing.T) {
+	g := NewGomegaWithT(t)
+	tests := []struct {
+		metrics  map[string]string
+		metric   string
+		enums    []string
+		wantErrs bool
+	}{
+		{
+			metrics: map[string]string{
+				"key": "value",
+			},
+			metric:   "not-exist-key",
+			wantErrs: false,
+		},
+		{
+			metrics: map[string]string{
+				"key": "value",
+			},
+			metric:   "key",
+			enums:    []string{"val1", "val2"},
+			wantErrs: true,
+		},
+		{
+			metrics: map[string]string{
+				"key": "value",
+			},
+			metric:   "key",
+			enums:    []string{"val1", "val2", "value"},
+			wantErrs: false,
+		},
+	}
+	testPath := field.NewPath("test")
+	for _, tt := range tests {
+		p := &Metric{
+			metrics: tt.metrics,
+		}
+		errs := p.ValidateStringEnums(testPath, tt.metric, tt.enums...)
+		g.Expect(len(errs) > 0).To(Equal(tt.wantErrs))
+	}
+}

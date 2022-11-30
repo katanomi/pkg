@@ -70,6 +70,24 @@ func (p *Metric) ValidateInt(base *field.Path, metric string, min, max *int) (er
 	return
 }
 
+// ValidateStringEnums help to validate that it is within the scope of the enumeration
+func (p *Metric) ValidateStringEnums(base *field.Path, metric string, enums ...string) (errs field.ErrorList) {
+	value, exist := p.GetMetricValue(metric)
+	if !exist {
+		return nil
+	}
+
+	for _, enum := range enums {
+		if value == enum {
+			return nil
+		}
+	}
+	path := base.Child(metric)
+	errs = append(errs, field.Invalid(path, value,
+		fmt.Sprintf("value should be one of %s", strings.Join(enums, ","))))
+	return
+}
+
 // ValidateFloat help to validate float metrics
 func (p *Metric) ValidateFloat(base *field.Path, metric string, min, max *float64) (errs field.ErrorList) {
 	value, exist := p.GetMetricValue(metric)
