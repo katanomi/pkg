@@ -96,8 +96,9 @@ func (n *Node) Json() string {
 		return n.objectToJson()
 	case NodeTypeValue:
 		return fmt.Sprintf("\"%s\"", n.Value)
+	default:
+		return ""
 	}
-	return ""
 }
 
 func (n *Node) Set(path string, value string) {

@@ -27,13 +27,12 @@ import (
 	perrors "github.com/katanomi/pkg/errors"
 	"github.com/katanomi/pkg/tracing"
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	duckv1 "knative.dev/pkg/apis/duck/v1"
 )
 
 var (
 	defaultOptions = []OptionFunc{
-		ErrorOpts(&metav1.Status{}),
+		ErrorOpts(&ResponseStatusErr{}),
 		HeaderOpts("Content-Type", "application/json"),
 	}
 )
@@ -419,4 +418,9 @@ func (p *PluginClient) TestModule(meta Meta, secret corev1.Secret) ClientTestMod
 // TestCaseExecution get test case execution client
 func (p *PluginClient) TestCaseExecution(meta Meta, secret corev1.Secret) ClientTestCaseExecution {
 	return newTestCaseExecution(p, meta, secret)
+}
+
+// NewToolService get tool service execution client
+func (p *PluginClient) NewToolService() ClientToolService {
+	return newToolService(p, p.meta, p.secret, p.ClassAddress)
 }

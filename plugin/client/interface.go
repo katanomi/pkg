@@ -465,3 +465,15 @@ type TestCaseExecutionCreator interface {
 	Interface
 	CreateTestCaseExecution(ctx context.Context, params metav1alpha1.TestProjectOptions, payload metav1alpha1.TestCaseExecution) (*metav1alpha1.TestCaseExecution, error)
 }
+
+// LivenessChecker check the tool service is alive
+type LivenessChecker interface {
+	// CheckAlive check the tool service is alive
+	CheckAlive(ctx context.Context) error
+}
+
+// Initializer initialize the tool service
+type Initializer interface {
+	// Initialize  the tool service if desired
+	Initialize(ctx context.Context) error
+}
