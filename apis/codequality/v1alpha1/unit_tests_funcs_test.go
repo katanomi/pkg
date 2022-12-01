@@ -61,6 +61,21 @@ func TestUnitTestsResultGetObjectWithValues(t *testing.T) {
 			},
 			MustLoadReturnObjectFromYAML("testdata/UnitTestsResult.GetObjectWithValues.full.golden.yaml", &UnitTestsResult{}).(*UnitTestsResult),
 		},
+		"full values with error": {
+			context.Background(),
+			nil,
+			map[string]string{
+				"coverage.lines":             "23%",
+				"coverage.branches":          "45%",
+				"testResults.passed":         "1",
+				"testResults.failed":         "2",
+				"testResults.error":          "3",
+				"testResults.skipped":        "3",
+				"testResults.passedTestRate": "100%",
+			},
+			MustLoadReturnObjectFromYAML("testdata/UnitTestsResult.GetObjectWithValues.fullWithError.golden.yaml",
+				&UnitTestsResult{}).(*UnitTestsResult),
+		},
 		"nil values": {
 			context.Background(),
 			field.NewPath("value"),
