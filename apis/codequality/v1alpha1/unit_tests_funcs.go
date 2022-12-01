@@ -78,6 +78,11 @@ func (TestResult) GetObjectWithValues(ctx context.Context, path *field.Path, val
 			Skipped:         strconvAtoi(values[path.Child("skipped").String()]),
 			PassedTestsRate: values[path.Child("passedTestsRate").String()],
 		}
+
+		if errNumStr, errExists := values[path.Child("error").String()]; errExists {
+			errNum := strconvAtoi(errNumStr)
+			result.Failed += errNum
+		}
 	}
 	return
 }
