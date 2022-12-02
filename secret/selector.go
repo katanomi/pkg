@@ -69,6 +69,9 @@ type SelectSecretOption struct {
 
 	// LabelSelector is label selector when select secret, default will be everything
 	LabelSelector labels.Selector
+
+	// IncludeAnnotaion if specified, it needs to be filtered base IncludeAnnotaion. Currently only key value filtering is used.
+	IncludeAnnotaion map[string]string
 }
 
 type SecretTypeList []corev1.SecretType
@@ -235,6 +238,11 @@ func selectToolSecretFrom(logger *zap.SugaredLogger, secretList []corev1.Secret,
 			continue
 		}
 
+		if !HasAnnotationsKey(sec.Annotations, option.IncludeAnnotaion, false) {
+			logger.Debugw("secret not macth expected annotation")
+			continue
+		}
+
 		toolAddress, err := neturl.Parse(address)
 		if err != nil {
 			logger.Infow("integration address is invalid", "address", address)
@@ -376,4 +384,28 @@ func containsInArray(items []string, value string) bool {
 		}
 	}
 	return false
+}
+
+// HasAnnotationsKey whether to include the expected annotation key, returns true when the expected annotation is empty.
+func HasAnnotationsKey(annotations, expectedAnnotaions map[string]string, matchValue bool) bool {
+	if expectedAnnotaions == nil {
+		return true
+	}
+
+	for k, expectedValue := range expectedAnnotaions {
+		if annotations == nil {
+			return false
+		}
+
+		annotationValue, ok := annotations[k]
+		if !ok {
+			return false
+		}
+
+		if matchValue && expectedValue != annotationValue {
+			return false
+		}
+	}
+
+	return true
 }
