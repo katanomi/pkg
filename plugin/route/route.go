@@ -247,6 +247,12 @@ func match(c client.Interface) []Route {
 	if v, ok := c.(client.TestCaseExecutionCreator); ok {
 		routes = append(routes, NewTestCaseExecutionCreator(v))
 	}
+	if v, ok := c.(client.LivenessChecker); ok {
+		routes = append(routes, NewLivenessCheck(v))
+	}
+	if v, ok := c.(client.Initializer); ok {
+		routes = append(routes, NewInitializer(v))
+	}
 
 	return routes
 }
@@ -398,6 +404,12 @@ func GetMethods(c client.Interface) []string {
 	}
 	if _, ok := c.(client.TestCaseExecutionCreator); ok {
 		methods = append(methods, "CreateTestCaseExecution")
+	}
+	if _, ok := c.(client.LivenessChecker); ok {
+		methods = append(methods, "CheckAlive")
+	}
+	if _, ok := c.(client.Initializer); ok {
+		methods = append(methods, "Initialize")
 	}
 
 	return methods
