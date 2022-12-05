@@ -86,6 +86,26 @@ func TestSelect(t *testing.T) {
 		expect(err, actual, "project-2", "secret-2")
 	})
 
+	t.Run("has inclued annotation opetion", func(t *testing.T) {
+		secret2 := buildSecret("secret-2", "project-1", "https://gitlab.com/",
+			"", []string{"/devops-1/"}, []string{}, false)
+		secret2.Annotations["tekton.dev/git-0"] = "label"
+
+		secrets := []corev1.Secret{
+			buildSecret("secret-1", "project-1", "https://gitlab.com/",
+				"", []string{"/devops-1/"}, []string{}, false),
+			secret2,
+		}
+		actual, err := selectToolSecret(log, secrets, []corev1.Secret{}, "https://gitlab.com/devops-1/demo", SelectSecretOption{
+			PerferredSecret:            types.NamespacedName{},
+			ExcludedSecretTypes:        nil,
+			Namespace:                  "project-1",
+			IncludeAnnotaion:           map[string]string{"tekton.dev/git-0": "https://gitlab.com/"},
+			GlobalCredentialsNamespace: "global-credentials",
+		})
+		expect(err, actual, "project-1", "secret-2")
+	})
+
 	t.Run("has namespaced credentials and correct scopes and perferred secret", func(t *testing.T) {
 		secrets := []corev1.Secret{
 			buildSecret("secret-1", "project-1", "https://gitlab.com/",
@@ -387,4 +407,105 @@ func Test_findNewestSecret(t *testing.T) {
 	g.Expect(findNewestSecret(secrets)).To(Equal(0))
 
 	g.Expect(findNewestSecret([]corev1.Secret{})).To(Equal(-1))
+}
+
+func Test_HasAnnotationsKey(t *testing.T) {
+	g := NewGomegaWithT(t)
+
+	cases := []struct {
+		name               string
+		expectedAnnotaions map[string]string
+		secret             corev1.Secret
+		matchValue         bool
+		want               bool
+	}{
+		{
+			name: "macth annotation.",
+			secret: corev1.Secret{
+				ObjectMeta: metav1.ObjectMeta{
+					Annotations: map[string]string{
+						"annotaiton.key":  "t",
+						"annotaiton.key1": "t",
+						"annotaiton.key3": "t",
+					},
+				},
+			},
+			expectedAnnotaions: map[string]string{
+				"annotaiton.key":  "t",
+				"annotaiton.key1": "t2",
+			},
+			want: true,
+		},
+		{
+			name: "secret annotation is empty",
+			secret: corev1.Secret{
+				ObjectMeta: metav1.ObjectMeta{
+					Name: "a",
+				},
+			},
+			expectedAnnotaions: map[string]string{
+				"annotaiton.key": "t",
+			},
+		},
+		{
+			name: "secret expected annotation is empty",
+			secret: corev1.Secret{
+				ObjectMeta: metav1.ObjectMeta{
+					Annotations: map[string]string{
+						"annotaiton.key":  "t",
+						"annotaiton.key1": "t",
+					},
+				},
+			},
+			want: true,
+		},
+		{
+			name: "failed match annotation, secret is empty",
+			secret: corev1.Secret{
+				ObjectMeta: metav1.ObjectMeta{},
+			},
+			expectedAnnotaions: map[string]string{
+				"annotaiton.key": "t",
+			},
+			want: false,
+		},
+		{
+			name: "failed match annotation",
+			secret: corev1.Secret{
+				ObjectMeta: metav1.ObjectMeta{
+					Annotations: map[string]string{
+						"integration": "true",
+					},
+				},
+			},
+			expectedAnnotaions: map[string]string{
+				"annotaiton.key": "t",
+			},
+			want: false,
+		},
+		{
+			name: "macth annotation value.",
+			secret: corev1.Secret{
+				ObjectMeta: metav1.ObjectMeta{
+					Annotations: map[string]string{
+						"annotaiton.key":  "t",
+						"annotaiton.key1": "t",
+						"annotaiton.key3": "t",
+					},
+				},
+			},
+			expectedAnnotaions: map[string]string{
+				"annotaiton.key":  "t",
+				"annotaiton.key1": "t2",
+			},
+			want:       false,
+			matchValue: true,
+		},
+	}
+
+	for _, tt := range cases {
+		t.Run(tt.name, func(t *testing.T) {
+			g.Expect(HasAnnotationsKey(tt.secret.Annotations, tt.expectedAnnotaions, tt.matchValue)).To(Equal(tt.want))
+		})
+	}
 }
