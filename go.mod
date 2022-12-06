@@ -19,7 +19,7 @@ require (
 	github.com/jarcoal/httpmock v1.0.8
 	github.com/onsi/ginkgo/v2 v2.1.4
 	github.com/onsi/gomega v1.19.0
-	github.com/opencontainers/image-spec v1.0.3-0.20220114050600-8b9d41f48198
+	github.com/opencontainers/image-spec v1.1.0-rc2
 	github.com/opentracing/opentracing-go v1.1.0
 	github.com/prometheus/client_golang v1.12.1
 	github.com/uber/jaeger-client-go v2.29.1+incompatible
@@ -53,6 +53,7 @@ require (
 	github.com/tektoncd/pipeline v0.37.1
 	golang.org/x/net v0.0.0-20220225172249-27dd8689420f
 	k8s.io/cli-runtime v0.23.9
+	oras.land/oras-go/v2 v2.0.0-rc.5
 )
 
 require (
@@ -154,7 +155,7 @@ require (
 )
 
 replace (
-	github.com/opencontainers/image-spec => github.com/opencontainers/image-spec v1.0.2-0.20210819154149-5ad6f50d6283
+	github.com/opencontainers/image-spec => github.com/opencontainers/image-spec v1.1.0-rc2
 	github.com/tektoncd/pipeline v0.37.1 => github.com/katanomi/pipeline v0.37.1-0.20220817070949-43570c13b315
 	go.uber.org/zap => github.com/katanomi/zap v1.18.2 // indirect
 )
