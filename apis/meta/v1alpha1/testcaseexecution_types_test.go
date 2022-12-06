@@ -92,10 +92,18 @@ func Test_executorFromNote(t *testing.T) {
 			},
 		},
 		{
-			name: "allow both is empty",
+			name: "allow special chars",
 			note: "[createdBy: xiangmu@._-|xiangmu@-._]",
 			want: &UserSpec{
 				Name:  "xiangmu@._-",
+				Email: "xiangmu@-._",
+			},
+		},
+		{
+			name: "allow space in name",
+			note: "[createdBy: xiang mu ._-|xiangmu@-._]",
+			want: &UserSpec{
+				Name:  "xiang mu ._-",
 				Email: "xiangmu@-._",
 			},
 		},
