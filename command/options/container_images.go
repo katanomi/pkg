@@ -19,30 +19,43 @@ package options
 import (
 	"context"
 
+	metav1alpha1 "github.com/katanomi/pkg/apis/meta/v1alpha1"
+	"github.com/katanomi/pkg/artifacts"
 	pkgargs "github.com/katanomi/pkg/command/args"
 	"github.com/spf13/cobra"
 	"k8s.io/apimachinery/pkg/util/validation/field"
-	"oras.land/oras-go/v2/registry"
 )
 
 // ContainerImagesOption describe container images option
 type ContainerImagesOption struct {
 	ContainerImages []string
+	Type            metav1alpha1.ArtifactType
 
-	references    []registry.Reference
+	references []artifacts.URI
+	parseErrs  field.ErrorList
+
 	requiredTag   bool
 	requiredValue bool
+	withoutDigest bool
 }
 
 // Setup init container images from args
 func (m *ContainerImagesOption) Setup(ctx context.Context, _ *cobra.Command, args []string) (err error) {
 	m.ContainerImages, _ = pkgargs.GetArrayValues(ctx, args, "container-images")
+	if m.Type == "" {
+		m.Type = metav1alpha1.OCIContainerImageArtifactParameterType
+	}
 	return nil
 }
 
 // GetReferences returns references of the container-images.
-func (m *ContainerImagesOption) GetReferences() []registry.Reference {
+func (m *ContainerImagesOption) GetReferences() []artifacts.URI {
 	return m.references
+}
+
+// GetParseError returns references of the container-images.
+func (m *ContainerImagesOption) GetParseError() field.ErrorList {
+	return m.parseErrs
 }
 
 // SetTagRequired set tag is not an empty tag.
@@ -57,26 +70,35 @@ func (m *ContainerImagesOption) SetValueRequired(required bool) *ContainerImages
 	return m
 }
 
+// SetWithoutDigest set tag is not an empty tag.
+func (m *ContainerImagesOption) SetWithoutDigest(required bool) *ContainerImagesOption {
+	m.withoutDigest = required
+	return m
+}
+
 // ValidateReferences check if the container images is valid
-func (m *ContainerImagesOption) ValidateReferences(path *field.Path, references []registry.Reference) (errs field.ErrorList) {
+func (m *ContainerImagesOption) ValidateReferences(path *field.Path, references []artifacts.URI) (errs field.ErrorList) {
 	if m.requiredValue && len(references) == 0 {
 		errs = append(errs, field.Required(path, "container-images must be set"))
 	}
 
 	for idx, reference := range references {
-		if err := reference.ValidateReference(); err != nil {
+		if err := reference.Validate(); err != nil {
 			errs = append(errs, field.Invalid(path.Index(idx), reference, err.Error()))
-		}
-
-		if !m.requiredTag {
 			continue
 		}
 
-		err := reference.ValidateReferenceAsTag()
-		if err != nil {
+		if err := reference.ValidateTag(); err != nil && m.requiredTag {
 			errs = append(errs, field.Invalid(path.Index(idx), reference, err.Error()))
+			continue
+		}
+
+		if m.withoutDigest && reference.DigestString() != "" {
+			errs = append(errs, field.Forbidden(path, "digest not allowed to be set."))
 		}
 	}
+
+	errs = append(errs, m.parseErrs...)
 	return
 }
 
@@ -86,13 +108,21 @@ func (m *ContainerImagesOption) Validate(path *field.Path) (errs field.ErrorList
 	return m.ValidateReferences(path, m.references)
 }
 
-func (m *ContainerImagesOption) parseContainerImages() {
+func (m *ContainerImagesOption) parseContainerImages() (errs field.ErrorList) {
 	if len(m.references) == 0 {
-		m.references = make([]registry.Reference, 0, len(m.ContainerImages))
+		m.parseErrs = field.ErrorList{}
+		m.references = make([]artifacts.URI, 0, len(m.ContainerImages))
 
-		for _, item := range m.ContainerImages {
-			reference, _ := registry.ParseReference(item)
+		path := field.NewPath("container-images")
+		for idx, item := range m.ContainerImages {
+			reference, err := artifacts.ParseURI(item, m.Type)
+			if err != nil {
+				m.parseErrs = append(m.parseErrs, field.Invalid(path.Index(idx), item, err.Error()))
+				continue
+			}
 			m.references = append(m.references, reference)
 		}
 	}
+
+	return m.parseErrs
 }

@@ -79,7 +79,7 @@ var _ = Describe("Test.ContainerImagesOption.Validate", func() {
 		})
 	})
 
-	Context("custom validate", func() {
+	Context("validate required tag", func() {
 		JustBeforeEach(func() {
 			imageOption = &ContainerImagesOption{
 				ContainerImages: []string{
@@ -89,6 +89,42 @@ var _ = Describe("Test.ContainerImagesOption.Validate", func() {
 				},
 			}
 			imageOption.SetTagRequired(true)
+		})
+
+		It("should return err", func() {
+			errs := imageOption.Validate(rootPath)
+			Expect(len(errs)).To(Equal(len(imageOption.ContainerImages)))
+		})
+	})
+
+	Context("validate without digest", func() {
+		JustBeforeEach(func() {
+			imageOption = &ContainerImagesOption{
+				ContainerImages: []string{
+					"docker.io/centos:test:1",
+					"127.0.0.1:8080/centos@sha256:744c8b3d4c8f5b30a1a78c5e3893c4d3f793919d1e14bcaee61028931e9f9929",
+				},
+			}
+			imageOption.SetWithoutDigest(true)
+		})
+
+		It("should return err", func() {
+			errs := imageOption.Validate(rootPath)
+			Expect(len(errs)).To(Equal(len(imageOption.ContainerImages)))
+		})
+	})
+
+	Context("validate without digest and tag", func() {
+		JustBeforeEach(func() {
+			imageOption = &ContainerImagesOption{
+				ContainerImages: []string{
+					"127.0.0.1:8080/centos:v1@sha256:744c8b3d4c8f5b30a1a78c5e3893c4d3f793919d1e14bcaee61028931e9f9929",
+					"127.0.0.1:8080/centos",
+				},
+			}
+			imageOption.SetWithoutDigest(true)
+			imageOption.SetTagRequired(true)
+			imageOption.SetValueRequired(true)
 		})
 
 		It("should return err", func() {
