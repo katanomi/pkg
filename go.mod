@@ -54,6 +54,7 @@ require (
 	github.com/tektoncd/pipeline v0.41.0
 	golang.org/x/net v0.1.0
 	k8s.io/cli-runtime v0.25.2
+	oras.land/oras-go/v2 v2.0.0-rc.5
 )
 
 require (
@@ -152,6 +153,6 @@ require (
 )
 
 replace (
-	github.com/opencontainers/image-spec => github.com/opencontainers/image-spec v1.0.2-0.20210819154149-5ad6f50d6283
+	github.com/opencontainers/image-spec => github.com/opencontainers/image-spec v1.1.0-rc2
 	go.uber.org/zap => github.com/katanomi/zap v1.18.2 // indirect
 )
