@@ -18,9 +18,13 @@ package artifacts
 
 import (
 	"fmt"
+	"net/url"
+	"regexp"
 	"strings"
 
 	metav1alpha1 "github.com/katanomi/pkg/apis/meta/v1alpha1"
+	"github.com/opencontainers/go-digest"
+	"oras.land/oras-go/v2/errdef"
 )
 
 // Protocol represent artifact transport protocol
@@ -33,6 +37,22 @@ var (
 	ProtocolHelmChart Protocol = "chart"
 	// ProtocolOCI oci protocol
 	ProtocolOCI Protocol = "oci"
+
+	// repositoryRegexp is adapted from the distribution implementation. The
+	// repository name set under OCI distribution spec is a subset of the docker
+	// spec. For maximum compatibility, the docker spec is verified client-side.
+	// Further checks are left to the server-side.
+	// References:
+	// - https://github.com/distribution/distribution/blob/v2.7.1/reference/regexp.go#L53
+	// - https://github.com/opencontainers/distribution-spec/blob/main/spec.md#pulling-manifests
+	repositoryRegexp = regexp.MustCompile(`^[a-z0-9]+(?:(?:[._]|__|[-]*)[a-z0-9]+)*(?:/[a-z0-9]+(?:(?:[._]|__|[-]*)[a-z0-9]+)*)*$`)
+
+	// tagRegexp checks the tag name.
+	// The docker and OCI spec have the same regular expression.
+	// Reference: https://github.com/opencontainers/distribution-spec/blob/main/spec.md#pulling-manifests
+	tagRegexp = regexp.MustCompile(`^[\w][\w.-]{0,127}$`)
+
+	ErrInvalidReference = "invalid reference"
 )
 
 // DigestAlgorithm artifact digest algorithm
@@ -77,6 +97,42 @@ func (u URI) Version() string {
 	} else {
 		return u.Tag
 	}
+}
+
+// String returns the uri string, preferably using tag as a reference.
+func (u URI) String() string {
+	ref := u.Host
+	if u.Path != "" {
+		ref = fmt.Sprintf("%s/%s", strings.Trim(ref, "/"), strings.Trim(u.Path, "/"))
+	}
+
+	if u.Tag != "" {
+		return fmt.Sprintf("%s:%s", ref, u.Tag)
+	}
+
+	if u.Digest != "" {
+		return fmt.Sprintf("%s@%s", ref, u.DigestString())
+	}
+
+	return ref
+}
+
+// WithDigestString return uri string, including tag and digest.
+func (u URI) WithDigestString() string {
+	ref := u.Host
+	if u.Path != "" {
+		ref = fmt.Sprintf("%s/%s", strings.Trim(ref, "/"), strings.Trim(u.Path, "/"))
+	}
+
+	if u.Tag != "" {
+		ref = fmt.Sprintf("%s:%s", ref, u.Tag)
+	}
+
+	if u.Digest != "" {
+		ref = fmt.Sprintf("%s@%s", ref, u.DigestString())
+	}
+
+	return ref
 }
 
 // ParseURI parse uri to URI struct
@@ -130,4 +186,57 @@ func ParseURI(uri string, t metav1alpha1.ArtifactType) (URI, error) {
 	}
 
 	return u, nil
+}
+
+// ValidateHost validates the host.
+func (u URI) ValidateHost() error {
+	if _, err := url.ParseRequestURI("sample://" + u.Host); err != nil {
+		return fmt.Errorf("%s: invalid registry %s", errdef.ErrInvalidReference, err.Error())
+	}
+	return nil
+}
+
+// ValidatePath validates the path.
+func (u URI) ValidatePath() error {
+	if !repositoryRegexp.MatchString(u.Path) {
+		return fmt.Errorf("%s: invalid repository %s", ErrInvalidReference, u.Path)
+	}
+	return nil
+}
+
+// ValidateTag validates the tag.
+func (u URI) ValidateTag() error {
+	if !tagRegexp.MatchString(u.Tag) {
+		return fmt.Errorf("%s: invalid tag %s", ErrInvalidReference, u.Tag)
+	}
+	return nil
+}
+
+// ValidateDigest validates the a digest.
+func (u URI) ValidateDigest() error {
+	if _, err := digest.Parse(u.DigestString()); err != nil {
+		return fmt.Errorf("%s: invalid digest %s; %v", ErrInvalidReference, u.DigestString(), err)
+	}
+	return nil
+}
+
+// Validate returns an error if the uri is invalid, otherwise returns empty.
+func (u URI) Validate() error {
+	if err := u.ValidateHost(); err != nil {
+		return err
+	}
+
+	if err := u.ValidatePath(); err != nil {
+		return err
+	}
+
+	if err := u.ValidateTag(); err != nil && u.Tag != "" {
+		return err
+	}
+
+	if err := u.ValidateDigest(); err != nil && u.DigestString() != "" {
+		return err
+	}
+
+	return nil
 }
