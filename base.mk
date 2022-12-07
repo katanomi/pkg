@@ -40,6 +40,7 @@ fmt: ##@Development Run go fmt against code.
 
 vet: ##@Development Run go vet against code.
 	go vet ./...
+	go vet -tags e2e ./...
 
 lint: golangcilint ##@Development Run golangci-lint against code.
 	$(GOLANGCILINT) run
@@ -47,10 +48,11 @@ lint: golangcilint ##@Development Run golangci-lint against code.
 ENVTEST_ASSETS_DIR=$(TOOLBIN)/testbin
 COVER_PROFILE ?= cover.out
 TEST_FILE ?= test.json
+GO_TEST_FLAGS ?= -v -json
 test: manifests generate fmt vet goimports ##@Development Run tests.
 	mkdir -p ${ENVTEST_ASSETS_DIR}
 	test -f ${ENVTEST_ASSETS_DIR}/setup-envtest.sh || curl -sSLo ${ENVTEST_ASSETS_DIR}/setup-envtest.sh https://raw.githubusercontent.com/kubernetes-sigs/controller-runtime/v0.8.3/hack/setup-envtest.sh
-	source ${ENVTEST_ASSETS_DIR}/setup-envtest.sh; fetch_envtest_tools $(ENVTEST_ASSETS_DIR); setup_envtest_env $(ENVTEST_ASSETS_DIR); go test -v -json -coverpkg=./... -coverprofile ${COVER_PROFILE} ./... | tee ${TEST_FILE}
+	source ${ENVTEST_ASSETS_DIR}/setup-envtest.sh; fetch_envtest_tools $(ENVTEST_ASSETS_DIR); setup_envtest_env $(ENVTEST_ASSETS_DIR); go test $(GO_TEST_FLAGS) -coverpkg=./... -coverprofile $(COVER_PROFILE) ./... | tee ${TEST_FILE}
 
 install: manifests kustomize ##@Deployment Install CRDs into the K8s cluster specified in ~/.kube/config.
 	$(KUSTOMIZE) build config/crd | kubectl apply -f -
@@ -105,6 +107,10 @@ golangcilint: ##@Setup Download golangci-lint locally if necessary
 YQ = $(TOOLBIN)/yq
 yq: ##@Setup Download yq locally if necessary.
 	$(call go-get-tool,$(YQ),github.com/mikefarah/yq/v4@v4.25.2)
+
+GOMOCK = $(TOOLBIN)/mockgen
+gomock: ## Download gomock locally if necessary.
+	$(call go-get-tool,$(GOMOCK),github.com/golang/mock/mockgen@v1.6.0)
 
 # go-get-tool will 'go get' any package $2 and install it to $1.
 PROJECT_DIR := $(shell dirname $(abspath $(lastword $(MAKEFILE_LIST))))

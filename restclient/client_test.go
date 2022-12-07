@@ -36,3 +36,16 @@ func TestClientContext(t *testing.T) {
 	ctx = WithRESTClient(ctx, clt)
 	g.Expect(RESTClient(ctx)).To(Equal(clt))
 }
+
+// func TestHttpClientContext(t *testing.T) {
+// 	g := NewGomegaWithT(t)
+
+// 	ctx := context.TODO()
+
+// 	clt := HttpRESTClient(ctx)
+// 	g.Expect(clt).To(BeNil())
+
+// 	clt = resty.New()
+// 	ctx = WithHttpRESTClient(ctx, clt)
+// 	g.Expect(HttpRESTClient(ctx)).To(Equal(clt))
+// }

@@ -42,6 +42,8 @@ require (
 	yunion.io/x/pkg v0.0.0-20210218105412-13a69f60034c
 )
 
+require k8s.io/utils v0.0.0-20210111153108-fddb29f9d009
+
 require (
 	contrib.go.opencensus.io/exporter/ocagent v0.7.1-0.20200907061046-05415f1de66d // indirect
 	contrib.go.opencensus.io/exporter/prometheus v0.3.0 // indirect
@@ -110,7 +112,6 @@ require (
 	k8s.io/apiextensions-apiserver v0.20.7 // indirect
 	k8s.io/component-base v0.20.7 // indirect
 	k8s.io/klog v1.0.0 // indirect
-	k8s.io/utils v0.0.0-20210111153108-fddb29f9d009 // indirect
 	sigs.k8s.io/structured-merge-diff/v4 v4.0.3 // indirect
 )
 
