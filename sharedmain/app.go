@@ -25,6 +25,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
+	"net"
 	"net/http"
 	"sync"
 	"time"
@@ -554,18 +555,20 @@ func (a *AppBuilder) Run() error {
 
 	// handle healthz and readiness api
 	a.startFunc = append(a.startFunc, func(ctx context.Context) error {
-		defaultContainer := restful.NewContainer()
-		defaultContainer.Add(route.NewDefaultService())
 		port := 8100
 		srv := &http.Server{
-			Addr:    fmt.Sprintf(":%d", port),
-			Handler: defaultContainer,
+			Addr: fmt.Sprintf(":%d", port),
+			Handler: http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				host, _, _ := net.SplitHostPort(r.Host)
+				http.Redirect(w, r, fmt.Sprintf("https://%s:8443", host)+r.RequestURI, http.StatusMovedPermanently)
+			}),
 		}
 		return srv.ListenAndServe()
 	})
 
 	// adds a http server if there are any endpoints registered
 	if a.container != nil && len(a.container.RegisteredWebServices()) > 0 {
+		a.container.Add(route.NewDefaultService())
 		a.container.Add(route.NewDocService(a.container.RegisteredWebServices()...))
 
 		a.startFunc = append(a.startFunc, func(ctx context.Context) error {
