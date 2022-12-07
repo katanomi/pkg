@@ -20,12 +20,12 @@ import (
 	"github.com/spf13/pflag"
 )
 
-// OCIContainerImageBuildURLOption describe ociContainerImageBuild-url option
-type OCIContainerImageBuildURLOption struct {
+// ResultsOCIContainerImageBuildURLOption describe ociContainerImageBuild-url option
+type ResultsOCIContainerImageBuildURLOption struct {
 	OciContainerImageBuildUrl string
 }
 
 // AddFlags add flags to options
-func (m *OCIContainerImageBuildURLOption) AddFlags(flags *pflag.FlagSet) {
-	flags.StringVar(&m.OciContainerImageBuildUrl, "ociContainerImageBuild-url", "ociContainerImageBuild-url", `the path to save ociContainerImageBuild-url, details: https://github.com/katanomi/spec/blob/main/docs/core/contracts/3.core.task-contracts.ociContainerImageBuild.md#results`)
+func (m *ResultsOCIContainerImageBuildURLOption) AddFlags(flags *pflag.FlagSet) {
+	flags.StringVar(&m.OciContainerImageBuildUrl, "results-ociContainerImageBuild-url", "", `the path to save ociContainerImageBuild-url, details: https://github.com/katanomi/spec/blob/main/docs/core/contracts/3.core.task-contracts.ociContainerImageBuild.md#results`)
 }
