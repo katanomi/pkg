@@ -18,6 +18,10 @@ package options
 
 import "github.com/spf13/pflag"
 
+const (
+	PathKtnSettingCli = "ktn-settings"
+)
+
 // SourcePathOption describe source path option
 type SourcePathOption struct {
 	SourcePath string
@@ -47,7 +51,7 @@ type KatanomiPathOption struct {
 
 // AddFlags add flags to options
 func (p *KatanomiPathOption) AddFlags(flags *pflag.FlagSet) {
-	flags.StringVar(&p.SharePath, "share-path", "", `the path shared between steps`)
-	flags.StringVar(&p.BinPath, "bin-path", "", `the path contains binaries`)
+	flags.StringVar(&p.SharePath, "share-path", "/katanomi/data", `the path shared between steps`)
+	flags.StringVar(&p.BinPath, "bin-path", "/katanomi/bin", `the path contains binaries`)
 	flags.StringVar(&p.ConfigPath, "config-path", "", `the path contains configs`)
 }
