@@ -59,9 +59,13 @@ func (d *RegistrySchemeDetectionBySecret) WithSecretRef(secretRef *corev1.Object
 // DetectScheme detect registry scheme
 // If the secret exists, the parameter of username and password will be ignored.
 // These parameters are reserved only to satisfy the interface `RegistrySchemeDetection`
-func (d *RegistrySchemeDetectionBySecret) DetectScheme(ctx context.Context, registry, username, password string) (string, error) {
+func (d *RegistrySchemeDetectionBySecret) DetectScheme(ctx context.Context, registry string, auths ...AuthOption) (string, error) {
+	if d.DefaultRegistrySchemeDetection == nil {
+		return "", fmt.Errorf("default registry scheme detection is nil")
+	}
+
 	log := logging.FromContext(ctx).With("registry", registry)
-	cClient := d.Client
+
 	if d.secretRef != nil && d.secretRef.Name != "" {
 		clt := kclient.Client(ctx)
 		if clt == nil {
@@ -80,17 +84,15 @@ func (d *RegistrySchemeDetectionBySecret) DetectScheme(ctx context.Context, regi
 			log.Infow("failed to get username and password from secret", "error", err)
 			return "", fmt.Errorf("failed to get auth from %s: %w", secretKey.String(), err)
 		}
-		cClient = d.Client.SetBasicAuth(username, password)
-	} else if username != "" && password != "" {
-		cClient = d.Client.SetBasicAuth(username, password)
+		auths = append(auths, WithBasicAuth(username, password))
 	}
-	d.DefaultRegistrySchemeDetection.Client = cClient
-	return d.DefaultRegistrySchemeDetection.DetectScheme(ctx, registry, username, password)
+
+	return d.DefaultRegistrySchemeDetection.DetectScheme(ctx, registry, auths...)
 }
 
 // DetectSchemeWithDefault detect registry scheme, if detect failed, return default scheme
-func (d *RegistrySchemeDetectionBySecret) DetectSchemeWithDefault(ctx context.Context, registry, username, password, defaultScheme string) string {
-	scheme, err := d.DetectScheme(ctx, registry, username, password)
+func (d *RegistrySchemeDetectionBySecret) DetectSchemeWithDefault(ctx context.Context, registry, defaultScheme string, auths ...AuthOption) string {
+	scheme, err := d.DetectScheme(ctx, registry, auths...)
 	if err != nil {
 		return defaultScheme
 	}

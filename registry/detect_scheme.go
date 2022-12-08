@@ -27,13 +27,16 @@ import (
 	"knative.dev/pkg/logging"
 )
 
+// AuthOption auth option for registry client
+type AuthOption func(*resty.Client) *resty.Client
+
 // RegistrySchemeDetection detect registry scheme
 type RegistrySchemeDetection interface {
 	// DetectScheme detect registry scheme
-	DetectScheme(ctx context.Context, registry, username, password string) (string, error)
+	DetectScheme(ctx context.Context, registry string, auths ...AuthOption) (string, error)
 
 	// DetectSchemeWithDefault detect registry scheme, if detect failed, return default scheme
-	DetectSchemeWithDefault(ctx context.Context, registry, username, password, defaultScheme string) string
+	DetectSchemeWithDefault(ctx context.Context, registry, defaultScheme string, auths ...AuthOption) string
 }
 
 // DefaultRegistrySchemeDetection default scheme detection
@@ -50,6 +53,27 @@ type DefaultRegistrySchemeDetection struct {
 
 	// httpClient for testing only
 	httpClient *http.Client
+}
+
+// WithBasicAuth set basic auth for registry client
+func WithBasicAuth(username, password string) AuthOption {
+	return func(client *resty.Client) *resty.Client {
+		return client.SetBasicAuth(username, password)
+	}
+}
+
+// WithAuthToken set auth token for registry client
+func WithAuthToken(token string) AuthOption {
+	return func(client *resty.Client) *resty.Client {
+		return client.SetAuthToken(token)
+	}
+}
+
+// WithAuthScheme set auth scheme for registry client
+func WithAuthScheme(scheme string) AuthOption {
+	return func(client *resty.Client) *resty.Client {
+		return client.SetScheme(scheme)
+	}
 }
 
 // NewDefaultRegistrySchemeDetection create default registry scheme detection
@@ -77,7 +101,7 @@ func DefaultDetectImageRegistryScheme(registryHost string, registryClient *http.
 }
 
 // DetectScheme detect registry scheme
-func (d *DefaultRegistrySchemeDetection) DetectScheme(ctx context.Context, registry, username, password string) (string, error) {
+func (d *DefaultRegistrySchemeDetection) DetectScheme(ctx context.Context, registry string, auths ...AuthOption) (string, error) {
 
 	if strings.HasPrefix(registry, "http://") {
 		return "http", nil
@@ -98,10 +122,13 @@ func (d *DefaultRegistrySchemeDetection) DetectScheme(ctx context.Context, regis
 		return "", fmt.Errorf("registry client is nil")
 	}
 
-	httpClient := d.Client.GetClient()
-	if username != "" && password != "" {
-		httpClient = d.Client.SetBasicAuth(username, password).GetClient()
+	// clone a new client to avoid interactions between multiple requests
+	cloneClient := *d.Client
+	restyClient := &cloneClient
+	for _, auth := range auths {
+		restyClient = auth(restyClient)
 	}
+	httpClient := restyClient.GetClient()
 	if d.httpClient != nil {
 		// for testing only
 		httpClient = d.httpClient
@@ -121,8 +148,8 @@ func (d *DefaultRegistrySchemeDetection) DetectScheme(ctx context.Context, regis
 }
 
 // DetectSchemeWithDefault detect registry scheme, if detect failed, return default scheme
-func (d *DefaultRegistrySchemeDetection) DetectSchemeWithDefault(ctx context.Context, registry, username, password, defaultScheme string) string {
-	scheme, err := d.DetectScheme(ctx, registry, username, password)
+func (d *DefaultRegistrySchemeDetection) DetectSchemeWithDefault(ctx context.Context, registry, defaultScheme string, auths ...AuthOption) string {
+	scheme, err := d.DetectScheme(ctx, registry, auths...)
 	if err != nil {
 		return defaultScheme
 	}

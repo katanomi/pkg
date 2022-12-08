@@ -66,7 +66,7 @@ var _ = Describe("Test.RegistrySchemeDetectionBySecret", func() {
 	})
 
 	JustBeforeEach(func() {
-		protocols, err = detect.DetectScheme(ctx, registryHost, "", "")
+		protocols, err = detect.DetectScheme(ctx, registryHost)
 	})
 
 	AfterEach(func() {
@@ -85,7 +85,7 @@ var _ = Describe("Test.RegistrySchemeDetectionBySecret", func() {
 			Expect(err.Error()).To(BeEquivalentTo("registry client is nil"))
 
 			By("with default scheme")
-			protocols = detect.DetectSchemeWithDefault(ctx, registryHost, "", "", "https")
+			protocols = detect.DetectSchemeWithDefault(ctx, registryHost, "https")
 			Expect(protocols).To(Equal("https"))
 		})
 	})
