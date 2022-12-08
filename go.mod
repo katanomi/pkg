@@ -48,7 +48,9 @@ require (
 )
 
 require (
+	github.com/docker/distribution v2.8.1+incompatible
 	github.com/mitchellh/mapstructure v1.5.0
+	github.com/opencontainers/go-digest v1.0.0
 	github.com/spf13/cobra v1.6.0
 	github.com/spf13/pflag v1.0.5
 	github.com/tektoncd/pipeline v0.41.0
@@ -105,7 +107,6 @@ require (
 	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/monochromegane/go-gitignore v0.0.0-20200626010858-205db1a8cc00 // indirect
 	github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 // indirect
-	github.com/opencontainers/go-digest v1.0.0 // indirect
 	github.com/peterbourgon/diskv v2.0.1+incompatible // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/prometheus/client_model v0.2.0 // indirect
