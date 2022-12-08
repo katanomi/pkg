@@ -123,3 +123,4 @@ func KatanomiConfigManager(ctx context.Context) *Manager {
 	}
 	return val.(*Manager)
 }
+
