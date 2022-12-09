@@ -81,10 +81,11 @@ func (d *RegistrySchemeDetectionBySecret) DetectScheme(ctx context.Context, regi
 		}
 		username, password, err := getDockerAuthFromSecret(registry, secret)
 		if err != nil {
-			log.Infow("failed to get username and password from secret", "error", err)
-			return "", fmt.Errorf("failed to get auth from %s: %w", secretKey.String(), err)
+			log.Debugw("failed to get username and password from secret", "error", err)
 		}
-		auths = append(auths, WithBasicAuth(username, password))
+		if username != "" && password != "" {
+			auths = append(auths, WithBasicAuth(username, password))
+		}
 	}
 
 	return d.DefaultRegistrySchemeDetection.DetectScheme(ctx, registry, auths...)

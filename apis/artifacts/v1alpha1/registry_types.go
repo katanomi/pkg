@@ -19,6 +19,7 @@ package v1alpha1
 import (
 	"encoding/json"
 	"fmt"
+	"strings"
 )
 
 // ImageConfig define sever and multiple docker credentials related content.
@@ -59,6 +60,7 @@ func GetAuthFromDockerConfigJson(registry string, dockerConfigJsonBytes []byte) 
 		return "", "", fmt.Errorf("no auths found")
 	}
 
+	registry = strings.TrimPrefix(strings.TrimPrefix(registry, "http://"), "https://")
 	for _, address := range []string{registry, "http://" + registry, "https://" + registry} {
 		if auth, ok := dockerConfig.Auths[address]; ok {
 			return auth.Username, auth.Password, nil
