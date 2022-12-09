@@ -156,25 +156,25 @@ var _ = Describe("Test.RegistrySchemeDetectionBySecret", func() {
 			})
 		})
 
-		When("secret type is dockerconfig but not matched", func() {
+		When("secret type is dockerconfig but not matched, no authentication information", func() {
 			BeforeEach(func() {
 				detect = detect.WithSecretRef(ref)
 				Expect(testing.LoadKubeResources("testdata/secret.dockerconfig.yaml", clt)).To(Succeed())
 			})
-			It("should return error", func() {
-				Expect(err).ShouldNot(BeNil())
-				Expect(err.Error()).To(ContainSubstring(`no auth found for registry:`))
+			It("should NOT return error", func() {
+				Expect(err).Should(BeNil())
+				Expect(protocols).Should(Equal("https"))
 			})
 		})
 
-		When("secret type is token", func() {
+		When("secret type is token, no authentication information", func() {
 			BeforeEach(func() {
 				detect = detect.WithSecretRef(ref)
 				Expect(testing.LoadKubeResources("testdata/secret.token.yaml", clt)).To(Succeed())
 			})
-			It("should return error", func() {
-				Expect(err).ShouldNot(BeNil())
-				Expect(err.Error()).To(Equal(`failed to get auth from default/secret-name: unsupported secret type kubernetes.io/service-account-token`))
+			It("should NOT return error", func() {
+				Expect(err).Should(BeNil())
+				Expect(protocols).Should(Equal("https"))
 			})
 		})
 	})
