@@ -123,6 +123,13 @@ func (b *BuildRunGitStatus) GetValWithKey(ctx context.Context, path *field.Path)
 	//
 	stringReplacements[path.Child("version").String()] = b.Version
 	//
+	variantsMap := map[string]string{}
+	for variant, version := range b.VersionVariants {
+		// the key is `version` not `versionVariants`, convenient for users.
+		variantsMap[path.Child("version").Child(variant).String()] = version
+	}
+	stringReplacements = ksubstitute.MergeMap(stringReplacements, variantsMap)
+	//
 	stringReplacements = ksubstitute.MergeMap(stringReplacements, b.Revision.GetValWithKey(ctx, path.Child("revision")))
 	//
 	stringReplacements = ksubstitute.MergeMap(stringReplacements, b.LastCommit.GetValWithKey(ctx, path.Child("lastCommit")))
