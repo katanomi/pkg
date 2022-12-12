@@ -19,6 +19,7 @@ package v1alpha1
 import (
 	"encoding/json"
 	"fmt"
+	"net/url"
 	"strings"
 )
 
@@ -60,8 +61,14 @@ func GetAuthFromDockerConfigJson(registry string, dockerConfigJsonBytes []byte) 
 		return "", "", fmt.Errorf("no auths found")
 	}
 
-	registry = strings.TrimPrefix(strings.TrimPrefix(registry, "http://"), "https://")
-	for _, address := range []string{registry, "http://" + registry, "https://" + registry} {
+	candidate := []string{registry, "https://" + registry, "http://" + registry}
+	tmpURL := "https://" + strings.TrimPrefix(strings.TrimPrefix(registry, "http://"), "https://")
+	u, err := url.Parse(tmpURL)
+	if err == nil {
+		candidate = append(candidate, u.Host, "https://"+u.Host, "http://"+u.Host)
+	}
+
+	for _, address := range candidate {
 		if auth, ok := dockerConfig.Auths[address]; ok {
 			return auth.Username, auth.Password, nil
 		}
