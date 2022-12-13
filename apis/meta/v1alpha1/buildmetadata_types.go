@@ -71,6 +71,11 @@ type BuildRunGitStatus struct {
 	// Version is the version generated for this git revision
 	// +optional
 	Version string `json:"version,omitempty"`
+
+	// VersionVariants are different variants generated based on version
+	// key is the name of the variant, value is the value after the variant.
+	// +optional
+	VersionVariants map[string]string `json:"versionVariants,omitempty"`
 }
 
 // BuildGitBranchStatus represent branch status of build run

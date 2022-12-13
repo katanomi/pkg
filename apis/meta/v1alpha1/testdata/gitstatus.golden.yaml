@@ -1,5 +1,8 @@
 url: https://github.com/katanomi/pkg
 version: v1.2.3
+versionVariants:
+  docker: v1.2.3
+  custom: v1.2.3-custom
 revision:
   raw: refs/pulls/123/head
   id: "123"

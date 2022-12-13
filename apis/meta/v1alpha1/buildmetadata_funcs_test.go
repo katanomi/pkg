@@ -140,9 +140,11 @@ var _ = Describe("Test.BuildRunGitStatus.GetValWithKey", func() {
 	When("struct is not empty", func() {
 		It("should have values", func() {
 			Expect(actual).To(Equal(map[string]string{
-				"git":         "",
-				"git.url":     "https://github.com/katanomi/pkg",
-				"git.version": "v1.2.3",
+				"git":                "",
+				"git.url":            "https://github.com/katanomi/pkg",
+				"git.version":        "v1.2.3",
+				"git.version.docker": "v1.2.3",
+				"git.version.custom": "v1.2.3-custom",
 				//
 				"git.revision":      "refs/pulls/123/head",
 				"git.revision.raw":  "refs/pulls/123/head",
