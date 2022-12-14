@@ -124,6 +124,12 @@ func TestUnitTestsResultIsEmpty(t *testing.T) {
 		g.Expect(object.IsEmpty()).To(gomega.BeFalse())
 	})
 
+	t.Run("has results with zero values", func(t *testing.T) {
+		g := gomega.NewGomegaWithT(t)
+		object := UnitTestsResult{TestResult: &TestResult{PassedTestsRate: "0.00"}}
+		g.Expect(object.IsEmpty()).To(gomega.BeFalse())
+	})
+
 	t.Run("nil results with coverage", func(t *testing.T) {
 		g := gomega.NewGomegaWithT(t)
 		object := UnitTestsResult{Coverage: &TestCoverage{Lines: "1"}}

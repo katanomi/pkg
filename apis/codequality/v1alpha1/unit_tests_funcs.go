@@ -65,7 +65,7 @@ func (t *TestResult) IsEmpty() bool {
 	if t == nil {
 		return true
 	}
-	return t.Failed+t.Passed+t.Skipped == 0
+	return t.Failed+t.Passed+t.Skipped == 0 && t.PassedTestsRate == ""
 }
 
 // GetObjectWithValues inits an object based on a json.path values map
