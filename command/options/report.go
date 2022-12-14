@@ -22,8 +22,8 @@ import (
 	"path"
 
 	pkgargs "github.com/katanomi/pkg/command/args"
+	"github.com/katanomi/pkg/common"
 	"github.com/katanomi/pkg/report"
-	"github.com/samber/lo"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 	"k8s.io/apimachinery/pkg/util/validation/field"
@@ -63,7 +63,7 @@ func (r *ReportPathsByTypesOption) Setup(ctx context.Context, cmd *cobra.Command
 	base := field.NewPath("report-configs")
 	for t, p := range pathByTypes {
 		reportType := report.ReportType(t)
-		if !lo.Contains(report.SupportedTypes, reportType) {
+		if !common.Contains(report.SupportedTypes, reportType) {
 			errs = append(errs, field.TypeInvalid(base, t, "Not support report type"))
 			continue
 		}

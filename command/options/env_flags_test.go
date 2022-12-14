@@ -18,34 +18,99 @@ package options
 
 import (
 	"context"
-	"testing"
 
+	cmdArgs "github.com/katanomi/pkg/command/args"
+	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 )
 
-func TestEnvFlagsOption(t *testing.T) {
-	g := NewGomegaWithT(t)
-	ctx := context.Background()
-	obj := struct {
-		EnvFlagsOption
-	}{}
-	args := []string{
-		"--env-flags", "FOO=BAR",
-	}
-	err := RegisterSetup(&obj, ctx, nil, args)
-	g.Expect(err).Should(Succeed())
-	g.Expect(obj.EnvFlags).To(Equal(map[string]string{
-		"FOO": "BAR",
-	}))
+var _ = Describe("Test.EnvFlagsOption.Setup", func() {
+	var (
+		ctx context.Context
+		obj struct {
+			EnvFlagsOption
+		}
+		args []string
+		err  error
+	)
 
-	// empty args
-	emptyArgs := []string{}
-	g.Expect(RegisterSetup(&obj, ctx, nil, emptyArgs)).ShouldNot(HaveOccurred())
+	BeforeEach(func() {
+		ctx = context.Background()
+		obj = struct{ EnvFlagsOption }{EnvFlagsOption: EnvFlagsOption{}}
+	})
 
-	// invalid args
-	invalidArgs := []string{
-		"--env-flags", "XXXX",
-	}
-	g.Expect(RegisterSetup(&obj, ctx, nil, invalidArgs)).Should(HaveOccurred())
+	JustBeforeEach(func() {
+		err = RegisterSetup(&obj, ctx, nil, args)
+	})
 
-}
+	When("args is empty", func() {
+		BeforeEach(func() {
+			args = []string{}
+		})
+		It("returns nil err", func() {
+			Expect(err).ShouldNot(HaveOccurred())
+		})
+	})
+
+	When("invalid env items", func() {
+		BeforeEach(func() {
+			args = []string{
+				"--env-flags", "foo", "bar",
+			}
+		})
+		It("return error message with invalid env items", func() {
+			Expect(err.Error()).Should(Equal("invalid env-flags: invalid env items: [foo bar]"))
+		})
+	})
+
+	When("env items with duplicated keys", func() {
+		BeforeEach(func() {
+			args = []string{
+				"--env-flags", "foo=1", "foo=2",
+			}
+		})
+		It("return error message with duplicated key env items", func() {
+			Expect(err.Error()).Should(Equal("invalid env-flags: duplicated env keys: [foo]"))
+		})
+	})
+
+	When("with both invalid items and duplicated keys", func() {
+		BeforeEach(func() {
+			args = []string{
+				"--env-flags", "foo=1", "foo=2", "bar",
+			}
+		})
+		It("return error message with duplicated key and invalid env items", func() {
+			Expect(err.Error()).Should(Equal("invalid env-flags: duplicated env keys: [foo],invalid env items: [bar]"))
+		})
+	})
+
+	When("with required validation option and empty env-flags", func() {
+		BeforeEach(func() {
+			args = []string{
+				"--env-flags",
+			}
+			ctx = WithValuesValidationOpts(ctx, []cmdArgs.ValuesValidateOption{cmdArgs.ValuesValidationOptRequired})
+
+		})
+		It("return error message with duplicated key and invalid env items", func() {
+			Expect(err.Error()).Should(Equal("empty values"))
+		})
+	})
+
+	When("with valid env-flags", func() {
+		BeforeEach(func() {
+			args = []string{
+				"--env-flags", "FOO=BAR",
+			}
+		})
+
+		It("should return valid key pairs", func() {
+			Expect(err).Should(Succeed())
+			Expect(obj.EnvFlags).To(Equal(map[string]string{
+				"FOO": "BAR",
+			}))
+		})
+	})
+
+})

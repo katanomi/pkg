@@ -18,24 +18,39 @@ package options
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/joho/godotenv"
 	pkgargs "github.com/katanomi/pkg/command/args"
 	"github.com/spf13/cobra"
 )
 
+type envValuesValidationKey struct{}
+
 // EnvFlagsOption describe env flags option
 type EnvFlagsOption struct {
 	EnvFlags map[string]string
 }
 
+// ValuesValidationOptionsFrom returns the value of the envValuesValidationKey key on the ctx
+func ValuesValidationOptionsFrom(ctx context.Context) ([]pkgargs.ValuesValidateOption, bool) {
+	opts, ok := ctx.Value(envValuesValidationKey{}).([]pkgargs.ValuesValidateOption)
+	return opts, ok
+}
+
+// WithValuesValidationOpts returns a copy of parent in which the []ValuesValidateOption is set
+func WithValuesValidationOpts(parent context.Context, opts []pkgargs.ValuesValidateOption) context.Context {
+	return context.WithValue(parent, envValuesValidationKey{}, opts)
+}
+
 // Setup defines how to start with env-flags option
 func (p *EnvFlagsOption) Setup(ctx context.Context, cmd *cobra.Command, args []string) (err error) {
-	p.EnvFlags, _ = pkgargs.GetKeyValues(ctx, args, "env-flags")
-	pairs, _ := pkgargs.GetArrayValues(ctx, args, "env-flags")
-	if len(pairs) != len(p.EnvFlags) {
-		return fmt.Errorf("invalid env-flags")
+	opts, ok := ValuesValidationOptionsFrom(ctx)
+	if !ok {
+		opts = []pkgargs.ValuesValidateOption{pkgargs.ValuesValidationOptDuplicatedKeys}
+	}
+	p.EnvFlags, err = pkgargs.GetKeyValues(ctx, args, "env-flags", opts...)
+	if err != nil {
+		return err
 	}
 	return nil
 }
