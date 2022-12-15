@@ -174,7 +174,47 @@ var _ = Describe("FilterCompletedTaskRun", func() {
 		})
 		It("should return TaskRun 3", func() {
 			Expect(taskRunList).To(Equal(expectList))
+		})
+	})
+})
 
+var _ = Describe("GetPipelineRunOwner", func() {
+
+	type result struct {
+		taskrun pipelinev1beta1.TaskRun
+		exist   bool
+		prName  string
+	}
+
+	var (
+		withOwnerTR, noOwnerTR pipelinev1beta1.TaskRun
+		expects                []result
+	)
+
+	BeforeEach(func() {
+		Expect(ktesting.LoadYAML("testdata/TaskRun.WithOwner.yaml", &withOwnerTR)).To(Succeed())
+		Expect(ktesting.LoadYAML("testdata/TaskRun.Completed.yaml", &noOwnerTR)).To(Succeed())
+		expects = []result{
+			{
+				withOwnerTR,
+				true,
+				"complete",
+			},
+			{
+				noOwnerTR,
+				false,
+				"",
+			},
+		}
+	})
+
+	Context("return owner if exist", func() {
+		It("return owner as expect", func() {
+			for _, r := range expects {
+				exist, owner := GetPipelineRunOwner(r.taskrun)
+				Expect(exist).To(Equal(r.exist))
+				Expect(owner.Name).To(Equal(r.prName))
+			}
 		})
 	})
 })
