@@ -93,14 +93,14 @@ func NewDefaultRegistrySchemeDetection(client *resty.Client, insecure, cache boo
 }
 
 // DefaultDetectImageRegistryScheme detect image registry scheme using default registry pinger
-func DefaultDetectImageRegistryScheme(registryHost string, registryClient *http.Client, insecure bool) (string, error) {
+func DefaultDetectImageRegistryScheme(ctx context.Context, registryHost string, registryClient *http.Client, insecure bool) (string, error) {
 	registryPinger := &DefaultRegistryPinger{
 		Client:   registryClient,
 		Insecure: insecure,
 	}
 
 	// verify the registry connection now to avoid future surprises
-	registryURL, err := registryPinger.Ping(registryHost)
+	registryURL, err := registryPinger.Ping(ctx, registryHost)
 	if err != nil {
 		return "", fmt.Errorf("failed to ping registry %s: %v", registryHost, err)
 	}
@@ -141,7 +141,7 @@ func (d *DefaultRegistrySchemeDetection) DetectScheme(ctx context.Context, regis
 		httpClient = d.httpClient
 	}
 
-	scheme, err := DefaultDetectImageRegistryScheme(registry, httpClient, d.Insecure)
+	scheme, err := DefaultDetectImageRegistryScheme(ctx, registry, httpClient, d.Insecure)
 	if err != nil {
 		log.Errorw("failed to detect registry scheme", "error", err)
 		return "", err

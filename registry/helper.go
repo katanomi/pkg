@@ -35,7 +35,7 @@ import (
 type RegistryPinger interface {
 	// Ping performs a health check against registry. It returns registry url qualified with schema unless an
 	// error occurs.
-	Ping(registry string) (*url.URL, error)
+	Ping(ctx context.Context, registry string) (*url.URL, error)
 }
 
 // DefaultRegistryPinger implements RegistryPinger.
@@ -46,7 +46,7 @@ type DefaultRegistryPinger struct {
 
 // Ping verifies that the integrated registry is ready, determines its transport protocol and returns its url
 // or error.
-func (drp *DefaultRegistryPinger) Ping(registry string) (*url.URL, error) {
+func (drp *DefaultRegistryPinger) Ping(ctx context.Context, registry string) (*url.URL, error) {
 	var (
 		registryURL *url.URL
 		err         error
@@ -55,7 +55,7 @@ func (drp *DefaultRegistryPinger) Ping(registry string) (*url.URL, error) {
 pathLoop:
 	// first try the new default / path, then fall-back to the obsolete /healthz endpoint
 	for _, path := range []string{"/", "/healthz"} {
-		registryURL, err = TryProtocolsWithRegistryURL(registry, drp.Insecure, func(u url.URL) error {
+		registryURL, err = TryProtocolsWithRegistryURL(ctx, registry, drp.Insecure, func(u url.URL) error {
 			u.Path = path
 			healthResponse, err := drp.Client.Get(u.String())
 			if err != nil {
@@ -103,7 +103,7 @@ func (*DryRunRegistryPinger) Ping(registry string) (*url.URL, error) {
 // TryProtocolsWithRegistryURL runs given action with different protocols until no error is returned. The
 // https protocol is the first attempt. If it fails and allowInsecure is true, http will be the next. Obtained
 // errors will be concatenated and returned.
-func TryProtocolsWithRegistryURL(registry string, allowInsecure bool, action func(registryURL url.URL) error) (*url.URL, error) {
+func TryProtocolsWithRegistryURL(ctx context.Context, registry string, allowInsecure bool, action func(registryURL url.URL) error) (*url.URL, error) {
 	errs := []error{}
 
 	if !strings.Contains(registry, "://") {
@@ -124,21 +124,16 @@ func TryProtocolsWithRegistryURL(registry string, allowInsecure bool, action fun
 	}
 	registry = url.Host
 
-	// TODO: change this method to provide a context
-	// this will fallback to a non-configurable logger
-	// and should be avoided
-	// better to provide a context and be able to pass
-	// a context with a configurable logger in it
-	log := logging.FromContext(context.TODO()).Named("TryProtocols")
+	log := logging.FromContext(ctx).Named("TryProtocols")
 	for _, proto := range protos {
-		log.Debugf("Trying protocol %s for the registry URL %s", proto, registry)
+		log.Debugw("Trying", "protocol", proto, "registry", registry)
 		url.Scheme = proto
 		err := action(*url)
 		if err == nil {
 			return url, nil
 		}
 
-		log.Debugf("Error with %s for %s: %v", proto, registry, err)
+		log.Debugw("Trying failed", "protocol", proto, "registry", registry, "error", err)
 		if _, ok := err.(*errcode.Errors); ok {
 			// we got a response back from the registry, so return it
 			return url, err
