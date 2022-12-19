@@ -118,30 +118,35 @@ func TryProtocolsWithRegistryURL(registry string, allowInsecure bool, action fun
 	case len(url.Scheme) > 0 && url.Scheme != "unset":
 		protos = []string{url.Scheme}
 	case allowInsecure || networkutils.IsPrivateAddress(registry):
-		protos = []string{"https", "http"}
+		protos = []string{HTTPS, HTTP}
 	default:
-		protos = []string{"https"}
+		protos = []string{HTTPS}
 	}
 	registry = url.Host
 
+	// TODO: change this method to provide a context
+	// this will fallback to a non-configurable logger
+	// and should be avoided
+	// better to provide a context and be able to pass
+	// a context with a configurable logger in it
 	log := logging.FromContext(context.TODO()).Named("TryProtocols")
 	for _, proto := range protos {
-		log.Infof("Trying protocol %s for the registry URL %s", proto, registry)
+		log.Debugf("Trying protocol %s for the registry URL %s", proto, registry)
 		url.Scheme = proto
 		err := action(*url)
 		if err == nil {
 			return url, nil
 		}
 
-		log.Infof("Error with %s for %s: %v", proto, registry, err)
+		log.Debugf("Error with %s for %s: %v", proto, registry, err)
 		if _, ok := err.(*errcode.Errors); ok {
 			// we got a response back from the registry, so return it
 			return url, err
 		}
 		errs = append(errs, err)
-		if proto == "https" && strings.Contains(err.Error(), "server gave HTTP response to HTTPS client") && !allowInsecure {
-			errs = append(errs, fmt.Errorf("\n* Append --force-insecure if you really want to prune the registry using insecure connection."))
-		} else if proto == "http" && strings.Contains(err.Error(), "malformed HTTP response") {
+		if proto == HTTPS && strings.Contains(err.Error(), "server gave HTTP response to HTTPS client") && !allowInsecure {
+			errs = append(errs, fmt.Errorf("\n* Append --force-insecure if you really want to prune the registry using insecure connection"))
+		} else if proto == HTTP && strings.Contains(err.Error(), "malformed HTTP response") {
 			errs = append(errs, fmt.Errorf("\n* Are you trying to connect to a TLS-enabled registry without TLS?"))
 		}
 	}

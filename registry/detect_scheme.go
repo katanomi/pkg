@@ -27,6 +27,13 @@ import (
 	"knative.dev/pkg/logging"
 )
 
+const (
+	// HTTP protocol for registry
+	HTTP = "http"
+	// HTTPS protol for registry
+	HTTPS = "https"
+)
+
 // AuthOption auth option for registry client
 type AuthOption func(*resty.Client) *resty.Client
 
@@ -104,10 +111,10 @@ func DefaultDetectImageRegistryScheme(registryHost string, registryClient *http.
 func (d *DefaultRegistrySchemeDetection) DetectScheme(ctx context.Context, registry string, auths ...AuthOption) (string, error) {
 
 	if strings.HasPrefix(registry, "http://") {
-		return "http", nil
+		return HTTP, nil
 	}
 	if strings.HasPrefix(registry, "https://") {
-		return "https", nil
+		return HTTPS, nil
 	}
 
 	log := logging.FromContext(ctx).With("registry", registry)
@@ -139,7 +146,7 @@ func (d *DefaultRegistrySchemeDetection) DetectScheme(ctx context.Context, regis
 		log.Errorw("failed to detect registry scheme", "error", err)
 		return "", err
 	}
-	log.Infow("detect registry scheme", "scheme", scheme)
+	log.Debugw("detect registry scheme", "scheme", scheme)
 
 	if d.Cache {
 		d.schemeCache.Store(registry, scheme)
