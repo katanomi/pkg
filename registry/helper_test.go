@@ -19,6 +19,7 @@ limitations under the License.
 package registry
 
 import (
+	"context"
 	"crypto/tls"
 	"net/http"
 	"net/http/httptest"
@@ -199,7 +200,8 @@ func TestDefaultImagePinger(t *testing.T) {
 				Insecure: tc.insecure,
 			}
 
-			registryURL, err := pinger.Ping(tc.schemePrefix + serverHost)
+			ctx := context.TODO()
+			registryURL, err := pinger.Ping(ctx, tc.schemePrefix+serverHost)
 			if err != nil {
 				if len(tc.expectedErrorSubstring) == 0 {
 					t.Errorf("[%s] got unexpected ping error of type %T: %v", tc.name, err, err)
