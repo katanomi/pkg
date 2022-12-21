@@ -105,3 +105,10 @@ func TestDeepCopy(t *testing.T) {
 
 	g.Expect(cmp.Diff(&abcPod, abcPod.DeepCopy())).To(BeEmpty())
 }
+
+func TestObjectConditionFromTopLevelConditionObject(t *testing.T) {
+	g := NewGomegaWithT(t)
+
+	objcs := &ObjectCondition{}
+	g.Expect(objcs.FromTopLevelConditionObject(nil)).To(BeNil())
+}

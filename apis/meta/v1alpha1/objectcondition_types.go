@@ -17,6 +17,7 @@ limitations under the License.
 package v1alpha1
 
 import (
+	"github.com/katanomi/pkg/pointer"
 	corev1 "k8s.io/api/core/v1"
 	"knative.dev/pkg/apis"
 )
@@ -38,6 +39,9 @@ func (o ObjectCondition) IsTheSame(obj ObjectCondition) bool {
 }
 
 func (o *ObjectCondition) FromTopLevelConditionObject(obj TopLevelConditionObject) *ObjectCondition {
+	if pointer.IsNil(obj) {
+		return nil
+	}
 	if obj.GetTopLevelCondition() != nil {
 		o.Condition = *obj.GetTopLevelCondition()
 	}
