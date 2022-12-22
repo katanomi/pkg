@@ -37,6 +37,8 @@ type KeyValueListOption struct {
 	// KeyValues stored after step
 	KeyValues map[string]string
 
+	// Validations stores a list of validation functions to be executed
+	// during validation
 	Validations []KeyValueOptionValidationFunc
 }
 

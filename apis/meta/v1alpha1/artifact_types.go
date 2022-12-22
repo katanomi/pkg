@@ -30,6 +30,7 @@ var ArtifactGVK = GroupVersion.WithKind("Artifact")
 var ArtifactListGVK = GroupVersion.WithKind("ArtifactList")
 
 // Artifact object for plugins
+// TODO: move to pkg/apis/artifacts/v1alpha1
 type Artifact struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
@@ -39,6 +40,7 @@ type Artifact struct {
 
 // ArtifactSpec spec for repository
 // TODO: add more necessary spec data
+// TODO: move to pkg/apis/artifacts/v1alpha1
 type ArtifactSpec struct {
 	// Address API related access URL
 	// +optional
@@ -69,6 +71,7 @@ type ArtifactSpec struct {
 
 // ArtifactProperties we should promote all shared field in properties into spec
 // but just defined it before we do the promotion
+// TODO: move to pkg/apis/artifacts/v1alpha1
 // +k8s:deepcopy-gen=false
 type ArtifactProperties struct {
 	// Size represent size of artifact
@@ -85,6 +88,7 @@ type ArtifactProperties struct {
 }
 
 // ArtifactTag represent tag of artifact
+// TODO: move to pkg/apis/artifacts/v1alpha1
 // +k8s:deepcopy-gen=false
 type ArtifactTag struct {
 	// Name artifact tag name
@@ -92,6 +96,7 @@ type ArtifactTag struct {
 }
 
 // ArtifactExtraAttrs represents artifact extra attributes like os
+// TODO: move to pkg/apis/artifacts/v1alpha1
 // +k8s:deepcopy-gen=false
 type ArtifactExtraAttrs struct {
 	// OS system os type
@@ -105,6 +110,7 @@ type ArtifactExtraAttrs struct {
 }
 
 // ArtifactReference represents reference of artifact
+// TODO: move to pkg/apis/artifacts/v1alpha1
 // +k8s:deepcopy-gen=false
 type ArtifactReference struct {
 	// ChildDigest child artifact digests
@@ -123,6 +129,7 @@ func (ref ArtifactReference) PlatformString() string {
 }
 
 // ArtifactList list of artifacts
+// TODO: move to pkg/apis/artifacts/v1alpha1
 type ArtifactList struct {
 	metav1.TypeMeta `json:",inline"`
 	ListMeta        `json:"metadata,omitempty"`

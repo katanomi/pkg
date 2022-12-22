@@ -1,5 +1,5 @@
 /*
-Copyright 2019 The Kubernetes Authors.
+Copyright 2022 The Katanomi Authors.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -25,7 +25,6 @@ import (
 
 	"github.com/alessio/shellescape"
 	"k8s.io/apimachinery/pkg/util/errors"
-	// "sigs.k8s.io/kind/pkg/errors"
 )
 
 // PrettyCommand takes arguments identical to Cmder.Command,

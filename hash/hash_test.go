@@ -17,9 +17,16 @@ limitations under the License.
 package hash
 
 import (
+	"bytes"
+	"context"
 	"fmt"
 	"hash/adler32"
+	"os"
+	"os/exec"
 	"testing"
+
+	"github.com/katanomi/pkg/command/io"
+	"github.com/onsi/gomega"
 
 	"github.com/davecgh/go-spew/spew"
 )
@@ -243,6 +250,126 @@ func TestHashSHA256(t *testing.T) {
 			}
 			if got != tt.want {
 				t.Errorf("HashSHA256() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestHashFolder(t *testing.T) {
+	table := map[string]struct {
+		Folder      string
+		Action      func(folder string, t *testing.T) error
+		Expected    string
+		Error       error
+		AfterAction func()
+	}{
+		"chart folder": {
+			Folder:   "testdata/chart",
+			Expected: "sha256:75c80677202215d8788b7a271e3eab03c143ecfe17a782bdd3c82f4720fc25da",
+			Error:    nil,
+		},
+		"copy chart folder touch a file": {
+			Folder: "testdata/copy",
+			Action: func(folder string, t *testing.T) error {
+				os.RemoveAll("testdata/copy")
+				if err := io.Copy("testdata/chart", "testdata/copy"); err != nil {
+					return err
+				}
+				cmd := exec.Command("touch", "testdata/copy/Chart.yaml")
+				return cmd.Run()
+			},
+			// keep the previous hash
+			Expected: "sha256:75c80677202215d8788b7a271e3eab03c143ecfe17a782bdd3c82f4720fc25da",
+			Error:    nil,
+			AfterAction: func() {
+				os.RemoveAll("testdata/copy")
+			},
+		},
+		"copy chart folder update a file with same value": {
+			Folder: "testdata/copy",
+			Action: func(folder string, t *testing.T) error {
+				os.RemoveAll("testdata/copy")
+				if err := io.Copy("testdata/chart", "testdata/copy"); err != nil {
+					return err
+				}
+				cmd := exec.Command("yq", "e", "-i", ".image.tag = \"v1.1.1\"", "testdata/copy/values.yaml")
+				buff := &bytes.Buffer{}
+				cmd.Stderr = buff
+				cmd.Stdout = buff
+				err := cmd.Run()
+				if err != nil {
+					t.Logf("error command: %s", buff.String())
+				}
+				return err
+			},
+			// keep the same hash
+			Expected: "sha256:75c80677202215d8788b7a271e3eab03c143ecfe17a782bdd3c82f4720fc25da",
+			Error:    nil,
+			AfterAction: func() {
+				os.RemoveAll("testdata/copy")
+			},
+		},
+		"copy chart folder update a file with new value": {
+			Folder: "testdata/copy",
+			Action: func(folder string, t *testing.T) error {
+				os.RemoveAll("testdata/copy")
+				if err := io.Copy("testdata/chart", "testdata/copy"); err != nil {
+					return err
+				}
+				cmd := exec.Command("yq", "e", "-i", ".image.tag = \"v1.1.2\"", "testdata/copy/values.yaml")
+				buff := &bytes.Buffer{}
+				cmd.Stderr = buff
+				cmd.Stdout = buff
+				err := cmd.Run()
+				if err != nil {
+					t.Logf("error command: %s", buff.String())
+				}
+				return err
+			},
+			// hash changed
+			Expected: "sha256:aecb9377fee7bad1cf220bfef24ef318705d022ba81dda4c4d89a50216dd7ad2",
+			Error:    nil,
+			AfterAction: func() {
+				os.RemoveAll("testdata/copy")
+			},
+		},
+		"copy chart folder and copy a file": {
+			Folder: "testdata/copy",
+			Action: func(folder string, t *testing.T) error {
+				os.RemoveAll("testdata/copy")
+				if err := io.Copy("testdata/chart", "testdata/copy"); err != nil {
+					return err
+				}
+				return io.Copy("testdata/copy/values.yaml", "testdata/copy/values.bkp.yaml")
+			},
+			// new hash
+			Expected: "sha256:88008bc80503efb3d6c0a8c76fbda9e89067fc57c400c89901519984fc80ad93",
+			Error:    nil,
+			AfterAction: func() {
+				os.RemoveAll("testdata/copy")
+			},
+		},
+	}
+
+	for k, test := range table {
+		t.Run(k, func(t *testing.T) {
+			g := gomega.NewGomegaWithT(t)
+			t.TempDir()
+
+			if test.Action != nil {
+				g.Expect(test.Action(test.Folder, t)).To(gomega.Succeed())
+			}
+
+			hashResult, err := HashFolder(context.TODO(), test.Folder)
+			if test.AfterAction != nil {
+				test.AfterAction()
+			}
+			g.Expect(hashResult).To(gomega.ContainSubstring(test.Expected))
+			t.Logf("expected: %q == %q", hashResult, test.Expected)
+			if test.Error == nil {
+				g.Expect(err).To(gomega.BeNil())
+			} else {
+				g.Expect(err).ToNot(gomega.BeNil())
 			}
 		})
 	}

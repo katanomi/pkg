@@ -21,7 +21,6 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/katanomi/pkg/apis/meta/v1alpha1"
 	. "github.com/onsi/gomega"
 )
 
@@ -29,7 +28,7 @@ func TestParseURI(t *testing.T) {
 	var data = []struct {
 		desc     string
 		uri      string
-		t        v1alpha1.ArtifactType
+		t        ArtifactType
 		u        URI
 		hasError bool
 	}{
@@ -82,7 +81,7 @@ func TestParseURI(t *testing.T) {
 		{
 			desc: "with type",
 			uri:  "docker.io/katanomi/pkg@sha256:asdf",
-			t:    v1alpha1.OCIHelmChartArtifactParameterType,
+			t:    ArtifactTypeHelmChart,
 			u: URI{
 				Host:      "docker.io",
 				Protocol:  string(ProtocolHelmChart),
@@ -144,7 +143,7 @@ func Test_StringWithDigestString(t *testing.T) {
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
 			g := NewGomegaWithT(t)
-			uri, err := ParseURI(c.uri, v1alpha1.OCIHelmChartArtifactParameterType)
+			uri, err := ParseURI(c.uri, ArtifactTypeHelmChart)
 			g.Expect(err).To(BeNil())
 			g.Expect(uri.String()).To(Equal(c.wantString))
 			g.Expect(uri.WithDigestString()).To(Equal(c.wantDigest))
@@ -225,7 +224,7 @@ func Test_Validate(t *testing.T) {
 			g := NewGomegaWithT(t)
 			errs := []error{}
 			for _, ref := range c.uris {
-				uri, err := ParseURI(ref, v1alpha1.OCIHelmChartArtifactParameterType)
+				uri, err := ParseURI(ref, ArtifactTypeHelmChart)
 				g.Expect(err).To(BeNil())
 				err = uri.Validate()
 				if err != nil {

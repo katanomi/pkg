@@ -60,6 +60,10 @@ func NewLogger(writer zapcore.WriteSyncer, level zapcore.LevelEnabler, opts ...z
 		MessageKey: "msg",
 		LevelKey:   "level",
 		NameKey:    "logger",
+		//// by commenting out this attribute
+		//// will remove the level attribute the logger output result
+		//// which is a better experience for CLI commands
+		//// TODO: may revisit this and improve the overall CLI experience again
 		// EncodeLevel:    zapcore.LowercaseLevelEncoder,
 		// EncodeLevel:    EmojiLevelEncoder,
 		EncodeTime:     zapcore.ISO8601TimeEncoder,

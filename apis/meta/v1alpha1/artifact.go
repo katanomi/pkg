@@ -21,12 +21,15 @@ type ArtifactType string
 
 const (
 	// OCIHelmChartArtifactParameterType helm charts as OCI artifact
+	// Deprecated: use pkg/apis/artifacts/v1alpha1.ArtifactTypeHelmChart instead
 	OCIHelmChartArtifactParameterType ArtifactType = "OCIHelmChart"
-	// OCIContainerImageArtifactParameterType runnable container image used to deploy workloads
+	// OCIContainerImageArtifactParameterType runnable container image used to deploy workloads'
+	// Deprecated: use pkg/apis/artifacts/v1alpha1.ArtifactTypeContainerImage instead
 	OCIContainerImageArtifactParameterType ArtifactType = "OCIContainerImage"
 )
 
 // ArtifactParameterSpec specs for an strong typed parameter as an artifact
+// TODO: move to pkg/apis/artifacts/v1alpha1
 type ArtifactParameterSpec struct {
 	// URI for artifact, must be a complete identifier, i.e docker.io/katanomi/repository
 	// +optional
@@ -47,6 +50,7 @@ type ArtifactParameterSpec struct {
 
 // NamedValue can use the NamedValue structure to set some special parameters in the artifact.
 // i.e artifact promotion use NamedValue to record artifact detail info.
+// TODO: move to pkg/apis/artifacts/v1alpha1
 type NamedValue struct {
 	// Name parameter name.
 	// +optional

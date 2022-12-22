@@ -11,6 +11,7 @@ All shared common packages and code across katanomi repos
  - [examples](examples): examples of how to utilize this repo methods/objects
  - [hack](hack): basic repo hacking files (not a package)
  - [logging](logging): logging related
+ - [maps](maps): package to manipulate maps with sortingand other methods.
  - [manager](manager): controller-runtime manager methods
  - [multicluster](multicluster): shared multicluster interfaces and implementations for client, etc.
  - [names](names): name generation releated methods (k8s.io/apiserver inspired)

@@ -19,8 +19,6 @@ package options
 import (
 	"context"
 
-	metav1alpha1 "github.com/katanomi/pkg/apis/meta/v1alpha1"
-	// "github.com/katanomi/pkg/artifacts"
 	artifacts "github.com/katanomi/pkg/apis/artifacts/v1alpha1"
 	pkgargs "github.com/katanomi/pkg/command/args"
 	"github.com/spf13/cobra"
@@ -30,7 +28,7 @@ import (
 // ContainerImagesOption describe container images option
 type ContainerImagesOption struct {
 	ContainerImages []string
-	Type            metav1alpha1.ArtifactType
+	Type            artifacts.ArtifactType
 
 	references []artifacts.URI
 	parseErrs  field.ErrorList
@@ -44,7 +42,7 @@ type ContainerImagesOption struct {
 func (m *ContainerImagesOption) Setup(ctx context.Context, _ *cobra.Command, args []string) (err error) {
 	m.ContainerImages, _ = pkgargs.GetArrayValues(ctx, args, "container-images")
 	if m.Type == "" {
-		m.Type = metav1alpha1.OCIContainerImageArtifactParameterType
+		m.Type = artifacts.ArtifactTypeContainerImage
 	}
 	return nil
 }

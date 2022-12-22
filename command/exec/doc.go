@@ -1,5 +1,5 @@
 /*
-Copyright 2019 The Kubernetes Authors.
+Copyright 2022 The Katanomi Authors.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -17,4 +17,6 @@ limitations under the License.
 // Package exec contains an interface for executing commands, along with helpers
 // TODO(bentheelder): add standardized timeout functionality & a default timeout
 // so that commands cannot hang indefinitely (!)
+//
+// Inspired by (copied from) https://github.com/kubernetes-sigs/kind/tree/main/pkg/exec
 package exec

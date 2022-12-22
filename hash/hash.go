@@ -22,15 +22,22 @@ limitations under the License.
 package hash
 
 import (
+	"context"
 	"crypto/hmac"
-	"crypto/sha256"
+	. "crypto/sha256"
 	"encoding/hex"
+	"encoding/json"
 	"fmt"
 	"hash"
 	"hash/fnv"
+	"io/fs"
+	"io/ioutil"
+	"path/filepath"
 
 	"github.com/davecgh/go-spew/spew"
+	"github.com/opencontainers/go-digest"
 	"k8s.io/apimachinery/pkg/util/rand"
+	"knative.dev/pkg/logging"
 )
 
 // DeepHashObject writes specified object to hash using the spew library
@@ -56,7 +63,7 @@ func ComputeHash(obj interface{}) string {
 
 // HashSHA256 will generate a hash value using SHA-256.
 func HashSHA256(secretKey string, value []byte) (string, error) {
-	return hashString(sha256.New, secretKey, value)
+	return hashString(New, secretKey, value)
 }
 
 func hashString(hashFunc func() hash.Hash, secretKey string, value []byte) (string, error) {
@@ -68,4 +75,33 @@ func hashString(hashFunc func() hash.Hash, secretKey string, value []byte) (stri
 
 	hashValue := hex.EncodeToString(hasher.Sum(nil))
 	return hashValue, nil
+}
+
+// HashFolder generates a hash for the folder
+func HashFolder(ctx context.Context, folder string) (hash string, err error) {
+	digests := make([]digest.Digest, 0, 100)
+	log := logging.FromContext(ctx)
+	err = filepath.WalkDir(folder, func(path string, d fs.DirEntry, err error) (walkErr error) {
+		if !d.IsDir() {
+
+			if data, readErr := ioutil.ReadFile(path); readErr == nil {
+				digestHash := digest.FromBytes(data)
+				log.Debugf("hash for path: %s hash: %q", path, digestHash)
+				digests = append(digests, digestHash)
+			} else {
+				log.Debugf("hash error path %s: %q", path, readErr)
+				walkErr = readErr
+			}
+		}
+		return
+	})
+	if err != nil {
+		return
+	}
+
+	var digestListBytes []byte
+	digestListBytes, err = json.Marshal(digests)
+	hash = digest.FromBytes(digestListBytes).String()
+	log.Debugf("Digest list: %v end hash: %s", digests, hash)
+	return
 }

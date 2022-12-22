@@ -22,7 +22,6 @@ import (
 	"regexp"
 	"strings"
 
-	metav1alpha1 "github.com/katanomi/pkg/apis/meta/v1alpha1"
 	"github.com/opencontainers/go-digest"
 	"oras.land/oras-go/v2/errdef"
 )
@@ -138,7 +137,7 @@ func (u URI) WithDigestString() string {
 }
 
 // ParseURI parse uri to URI struct
-func ParseURI(uri string, t metav1alpha1.ArtifactType) (URI, error) {
+func ParseURI(uri string, t ArtifactType) (URI, error) {
 	var u = URI{Raw: uri}
 
 	str := uri
@@ -151,11 +150,13 @@ func ParseURI(uri string, t metav1alpha1.ArtifactType) (URI, error) {
 		str = str[protocolIndex+len("://"):]
 	}
 
-	if t == metav1alpha1.OCIContainerImageArtifactParameterType {
-		u.Protocol = string(ProtocolDocker)
-	}
-	if t == metav1alpha1.OCIHelmChartArtifactParameterType {
+	switch t {
+	case ArtifactTypeHelmChart:
 		u.Protocol = string(ProtocolHelmChart)
+	case ArtifactTypeContainerImage:
+		u.Protocol = string(ProtocolDocker)
+	default:
+		// no-op
 	}
 
 	hostIndex := strings.Index(str, "/")

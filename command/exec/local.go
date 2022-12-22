@@ -1,5 +1,5 @@
 /*
-Copyright 2018 The Kubernetes Authors.
+Copyright 2022 The Katanomi Authors.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -24,7 +24,6 @@ import (
 	"sync"
 
 	pkgerrors "github.com/pkg/errors"
-	// "sigs.k8s.io/kind/pkg/errors"
 )
 
 // LocalCmd wraps os/exec.Cmd, implementing the kind/pkg/exec.Cmd interface
