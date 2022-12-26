@@ -17,7 +17,6 @@ limitations under the License.
 package hash
 
 import (
-	"bytes"
 	"context"
 	"fmt"
 	"hash/adler32"
@@ -285,30 +284,6 @@ func TestHashFolder(t *testing.T) {
 				os.RemoveAll("testdata/copy")
 			},
 		},
-		"copy chart folder update a file with same value": {
-			Folder: "testdata/copy",
-			Action: func(folder string, t *testing.T) error {
-				os.RemoveAll("testdata/copy")
-				if err := io.Copy("testdata/chart", "testdata/copy"); err != nil {
-					return err
-				}
-				cmd := exec.Command("yq", "e", "-i", ".image.tag = \"v1.1.1\"", "testdata/copy/values.yaml")
-				buff := &bytes.Buffer{}
-				cmd.Stderr = buff
-				cmd.Stdout = buff
-				err := cmd.Run()
-				if err != nil {
-					t.Logf("error command: %s", buff.String())
-				}
-				return err
-			},
-			// keep the same hash
-			Expected: "sha256:75c80677202215d8788b7a271e3eab03c143ecfe17a782bdd3c82f4720fc25da",
-			Error:    nil,
-			AfterAction: func() {
-				os.RemoveAll("testdata/copy")
-			},
-		},
 		"copy chart folder update a file with new value": {
 			Folder: "testdata/copy",
 			Action: func(folder string, t *testing.T) error {
@@ -316,15 +291,8 @@ func TestHashFolder(t *testing.T) {
 				if err := io.Copy("testdata/chart", "testdata/copy"); err != nil {
 					return err
 				}
-				cmd := exec.Command("yq", "e", "-i", ".image.tag = \"v1.1.2\"", "testdata/copy/values.yaml")
-				buff := &bytes.Buffer{}
-				cmd.Stderr = buff
-				cmd.Stdout = buff
-				err := cmd.Run()
-				if err != nil {
-					t.Logf("error command: %s", buff.String())
-				}
-				return err
+
+				return io.Copy("testdata/chart-1.1.2/values.yaml", "testdata/copy/values.yaml")
 			},
 			// hash changed
 			Expected: "sha256:aecb9377fee7bad1cf220bfef24ef318705d022ba81dda4c4d89a50216dd7ad2",

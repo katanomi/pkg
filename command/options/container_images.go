@@ -18,10 +18,13 @@ package options
 
 import (
 	"context"
+	"encoding/json"
 
 	artifacts "github.com/katanomi/pkg/apis/artifacts/v1alpha1"
 	pkgargs "github.com/katanomi/pkg/command/args"
+	"github.com/katanomi/pkg/command/io"
 	"github.com/spf13/cobra"
+	"github.com/spf13/pflag"
 	"k8s.io/apimachinery/pkg/util/validation/field"
 )
 
@@ -29,6 +32,7 @@ import (
 type ContainerImagesOption struct {
 	ContainerImages []string
 	Type            artifacts.ArtifactType
+	ResultPath      string
 
 	references []artifacts.URI
 	parseErrs  field.ErrorList
@@ -36,6 +40,11 @@ type ContainerImagesOption struct {
 	requiredTag   bool
 	requiredValue bool
 	withoutDigest bool
+}
+
+// AddFlags add flags for ContainerImageOption
+func (m *ContainerImagesOption) AddFlags(flags *pflag.FlagSet) {
+	flags.StringVar(&m.ResultPath, "container-image-result-path", m.ResultPath, `filepath to store container image results`)
 }
 
 // Setup init container images from args
@@ -125,4 +134,15 @@ func (m *ContainerImagesOption) parseContainerImages() (errs field.ErrorList) {
 	}
 
 	return m.parseErrs
+}
+
+// WriteResult writes a result to the provided path if given
+func (m *ContainerImagesOption) WriteResult(artfactList []artifacts.URI) (err error) {
+	stringSlice := artifacts.AsDigestStringArray(artfactList...)
+	var content []byte
+	if content, err = json.Marshal(stringSlice); err != nil {
+		return
+	}
+	err = io.WriteFile(m.ResultPath, content, 0777)
+	return
 }

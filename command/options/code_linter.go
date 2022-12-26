@@ -53,7 +53,7 @@ func (c *CodeLinterOption) AddFlags(flags *pflag.FlagSet) {
 
 // Setup init quality gate rules from args
 func (c *CodeLinterOption) Setup(ctx context.Context, cmd *cobra.Command, args []string) (err error) {
-	c.Result = "Succeded"
+	c.Result = v1alpha1.Succeeded
 	c.Issues = &v1alpha1.CodeLintIssues{}
 	return c.QualityGateRulesOption.Setup(ctx, cmd, args)
 }
@@ -75,7 +75,7 @@ func (c *CodeLinterOption) WriteResult(err error, w io.Writer) {
 		return
 	}
 	if err != nil {
-		c.Result = "Failed"
+		c.Result = v1alpha1.Failed
 	}
 	data := map[string]string{
 		"result":       c.Result,

@@ -30,6 +30,7 @@ import (
 var _ = Describe("Test.RegisterFlags", func() {
 	type testStruct struct {
 		ToolImageOption
+		ContainerImagesOption
 	}
 
 	var (
@@ -48,9 +49,10 @@ var _ = Describe("Test.RegisterFlags", func() {
 
 	When("provide expected flags", func() {
 		It("should get the expected value", func() {
-			err := flags.Parse([]string{"--tool-image", "test-image"})
+			err := flags.Parse([]string{"--tool-image", "test-image", "--container-image-result-path", "/abc/def"})
 			Expect(err).Should(Succeed())
 			Expect(obj.ToolImage).Should(Equal("test-image"))
+			Expect(obj.ResultPath).Should(Equal("/abc/def"))
 		})
 	})
 
