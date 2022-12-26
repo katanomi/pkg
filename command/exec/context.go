@@ -40,7 +40,7 @@ func WithCmder(ctx context.Context, cmdr Cmder) context.Context {
 // cmdKey key for Cmd in Context
 type cmdKey struct{}
 
-// FromContextCmder returns a Cmder from the context
+// FromContextCmd returns a Cmd from the context
 func FromContextCmd(ctx context.Context) (cmdr Cmd) {
 	if value := ctx.Value(cmdKey{}); value != nil {
 		if cmdr, ok := value.(Cmd); ok {

@@ -27,11 +27,9 @@ import (
 
 // CLIPathOption adds a generic option to store different cli paths
 type CLIPathOption struct {
-	// Name of the program
-	// i.e yq, helm etc.
-	Name string
 	// CLIPath direct path for CLI
 	// used to store the default value
+	// i.e /bin/helm
 	CLIPath string
 	// FlagName to be used to store
 	FlagName string
@@ -39,15 +37,18 @@ type CLIPathOption struct {
 
 // AddFlags adds flags for option
 func (p *CLIPathOption) AddFlags(flags *pflag.FlagSet) {
-	flags.StringVar(&p.CLIPath, p.FlagName, p.CLIPath, `the path for `+p.Name)
+	if p.FlagName == "" {
+		p.FlagName = "cli-path"
+	}
+	flags.StringVar(&p.CLIPath, p.FlagName, p.CLIPath, `the path for  `+p.FlagName)
 }
 
 // Validate if values are given
 func (p *CLIPathOption) Validate(path *field.Path) (errs field.ErrorList) {
 	if p.CLIPath == "" {
-		errs = append(errs, field.Required(path.Child(p.FlagName), `path for `+p.Name+` is necessary`))
+		errs = append(errs, field.Required(path.Child(p.FlagName), `path for `+p.FlagName+` is necessary`))
 	} else if !io.IsExist(p.CLIPath) {
-		errs = append(errs, field.Required(path.Child(p.FlagName), `path "`+p.CLIPath+`" for `+p.Name+` does not exist`))
+		errs = append(errs, field.Required(path.Child(p.FlagName), `path "`+p.CLIPath+`" for `+p.FlagName+` does not exist`))
 	}
 	return
 }

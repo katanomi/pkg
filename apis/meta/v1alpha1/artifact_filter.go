@@ -16,6 +16,7 @@ limitations under the License.
 
 package v1alpha1
 
+// ArtifactFilterRegexList string slice
 // TODO: move to pkg/apis/artifacts/v1alpha1
 type ArtifactFilterRegexList []string
 

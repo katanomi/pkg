@@ -82,7 +82,7 @@ func (no *NoOpCmd) SetStdout(stdout io.Writer) Cmd {
 	return no
 }
 
-// SetStdout sets Stderr
+// SetStderr sets Stderr
 func (no *NoOpCmd) SetStderr(stderr io.Writer) Cmd {
 	no.Stderr = stderr
 	return no

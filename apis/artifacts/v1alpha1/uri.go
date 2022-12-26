@@ -257,6 +257,8 @@ func ParseFirstDigest(line string) (algorithm DigestAlgorithm, digest string, ok
 				hash = group
 			case "algo":
 				algo = group
+			default:
+				// no-op
 			}
 		}
 		if hash != "" && algo != "" {

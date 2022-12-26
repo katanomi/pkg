@@ -182,7 +182,6 @@ func TestOption_AddFlags(t *testing.T) {
 		ContextOption
 		CLIPathOption
 	}{}
-	obj.CLIPathOption.FlagName = "cli-flag"
 	flagSet := pflag.NewFlagSet("test", pflag.ContinueOnError)
 	RegisterFlags(&obj, flagSet)
 
@@ -197,7 +196,7 @@ func TestOption_AddFlags(t *testing.T) {
 		"--report-path", "report-path-value",
 		"--tool-image", "tool-image-value",
 		"--context", "context-value",
-		"--cli-flag", "/some/cli",
+		"--cli-path", "/some/cli",
 	})
 	g.Expect(err).Should(Succeed())
 	g.Expect(obj.Command).To(Equal("command-value"))

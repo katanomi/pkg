@@ -186,3 +186,45 @@ func TestArtifactVersionGetContainerImageFromValues(t *testing.T) {
 		})
 	}
 }
+
+func TestArtifactVersionGetHelmChartFromValues(t *testing.T) {
+	table := map[string]struct {
+		ctx    context.Context
+		values []string
+
+		expected *[]ArtifactVersion
+	}{
+		"multiple values with tag, digest, digest and tag": {
+			context.Background(),
+			[]string{
+				// the same artifact
+				"registry.katanomi.dev/abc/def:v1.1.1@sha256:88008bc80503efb3d6c0a8c76fbda9e89067fc57c400c89901519984fc80ad93",
+
+				// another artifact with digest and two tags
+				"index.docker.io/katanomi/controller:v1.1.1@sha256:88008bc80503efb3d6c0a8c76fbda9e89067fc57c400c89901519984fc80ad93",
+				"index.docker.io/katanomi/controller:latest@sha256:88008bc80503efb3d6c0a8c76fbda9e89067fc57c400c89901519984fc80ad93",
+			},
+			MustLoadReturnObjectFromYAML("testdata/ArtifactVersion.GetHelmChartFromValues.golden.yaml", &[]ArtifactVersion{}).(*[]ArtifactVersion),
+		},
+		"empty values": {
+			context.Background(),
+			nil,
+			nil,
+		},
+	}
+
+	for test, values := range table {
+		t.Run(test, func(t *testing.T) {
+			g := gomega.NewGomegaWithT(t)
+			result := GetHelmChartFromValues(values.ctx, values.values)
+
+			if values.expected == nil {
+				g.Expect(result).To(gomega.BeNil())
+			} else {
+				diff := cmp.Diff(*values.expected, result)
+				g.Expect(diff).To(gomega.BeEmpty())
+			}
+
+		})
+	}
+}

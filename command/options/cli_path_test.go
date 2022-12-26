@@ -28,7 +28,6 @@ import (
 func TestCLIPathOptionExecute(t *testing.T) {
 	cli := &CLIPathOption{
 		CLIPath:  "/some/cli",
-		Name:     "cli",
 		FlagName: "cli-path",
 	}
 	ctx := context.TODO()
