@@ -50,14 +50,26 @@ func (r ProjectSubType) Validate(fld *field.Path) field.ErrorList {
 	errs := field.ErrorList{}
 
 	supportedTypes := map[ProjectSubType]struct{}{
-		DefaultProjectSubType:         {},
-		ImageRegistryProjectSubType:   {},
-		GitUserProjectSubType:         {},
-		GitGroupProjectSubType:        {},
-		MavenRepositoryProjectSubType: {},
-		RawRepositoryProjectSubType:   {},
-		ProjectManagementSubtype:      {},
-		TestProjectSubType:            {},
+		DefaultProjectSubType:              {},
+		ImageRegistryProjectSubType:        {},
+		GitUserProjectSubType:              {},
+		GitGroupProjectSubType:             {},
+		MavenRepositoryProjectSubType:      {},
+		RawRepositoryProjectSubType:        {},
+		ProjectManagementSubtype:           {},
+		TestProjectSubType:                 {},
+		MavenProxyRepositoryProjectSubType: {},
+		MavenGroupRepositoryProjectSubType: {},
+		RawProxyRepositoryProjectSubType:   {},
+		RawGroupRepositoryProjectSubType:   {},
+		NPMRepositoryProjectSubType:        {},
+		NPMProxyRepositoryProjectSubType:   {},
+		NPMGroupRepositoryProjectSubType:   {},
+		PYPIRepositoryProjectSubType:       {},
+		PYPIProxyRepositoryProjectSubType:  {},
+		PYPIGroupRepositoryProjectSubType:  {},
+		GoProxyRepositoryProjectSubType:    {},
+		GoGroupRepositoryProjectSubType:    {},
 	}
 
 	types := strings.Split(r.String(), ",")
@@ -95,6 +107,42 @@ const (
 
 	// TestProjectSubType test project subtype
 	TestProjectSubType ProjectSubType = "TestProject"
+
+	// MavenProxyRepositoryProjectSubType maven-proxy repository project subtype
+	MavenProxyRepositoryProjectSubType ProjectSubType = "MavenProxyRepository"
+
+	// MavenGroupRepositoryProjectSubType maven-group repository project subtype
+	MavenGroupRepositoryProjectSubType ProjectSubType = "MavenGroupRepository"
+
+	// RawProxyRepositoryProjectSubType raw-proxy repository project subtype
+	RawProxyRepositoryProjectSubType ProjectSubType = "RawProxyRepository"
+
+	// RawGroupRepositoryProjectSubType raw-group repository project subtype
+	RawGroupRepositoryProjectSubType ProjectSubType = "RawGroupRepository"
+
+	// NPMRepositoryProjectSubType npm repository project subtype
+	NPMRepositoryProjectSubType ProjectSubType = "NPMRepository"
+
+	// NPMProxyRepositoryProjectSubType npm-proxy repository project subtype
+	NPMProxyRepositoryProjectSubType ProjectSubType = "NPMProxyRepository"
+
+	// NPMGroupRepositoryProjectSubType npm-group repository project subtype
+	NPMGroupRepositoryProjectSubType ProjectSubType = "NPMGroupRepository"
+
+	// PYPIRepositoryProjectSubType python repository project subtype
+	PYPIRepositoryProjectSubType ProjectSubType = "PYPIRepository"
+
+	// PYPIProxyRepositoryProjectSubType python-proxy repository project subtype
+	PYPIProxyRepositoryProjectSubType ProjectSubType = "PYPIProxyRepository"
+
+	// PYPIGroupRepositoryProjectSubType python-group repository project subtype
+	PYPIGroupRepositoryProjectSubType ProjectSubType = "PYPIGroupRepository"
+
+	// GoProxyRepositoryProjectSubType go-proxy repository project subtype
+	GoProxyRepositoryProjectSubType ProjectSubType = "GoProxyRepository"
+
+	// GoGroupRepositoryProjectSubType go-group repository project subtype
+	GoGroupRepositoryProjectSubType ProjectSubType = "GoGroupRepository"
 
 	// TODO: add more subtypes
 )
