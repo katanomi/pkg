@@ -68,6 +68,12 @@ spec:
           value: |
             export GOPROXY=https://build-nexus.alauda.cn/repository/golang/,direct
             export GOMAXPROCS=4
+            if [ "$GOCACHE" != "" ]; then
+              export TOOLBIN=$GOCACHE/../toolbin
+              mkdir -p $TOOLBIN
+              ls -la $TOOLBIN
+            fi
+
             make test
         - name: test-report-path
           value: ./test.json
@@ -94,14 +100,10 @@ spec:
           value: registry.alauda.cn:60080/devops/builder-go:1.18-ubuntu-495a3d88
         - name: command
           value: >
-            #功能：扫描前执行
-
             export GOPROXY=https://build-nexus.alauda.cn/repository/golang/,direct
 
-
-            #功能：golangci-lint执行启动命令
-
             golangci-lint run
+
         - name: report-path
           value: ./golangci-lint-report.txt
         - name: quality-gate
