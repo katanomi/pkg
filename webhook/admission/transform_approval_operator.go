@@ -34,6 +34,11 @@ import (
 // ChecksGetter gets the checks from the runtime object
 type ChecksGetter interface {
 	GetChecks(runtime.Object) []*metav1alpha1.Check
+	// SkipCreateCheck represent whether should skip checking for create request
+	// Whether or not skip creating check mainly depends on the developer's permission
+	// If the developer can create approval in resource directly then we should not skip
+	// checking and vice versa.
+	SkipCreateCheck() bool
 }
 
 // PairOfOldNewCheck is a pair of old and new check
@@ -45,9 +50,15 @@ func WithApprovalOperator(getter ChecksGetter) TransformFunc {
 		if req.Operation != admissionv1.Create && req.Operation != admissionv1.Update {
 			return
 		}
+
+		if req.Operation == admissionv1.Create && getter.SkipCreateCheck() {
+			return
+		}
+
 		log := logging.FromContext(ctx)
 		newChecks := getter.GetChecks(runtimeObj)
 		var oldChecks []*metav1alpha1.Check
+		
 		if req.Operation == admissionv1.Create {
 			// If it is a the create operation, the base is nil.
 			oldChecks = make([]*metav1alpha1.Check, len(newChecks))
@@ -56,6 +67,7 @@ func WithApprovalOperator(getter ChecksGetter) TransformFunc {
 			oldObject, _ := base.(runtime.Object)
 			oldChecks = getter.GetChecks(oldObject)
 		}
+
 		if len(oldChecks) != len(newChecks) {
 			log.Warnw("unable to add approval operator, length mismatch", "req", req, "old", oldChecks, "new", newChecks)
 			return

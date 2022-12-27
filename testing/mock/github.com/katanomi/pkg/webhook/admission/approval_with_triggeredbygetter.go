@@ -94,20 +94,6 @@ func (mr *MockApprovalWithTriggeredByGetterMockRecorder) GetChecks(arg0 interfac
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetChecks", reflect.TypeOf((*MockApprovalWithTriggeredByGetter)(nil).GetChecks), arg0)
 }
 
-// GetClusterName mocks base method.
-func (m *MockApprovalWithTriggeredByGetter) GetClusterName() string {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetClusterName")
-	ret0, _ := ret[0].(string)
-	return ret0
-}
-
-// GetClusterName indicates an expected call of GetClusterName.
-func (mr *MockApprovalWithTriggeredByGetterMockRecorder) GetClusterName() *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetClusterName", reflect.TypeOf((*MockApprovalWithTriggeredByGetter)(nil).GetClusterName))
-}
-
 // GetCreationTimestamp mocks base method.
 func (m *MockApprovalWithTriggeredByGetter) GetCreationTimestamp() v1.Time {
 	m.ctrl.T.Helper()
@@ -358,18 +344,6 @@ func (mr *MockApprovalWithTriggeredByGetterMockRecorder) SetAnnotations(arg0 int
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetAnnotations", reflect.TypeOf((*MockApprovalWithTriggeredByGetter)(nil).SetAnnotations), arg0)
 }
 
-// SetClusterName mocks base method.
-func (m *MockApprovalWithTriggeredByGetter) SetClusterName(arg0 string) {
-	m.ctrl.T.Helper()
-	m.ctrl.Call(m, "SetClusterName", arg0)
-}
-
-// SetClusterName indicates an expected call of SetClusterName.
-func (mr *MockApprovalWithTriggeredByGetterMockRecorder) SetClusterName(arg0 interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetClusterName", reflect.TypeOf((*MockApprovalWithTriggeredByGetter)(nil).SetClusterName), arg0)
-}
-
 // SetCreationTimestamp mocks base method.
 func (m *MockApprovalWithTriggeredByGetter) SetCreationTimestamp(arg0 v1.Time) {
 	m.ctrl.T.Helper()
@@ -536,4 +510,18 @@ func (m *MockApprovalWithTriggeredByGetter) SetUID(arg0 types.UID) {
 func (mr *MockApprovalWithTriggeredByGetterMockRecorder) SetUID(arg0 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetUID", reflect.TypeOf((*MockApprovalWithTriggeredByGetter)(nil).SetUID), arg0)
+}
+
+// SkipCreateCheck mocks base method.
+func (m *MockApprovalWithTriggeredByGetter) SkipCreateCheck() bool {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "SkipCreateCheck")
+	ret0, _ := ret[0].(bool)
+	return ret0
+}
+
+// SkipCreateCheck indicates an expected call of SkipCreateCheck.
+func (mr *MockApprovalWithTriggeredByGetterMockRecorder) SkipCreateCheck() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SkipCreateCheck", reflect.TypeOf((*MockApprovalWithTriggeredByGetter)(nil).SkipCreateCheck))
 }
