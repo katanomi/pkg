@@ -16,7 +16,9 @@ limitations under the License.
 
 package options
 
-import "github.com/spf13/pflag"
+import (
+	"github.com/spf13/pflag"
+)
 
 const (
 	PathKtnSettingCli = "ktn-settings"
@@ -34,12 +36,19 @@ func (p *SourcePathOption) AddFlags(flags *pflag.FlagSet) {
 
 // ResultPathOption describe result path option
 type ResultPathOption struct {
+	// FlagName defines the name when adding the flag
+	// defaults to result-path
+	FlagName string
+	// ResultPath stores the value read from the flag
 	ResultPath string
 }
 
 // AddFlags add flags to options
 func (p *ResultPathOption) AddFlags(flags *pflag.FlagSet) {
-	flags.StringVar(&p.ResultPath, "result-path", "", `the path to save task results`)
+	if p.FlagName == "" {
+		p.FlagName = "result-path"
+	}
+	flags.StringVar(&p.ResultPath, p.FlagName, "", `the path to save task results`)
 }
 
 // KatanomiPathOption describe katanomi path option

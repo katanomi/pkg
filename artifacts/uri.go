@@ -28,14 +28,22 @@ import (
 )
 
 // Protocol represent artifact transport protocol
+//
+// Deprecated: use pkg/apis/artifacts/v1alpha1 instead
 type Protocol string
 
 var (
 	// ProtocolDocker docker protocol
+	//
+	// Deprecated: use pkg/apis/artifacts/v1alpha1 instead
 	ProtocolDocker Protocol = "docker"
 	// ProtocolHelmChart helm chart protocol
+	//
+	// Deprecated: use pkg/apis/artifacts/v1alpha1 instead
 	ProtocolHelmChart Protocol = "chart"
 	// ProtocolOCI oci protocol
+	//
+	// Deprecated: use pkg/apis/artifacts/v1alpha1 instead
 	ProtocolOCI Protocol = "oci"
 
 	// repositoryRegexp is adapted from the distribution implementation. The
@@ -45,25 +53,37 @@ var (
 	// References:
 	// - https://github.com/distribution/distribution/blob/v2.7.1/reference/regexp.go#L53
 	// - https://github.com/opencontainers/distribution-spec/blob/main/spec.md#pulling-manifests
+	//
+	// Deprecated: use pkg/apis/artifacts/v1alpha1 instead
 	repositoryRegexp = regexp.MustCompile(`^[a-z0-9]+(?:(?:[._]|__|[-]*)[a-z0-9]+)*(?:/[a-z0-9]+(?:(?:[._]|__|[-]*)[a-z0-9]+)*)*$`)
 
 	// tagRegexp checks the tag name.
 	// The docker and OCI spec have the same regular expression.
 	// Reference: https://github.com/opencontainers/distribution-spec/blob/main/spec.md#pulling-manifests
+	//
+	// Deprecated: use pkg/apis/artifacts/v1alpha1 instead
 	tagRegexp = regexp.MustCompile(`^[\w][\w.-]{0,127}$`)
 
+	//
+	// Deprecated: use pkg/apis/artifacts/v1alpha1 instead
 	ErrInvalidReference = "invalid reference"
 )
 
 // DigestAlgorithm artifact digest algorithm
+//
+// Deprecated: use pkg/apis/artifacts/v1alpha1 instead
 type DigestAlgorithm string
 
 const (
 	// SHA256 artifact digest algorithm is sha256
+	//
+	// Deprecated: use pkg/apis/artifacts/v1alpha1 instead
 	SHA256 DigestAlgorithm = "sha256"
 )
 
 // URI represents artifact uri , like docker://gcr.io/tekton-releases/github.com/tektoncd/pipeline/cmd/nop:v0.37.1@sha256:04411f239bc7144c3248b53af6741c2726eaddbe9b9cf62a24cf812689cc3223
+//
+// Deprecated: use pkg/apis/artifacts/v1alpha1 instead
 type URI struct {
 	// Protocol represent artifact transport protocol, it is optional, default value is docker
 	Protocol string
@@ -83,6 +103,8 @@ type URI struct {
 }
 
 // DigestString will return format of Algorithm:Digest
+//
+// Deprecated: use pkg/apis/artifacts/v1alpha1 instead
 func (u URI) DigestString() string {
 	if u.Digest == "" {
 		return ""
@@ -91,6 +113,8 @@ func (u URI) DigestString() string {
 }
 
 // Version will return sha256:xx or tag .
+//
+// Deprecated: use pkg/apis/artifacts/v1alpha1 instead
 func (u URI) Version() string {
 	if u.Digest != "" {
 		return u.DigestString()
@@ -100,6 +124,8 @@ func (u URI) Version() string {
 }
 
 // String returns the uri string, preferably using tag as a reference.
+//
+// Deprecated: use pkg/apis/artifacts/v1alpha1 instead
 func (u URI) String() string {
 	ref := u.Host
 	if u.Path != "" {
@@ -118,6 +144,8 @@ func (u URI) String() string {
 }
 
 // WithDigestString return uri string, including tag and digest.
+//
+// Deprecated: use pkg/apis/artifacts/v1alpha1 instead
 func (u URI) WithDigestString() string {
 	ref := u.Host
 	if u.Path != "" {
@@ -136,6 +164,8 @@ func (u URI) WithDigestString() string {
 }
 
 // ParseURI parse uri to URI struct
+//
+// Deprecated: use pkg/apis/artifacts/v1alpha1 instead
 func ParseURI(uri string, t metav1alpha1.ArtifactType) (URI, error) {
 	var u = URI{Raw: uri}
 
@@ -189,6 +219,8 @@ func ParseURI(uri string, t metav1alpha1.ArtifactType) (URI, error) {
 }
 
 // ValidateHost validates the host.
+//
+// Deprecated: use pkg/apis/artifacts/v1alpha1 instead
 func (u URI) ValidateHost() error {
 	if _, err := url.ParseRequestURI("sample://" + u.Host); err != nil {
 		return fmt.Errorf("%s: invalid registry %s", errdef.ErrInvalidReference, err.Error())
@@ -197,6 +229,8 @@ func (u URI) ValidateHost() error {
 }
 
 // ValidatePath validates the path.
+//
+// Deprecated: use pkg/apis/artifacts/v1alpha1 instead
 func (u URI) ValidatePath() error {
 	if !repositoryRegexp.MatchString(u.Path) {
 		return fmt.Errorf("%s: invalid repository %s", ErrInvalidReference, u.Path)
@@ -205,6 +239,8 @@ func (u URI) ValidatePath() error {
 }
 
 // ValidateTag validates the tag.
+//
+// Deprecated: use pkg/apis/artifacts/v1alpha1 instead
 func (u URI) ValidateTag() error {
 	if !tagRegexp.MatchString(u.Tag) {
 		return fmt.Errorf("%s: invalid tag %s", ErrInvalidReference, u.Tag)
@@ -213,6 +249,8 @@ func (u URI) ValidateTag() error {
 }
 
 // ValidateDigest validates the a digest.
+//
+// Deprecated: use pkg/apis/artifacts/v1alpha1 instead
 func (u URI) ValidateDigest() error {
 	if _, err := digest.Parse(u.DigestString()); err != nil {
 		return fmt.Errorf("%s: invalid digest %s; %v", ErrInvalidReference, u.DigestString(), err)
@@ -221,6 +259,8 @@ func (u URI) ValidateDigest() error {
 }
 
 // Validate returns an error if the uri is invalid, otherwise returns empty.
+//
+// Deprecated: use pkg/apis/artifacts/v1alpha1 instead
 func (u URI) Validate() error {
 	if err := u.ValidateHost(); err != nil {
 		return err

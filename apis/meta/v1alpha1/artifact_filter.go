@@ -16,15 +16,19 @@ limitations under the License.
 
 package v1alpha1
 
+// ArtifactFilterRegexList string slice
+// TODO: move to pkg/apis/artifacts/v1alpha1
 type ArtifactFilterRegexList []string
 
 // ArtifactTagFilter contains regular expressions used to match the artifact's tag.
+// TODO: move to pkg/apis/artifacts/v1alpha1
 type ArtifactTagFilter struct {
 	// Regex regular expressions matches tag
 	Regex ArtifactFilterRegexList `json:"regex,omitempty"`
 }
 
 // ArtifactEnvFilter contains name and regular expressions used to match the artifact's env.
+// TODO: move to pkg/apis/artifacts/v1alpha1
 type ArtifactEnvFilter struct {
 	// Name represent env name
 	Name string `json:"name,omitempty"`
@@ -41,6 +45,7 @@ type ArtifactLabelFilter struct {
 }
 
 // ArtifactFilter artifact filter.
+// TODO: move to pkg/apis/artifacts/v1alpha1
 type ArtifactFilter struct {
 	// +optional
 	Tags []ArtifactTagFilter `json:"tags,omitempty"`
@@ -51,6 +56,7 @@ type ArtifactFilter struct {
 }
 
 // ArtifactFilterSet filters for ArtifactPromotionPolicy
+// TODO: move to pkg/apis/artifacts/v1alpha1
 type ArtifactFilterSet struct {
 	//  all nested filter expressions MUST evaluate to true in order for the all filter expression to be true.
 	// +optional

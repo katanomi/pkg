@@ -20,7 +20,6 @@ import (
 	"context"
 	"fmt"
 
-	// "regexp"
 	"strings"
 )
 
@@ -81,8 +80,13 @@ func GetContainerImageObjectFromURLValues(ctx context.Context, url, digest strin
 	return
 }
 
-// GetContainerImageFromValues return a list of container image artifacts using url, digest and tags
-func GetContainerImageFromValues(ctx context.Context, array []string) (versions []ArtifactVersion) {
+// OCIArtifactTransformationFunc transformation function to use when converting a string array into
+// ArtifactVersion
+// +k8s:deepcopy-gen=false
+type OCIArtifactTransformationFunc func(ArtifactVersion) ArtifactVersion
+
+// GetOCIArtifactFromValues return a list of container image artifacts using url, digest and tags
+func GetOCIArtifactFromValues(ctx context.Context, array []string, transformFunc ...OCIArtifactTransformationFunc) (versions []ArtifactVersion) {
 	// will use the url@digest as an index
 	// to attach tags to the same artifact
 	// must provide the same digest otherwise will consider to be
@@ -111,10 +115,45 @@ func GetContainerImageFromValues(ctx context.Context, array []string) (versions 
 			if digest != "" {
 				digestIndex[key] = len(versions)
 			}
+			for _, trans := range transformFunc {
+				artifact = trans(artifact)
+			}
 			versions = append(versions, artifact)
 		}
 	}
 	return
+}
+
+// GetContainerImageFromValues return a list of container image artifacts using url, digest and tags
+func GetContainerImageFromValues(ctx context.Context, array []string) (versions []ArtifactVersion) {
+	// will use the url@digest as an index
+	// to attach tags to the same artifact
+	// must provide the same digest otherwise will consider to be
+	// different artifacts
+	versions = GetOCIArtifactFromValues(ctx, array, ContainerImageTransformFunc)
+	return
+}
+
+// GetHelmChartFromValues return a list of helm chart artifacts using url, digest and tags
+func GetHelmChartFromValues(ctx context.Context, array []string) (versions []ArtifactVersion) {
+	// will use the url@digest as an index
+	// to attach tags to the same artifact
+	// must provide the same digest otherwise will consider to be
+	// different artifacts
+	versions = GetOCIArtifactFromValues(ctx, array, HelmChartTransformFunc)
+	return
+}
+
+// ContainerImageTransformFunc transform into a container image
+func ContainerImageTransformFunc(artifact ArtifactVersion) ArtifactVersion {
+	artifact.Type = ArtifactTypeContainerImage
+	return artifact
+}
+
+// HelmChartTransformFunc transform into a helm chart
+func HelmChartTransformFunc(artifact ArtifactVersion) ArtifactVersion {
+	artifact.Type = ArtifactTypeHelmChart
+	return artifact
 }
 
 // ExtractRepositoryDigestTag takes a oci artifact url and extracts

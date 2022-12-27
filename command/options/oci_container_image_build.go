@@ -21,6 +21,7 @@ import (
 )
 
 // ResultsOCIContainerImageBuildURLOption describe ociContainerImageBuild-url option
+// Deprecated: use ContainerImageOption result store mechanism instead
 type ResultsOCIContainerImageBuildURLOption struct {
 	OciContainerImageBuildUrl string
 }

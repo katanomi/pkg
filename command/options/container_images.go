@@ -18,18 +18,21 @@ package options
 
 import (
 	"context"
+	"encoding/json"
 
-	metav1alpha1 "github.com/katanomi/pkg/apis/meta/v1alpha1"
-	"github.com/katanomi/pkg/artifacts"
+	artifacts "github.com/katanomi/pkg/apis/artifacts/v1alpha1"
 	pkgargs "github.com/katanomi/pkg/command/args"
+	"github.com/katanomi/pkg/command/io"
 	"github.com/spf13/cobra"
+	"github.com/spf13/pflag"
 	"k8s.io/apimachinery/pkg/util/validation/field"
 )
 
 // ContainerImagesOption describe container images option
 type ContainerImagesOption struct {
 	ContainerImages []string
-	Type            metav1alpha1.ArtifactType
+	Type            artifacts.ArtifactType
+	ResultPath      string
 
 	references []artifacts.URI
 	parseErrs  field.ErrorList
@@ -39,11 +42,16 @@ type ContainerImagesOption struct {
 	withoutDigest bool
 }
 
+// AddFlags add flags for ContainerImageOption
+func (m *ContainerImagesOption) AddFlags(flags *pflag.FlagSet) {
+	flags.StringVar(&m.ResultPath, "container-image-result-path", m.ResultPath, `filepath to store container image results`)
+}
+
 // Setup init container images from args
 func (m *ContainerImagesOption) Setup(ctx context.Context, _ *cobra.Command, args []string) (err error) {
 	m.ContainerImages, _ = pkgargs.GetArrayValues(ctx, args, "container-images")
 	if m.Type == "" {
-		m.Type = metav1alpha1.OCIContainerImageArtifactParameterType
+		m.Type = artifacts.ArtifactTypeContainerImage
 	}
 	return nil
 }
@@ -78,6 +86,7 @@ func (m *ContainerImagesOption) SetWithoutDigest(required bool) *ContainerImages
 
 // ValidateReferences check if the container images is valid
 func (m *ContainerImagesOption) ValidateReferences(path *field.Path, references []artifacts.URI) (errs field.ErrorList) {
+	path = path.Child("container-images")
 	if m.requiredValue && len(references) == 0 {
 		errs = append(errs, field.Required(path, "container-images must be set"))
 	}
@@ -125,4 +134,15 @@ func (m *ContainerImagesOption) parseContainerImages() (errs field.ErrorList) {
 	}
 
 	return m.parseErrs
+}
+
+// WriteResult writes a result to the provided path if given
+func (m *ContainerImagesOption) WriteResult(artfactList []artifacts.URI) (err error) {
+	stringSlice := artifacts.AsDigestStringArray(artfactList...)
+	var content []byte
+	if content, err = json.Marshal(stringSlice); err != nil {
+		return
+	}
+	err = io.WriteFile(m.ResultPath, content, 0777)
+	return
 }

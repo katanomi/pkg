@@ -68,4 +68,22 @@ var _ = Describe("Test.ContextOption.Validate", func() {
 			Expect(err).Should(BeEmpty())
 		})
 	})
+	Context("when context is not empty and is an existing folder", func() {
+		BeforeEach(func() {
+			obj.Context = "testdata"
+			obj.ValidateContextExists = true
+		})
+		It("should not return error", func() {
+			Expect(err).Should(BeEmpty())
+		})
+	})
+	Context("when context is not empty and is an NON existing folder", func() {
+		BeforeEach(func() {
+			obj.Context = "testdata-no-exists"
+			obj.ValidateContextExists = true
+		})
+		It("should not return error", func() {
+			Expect(err).ShouldNot(BeEmpty())
+		})
+	})
 })

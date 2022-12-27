@@ -52,7 +52,7 @@ func TestCodeLinterOption_Setup(t *testing.T) {
 	obj := CodeLinterOption{}
 	err := obj.Setup(context.Background(), nil, []string{"--quality-gate-rules", "a=b", "c=d"})
 	g.Expect(err).Should(Succeed())
-	g.Expect(obj.Result).To(Equal("Successed"))
+	g.Expect(obj.Result).To(Equal(v1alpha1.Succeeded))
 	g.Expect(obj.Issues).NotTo(BeNil())
 	g.Expect(obj.QualityGateRules).To(Equal(map[string]string{
 		"a": "b",

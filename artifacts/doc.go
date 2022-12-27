@@ -15,4 +15,6 @@ limitations under the License.
 */
 
 // Package artifacts provide functions to artifacts
+//
+// Deprecated: use pkg/apis/artifacts/v1alpha1 instead
 package artifacts

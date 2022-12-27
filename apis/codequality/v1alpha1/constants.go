@@ -16,6 +16,10 @@ limitations under the License.
 
 package v1alpha1
 
+import (
+	metav1alpha1 "github.com/katanomi/pkg/apis/meta/v1alpha1"
+)
+
 const (
 	// Known code rating metrics
 
@@ -31,6 +35,11 @@ const (
 	// SecurityHotspots metrics is based on the number of possible security issues
 	// found during code analysis
 	CodeRatingTypeSecurityHotspots = "SecurityHotspots"
+
+	// Succeeded alias for  metav1alpha1.SucceededReason
+	Succeeded = metav1alpha1.SucceededReason
+	// Failed alias for  metav1alpha1.FailedReason
+	Failed = metav1alpha1.FailedReason
 )
 
 const (

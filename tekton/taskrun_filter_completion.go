@@ -34,7 +34,7 @@ func FilterCompletedTaskRun(list *v1beta1.TaskRunList) {
 	list.Items = items
 }
 
-//  IsCompletedTaskRun return true if taskrun is completed
+// IsCompletedTaskRun return true if taskrun is completed
 func IsCompletedTaskRun(taskRun v1beta1.TaskRun) bool {
 	// When taskRun is Done the completionTime should be set
 	// In case completionTime is nil cause crash we check if completionTime is nil here.

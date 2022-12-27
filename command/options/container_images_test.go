@@ -17,6 +17,12 @@ limitations under the License.
 package options
 
 import (
+	"io/ioutil"
+	"os"
+
+	"github.com/google/go-cmp/cmp"
+	artifacts "github.com/katanomi/pkg/apis/artifacts/v1alpha1"
+	pkgtest "github.com/katanomi/pkg/testing"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	"k8s.io/apimachinery/pkg/util/validation/field"
@@ -132,4 +138,72 @@ var _ = Describe("Test.ContainerImagesOption.Validate", func() {
 			Expect(len(errs)).To(Equal(len(imageOption.ContainerImages)))
 		})
 	})
+})
+
+var _ = Describe("ContainerImagesOption.WriteResult", func() {
+	var (
+		opts         *ContainerImagesOption
+		artifactList []artifacts.URI
+		resultFile   *os.File
+		err          error
+	)
+	BeforeEach(func() {
+		resultFile, err = ioutil.TempFile("/tmp/", "test-ContainerImagesOption.WriteResult-*")
+		Expect(err).To(BeNil())
+		opts = &ContainerImagesOption{
+			ResultPath: resultFile.Name(),
+		}
+		DeferCleanup(func() {
+			Expect(os.Remove(resultFile.Name())).To(Succeed())
+		})
+	})
+	JustBeforeEach(func() {
+		err = opts.WriteResult(artifactList)
+	})
+	JustAfterEach(func() {
+	})
+	When("list is full with data", func() {
+		BeforeEach(func() {
+			artifactList = []artifacts.URI{
+				{
+					Host:      "index.docker.io",
+					Path:      "katanomi/controller",
+					Digest:    "88008bc80503efb3d6c0a8c76fbda9e89067fc57c400c89901519984fc80ad93",
+					Algorithm: artifacts.SHA256,
+					Tag:       "v1.2.3",
+				},
+				{
+					Host: "index.docker.io",
+					Path: "katanomi/controller",
+					Tag:  "latest",
+				},
+				{
+					Host:      "docker.io",
+					Path:      "katanomi/another",
+					Digest:    "88008bc80503efb3d6c0a8c76fbda9e89067fc57c400c89901519984fc80ad93",
+					Algorithm: artifacts.SHA256,
+				},
+			}
+		})
+		It("should write a json array with uri strings ", func() {
+			result := []string{}
+			Expect(pkgtest.LoadJSON(resultFile.Name(), &result)).To(Succeed())
+			expected := []string{}
+			Expect(pkgtest.LoadJSON("testdata/container-images.WriteResult.full.golden.json", &expected)).To(Succeed())
+			Expect(cmp.Diff(result, expected)).To(BeEmpty())
+		})
+	})
+	When("list is nil", func() {
+		BeforeEach(func() {
+			artifactList = nil
+		})
+		It("should write an empty json array", func() {
+			result := []string{}
+			Expect(pkgtest.LoadJSON(resultFile.Name(), &result)).To(Succeed())
+			expected := []string{}
+			Expect(pkgtest.LoadJSON("testdata/container-images.WriteResult.nil.golden.json", &expected)).To(Succeed())
+			Expect(cmp.Diff(result, expected)).To(BeEmpty())
+		})
+	})
+
 })
