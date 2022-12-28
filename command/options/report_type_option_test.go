@@ -27,32 +27,78 @@ import (
 )
 
 func TestReportTypeOption(t *testing.T) {
-	g := NewGomegaWithT(t)
-	ctx := context.Background()
-	base := field.NewPath("base")
+	t.Run("default flag ande setup", func(t *testing.T) {
+		g := NewGomegaWithT(t)
+		ctx := context.Background()
+		base := field.NewPath("base")
 
-	obj := struct {
-		ReportTypeOption
-	}{}
-	args := []string{
-		"--report-type", "junit-xml",
-	}
+		obj := struct {
+			ReportTypeOption
+		}{}
+		args := []string{
+			"--report-type", "junit-xml",
+		}
 
-	flagSet := pflag.NewFlagSet("test", pflag.ContinueOnError)
-	RegisterFlags(&obj, flagSet)
-	err := flagSet.Parse(args)
-	g.Expect(err).Should(Succeed(), "parse flag succeed.")
+		flagSet := pflag.NewFlagSet("test", pflag.ContinueOnError)
+		RegisterFlags(&obj, flagSet)
+		err := flagSet.Parse(args)
+		g.Expect(err).Should(Succeed(), "parse flag succeed.")
 
-	err = RegisterSetup(&obj, ctx, nil, args)
-	g.Expect(err).Should(Succeed(), "step flag succeed.")
-	g.Expect(obj.SupportedType).ToNot(BeNil())
-	g.Expect(obj.SupportedType).To(Equal(report.DefaultReportParsers), "should equal default")
-	g.Expect(obj.Validate(base)).To(HaveLen(0), "validate succeed")
+		err = RegisterSetup(&obj, ctx, nil, args)
+		g.Expect(err).Should(Succeed(), "step flag succeed.")
+		g.Expect(obj.SupportedType).ToNot(BeNil())
+		g.Expect(obj.SupportedType).To(Equal(report.DefaultReportParsers), "should equal default")
+		g.Expect(obj.Validate(base)).To(HaveLen(0), "validate succeed")
+	})
 
-	invalidArgs := []string{
-		"--report-type", "Junit",
-	}
-	err = flagSet.Parse(invalidArgs)
-	g.Expect(err).Should(Succeed(), "parse flag succeed.")
-	g.Expect(obj.Validate(base)).To(HaveLen(1), "validate failed")
+	t.Run("invalid type", func(t *testing.T) {
+		g := NewGomegaWithT(t)
+		ctx := context.Background()
+		base := field.NewPath("base")
+
+		obj := struct {
+			ReportTypeOption
+		}{}
+		args := []string{
+			"--report-type", "Junit",
+		}
+
+		flagSet := pflag.NewFlagSet("test", pflag.ContinueOnError)
+		RegisterFlags(&obj, flagSet)
+		err := flagSet.Parse(args)
+		g.Expect(err).Should(Succeed(), "parse flag succeed.")
+
+		err = RegisterSetup(&obj, ctx, nil, args)
+		g.Expect(err).Should(Succeed(), "step flag succeed.")
+		g.Expect(obj.SupportedType).ToNot(BeNil())
+		g.Expect(obj.SupportedType).To(Equal(report.DefaultReportParsers), "should equal default")
+		g.Expect(obj.Validate(base)).To(HaveLen(1), "validate failed")
+	})
+
+	t.Run("custom type parser", func(t *testing.T) {
+		g := NewGomegaWithT(t)
+		ctx := context.Background()
+		base := field.NewPath("base")
+
+		obj := struct {
+			ReportTypeOption
+		}{}
+
+		obj.SupportedType = map[report.ReportType]report.ReportParser{"Junit": &report.JunitParser{}}
+
+		args := []string{
+			"--report-type", "Junit",
+		}
+
+		flagSet := pflag.NewFlagSet("test", pflag.ContinueOnError)
+		RegisterFlags(&obj, flagSet)
+		err := flagSet.Parse(args)
+		g.Expect(err).Should(Succeed(), "parse flag succeed.")
+
+		err = RegisterSetup(&obj, ctx, nil, args)
+		g.Expect(err).Should(Succeed(), "step flag succeed.")
+		g.Expect(obj.SupportedType).ToNot(BeNil())
+		g.Expect(obj.Validate(base)).To(HaveLen(0), "validate success")
+	})
+
 }

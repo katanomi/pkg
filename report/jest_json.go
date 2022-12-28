@@ -24,8 +24,8 @@ import (
 )
 
 const (
-	// JestJson is the type of jest-json
-	JestJson ReportType = "jest-json"
+	// TypeJestJson is the type of jest-json
+	TypeJestJson ReportType = "jest-json"
 )
 
 // JestJsonParser jest json parser

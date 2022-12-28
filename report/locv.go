@@ -28,8 +28,8 @@ import (
 )
 
 const (
-	// Lcov is the type of lcov
-	Lcov ReportType = "lcov"
+	// TypeLcov is the type of lcov
+	TypeLcov ReportType = "lcov"
 )
 
 // LcovParser lcov report parser
@@ -79,7 +79,7 @@ func (p *LcovParser) Parse(path string) (result interface{}, err error) {
 }
 
 // parseLine parse lcov report line data.
-func (p *LcovParser) parseLine(line string) error {
+func (p *LcovParser) parseLine(line string) (err error) {
 	line = strings.TrimSpace(line)
 	parts := strings.Split(line, ":")
 	// line is "TN:" or "end_of_record", ignore parsing to prevent out-of-array problems.
@@ -87,35 +87,24 @@ func (p *LcovParser) parseLine(line string) error {
 		return nil
 	}
 
+	num := 0
 	switch parts[0] {
 	case LineFound:
-		num, err := strconv.Atoi(string(parts[1]))
-		if err != nil {
-			return err
-		}
+		num, err = strconv.Atoi(parts[1])
 		p.LineFound += num
 	case LineHit:
-		num, err := strconv.Atoi(string(parts[1]))
-		if err != nil {
-			return err
-		}
+		num, err = strconv.Atoi(parts[1])
 		p.LineHit += num
 	case BranchFound:
-		num, err := strconv.Atoi(string(parts[1]))
-		if err != nil {
-			return err
-		}
+		num, err = strconv.Atoi(parts[1])
 		p.BranchFound += num
 	case BranchHit:
-		num, err := strconv.Atoi(string(parts[1]))
-		if err != nil {
-			return err
-		}
+		num, err = strconv.Atoi(parts[1])
 		p.BranchHit += num
 	default:
 		// no action
 	}
-	return nil
+	return
 }
 
 // ConvertToTestCoverage convert to TestCoverage

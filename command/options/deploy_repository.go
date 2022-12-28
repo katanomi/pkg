@@ -31,6 +31,10 @@ import (
 type DeployRepositoryOption struct {
 	// DeployRepository deploy registry url
 	DeployRepository string
+
+	// Required define DeployRepository is required
+	Required bool
+
 	// DeployArgs save deloy agrs.
 	DeployArgs map[string]string
 }
@@ -48,13 +52,13 @@ func (m *DeployRepositoryOption) AddFlags(flags *pflag.FlagSet) {
 
 // Validate check if the deploy repository is valid
 func (m *DeployRepositoryOption) Validate(path *field.Path) (errs field.ErrorList) {
-	// allow deploy repository is empty.
-	if m.DeployRepository == "" {
+	deployPath := path.Child("deploy-repository")
+	if m.Required && m.DeployRepository == "" {
+		errs = append(errs, field.Required(deployPath, "deploy repository must be set"))
 		return
 	}
 
-	dependencyPath := path.Child("deploy-repository")
 	urlValidator := validators.NewURL().SetErrMsg("deploy repository is not a valid url")
-	errs = append(errs, urlValidator.Validate(dependencyPath, m.DeployRepository)...)
+	errs = append(errs, urlValidator.Validate(deployPath, m.DeployRepository)...)
 	return errs
 }

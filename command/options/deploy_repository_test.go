@@ -18,7 +18,6 @@ package options
 
 import (
 	"context"
-	"reflect"
 	"testing"
 
 	. "github.com/onsi/gomega"
@@ -30,7 +29,8 @@ func TestDeployRepositoryOption_Validate(t *testing.T) {
 	tests := []struct {
 		name             string
 		DeployRepository string
-		wantErrs         field.ErrorList
+		Required         bool
+		wantErr          bool
 	}{
 		{
 			name:             "validate success",
@@ -41,42 +41,55 @@ func TestDeployRepositoryOption_Validate(t *testing.T) {
 		},
 		{
 			name:             "validate repository failed",
-			DeployRepository: "test.com/test",
+			DeployRepository: "test.com/\f&^test",
+			wantErr:          true,
+		},
+		{
+			name:     "validate required repstory",
+			Required: true,
+			wantErr:  true,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			m := &DeployRepositoryOption{DeployRepository: tt.DeployRepository}
-			if gotErrs := m.Validate(field.NewPath("unittest")); !reflect.DeepEqual(gotErrs, tt.wantErrs) {
-				t.Errorf("DeployRepositoryOption.Validate() = %v, want %v", gotErrs, tt.wantErrs)
+			m := &DeployRepositoryOption{DeployRepository: tt.DeployRepository, Required: tt.Required}
+			if gotErrs := m.Validate(field.NewPath("unittest")); tt.wantErr != (len(gotErrs) != 0) {
+				t.Errorf("DeployRepositoryOption.Validate() = %v, want %v", gotErrs, tt.wantErr)
 			}
 		})
 	}
 }
 
 func TestDeployRepositoryOption_Setup(t *testing.T) {
-	g := NewGomegaWithT(t)
-	ctx := context.Background()
-	base := field.NewPath("base")
+	t.Run("parse flag", func(t *testing.T) {
+		g := NewGomegaWithT(t)
+		obj := struct {
+			DeployRepositoryOption
+		}{}
+		args := []string{
+			"--deploy-repository", "registry.com",
+		}
 
-	obj := struct {
-		DeployRepositoryOption
-	}{}
-	args := []string{
-		"--deploy-repository", "registry.com",
-	}
+		flagSet := pflag.NewFlagSet("test", pflag.ContinueOnError)
+		RegisterFlags(&obj, flagSet)
+		err := flagSet.Parse(args)
+		g.Expect(err).Should(Succeed(), "parse flag succeed.")
+		g.Expect(obj.DeployRepository).To(Equal("registry.com"))
+	})
 
-	flagSet := pflag.NewFlagSet("test", pflag.ContinueOnError)
-	RegisterFlags(&obj, flagSet)
-	err := flagSet.Parse(args)
-	g.Expect(err).Should(Succeed(), "parse flag succeed.")
+	t.Run("setup get args", func(t *testing.T) {
+		g := NewGomegaWithT(t)
+		obj := struct {
+			DeployRepositoryOption
+		}{}
 
-	args = []string{
-		"--deploy-args", "tag=1", "tag=2",
-	}
-	err = RegisterSetup(&obj, ctx, nil, args)
-	g.Expect(err).Should(Succeed(), "step flag succeed.")
-	g.Expect(obj.DeployRepository).To(Equal("registry.com"))
-	g.Expect(obj.Validate(base)).To(HaveLen(0), "validate succeed")
+		args := []string{
+			"--deploy-args", "tag1=1", "tag2=2",
+		}
+		err := RegisterSetup(&obj, context.Background(), nil, args)
+		g.Expect(err).Should(Succeed(), "step succeed.")
+		g.Expect(obj.DeployArgs).To(HaveLen(2), "get args succeed")
+	})
+
 }

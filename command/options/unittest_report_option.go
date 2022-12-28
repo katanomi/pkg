@@ -27,7 +27,7 @@ import (
 	"k8s.io/apimachinery/pkg/util/validation/field"
 )
 
-// UnitTestReportOption
+// UnitTestReportOption unittest report option
 type UnitTestReportOption struct {
 	ReportPathOption
 	ReportTypeOption
@@ -66,7 +66,8 @@ func (c *UnitTestReportOption) WriteResult(obj interface{}) error {
 		return nil
 	}
 
-	data := encoding.Encode(obj)
+	jsonPath := encoding.NewJsonPath()
+	data := jsonPath.Encode(obj)
 	content, err := json.Marshal(data)
 	if err != nil {
 		return err

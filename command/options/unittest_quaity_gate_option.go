@@ -30,15 +30,19 @@ import (
 	"k8s.io/apimachinery/pkg/util/validation/field"
 )
 
+// MetricType define quaity gate rules
 type MetricType string
 
 const (
-	LinesCoverageMetric    = "lines-coverage"
+	// LinesCoverageMetric coverage lines rule.
+	LinesCoverageMetric = "lines-coverage"
+	// BranchesCoverageMetric coverage branches rule.
 	BranchesCoverageMetric = "branches-coverage"
-	PassedTestsRateMetric  = "passed-tests-rate"
+	// PassedTestsRateMetric test result passed rate rule.
+	PassedTestsRateMetric = "passed-tests-rate"
 )
 
-// UnitTestReportOption
+// UnitTestQuaityGateOption unittest quaity gate option
 type UnitTestQuaityGateOption struct {
 	QualityGateOption
 	QualityGateRulesOption
@@ -56,13 +60,11 @@ func (m *UnitTestQuaityGateOption) Setup(ctx context.Context, cmd *cobra.Command
 
 // Validate verify that the input rules are legal.
 func (m *UnitTestQuaityGateOption) Validate(path *field.Path) (errs field.ErrorList) {
-	if m.QualityGate {
-		validator := validators.NewMetric(m.QualityGateRules)
-		base := path.Child("quality-gate")
-		errs = append(errs, validator.ValidateFloat(base, LinesCoverageMetric, pointer.Float64(0), pointer.Float64(100))...)
-		errs = append(errs, validator.ValidateFloat(base, BranchesCoverageMetric, pointer.Float64(0), pointer.Float64(100))...)
-		errs = append(errs, validator.ValidateFloat(base, PassedTestsRateMetric, pointer.Float64(0), pointer.Float64(100))...)
-	}
+	validator := validators.NewMetric(m.QualityGateRules)
+	base := path.Child("quality-gate")
+	errs = append(errs, validator.ValidateFloat(base, LinesCoverageMetric, pointer.Float64(0), pointer.Float64(100))...)
+	errs = append(errs, validator.ValidateFloat(base, BranchesCoverageMetric, pointer.Float64(0), pointer.Float64(100))...)
+	errs = append(errs, validator.ValidateFloat(base, PassedTestsRateMetric, pointer.Float64(0), pointer.Float64(100))...)
 
 	return
 }
@@ -108,12 +110,12 @@ func (m *UnitTestQuaityGateOption) validateQualityGate(ctx context.Context, base
 
 	testRate, err := strconv.ParseFloat(value, 64)
 	if err != nil {
-		errs = append(errs, field.InternalError(base.Child(metric), fmt.Errorf("parse validate value[%s] failed. error: %s", value, err.Error())))
+		errs = append(errs, field.InternalError(base.Child(metric), fmt.Errorf("parsing metric %q value %q failed: error: %s", metric, value, err.Error())))
 		return
 	}
 
 	if testRate < rate {
-		errs = append(errs, field.Forbidden(base.Child(metric), fmt.Sprintf("quality gate failed: current %.2f%% < expected %.2f%%", testRate, rate)))
+		errs = append(errs, field.Forbidden(base.Child(metric), fmt.Sprintf("%s quality gate failed: current %.2f%% < expected %.2f%%", metric, testRate, rate)))
 	} else {
 		logger.Infof("==> ✅  %s quality gate passed: current %.2f%% >= expected %.2f%%", metric, testRate, rate)
 	}

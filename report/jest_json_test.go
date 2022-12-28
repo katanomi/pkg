@@ -32,7 +32,7 @@ func TestResult_JestJson(t *testing.T) {
 	}{
 		{
 			name: "parser success",
-			path: "./testdata/jest_json_success.json",
+			path: "./testdata/jestjsonparser-success.json",
 			wantTestResult: v1alpha1.TestResult{
 				Passed:          5,
 				Skipped:         2,

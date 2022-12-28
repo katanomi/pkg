@@ -26,7 +26,7 @@ import (
 	"k8s.io/apimachinery/pkg/util/validation/field"
 )
 
-func TestUnitTestQuaityGateOption_ValidateQualityGate(t *testing.T) {
+func TestUnitTestQuaityGateOption(t *testing.T) {
 	t.Run("open quality and pass", func(t *testing.T) {
 		g := NewGomegaWithT(t)
 		base := field.NewPath("base")
@@ -55,7 +55,35 @@ func TestUnitTestQuaityGateOption_ValidateQualityGate(t *testing.T) {
 
 	})
 
-	t.Run("empty validate pass", func(t *testing.T) {
+	t.Run("disable quality and check rule passed", func(t *testing.T) {
+		g := NewGomegaWithT(t)
+		base := field.NewPath("base")
+
+		obj := struct {
+			UnitTestQuaityGateOption
+		}{}
+		args := []string{
+			"--enable-quality-gate", "false",
+		}
+
+		flagSet := pflag.NewFlagSet("test", pflag.ContinueOnError)
+		RegisterFlags(&obj, flagSet)
+		err := flagSet.Parse(args)
+		g.Expect(err).Should(Succeed(), "parse flag succeed.")
+		g.Expect(obj.QualityGate).To(Equal(true), "parse quality gate succeed.")
+
+		args = append(args, "--quality-gate-rules", "passed-tests-rate=90", "lines-coverage=80", "branches-coverage=66.66")
+		err = RegisterSetup(&obj, context.Background(), nil, args)
+		g.Expect(err).Should(Succeed(), "setp succeed.")
+
+		expectRules := map[string]string{PassedTestsRateMetric: "90", LinesCoverageMetric: "80", BranchesCoverageMetric: "66.66"}
+		g.Expect(obj.QualityGateRules).To(Equal(expectRules), "parse quality rule succeed.")
+
+		g.Expect(obj.Validate(base)).To(HaveLen(0), "validate succeed")
+
+	})
+
+	t.Run("empty rule validate pass", func(t *testing.T) {
 		g := NewGomegaWithT(t)
 		base := field.NewPath("base")
 
@@ -103,7 +131,10 @@ func TestUnitTestQuaityGateOption_ValidateQualityGate(t *testing.T) {
 		g.Expect(obj.Validate(base)).To(HaveLen(2), "validate succeed")
 	})
 
-	t.Run("ValidateQualityGate rules test", func(t *testing.T) {
+}
+
+func TestUnitTestQuaityGateOption_ValidateQualityGate(t *testing.T) {
+	t.Run("ValidateQualityGate not testresult and coverage data passed", func(t *testing.T) {
 		g := NewGomegaWithT(t)
 		ctx := context.Background()
 
@@ -112,30 +143,69 @@ func TestUnitTestQuaityGateOption_ValidateQualityGate(t *testing.T) {
 		}{}
 		obj.UnitTestQuaityGateOption.QualityGate = true
 		obj.UnitTestQuaityGateOption.QualityGateRules = map[string]string{PassedTestsRateMetric: "90", LinesCoverageMetric: "80", BranchesCoverageMetric: "66.66"}
-
 		g.Expect(obj.ValidateQualityGate(ctx, nil)).To(HaveLen(1), "unitest test data must be set.")
+
 		testResults := &v1alpha1.UnitTestsResult{}
 		g.Expect(obj.ValidateQualityGate(ctx, testResults)).To(HaveLen(0), "not testresult and coverage data.")
+	})
 
-		testResults.TestResult = &v1alpha1.TestResult{
-			PassedTestsRate: "90",
-		}
-		testResults.Coverage = &v1alpha1.TestCoverage{
-			Lines:    "90",
-			Branches: "70.15",
+	t.Run("ValidateQualityGate rules validate passed", func(t *testing.T) {
+		g := NewGomegaWithT(t)
+		ctx := context.Background()
+		obj := struct {
+			UnitTestQuaityGateOption
+		}{}
+		obj.UnitTestQuaityGateOption.QualityGate = true
+		obj.UnitTestQuaityGateOption.QualityGateRules = map[string]string{PassedTestsRateMetric: "90", LinesCoverageMetric: "80", BranchesCoverageMetric: "66.66"}
+		testResults := &v1alpha1.UnitTestsResult{
+			TestResult: &v1alpha1.TestResult{
+				PassedTestsRate: "90",
+			},
+			Coverage: &v1alpha1.TestCoverage{
+				Lines:    "90",
+				Branches: "70.15",
+			},
 		}
 		g.Expect(obj.ValidateQualityGate(ctx, testResults)).To(HaveLen(0), "rules validate pass")
+	})
 
-		testResults.TestResult = &v1alpha1.TestResult{
-			PassedTestsRate: "89.99",
+	t.Run("ValidateQualityGate rules validate failed", func(t *testing.T) {
+		g := NewGomegaWithT(t)
+		ctx := context.Background()
+		obj := struct {
+			UnitTestQuaityGateOption
+		}{}
+		obj.UnitTestQuaityGateOption.QualityGate = true
+		obj.UnitTestQuaityGateOption.QualityGateRules = map[string]string{PassedTestsRateMetric: "90", LinesCoverageMetric: "80", BranchesCoverageMetric: "66.66"}
+		testResults := &v1alpha1.UnitTestsResult{
+			TestResult: &v1alpha1.TestResult{
+				PassedTestsRate: "50",
+			},
+			Coverage: &v1alpha1.TestCoverage{
+				Lines:    "79.99",
+				Branches: "70.15",
+			},
 		}
-		testResults.Coverage = &v1alpha1.TestCoverage{
-			Lines:    "30",
-			Branches: "50.15",
-		}
-		g.Expect(obj.ValidateQualityGate(ctx, testResults)).To(HaveLen(3), "rules validate failed ")
+		g.Expect(obj.ValidateQualityGate(ctx, testResults)).To(HaveLen(2), "not testresult and coverage data.")
+	})
 
+	t.Run("ValidateQualityGate rules metric not set, and validate pass", func(t *testing.T) {
+		g := NewGomegaWithT(t)
+		ctx := context.Background()
+		obj := struct {
+			UnitTestQuaityGateOption
+		}{}
+		obj.UnitTestQuaityGateOption.QualityGate = true
 		obj.UnitTestQuaityGateOption.QualityGateRules = map[string]string{}
-		g.Expect(obj.ValidateQualityGate(ctx, testResults)).To(HaveLen(0), "rules metric not set, and validate pass")
+		testResults := &v1alpha1.UnitTestsResult{
+			TestResult: &v1alpha1.TestResult{
+				PassedTestsRate: "90",
+			},
+			Coverage: &v1alpha1.TestCoverage{
+				Lines:    "90",
+				Branches: "70.15",
+			},
+		}
+		g.Expect(obj.ValidateQualityGate(ctx, testResults)).To(HaveLen(0), "not testresult and coverage data.")
 	})
 }

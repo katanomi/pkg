@@ -24,8 +24,8 @@ import (
 )
 
 const (
-	// Lcov is the type of lcov
-	MochaJson ReportType = "mocha-json"
+	// TypeMochaJson is the type of mocha json
+	TypeMochaJson ReportType = "mocha-json"
 )
 
 // MochaJsonParser mocha json report parser

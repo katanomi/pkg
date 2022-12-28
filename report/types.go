@@ -28,10 +28,10 @@ var SupportedTypes = []ReportType{
 
 // DefaultReportParsers consists of default supported report types
 var DefaultReportParsers = map[ReportType]ReportParser{
-	TypeJunitXml: &JunitParser{},
-	MochaJson:    &MochaJsonParser{},
-	JestJson:     &JestJsonParser{},
-	Lcov:         &LcovParser{},
+	TypeJunitXml:  &JunitParser{},
+	TypeMochaJson: &MochaJsonParser{},
+	TypeJestJson:  &JestJsonParser{},
+	TypeLcov:      &LcovParser{},
 }
 
 // ReportParser provides an interface for parsing reports.

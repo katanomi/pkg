@@ -28,7 +28,9 @@ import (
 
 // ReportTypeOption describe report type option
 type ReportTypeOption struct {
-	ReportType    string
+	ReportType string
+	Required   bool
+
 	FlagName      string
 	SupportedType map[report.ReportType]report.ReportParser
 }
@@ -51,7 +53,8 @@ func (m *ReportTypeOption) AddFlags(flags *pflag.FlagSet) {
 
 // Validate verify that the type is supported.
 func (m *ReportTypeOption) Validate(path *field.Path) (errs field.ErrorList) {
-	if m.ReportType == "" {
+	if m.Required && m.ReportType == "" {
+		errs = append(errs, field.Required(path, m.FlagName+` must be set`))
 		return
 	}
 

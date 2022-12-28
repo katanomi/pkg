@@ -32,7 +32,7 @@ func TestLcovParser_Coverage(t *testing.T) {
 	}{
 		{
 			name: "paser success.",
-			path: "./testdata/lcov_success.info",
+			path: "./testdata/lcovparser-success.info",
 			wantTestCoverage: v1alpha1.TestCoverage{
 				Lines:    "70.00",
 				Branches: "50.00",

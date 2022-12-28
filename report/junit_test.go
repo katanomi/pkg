@@ -32,7 +32,7 @@ func TestResult_Junit(t *testing.T) {
 	}{
 		{
 			name: "parse success",
-			path: "./testdata/junit_success.xml",
+			path: "./testdata/junitparser-jest-success.xml",
 			wantTestResult: v1alpha1.TestResult{
 				Passed:          5,
 				Skipped:         2,
@@ -43,7 +43,7 @@ func TestResult_Junit(t *testing.T) {
 		// mocha generage junit report, need add "--reporter-options includePending=true" option to inclue skipped data.
 		{
 			name: "parse mocha success",
-			path: "./testdata/junit_mocha_success.xml",
+			path: "./testdata/junitparser-mocha-success.xml",
 			wantTestResult: v1alpha1.TestResult{
 				Passed:          3,
 				Skipped:         2,

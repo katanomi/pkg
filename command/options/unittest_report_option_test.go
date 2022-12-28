@@ -26,46 +26,83 @@ import (
 )
 
 func TestUnitTestReportOption(t *testing.T) {
-	g := NewGomegaWithT(t)
-	base := field.NewPath("base")
+	t.Run("default flag and setup", func(t *testing.T) {
+		g := NewGomegaWithT(t)
+		base := field.NewPath("base")
 
-	obj := struct {
-		UnitTestReportOption
-	}{}
-	args := []string{
-		"--report-type", "junit-xml",
-		"--report-path", "./junit.xml",
-		"--result-path", "/tmp/result",
-	}
+		obj := struct {
+			UnitTestReportOption
+		}{}
+		args := []string{
+			"--report-type", "junit-xml",
+			"--report-path", "./junit.xml",
+			"--result-path", "/tmp/result",
+		}
 
-	flagSet := pflag.NewFlagSet("test", pflag.ContinueOnError)
-	RegisterFlags(&obj, flagSet)
-	err := flagSet.Parse(args)
-	g.Expect(err).Should(Succeed(), "parse flag succeed.")
-	g.Expect(obj.ReportType).To(Equal("junit-xml"), "parse report type succeed.")
-	g.Expect(obj.ReportPath).To(Equal("./junit.xml"), "parse report path succeed.")
-	g.Expect(obj.ResultPath).To(Equal("/tmp/result"), "parse result path succeed.")
-	err = RegisterSetup(&obj, context.Background(), nil, args)
+		flagSet := pflag.NewFlagSet("test", pflag.ContinueOnError)
+		RegisterFlags(&obj, flagSet)
+		err := flagSet.Parse(args)
+		g.Expect(err).Should(Succeed(), "parse flag succeed.")
+		g.Expect(obj.ReportType).To(Equal("junit-xml"), "parse report type succeed.")
+		g.Expect(obj.ReportPath).To(Equal("./junit.xml"), "parse report path succeed.")
+		g.Expect(obj.ResultPath).To(Equal("/tmp/result"), "parse result path succeed.")
+		err = RegisterSetup(&obj, context.Background(), nil, args)
 
-	g.Expect(err).Should(Succeed(), "step succeed.")
-	g.Expect(obj.Validate(base)).To(HaveLen(0), "validate succeed")
+		g.Expect(err).Should(Succeed(), "step succeed.")
+		g.Expect(obj.Validate(base)).To(HaveLen(0), "validate succeed")
+	})
 
-	failedObj := struct {
-		UnitTestReportOption
-	}{}
-	args = []string{
-		"--report-type", "junit-xml",
-		"--result-path", "/tmp/result",
-	}
-	failedFlagSet := pflag.NewFlagSet("test", pflag.ContinueOnError)
-	RegisterFlags(&failedObj, failedFlagSet)
-	err = failedFlagSet.Parse(args)
-	g.Expect(err).Should(Succeed(), "parse flag succeed.")
+	t.Run("custom flag and setup", func(t *testing.T) {
+		g := NewGomegaWithT(t)
+		base := field.NewPath("base")
 
-	err = RegisterSetup(&failedObj, context.Background(), nil, args)
-	g.Expect(err).Should(Succeed(), "step succeed.")
-	g.Expect(failedObj.ReportType).To(Equal("junit-xml"), "parse report type succeed.")
-	g.Expect(failedObj.ReportPath).To(Equal(""), "parse report path succeed.")
-	g.Expect(failedObj.ResultPath).To(Equal("/tmp/result"), "parse result path succeed.")
-	g.Expect(failedObj.Validate(base)).To(HaveLen(1), "validate failed")
+		obj := struct {
+			UnitTestReportOption
+		}{}
+		obj.ReportPathOption.FlagName = "custom-path"
+		obj.ReportTypeOption.FlagName = "custom-type"
+		obj.ResultPathOption.FlagName = "custom-result"
+		args := []string{
+			"--custom-type", "junit-xml",
+			"--custom-path", "./junit.xml",
+			"--custom-result", "/tmp/result",
+		}
+
+		flagSet := pflag.NewFlagSet("test", pflag.ContinueOnError)
+		RegisterFlags(&obj, flagSet)
+		err := flagSet.Parse(args)
+		g.Expect(err).Should(Succeed(), "parse flag succeed.")
+		g.Expect(obj.ReportType).To(Equal("junit-xml"), "parse report type succeed.")
+		g.Expect(obj.ReportPath).To(Equal("./junit.xml"), "parse report path succeed.")
+		g.Expect(obj.ResultPath).To(Equal("/tmp/result"), "parse result path succeed.")
+		err = RegisterSetup(&obj, context.Background(), nil, args)
+
+		g.Expect(err).Should(Succeed(), "step succeed.")
+		g.Expect(obj.Validate(base)).To(HaveLen(0), "validate succeed")
+	})
+
+	t.Run("Validate failed", func(t *testing.T) {
+		g := NewGomegaWithT(t)
+		base := field.NewPath("base")
+
+		obj := struct {
+			UnitTestReportOption
+		}{}
+		args := []string{
+			"--report-type", "junit-xml",
+			"--result-path", "/tmp/result",
+		}
+		flagSet := pflag.NewFlagSet("test", pflag.ContinueOnError)
+		RegisterFlags(&obj, flagSet)
+		err := flagSet.Parse(args)
+		g.Expect(err).Should(Succeed(), "parse flag succeed.")
+
+		err = RegisterSetup(&obj, context.Background(), nil, args)
+		g.Expect(err).Should(Succeed(), "step succeed.")
+		g.Expect(obj.ReportType).To(Equal("junit-xml"), "parse report type succeed.")
+		g.Expect(obj.ReportPath).To(Equal(""), "parse report path succeed.")
+		g.Expect(obj.ResultPath).To(Equal("/tmp/result"), "parse result path succeed.")
+		g.Expect(obj.Validate(base)).To(HaveLen(1), "validate failed")
+	})
+
 }

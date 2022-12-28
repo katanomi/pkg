@@ -32,7 +32,7 @@ func TestResult_MochaJson(t *testing.T) {
 	}{
 		{
 			name: "parse mocha success",
-			path: "./testdata/mocha_json_success.json",
+			path: "./testdata/mochajsonparser-success.json",
 			wantTestResult: v1alpha1.TestResult{
 				Passed:          3,
 				Skipped:         2,
