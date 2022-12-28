@@ -137,3 +137,42 @@ func TestUnitTestsResultIsEmpty(t *testing.T) {
 		g.Expect(object.IsEmpty()).To(gomega.BeFalse())
 	})
 }
+
+func TestUnitTestsResultPassedTestsRate(t *testing.T) {
+	g := gomega.NewGomegaWithT(t)
+	cases := []struct {
+		name       string
+		testResult *TestResult
+		want       string
+	}{
+		{
+			name: "empty test result",
+			want: "0",
+		},
+		{
+			name: "PassedTestsRate 33.33",
+			testResult: &TestResult{
+				Passed:          1,
+				Failed:          2,
+				PassedTestsRate: "100.00",
+			},
+			want: "33.33",
+		},
+		{
+			name: "PassedTestsRate 70",
+			testResult: &TestResult{
+				Passed:          7,
+				Failed:          3,
+				PassedTestsRate: "00.00",
+			},
+			want: "70.00",
+		},
+	}
+
+	for _, tt := range cases {
+		t.Run(tt.name, func(t *testing.T) {
+			result := PassedTestsRate(tt.testResult)
+			g.Expect(result).To(gomega.Equal(tt.want))
+		})
+	}
+}

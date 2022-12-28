@@ -18,6 +18,7 @@ package v1alpha1
 
 import (
 	"context"
+	"fmt"
 	"strconv"
 
 	"k8s.io/apimachinery/pkg/util/validation/field"
@@ -85,6 +86,18 @@ func (TestResult) GetObjectWithValues(ctx context.Context, path *field.Path, val
 		}
 	}
 	return
+}
+
+// PassedTestsRate rate of passed tests calculated using passed / (passed + failed) * 100, i.e 96.54
+// if input t is nil, will return "0"
+func PassedTestsRate(t *TestResult) string {
+	if t == nil {
+		return "0"
+	}
+
+	passedTestsRate := float64(t.Passed) / float64(t.Passed+t.Failed)
+	passedTestsRate *= 100
+	return fmt.Sprintf("%.2f", passedTestsRate)
 }
 
 func strconvAtoi(stringVal string) (val int) {

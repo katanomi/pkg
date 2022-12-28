@@ -26,6 +26,18 @@ import (
 	"github.com/mitchellh/mapstructure"
 )
 
+var DefaultJsonPath = JsonPath{}
+
+// Encode using DefaultJsonPath encode obj to json path
+func Encode(obj interface{}) map[string]string {
+	return DefaultJsonPath.Encode(obj)
+}
+
+// Encode using DefaultJsonPath decode json path to obj
+func Decode(obj interface{}, data map[string]string) error {
+	return DefaultJsonPath.Decode(obj, data)
+}
+
 // NewJsonPath construct json path
 func NewJsonPath() JsonPath {
 	return JsonPath{}

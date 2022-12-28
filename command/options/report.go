@@ -21,6 +21,7 @@ import (
 	"fmt"
 	"path"
 
+	"github.com/katanomi/pkg/apis/codequality/v1alpha1"
 	pkgargs "github.com/katanomi/pkg/command/args"
 	"github.com/katanomi/pkg/common"
 	"github.com/katanomi/pkg/report"
@@ -32,11 +33,15 @@ import (
 // ReportPathOption describe report path option
 type ReportPathOption struct {
 	ReportPath string
+	FlagName   string
 }
 
 // AddFlags add flags to options
 func (m *ReportPathOption) AddFlags(flags *pflag.FlagSet) {
-	flags.StringVar(&m.ReportPath, "report-path", "", `the path contains report`)
+	if m.FlagName == "" {
+		m.FlagName = "report-path"
+	}
+	flags.StringVar(&m.ReportPath, m.FlagName, "", `the path contains report`)
 }
 
 // Validate check if command is empty
@@ -50,12 +55,17 @@ func (m *ReportPathOption) Validate(path *field.Path) (errs field.ErrorList) {
 // ReportPathsByTypesOption is the option for multiple report types with its report paths
 type ReportPathsByTypesOption struct {
 	ReportPathByTypes map[report.ReportType]string
+	ReportParsers     map[report.ReportType]report.ReportParser
 }
 
 // Setup defines how to start up with report-configs option
 func (r *ReportPathsByTypesOption) Setup(ctx context.Context, cmd *cobra.Command, args []string) (err error) {
 	if r.ReportPathByTypes == nil {
 		r.ReportPathByTypes = make(map[report.ReportType]string)
+	}
+
+	if r.ReportParsers == nil {
+		r.ReportParsers = report.DefaultReportParsers
 	}
 	pathByTypes, _ := pkgargs.GetKeyValues(ctx, args, "report-configs")
 	// report type validation
@@ -75,24 +85,33 @@ func (r *ReportPathsByTypesOption) Setup(ctx context.Context, cmd *cobra.Command
 // TestSummariesByType gets test summaries by report type
 func (r *ReportPathsByTypesOption) TestSummariesByType(parentPath string) (summaries report.SummariesByType,
 	err error) {
-	summaries = map[report.ReportType]report.TestSummary{}
+	// Avoid using the current function when no setup is called.
+	if r.ReportParsers == nil {
+		r.ReportParsers = report.DefaultReportParsers
+	}
+
+	summaries = map[report.ReportType]v1alpha1.AutomatedTestResult{}
 	var errs field.ErrorList
 	base := field.NewPath("report-configs")
 	for reportType, reportPath := range r.ReportPathByTypes {
-		switch reportType {
-		// Add more type in the future...
-		case report.TypeJunitXml:
-			summary, err := report.GetSummaryFromJunitXml(path.Join(parentPath, reportPath))
-			if err != nil {
-				errs = append(errs, field.InternalError(base.Child(string(reportType)),
-					fmt.Errorf("GetSummaryFromJunitXml err: %s",
-						err.Error())))
-				continue
-			}
-			summaries[report.TypeJunitXml] = *summary
-		default:
-			// do nothing...
+		parser, ok := r.ReportParsers[reportType]
+		if !ok {
+			errs = append(errs, field.Invalid(base, reportType, "not found report type parser"))
+			continue
 		}
+
+		result, err := parser.Parse(path.Join(parentPath, reportPath))
+		if err != nil {
+			errs = append(errs, field.InternalError(base.Child(string(reportType)),
+				fmt.Errorf("failed to parse report. err: %s", err.Error())))
+			continue
+		}
+
+		converter, ok := result.(report.ConvertToAutomatedTestResult)
+		if !ok {
+			errs = append(errs, field.TypeInvalid(base.Child(string(reportType)), converter, "pase result is not ConvertToAutomatedTestResult interface"))
+		}
+		summaries[report.TypeJunitXml] = converter.ConvertToAutomatedTestResult()
 	}
 	return summaries, errs.ToAggregate()
 }

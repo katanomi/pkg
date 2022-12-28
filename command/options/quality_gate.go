@@ -23,9 +23,13 @@ import (
 // QualityGateOption describe quality gate option
 type QualityGateOption struct {
 	QualityGate bool
+	FlagName    string
 }
 
 // AddFlags add flags to options
 func (m *QualityGateOption) AddFlags(flags *pflag.FlagSet) {
-	flags.BoolVar(&m.QualityGate, "enable-quality-gate", false, `enables the quality gate`)
+	if m.FlagName == "" {
+		m.FlagName = "enable-quality-gate"
+	}
+	flags.BoolVar(&m.QualityGate, m.FlagName, false, `enables the quality gate`)
 }

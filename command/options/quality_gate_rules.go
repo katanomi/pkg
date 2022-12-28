@@ -27,6 +27,7 @@ import (
 // QualityGateRulesOption describe quality gate rules option
 type QualityGateRulesOption struct {
 	QualityGateRules map[string]string
+	FlagName         string
 }
 
 // Setup init quality gate rules from args
@@ -34,8 +35,13 @@ func (m *QualityGateRulesOption) Setup(ctx context.Context, _ *cobra.Command, ar
 	if m.QualityGateRules == nil {
 		m.QualityGateRules = make(map[string]string)
 	}
-	m.QualityGateRules, _ = pkgargs.GetKeyValues(ctx, args, "quality-gate-rules")
-	return nil
+
+	if m.FlagName == "" {
+		m.FlagName = "quality-gate-rules"
+	}
+
+	m.QualityGateRules, err = pkgargs.GetKeyValues(ctx, args, m.FlagName)
+	return err
 }
 
 // GetRuleValue get rule value

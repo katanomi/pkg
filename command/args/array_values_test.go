@@ -107,4 +107,15 @@ var _ = Describe("GetArrayValues", func() {
 			Expect(ok).To(BeTrue())
 		})
 	})
+
+	When("flag with empty values", func() {
+		BeforeEach(func() {
+			cliArgs = []string{"--flag1", "", "--another-flag", ""}
+			flag = "flag1"
+		})
+		It("should return empty slice with true ok", func() {
+			Expect(result).To(Equal([]string{}))
+			Expect(ok).To(BeTrue())
+		})
+	})
 })

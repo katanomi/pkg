@@ -14,25 +14,29 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package qualitygate
+package options
 
 import (
 	"context"
-	"errors"
+	"testing"
 
-	"github.com/katanomi/pkg/command/logger"
+	. "github.com/onsi/gomega"
 	"k8s.io/apimachinery/pkg/util/validation/field"
 )
 
-var (
-	QualityGateCheckFailedErr = errors.New("quality gate check failed")
-)
+func TestDependencyReposOption_Setup(t *testing.T) {
+	g := NewGomegaWithT(t)
+	ctx := context.Background()
+	base := field.NewPath("base")
 
-// PrintQualityGateError print quality gate error message.
-func PrintQualityGateError(ctx context.Context, errs field.ErrorList) error {
-	if len(errs) > 0 {
-		logger.Errors(ctx, errs.ToAggregate())
-		return QualityGateCheckFailedErr
+	obj := struct {
+		Cmd DependencyReposOption
+	}{Cmd: DependencyReposOption{FlagName: "test-flag"}}
+	args := []string{
+		"--test-flag", "registry.com", "registry.com",
 	}
-	return nil
+	err := RegisterSetup(&obj, ctx, nil, args)
+	g.Expect(err).Should(Succeed(), "parse flag succeed.")
+	g.Expect(obj.Cmd.DependencyRepos).To(Equal([]string{"registry.com", "registry.com"}))
+	g.Expect(obj.Cmd.Validate(base)).To(HaveLen(0), "validate succeed")
 }

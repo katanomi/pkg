@@ -23,8 +23,14 @@ import (
 )
 
 // GetArrayValues returns a list of values for a one flag in a set of given arguments
-// args should be all the arguments to be interpreted. i.e --arg1 key1=value1 key2=value2 --arg2 key3=value3
-// flag should be the flag name to select keys and values from, i.e arg1 or arg2 in the example above
+// args should be all the arguments to be interpreted. i.e ["--arg1","key1=value1","key2=value2", "--arg2", "key3=value3"]
+// flag should be the flag name to select keys and values from, i.e arg1 or arg2 in the example above.
+//
+// Note: When the value is empty, it will be removed.
+//
+//	 i.e: flag: arg1
+//		  args: ["--arg1", "", "key1=value1", "--arg2", "key3=value3"]
+//	      return: ["key1=value1"]
 func GetArrayValues(ctx context.Context, args []string, flag string) (values []string, ok bool) {
 	values = make([]string, 0, len(args))
 	offset := -1
@@ -46,5 +52,16 @@ func GetArrayValues(ctx context.Context, args []string, flag string) (values []s
 			// no-op
 		}
 	}
+
+	// remove empty value
+	i := 0
+	for _, v := range values {
+		if v != "" {
+			values[i] = v
+			i++
+		}
+	}
+	values = values[0:i]
+
 	return
 }
