@@ -16,10 +16,40 @@ limitations under the License.
 
 package report
 
+import "github.com/katanomi/pkg/apis/codequality/v1alpha1"
+
 // ReportType defines report type
 type ReportType string
 
 // SupportedTypes consists of default supported report types
 var SupportedTypes = []ReportType{
 	TypeJunitXml,
+}
+
+// DefaultReportParsers consists of default supported report types
+var DefaultReportParsers = map[ReportType]ReportParser{
+	TypeJunitXml:  &JunitParser{},
+	TypeMochaJson: &MochaJsonParser{},
+	TypeJestJson:  &JestJsonParser{},
+	TypeLcov:      &LcovParser{},
+}
+
+// ReportParser provides an interface for parsing reports.
+type ReportParser interface {
+	Parse(string) (interface{}, error)
+}
+
+// ConvertToTestResult provides an interface converted to TestResult.
+type ConvertToTestResult interface {
+	ConvertToTestResult() v1alpha1.TestResult
+}
+
+// ConvertToTestCoverage provides an interface converted to TestCoverage.
+type ConvertToTestCoverage interface {
+	ConvertToTestCoverage() v1alpha1.TestCoverage
+}
+
+// ConvertToAutomatedTestResult provides an interface converted to AutomatedTestResult.
+type ConvertToAutomatedTestResult interface {
+	ConvertToAutomatedTestResult() v1alpha1.AutomatedTestResult
 }

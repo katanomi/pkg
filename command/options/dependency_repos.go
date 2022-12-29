@@ -30,17 +30,21 @@ import (
 // DependencyReposOption describe dependency repo option
 type DependencyReposOption struct {
 	DependencyRepos []string
+	FlagName        string
 }
 
 // Setup init dependency repositories from args
 func (m *DependencyReposOption) Setup(ctx context.Context, _ *cobra.Command, args []string) (err error) {
-	m.DependencyRepos, _ = pkgargs.GetArrayValues(ctx, args, "dependencies-repositories")
+	if m.FlagName == "" {
+		m.FlagName = "dependencies-repositories"
+	}
+	m.DependencyRepos, _ = pkgargs.GetArrayValues(ctx, args, m.FlagName)
 	return nil
 }
 
 // Validate check if the dependency repository is valid
 func (m *DependencyReposOption) Validate(path *field.Path) (errs field.ErrorList) {
-	dependencyPath := path.Child("dependencies-repositories")
+	dependencyPath := path.Child(m.FlagName)
 	urlValidator := validators.NewURL().SetErrMsg("dependency repository is not a valid url")
 	errs = append(errs, urlValidator.Validate(dependencyPath, m.DependencyRepos...)...)
 	return errs

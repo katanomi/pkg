@@ -1,0 +1,261 @@
+{
+    "stats": {
+      "suites": 4,
+      "tests": 6,
+      "passes": 3,
+      "pending": 2,
+      "failures": 1,
+      "start": "2022-12-21T10:05:51.213Z",
+      "end": "2022-12-21T10:05:51.220Z",
+      "duration": 7,
+      "testsRegistered": 6,
+      "passPercent": 75,
+      "pendingPercent": 33.33333333333333,
+      "other": 0,
+      "hasOther": false,
+      "skipped": 0,
+      "hasSkipped": false
+    },
+    "results": [
+      {
+        "uuid": "32cf4ee6-5c8b-482b-ba42-0914d6b7b712",
+        "title": "",
+        "fullFile": "",
+        "file": "",
+        "beforeHooks": [],
+        "afterHooks": [],
+        "tests": [],
+        "suites": [
+          {
+            "uuid": "5ae4c46c-2b50-41f4-9740-a85ee4183990",
+            "title": "减法函数的测试",
+            "fullFile": "/nodejs-test/test/sub.test.js",
+            "file": "/test/sub.test.js",
+            "beforeHooks": [],
+            "afterHooks": [],
+            "tests": [
+              {
+                "title": "1 减 1 应该等于 0",
+                "fullTitle": "减法函数的测试 1 减 1 应该等于 0",
+                "timedOut": false,
+                "duration": 1,
+                "state": "passed",
+                "speed": "fast",
+                "pass": true,
+                "fail": false,
+                "pending": false,
+                "context": null,
+                "code": "expect(sub(1, 1)).to.be.equal(0);",
+                "err": {},
+                "uuid": "c241a0f8-7d57-4804-8fde-c5d218e3c3b9",
+                "parentUUID": "5ae4c46c-2b50-41f4-9740-a85ee4183990",
+                "isHook": false,
+                "skipped": false
+              },
+              {
+                "title": "failed 1 减 1 应该等于 2",
+                "fullTitle": "减法函数的测试 failed 1 减 1 应该等于 2",
+                "timedOut": false,
+                "duration": 1,
+                "state": "failed",
+                "speed": null,
+                "pass": false,
+                "fail": true,
+                "pending": false,
+                "context": null,
+                "code": "expect(sub(1, 1)).to.be.equal(2);",
+                "err": {
+                  "message": "AssertionError: expected +0 to equal 2",
+                  "estack": "AssertionError: expected +0 to equal 2\n    at Context.<anonymous> (test/sub.test.js:11:29)\n    at process.processImmediate (node:internal/timers:471:21)",
+                  "diff": "- 0\n+ 2\n"
+                },
+                "uuid": "08d322a0-0498-491d-95e2-32c947e091fa",
+                "parentUUID": "5ae4c46c-2b50-41f4-9740-a85ee4183990",
+                "isHook": false,
+                "skipped": false
+              }
+            ],
+            "suites": [],
+            "passes": [
+              "c241a0f8-7d57-4804-8fde-c5d218e3c3b9"
+            ],
+            "failures": [
+              "08d322a0-0498-491d-95e2-32c947e091fa"
+            ],
+            "pending": [],
+            "skipped": [],
+            "duration": 2,
+            "root": false,
+            "rootEmpty": false,
+            "_timeout": 2000
+          },
+          {
+            "uuid": "7be71b79-9f26-4a0b-a6fe-18a0b77f456e",
+            "title": "describe skip 测试",
+            "fullFile": "/nodejs-test/test/sub.test.js",
+            "file": "/test/sub.test.js",
+            "beforeHooks": [],
+            "afterHooks": [],
+            "tests": [
+              {
+                "title": "skip 1 减 1 应该等于 0",
+                "fullTitle": "describe skip 测试 skip 1 减 1 应该等于 0",
+                "timedOut": false,
+                "duration": 0,
+                "state": "pending",
+                "speed": null,
+                "pass": false,
+                "fail": false,
+                "pending": true,
+                "context": null,
+                "code": "",
+                "err": {},
+                "uuid": "b904058a-ac38-4bb7-96da-f71f9ceb0e10",
+                "parentUUID": "7be71b79-9f26-4a0b-a6fe-18a0b77f456e",
+                "isHook": false,
+                "skipped": false
+              }
+            ],
+            "suites": [],
+            "passes": [],
+            "failures": [],
+            "pending": [
+              "b904058a-ac38-4bb7-96da-f71f9ceb0e10"
+            ],
+            "skipped": [],
+            "duration": 0,
+            "root": false,
+            "rootEmpty": false,
+            "_timeout": 2000
+          },
+          {
+            "uuid": "454e827b-1376-4b55-96d8-733e20eedbc0",
+            "title": "skip 测试",
+            "fullFile": "/nodejs-test/test/sub.test.js",
+            "file": "/test/sub.test.js",
+            "beforeHooks": [],
+            "afterHooks": [],
+            "tests": [
+              {
+                "title": "inline skip 1 减 1 应该等于 0",
+                "fullTitle": "skip 测试 inline skip 1 减 1 应该等于 0",
+                "timedOut": false,
+                "duration": 0,
+                "state": "pending",
+                "speed": null,
+                "pass": false,
+                "fail": false,
+                "pending": true,
+                "context": null,
+                "code": "this.skip()\nexpect(sub(1, 1)).to.be.equal(0);",
+                "err": {},
+                "uuid": "4d588f54-44e7-4fa1-b654-21a597964397",
+                "parentUUID": "454e827b-1376-4b55-96d8-733e20eedbc0",
+                "isHook": false,
+                "skipped": false
+              },
+              {
+                "title": "3 减 1 应该等于 2",
+                "fullTitle": "skip 测试 3 减 1 应该等于 2",
+                "timedOut": false,
+                "duration": 0,
+                "state": "passed",
+                "speed": "fast",
+                "pass": true,
+                "fail": false,
+                "pending": false,
+                "context": null,
+                "code": "expect(sub(3, 1)).to.be.equal(2);",
+                "err": {},
+                "uuid": "0082a0cf-9b67-4883-959e-96d3a0907213",
+                "parentUUID": "454e827b-1376-4b55-96d8-733e20eedbc0",
+                "isHook": false,
+                "skipped": false
+              }
+            ],
+            "suites": [],
+            "passes": [
+              "0082a0cf-9b67-4883-959e-96d3a0907213"
+            ],
+            "failures": [],
+            "pending": [
+              "4d588f54-44e7-4fa1-b654-21a597964397"
+            ],
+            "skipped": [],
+            "duration": 0,
+            "root": false,
+            "rootEmpty": false,
+            "_timeout": 2000
+          },
+          {
+            "uuid": "4caca367-5b9b-4f9a-956b-a5827f355683",
+            "title": "加法函数的测试",
+            "fullFile": "/nodejs-test/test/sum.mocha.test.js",
+            "file": "/test/sum.mocha.test.js",
+            "beforeHooks": [],
+            "afterHooks": [],
+            "tests": [
+              {
+                "title": "1 加 1 应该等于 2",
+                "fullTitle": "加法函数的测试 1 加 1 应该等于 2",
+                "timedOut": false,
+                "duration": 0,
+                "state": "passed",
+                "speed": "fast",
+                "pass": true,
+                "fail": false,
+                "pending": false,
+                "context": null,
+                "code": "expect(sum(1, 1)).to.be.equal(2);",
+                "err": {},
+                "uuid": "30054a1c-3ca1-48a3-b52d-d19a26842e89",
+                "parentUUID": "4caca367-5b9b-4f9a-956b-a5827f355683",
+                "isHook": false,
+                "skipped": false
+              }
+            ],
+            "suites": [],
+            "passes": [
+              "30054a1c-3ca1-48a3-b52d-d19a26842e89"
+            ],
+            "failures": [],
+            "pending": [],
+            "skipped": [],
+            "duration": 0,
+            "root": false,
+            "rootEmpty": false,
+            "_timeout": 2000
+          }
+        ],
+        "passes": [],
+        "failures": [],
+        "pending": [],
+        "skipped": [],
+        "duration": 0,
+        "root": true,
+        "rootEmpty": true,
+        "_timeout": 2000
+      }
+    ],
+    "meta": {
+      "mocha": {
+        "version": "10.1.0"
+      },
+      "mochawesome": {
+        "options": {
+          "quiet": false,
+          "reportFilename": "mochawesome",
+          "saveHtml": true,
+          "saveJson": true,
+          "consoleReporter": "spec",
+          "useInlineDiffs": false,
+          "code": true
+        },
+        "version": "7.1.3"
+      },
+      "marge": {
+        "options": null,
+        "version": "6.2.0"
+      }
+    }
+  }

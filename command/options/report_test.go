@@ -24,6 +24,7 @@ import (
 	"github.com/katanomi/pkg/report"
 	pkgTesting "github.com/katanomi/pkg/testing"
 	. "github.com/onsi/gomega"
+	"k8s.io/apimachinery/pkg/util/validation/field"
 )
 
 func TestReportOption(t *testing.T) {
@@ -73,4 +74,35 @@ func TestSummariesByType(t *testing.T) {
 	g.Expect(err).ShouldNot(HaveOccurred())
 	diff := cmp.Diff(result, expectedResult)
 	g.Expect(diff).To(BeEmpty())
+}
+
+func TestReportPathsByTypesOption_Validate(t *testing.T) {
+	t.Run("Validate passed", func(t *testing.T) {
+		g := NewGomegaWithT(t)
+		ctx := context.Background()
+		base := field.NewPath("base")
+		obj := struct {
+			ReportPathsByTypesOption
+		}{}
+
+		args := []string{
+			"--report-configs", "junit-xml=junit.xml",
+		}
+		err := RegisterSetup(&obj, ctx, nil, args)
+		g.Expect(err).To(Succeed())
+		errs := obj.Validate(base)
+		g.Expect(errs).To(HaveLen(0))
+	})
+
+	t.Run("Validate failed", func(t *testing.T) {
+		g := NewGomegaWithT(t)
+		base := field.NewPath("base")
+		obj := struct {
+			ReportPathsByTypesOption
+		}{}
+		obj.ReportPathByTypes = map[report.ReportType]string{"junit": "junit.xml"}
+		obj.ReportParsers = map[report.ReportType]report.ReportParser{}
+		errs := obj.Validate(base)
+		g.Expect(errs).To(HaveLen(1))
+	})
 }

@@ -18,6 +18,7 @@ package report
 
 import (
 	"github.com/joshdk/go-junit"
+	"github.com/katanomi/pkg/apis/codequality/v1alpha1"
 )
 
 const (
@@ -26,28 +27,43 @@ const (
 )
 
 // SummariesByType stores TestSummary by ReportType
-type SummariesByType map[ReportType]TestSummary
+type SummariesByType map[ReportType]v1alpha1.AutomatedTestResult
 
-// TestSummary defines summary of test report
-type TestSummary struct {
-	Total           int     `json:"total"`
-	Passed          int     `json:"passed"`
-	Failed          int     `json:"failed"`
-	Error           int     `json:"error"`
-	Skipped         int     `json:"skipped"`
-	PassedTestsRate float64 `json:"passedTestsRate,omitempty"`
+// JunitParser junit parser
+type JunitParser struct {
+	// save junit testsuites
+	Suites []junit.Suite
 }
 
-// GetSummaryFromJunitXml gets summary from provided junit-xml file path
-func GetSummaryFromJunitXml(reportPath string) (summary *TestSummary, err error) {
-	var suites []junit.Suite
-	suites, err = junit.IngestDir(reportPath)
+// Parse pase junit report.
+func (p *JunitParser) Parse(path string) (testResult interface{}, err error) {
+	p.Suites, err = junit.IngestFile(path)
 	if err != nil {
 		return nil, err
 	}
 
-	summary = &TestSummary{}
-	for _, suite := range suites {
+	return p, nil
+}
+
+// ConvertToTestResult convert to TestResult
+func (m *JunitParser) ConvertToTestResult() v1alpha1.TestResult {
+	result := v1alpha1.TestResult{}
+
+	for _, suite := range m.Suites {
+		result.Failed += suite.Totals.Error + suite.Totals.Failed
+		result.Passed += suite.Totals.Passed
+		result.Skipped += suite.Totals.Skipped
+	}
+
+	result.PassedTestsRate = v1alpha1.PassedTestsRate(&result)
+	return result
+}
+
+// ConvertToAutomatedTestResult convert to AutomatedTestResult
+func (m *JunitParser) ConvertToAutomatedTestResult() v1alpha1.AutomatedTestResult {
+	summary := v1alpha1.AutomatedTestResult{}
+
+	for _, suite := range m.Suites {
 		summary.Total += suite.Totals.Tests
 		summary.Error += suite.Totals.Error
 		summary.Failed += suite.Totals.Failed
@@ -60,5 +76,5 @@ func GetSummaryFromJunitXml(reportPath string) (summary *TestSummary, err error)
 	if divider > 0 {
 		summary.PassedTestsRate = float64(summary.Passed) / float64(divider)
 	}
-	return summary, nil
+	return summary
 }
