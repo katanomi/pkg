@@ -17,6 +17,7 @@ limitations under the License.
 package report
 
 import (
+	"fmt"
 	"reflect"
 	"testing"
 
@@ -24,14 +25,12 @@ import (
 )
 
 func TestResult_JestJson(t *testing.T) {
-	tests := []struct {
-		name           string
+	tests := map[string]struct {
 		path           string
 		wantTestResult v1alpha1.TestResult
-		wantErr        bool
+		wantErr        error
 	}{
-		{
-			name: "parser success",
+		"jest json success": {
 			path: "./testdata/jestjsonparser-success.json",
 			wantTestResult: v1alpha1.TestResult{
 				Passed:          5,
@@ -40,15 +39,27 @@ func TestResult_JestJson(t *testing.T) {
 				PassedTestsRate: "71.43",
 			},
 		},
+		"jest file not found": {
+			path:    "./testdata/jestjsonparser-not-found.json",
+			wantErr: fmt.Errorf("open ./testdata/jestjsonparser-not-found.json: no such file or directory"),
+		},
+		"jest parse failed": {
+			path:    "./testdata/jestjsonparser-failed.json",
+			wantErr: fmt.Errorf("json: cannot unmarshal string into Go struct field JestJsonParser.numPassedTests of type int"),
+		},
 	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
+	for name, tt := range tests {
+		t.Run(name, func(t *testing.T) {
 			p := &JestJsonParser{}
 			testResult, err := p.Parse(tt.path)
-			if (err != nil) != tt.wantErr {
+			if err != tt.wantErr && err.Error() != tt.wantErr.Error() {
 				t.Errorf("JestJsonParser.TestResult() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
+			if testResult == nil {
+				return
+			}
+
 			converter, _ := testResult.(ConvertToTestResult)
 			outResult := converter.ConvertToTestResult()
 			if !reflect.DeepEqual(outResult, tt.wantTestResult) {

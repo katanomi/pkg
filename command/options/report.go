@@ -51,6 +51,9 @@ func (m *ReportPathOption) Validate(path *field.Path) (errs field.ErrorList) {
 	return errs
 }
 
+// AutomatedTestResultDefaultParser AutomatedTestResult default parser
+var AutomatedTestResultDefaultParser = map[report.ReportType]report.ReportParser{report.TypeJunitXml: &report.JunitParser{}}
+
 // ReportPathsByTypesOption is the option for multiple report types with its report paths
 type ReportPathsByTypesOption struct {
 	ReportPathByTypes map[report.ReportType]string
@@ -61,7 +64,7 @@ type ReportPathsByTypesOption struct {
 func (m *ReportPathsByTypesOption) Validate(path *field.Path) (errs field.ErrorList) {
 	for t := range m.ReportPathByTypes {
 		if _, ok := m.ReportParsers[t]; !ok {
-			errs = append(errs, field.TypeInvalid(path, t, "Not support report type"))
+			errs = append(errs, field.TypeInvalid(path, t, "Not supported report type"))
 		}
 	}
 	return
@@ -74,7 +77,7 @@ func (r *ReportPathsByTypesOption) Setup(ctx context.Context, cmd *cobra.Command
 	}
 
 	if r.ReportParsers == nil {
-		r.ReportParsers = map[report.ReportType]report.ReportParser{report.TypeJunitXml: &report.JunitParser{}}
+		r.ReportParsers = AutomatedTestResultDefaultParser
 	}
 
 	pathByTypes, _ := pkgargs.GetKeyValues(ctx, args, "report-configs")
@@ -84,7 +87,7 @@ func (r *ReportPathsByTypesOption) Setup(ctx context.Context, cmd *cobra.Command
 	for t, p := range pathByTypes {
 		reportType := report.ReportType(t)
 		if _, ok := r.ReportParsers[reportType]; !ok {
-			errs = append(errs, field.TypeInvalid(base, t, "Not support report type"))
+			errs = append(errs, field.TypeInvalid(base, t, "Not supported report type"))
 			continue
 		}
 		r.ReportPathByTypes[reportType] = p
@@ -97,7 +100,7 @@ func (r *ReportPathsByTypesOption) TestSummariesByType(parentPath string) (summa
 	err error) {
 	// Avoid using the current function when no setup is called.
 	if r.ReportParsers == nil {
-		r.ReportParsers = report.DefaultReportParsers
+		r.ReportParsers = AutomatedTestResultDefaultParser
 	}
 
 	summaries = map[report.ReportType]v1alpha1.AutomatedTestResult{}
@@ -119,7 +122,7 @@ func (r *ReportPathsByTypesOption) TestSummariesByType(parentPath string) (summa
 
 		converter, ok := result.(report.ConvertToAutomatedTestResult)
 		if !ok {
-			errs = append(errs, field.TypeInvalid(base.Child(string(reportType)), converter, "pase result is not ConvertToAutomatedTestResult interface"))
+			errs = append(errs, field.TypeInvalid(base.Child(string(reportType)), converter, "ConvertToAutomatedTestResult interface is not implemented"))
 		}
 		summaries[reportType] = converter.ConvertToAutomatedTestResult()
 	}

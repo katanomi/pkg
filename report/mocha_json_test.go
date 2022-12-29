@@ -17,6 +17,7 @@ limitations under the License.
 package report
 
 import (
+	"fmt"
 	"reflect"
 	"testing"
 
@@ -24,14 +25,12 @@ import (
 )
 
 func TestResult_MochaJson(t *testing.T) {
-	tests := []struct {
-		name           string
+	tests := map[string]struct {
 		path           string
 		wantTestResult v1alpha1.TestResult
-		wantErr        bool
+		wantErr        error
 	}{
-		{
-			name: "parse mocha success",
+		"parse mocha success": {
 			path: "./testdata/mochajsonparser-success.json",
 			wantTestResult: v1alpha1.TestResult{
 				Passed:          3,
@@ -40,15 +39,28 @@ func TestResult_MochaJson(t *testing.T) {
 				PassedTestsRate: "75.00",
 			},
 		},
+		"parse file not found": {
+			path:    "./testdata/mochajsonparser-not-found.json",
+			wantErr: fmt.Errorf("open ./testdata/mochajsonparser-not-found.json: no such file or directory"),
+		},
+		"parse unmarshal failed": {
+			path:    "./testdata/mochajsonparser-failed.json",
+			wantErr: fmt.Errorf("json: cannot unmarshal string into Go struct field MochaJsonStats.stats.tests of type int"),
+		},
 	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
+	for name, tt := range tests {
+		t.Run(name, func(t *testing.T) {
 			p := &MochaJsonParser{}
 			testResult, err := p.Parse(tt.path)
-			if (err != nil) != tt.wantErr {
+			if err != tt.wantErr && err.Error() != tt.wantErr.Error() {
 				t.Errorf("MochaJsonParser.TestResult() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
+
+			if testResult == nil {
+				return
+			}
+
 			converter, _ := testResult.(ConvertToTestResult)
 			outResult := converter.ConvertToTestResult()
 			if !reflect.DeepEqual(outResult, tt.wantTestResult) {

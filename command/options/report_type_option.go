@@ -59,7 +59,7 @@ func (m *ReportTypeOption) Validate(path *field.Path) (errs field.ErrorList) {
 	}
 
 	if _, ok := m.SupportedType[report.ReportType(m.ReportType)]; !ok {
-		errs = append(errs, field.TypeInvalid(path, m.ReportType, "Not support report type"))
+		errs = append(errs, field.TypeInvalid(path, m.ReportType, "Not supported report type"))
 	}
 	return
 }

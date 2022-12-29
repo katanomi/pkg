@@ -17,6 +17,7 @@ limitations under the License.
 package report
 
 import (
+	"fmt"
 	"reflect"
 	"testing"
 
@@ -24,27 +25,38 @@ import (
 )
 
 func TestLcovParser_Coverage(t *testing.T) {
-	tests := []struct {
-		name             string
+	tests := map[string]struct {
 		path             string
 		wantTestCoverage v1alpha1.TestCoverage
-		wantErr          bool
+		wantErr          error
 	}{
-		{
-			name: "paser success.",
+		"parse lcov success": {
 			path: "./testdata/lcovparser-success.info",
 			wantTestCoverage: v1alpha1.TestCoverage{
 				Lines:    "70.00",
 				Branches: "50.00",
 			},
 		},
+		"lcov file not found": {
+			path:    "./testdata/lcovparser-not-found.info",
+			wantErr: fmt.Errorf("open ./testdata/lcovparser-not-found.info: no such file or directory"),
+		},
+		"lcov parseline failed": {
+			path:    "./testdata/lcovparser-failed.info",
+			wantErr: fmt.Errorf(`invalid lcov text:LF:f. error: strconv.Atoi: parsing "f": invalid syntax`),
+		},
 	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
+
+	for name, tt := range tests {
+		t.Run(name, func(t *testing.T) {
 			p := &LcovParser{}
 			testConverager, err := p.Parse(tt.path)
-			if (err != nil) != tt.wantErr {
+			if err != tt.wantErr && err.Error() != tt.wantErr.Error() {
 				t.Errorf("LcovParser.TestResult() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+
+			if testConverager == nil {
 				return
 			}
 

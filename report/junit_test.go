@@ -17,6 +17,7 @@ limitations under the License.
 package report
 
 import (
+	"fmt"
 	"reflect"
 	"testing"
 
@@ -24,14 +25,12 @@ import (
 )
 
 func TestResult_Junit(t *testing.T) {
-	tests := []struct {
-		name           string
+	tests := map[string]struct {
 		path           string
 		wantTestResult v1alpha1.TestResult
-		wantErr        bool
+		wantErr        error
 	}{
-		{
-			name: "parse success",
+		"jest junit success": {
 			path: "./testdata/junitparser-jest-success.xml",
 			wantTestResult: v1alpha1.TestResult{
 				Passed:          5,
@@ -41,8 +40,7 @@ func TestResult_Junit(t *testing.T) {
 			},
 		},
 		// mocha generage junit report, need add "--reporter-options includePending=true" option to inclue skipped data.
-		{
-			name: "parse mocha success",
+		"mocha junit success": {
 			path: "./testdata/junitparser-mocha-success.xml",
 			wantTestResult: v1alpha1.TestResult{
 				Passed:          3,
@@ -51,14 +49,22 @@ func TestResult_Junit(t *testing.T) {
 				PassedTestsRate: "75.00",
 			},
 		},
+		"junit file not found": {
+			path:    "./testdata/junitparser-not-found.xml",
+			wantErr: fmt.Errorf("open ./testdata/junitparser-not-found.xml: no such file or directory"),
+		},
 	}
 
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
+	for name, tt := range tests {
+		t.Run(name, func(t *testing.T) {
 			p := &JunitParser{}
 			testResult, err := p.Parse(tt.path)
-			if (err != nil) != tt.wantErr {
+			if err != tt.wantErr && err.Error() != tt.wantErr.Error() {
 				t.Errorf("MochaJsonParser.TestResult() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+
+			if testResult == nil {
 				return
 			}
 
