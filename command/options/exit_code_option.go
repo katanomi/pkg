@@ -41,18 +41,19 @@ func (p *ExitCodeOption) AddFlags(flags *pflag.FlagSet) {
 }
 
 // Succeed judging whether the execution status is successful or not according to the exit file.
-func (m *ExitCodeOption) Succeed() (bool, error) {
+func (m *ExitCodeOption) Succeed() (bool, string, error) {
 	if m.ExitCodePath == "" {
-		return false, fmt.Errorf("exit code file not set")
+		return false, "", fmt.Errorf("exit code file not set")
 	}
 
 	data, err := os.ReadFile(m.ExitCodePath)
 	if err != nil {
-		return false, fmt.Errorf("failed to read exit code file[%s], error: %s", m.ExitCodePath, err.Error())
+		return false, "", fmt.Errorf("failed to read exit code file[%s], error: %s", m.ExitCodePath, err.Error())
 	}
 
-	if data != nil && strings.TrimSpace(string(data)) != "0" {
-		return false, nil
+	code := string(data)
+	if code != "" && strings.TrimSpace(code) != "0" {
+		return false, code, nil
 	}
-	return true, nil
+	return true, code, nil
 }
