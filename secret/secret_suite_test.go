@@ -19,12 +19,12 @@ package secret
 import (
 	"testing"
 
-	"k8s.io/apimachinery/pkg/runtime"
-
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
+	uberzap "go.uber.org/zap"
 	corev1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/runtime"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 )
@@ -34,10 +34,18 @@ func TestSecret(t *testing.T) {
 	RunSpecs(t, "Secret Suite")
 }
 
-var scheme = runtime.NewScheme()
+var (
+	scheme = runtime.NewScheme()
+	logger *uberzap.SugaredLogger
+)
 
 func init() {
 	corev1.AddToScheme(scheme)
+}
+
+func init() {
+	logf.SetLogger(zap.New(zap.WriteTo(GinkgoWriter), zap.UseDevMode(true)))
+	logger = zap.NewRaw(zap.WriteTo(GinkgoWriter), zap.UseDevMode(true)).Sugar()
 }
 
 var testLogger = zap.NewRaw(zap.WriteTo(GinkgoWriter), zap.UseDevMode(true)).Sugar()

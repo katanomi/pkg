@@ -1,5 +1,5 @@
 /*
-Copyright 2021 The Katanomi Authors.
+Copyright 2023 The Katanomi Authors.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -22,7 +22,7 @@ import (
 
 const (
 	// Build metadata key.
-	BuildMetadataKey = "builds.katanomi.dev/buildrun"
+	BuildMetadataKey = "builds.katanomi.dev/buildrun" // NOSONAR
 )
 
 // BuildMetaData this structure is a derivative of buildrun and is used for artifacts to record build information.
@@ -43,8 +43,8 @@ type BuildMetaDataStatus struct {
 	TriggeredBy *TriggeredBy `json:"triggeredBy,omitempty"`
 }
 
-// BuildRunGitStatus represent code repository status
-type BuildRunGitStatus struct {
+// BaseGitStatus is the base git status
+type BaseGitStatus struct {
 	// URL means git repository url of current buildrun
 	// +optional
 	URL string `json:"url,omitempty"`
@@ -67,6 +67,12 @@ type BuildRunGitStatus struct {
 	// Target branch status of current build for Pull requests
 	// +optional
 	Target *BuildGitBranchStatus `json:"target,omitempty"`
+}
+
+// BuildRunGitStatus represent code repository status
+type BuildRunGitStatus struct {
+	// BaseGitStatus is the base git status
+	BaseGitStatus `json:",inline"`
 
 	// Version is the version generated for this git revision
 	// +optional

@@ -24,7 +24,7 @@ import (
 const (
 	// ClusterNameEnvKey is the environment variable that specifies the system cluster name.
 	// ClusterName can be attached to the created resource. When there are multiple clusters, the resource can be found by the api by the cluster name.
-	ClusterNameEnvKey = "SYSTEM_CLUSTER_NAME"
+	ClusterNameEnvKey = "SYSTEM_CLUSTER_NAME" // NOSONAR
 )
 
 // ClusterName returns the cluster name that describes the cluster name the instance runs on.

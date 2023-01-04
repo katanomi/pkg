@@ -35,7 +35,7 @@ func (c ContextKey) String() string {
 
 const (
 	// KeyForSubType subtype key in context
-	KeyForSubType ContextKey = "subtype"
+	KeyForSubType ContextKey = "subtype" // NOSONAR
 )
 
 // ProjectSubType stores a specific project subtype

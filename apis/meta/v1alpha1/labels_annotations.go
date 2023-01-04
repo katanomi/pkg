@@ -1,5 +1,5 @@
 /*
-Copyright 2021 The Katanomi Authors.
+Copyright 2023 The Katanomi Authors.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -64,6 +64,12 @@ const (
 
 	// SecretSyncGeneratorLabelKey The name of the secret is the integration credentials that are automatically synced to the namespace
 	SecretSyncGeneratorLabelKey = "integrations.katanomi.dev/integration.secretsync"
+
+	// ClusterGitSourceLabelKey for cluster git source resources
+	ClusterGitSourceLabelKey = "sources.katanomi.dev/clusterGitSource"
+
+	// GitSourceLabelKey for git source resources
+	GitSourceLabelKey = "sources.katanomi.dev/gitSource"
 )
 
 // Common Annotations

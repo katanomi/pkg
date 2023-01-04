@@ -110,9 +110,9 @@ func (b *BuildGitPullRequestStatus) AssignByGitPullRequest(gitPullRequest *GitPu
 	return b
 }
 
-func (b *BuildRunGitStatus) GetValWithKey(ctx context.Context, path *field.Path) map[string]string {
+func (b *BaseGitStatus) GetValWithKey(ctx context.Context, path *field.Path) map[string]string {
 	if b == nil {
-		b = &BuildRunGitStatus{}
+		b = &BaseGitStatus{}
 	}
 	stringReplacements := map[string]string{}
 	// adds a blank to have it return empty value when referencing
@@ -120,15 +120,6 @@ func (b *BuildRunGitStatus) GetValWithKey(ctx context.Context, path *field.Path)
 	stringReplacements[path.String()] = ""
 	//
 	stringReplacements[path.Child("url").String()] = b.URL
-	//
-	stringReplacements[path.Child("version").String()] = b.Version
-	//
-	variantsMap := map[string]string{}
-	for variant, version := range b.VersionVariants {
-		// the key is `version` not `versionVariants`, convenient for users.
-		variantsMap[path.Child("version").Child(variant).String()] = version
-	}
-	stringReplacements = ksubstitute.MergeMap(stringReplacements, variantsMap)
 	//
 	stringReplacements = ksubstitute.MergeMap(stringReplacements, b.Revision.GetValWithKey(ctx, path.Child("revision")))
 	//
@@ -139,6 +130,28 @@ func (b *BuildRunGitStatus) GetValWithKey(ctx context.Context, path *field.Path)
 	stringReplacements = ksubstitute.MergeMap(stringReplacements, b.Branch.GetValWithKey(ctx, path.Child("branch")))
 	//
 	stringReplacements = ksubstitute.MergeMap(stringReplacements, b.Target.GetValWithKey(ctx, path.Child("target")))
+	return stringReplacements
+}
+
+func (b *BuildRunGitStatus) GetValWithKey(ctx context.Context, path *field.Path) map[string]string {
+	if b == nil {
+		b = &BuildRunGitStatus{}
+	}
+	stringReplacements := map[string]string{}
+	// adds a blank to have it return empty value when referencing
+	// may return a simplified value in the future
+	stringReplacements[path.String()] = ""
+	//
+	stringReplacements = ksubstitute.MergeMap(stringReplacements, b.BaseGitStatus.GetValWithKey(ctx, path))
+	//
+	stringReplacements[path.Child("version").String()] = b.Version
+	//
+	variantsMap := map[string]string{}
+	for variant, version := range b.VersionVariants {
+		// the key is `version` not `versionVariants`, convenient for users.
+		variantsMap[path.Child("version").Child(variant).String()] = version
+	}
+	stringReplacements = ksubstitute.MergeMap(stringReplacements, variantsMap)
 	return stringReplacements
 }
 

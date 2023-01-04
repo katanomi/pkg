@@ -48,9 +48,7 @@ func LoadKubeResourcesAsUnstructured(file string) (objs []unstructured.Unstructu
 		if err != nil {
 			return
 		}
-		if obj != nil {
-			objs = append(objs, *obj)
-		}
+		objs = append(objs, *obj)
 	}
 	return
 }

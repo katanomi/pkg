@@ -1,0 +1,7 @@
+namespace: default
+filter:
+  exact:
+    $(kind): Cluster
+refs:
+- name: cluster-1
+- name: not-exist

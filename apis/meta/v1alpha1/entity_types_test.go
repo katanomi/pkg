@@ -13,3 +13,24 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
+
+package v1alpha1
+
+import (
+	. "github.com/onsi/ginkgo/v2"
+	. "github.com/onsi/gomega"
+	authv1 "k8s.io/api/authorization/v1"
+)
+
+var _ = Describe("Entity", func() {
+	Context("EntityResourceAttributes", func() {
+		It("should return related attributes", func() {
+			Expect(EntityResourceAttributes("get")).To(Equal(authv1.ResourceAttributes{
+				Group:    GroupVersion.Group,
+				Version:  GroupVersion.Version,
+				Resource: "entities",
+				Verb:     "get",
+			}))
+		})
+	})
+})
