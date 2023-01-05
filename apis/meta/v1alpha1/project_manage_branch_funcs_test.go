@@ -25,6 +25,17 @@ import (
 )
 
 func TestBranchSpec_Equal(t *testing.T) {
+	t.Run("nil object call equal", func(t *testing.T) {
+		g := NewGomegaWithT(t)
+		var branchSpec *BranchSpec
+		item := BranchSpec{
+			CodeInfo: CodeInfo{
+				Project: "project1",
+			},
+		}
+		g.Expect(branchSpec.Equal(item)).To(BeFalse())
+	})
+
 	t.Run("code info not equal", func(t *testing.T) {
 		g := NewGomegaWithT(t)
 		branchSpec := BranchSpec{
@@ -100,6 +111,13 @@ func TestCodeInfo_Equal(t *testing.T) {
 			Address:         &duckv1.Addressable{URL: codeAddress},
 		}
 		g.Expect(codeInfo.Equal(item)).To(BeTrue())
+	})
+
+	t.Run("nil object call equal", func(t *testing.T) {
+		g := NewGomegaWithT(t)
+		var codeInfo *CodeInfo
+		item := CodeInfo{}
+		g.Expect(codeInfo.Equal(item)).To(BeFalse())
 	})
 
 	t.Run("address is nil equal", func(t *testing.T) {

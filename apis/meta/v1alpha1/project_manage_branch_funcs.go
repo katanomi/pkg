@@ -18,6 +18,10 @@ package v1alpha1
 
 // Equal compares two branchSpec for equality.
 func (b *BranchSpec) Equal(item BranchSpec) bool {
+	if b == nil {
+		return false
+	}
+
 	return b.CodeInfo.Equal(item.CodeInfo) &&
 		b.Author.Equal(item.Author) &&
 		b.Issue.Equal(item.Issue)
@@ -25,6 +29,10 @@ func (b *BranchSpec) Equal(item BranchSpec) bool {
 
 // Equal compares two userSpec for equality.
 func (a *UserSpec) Equal(item UserSpec) bool {
+	if a == nil {
+		return false
+	}
+
 	return a.Id == item.Id &&
 		a.Name == item.Name &&
 		a.Email == item.Email
@@ -32,6 +40,10 @@ func (a *UserSpec) Equal(item UserSpec) bool {
 
 // Equal compares two codeinfos for equality, the IntegrationName is not used as the basis for judgment.
 func (c *CodeInfo) Equal(item CodeInfo) bool {
+	if c == nil {
+		return false
+	}
+
 	var host1, host2 string
 	if c.Address != nil && c.Address.URL != nil {
 		host1 = c.Address.URL.String()
@@ -50,5 +62,9 @@ func (c *CodeInfo) Equal(item CodeInfo) bool {
 
 // Equal compares two issueinfo for equality.
 func (c *IssueInfo) Equal(item IssueInfo) bool {
+	if c == nil {
+		return false
+	}
+
 	return c.Type == item.Type && c.Id == item.Id
 }
