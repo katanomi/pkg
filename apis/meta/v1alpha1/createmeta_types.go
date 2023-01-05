@@ -57,6 +57,9 @@ type CreatePullRequestPayload struct {
 	Target      GitBranchBaseInfo `json:"target"`
 	Title       string            `json:"title"`
 	Description string            `json:"description,omitempty"`
+
+	// indicates if the source branch should be deleted when the pull request is merged
+	RemoveSourceBranch bool `json:"removeSourceBranch,omitempty"`
 }
 
 // CreatePullRequestCommentPayload payload for create pr's Comment

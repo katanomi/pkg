@@ -94,7 +94,7 @@ var _ = Describe("Test GetBaseUserInfoFromReq", func() {
 		})
 	})
 	Context("when the request context dose not contains the user info", func() {
-		It("should get the username as excepted", func() {
+		It("should get nil", func() {
 			gomega.Expect(authorInfo).To(gomega.BeNil())
 		})
 	})
