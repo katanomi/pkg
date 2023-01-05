@@ -72,3 +72,15 @@ func getUserInfoFromReq(req *restful.Request) (userinfo metav1alpha1.UserInfo, e
 	userinfo.FromJWT(claims)
 	return userinfo, errors.NewAggregate(errorList)
 }
+
+// GetBaseUserInfoFromReq get the base userinfo from the request object
+func GetBaseUserInfoFromReq(req *restful.Request) *metav1alpha1.GitUserBaseInfo {
+	userinfo, ok := UserInfoFrom(req.Request.Context())
+	if !ok {
+		return nil
+	}
+	authorInfo := &metav1alpha1.GitUserBaseInfo{}
+	authorInfo.Name = userinfo.GetName()
+	authorInfo.Email = userinfo.GetEmail()
+	return authorInfo
+}
