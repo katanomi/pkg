@@ -23,7 +23,6 @@ import (
 	"github.com/katanomi/pkg/plugin/path"
 
 	metav1alpha1 "github.com/katanomi/pkg/apis/meta/v1alpha1"
-	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	duckv1 "knative.dev/pkg/apis/duck/v1"
 )
@@ -36,22 +35,18 @@ type ClientGitCommit interface {
 
 type gitCommit struct {
 	client Client
-	meta   Meta
-	secret corev1.Secret
 }
 
-func newGitCommit(client Client, meta Meta, secret corev1.Secret) ClientGitCommit {
+func newGitCommit(client Client) ClientGitCommit {
 	return &gitCommit{
 		client: client,
-		meta:   meta,
-		secret: secret,
 	}
 }
 
 // Get commit info
 func (g *gitCommit) Get(ctx context.Context, baseURL *duckv1.Addressable, option metav1alpha1.GitCommitOption, options ...OptionFunc) (*metav1alpha1.GitCommit, error) {
 	commitObj := &metav1alpha1.GitCommit{}
-	options = append(options, MetaOpts(g.meta), SecretOpts(g.secret), ResultOpts(commitObj))
+	options = append(options, ResultOpts(commitObj))
 	if option.Repository == "" {
 		return nil, errors.NewBadRequest("repo is empty string")
 	} else if option.SHA == nil {
@@ -73,7 +68,7 @@ func (g *gitCommit) List(ctx context.Context, baseURL *duckv1.Addressable, optio
 	if option.Repository == "" {
 		return nil, errors.NewBadRequest("repo is empty string")
 	}
-	options = append(options, MetaOpts(g.meta), SecretOpts(g.secret), ResultOpts(result))
+	options = append(options, ResultOpts(result))
 	query := map[string]string{"ref": option.Ref}
 	if option.Since != nil {
 		query["since"] = option.Since.Format(time.RFC3339)

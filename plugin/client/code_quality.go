@@ -21,8 +21,6 @@ import (
 	"fmt"
 	"time"
 
-	corev1 "k8s.io/api/core/v1"
-
 	metav1alpha1 "github.com/katanomi/pkg/apis/meta/v1alpha1"
 	duckv1 "knative.dev/pkg/apis/duck/v1"
 )
@@ -37,21 +35,17 @@ type ClientCodeQuality interface {
 
 type codeQuality struct {
 	client Client
-	meta   Meta
-	secret corev1.Secret
 }
 
-func newCodeQuality(client Client, meta Meta, secret corev1.Secret) ClientCodeQuality {
+func newCodeQuality(client Client) ClientCodeQuality {
 	return &codeQuality{
 		client: client,
-		meta:   meta,
-		secret: secret,
 	}
 }
 
 func (c *codeQuality) Get(ctx context.Context, baseURL *duckv1.Addressable, projectKey string, options ...OptionFunc) (*metav1alpha1.CodeQuality, error) {
 	codeQualityResult := &metav1alpha1.CodeQuality{}
-	options = append(options, MetaOpts(c.meta), SecretOpts(c.secret), ResultOpts(codeQualityResult))
+	options = append(options, ResultOpts(codeQualityResult))
 	uri := fmt.Sprintf("/codeQuality/%s", projectKey)
 	if err := c.client.Get(ctx, baseURL, uri, options...); err != nil {
 		return nil, err
@@ -61,7 +55,7 @@ func (c *codeQuality) Get(ctx context.Context, baseURL *duckv1.Addressable, proj
 
 func (c *codeQuality) GetByBranch(ctx context.Context, baseURL *duckv1.Addressable, opt metav1alpha1.CodeQualityBaseOption, options ...OptionFunc) (*metav1alpha1.CodeQuality, error) {
 	codeQualityResult := &metav1alpha1.CodeQuality{}
-	options = append(options, MetaOpts(c.meta), SecretOpts(c.secret), ResultOpts(codeQualityResult))
+	options = append(options, ResultOpts(codeQualityResult))
 	uri := fmt.Sprintf("/codeQuality/%s/branches/%s", opt.ProjectKey, opt.BranchKey)
 	if err := c.client.Get(ctx, baseURL, uri, options...); err != nil {
 		return nil, err
@@ -80,7 +74,7 @@ func (c *codeQuality) GetLineCharts(ctx context.Context, baseURL *duckv1.Address
 	if opt.CompletionTime != nil {
 		query["completionTime"] = opt.CompletionTime.Format(time.RFC3339)
 	}
-	options = append(options, MetaOpts(c.meta), SecretOpts(c.secret), QueryOpts(query), ResultOpts(lineChartResult))
+	options = append(options, QueryOpts(query), ResultOpts(lineChartResult))
 	uri := fmt.Sprintf("/codeQuality/%s/branches/%s/lineCharts", opt.ProjectKey, opt.BranchKey)
 	if err := c.client.Get(ctx, baseURL, uri, options...); err != nil {
 		return nil, err
@@ -90,7 +84,7 @@ func (c *codeQuality) GetLineCharts(ctx context.Context, baseURL *duckv1.Address
 
 func (c *codeQuality) GetOverview(ctx context.Context, baseURL *duckv1.Addressable, options ...OptionFunc) (*metav1alpha1.CodeQualityProjectOverview, error) {
 	overview := &metav1alpha1.CodeQualityProjectOverview{}
-	options = append(options, MetaOpts(c.meta), SecretOpts(c.secret), ResultOpts(overview))
+	options = append(options, ResultOpts(overview))
 	if err := c.client.Get(ctx, baseURL, "/codeQuality", options...); err != nil {
 		return nil, err
 	}
@@ -104,7 +98,7 @@ func (c *codeQuality) GetMetricsByTaskID(ctx context.Context, baseURL *duckv1.Ad
 		"branch":      opt.Branch,
 		"pullRequest": opt.PullRequest,
 	}
-	options = append(options, MetaOpts(c.meta), SecretOpts(c.secret), ResultOpts(taskMetrics), QueryOpts(query))
+	options = append(options, ResultOpts(taskMetrics), QueryOpts(query))
 	if err := c.client.Get(ctx, baseURL, fmt.Sprintf("/codeQuality/task/%s/summary", opt.TaskID), options...); err != nil {
 		return nil, err
 	}

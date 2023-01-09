@@ -22,7 +22,6 @@ import (
 	"github.com/katanomi/pkg/plugin/path"
 
 	metav1alpha1 "github.com/katanomi/pkg/apis/meta/v1alpha1"
-	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	duckv1 "knative.dev/pkg/apis/duck/v1"
 )
@@ -36,22 +35,18 @@ type ClientGitBranch interface {
 
 type gitBranch struct {
 	client Client
-	meta   Meta
-	secret corev1.Secret
 }
 
-func newGitBranch(client Client, meta Meta, secret corev1.Secret) ClientGitBranch {
+func newGitBranch(client Client) ClientGitBranch {
 	return &gitBranch{
 		client: client,
-		meta:   meta,
-		secret: secret,
 	}
 }
 
 // List list branch
 func (g *gitBranch) List(ctx context.Context, baseURL *duckv1.Addressable, repo metav1alpha1.GitBranchOption, options ...OptionFunc) (*metav1alpha1.GitBranchList, error) {
 	list := &metav1alpha1.GitBranchList{}
-	options = append(options, MetaOpts(g.meta), SecretOpts(g.secret), ResultOpts(list))
+	options = append(options, ResultOpts(list))
 	if repo.Repository == "" {
 		return nil, errors.NewBadRequest("repo is empty string")
 	}
@@ -65,7 +60,7 @@ func (g *gitBranch) List(ctx context.Context, baseURL *duckv1.Addressable, repo 
 // Create create branch
 func (g *gitBranch) Create(ctx context.Context, baseURL *duckv1.Addressable, payload metav1alpha1.CreateBranchPayload, options ...OptionFunc) (*metav1alpha1.GitBranch, error) {
 	branchObj := &metav1alpha1.GitBranch{}
-	options = append(options, MetaOpts(g.meta), SecretOpts(g.secret), BodyOpts(payload.CreateBranchParams), ResultOpts(branchObj))
+	options = append(options, BodyOpts(payload.CreateBranchParams), ResultOpts(branchObj))
 	if payload.Repository == "" {
 		return nil, errors.NewBadRequest("repo is empty string")
 	}
@@ -80,7 +75,7 @@ func (g *gitBranch) Create(ctx context.Context, baseURL *duckv1.Addressable, pay
 // Get branch info
 func (g *gitBranch) Get(ctx context.Context, baseURL *duckv1.Addressable, repo metav1alpha1.GitRepo, branch string, options ...OptionFunc) (*metav1alpha1.GitBranch, error) {
 	branchObj := &metav1alpha1.GitBranch{}
-	options = append(options, MetaOpts(g.meta), SecretOpts(g.secret), ResultOpts(branchObj))
+	options = append(options, ResultOpts(branchObj))
 	if repo.Repository == "" {
 		return nil, errors.NewBadRequest("repo is empty string")
 	}

@@ -21,7 +21,6 @@ import (
 	"fmt"
 
 	metav1alpha1 "github.com/katanomi/pkg/apis/meta/v1alpha1"
-	corev1 "k8s.io/api/core/v1"
 	duckv1 "knative.dev/pkg/apis/duck/v1"
 )
 
@@ -34,15 +33,11 @@ type ClientArtifact interface {
 
 type artifact struct {
 	client Client
-	meta   Meta
-	secret corev1.Secret
 }
 
-func newArtifact(client Client, meta Meta, secret corev1.Secret) ClientArtifact {
+func newArtifact(client Client) ClientArtifact {
 	return &artifact{
 		client: client,
-		meta:   meta,
-		secret: secret,
 	}
 }
 
@@ -55,7 +50,7 @@ func (p *artifact) List(ctx context.Context,
 	list := &metav1alpha1.ArtifactList{}
 
 	uri := fmt.Sprintf("projects/%s/repositories/%s/artifacts", project, repsitory)
-	options = append(options, MetaOpts(p.meta), SecretOpts(p.secret), ResultOpts(list))
+	options = append(options, ResultOpts(list))
 	if err := p.client.Get(ctx, baseURL, uri, options...); err != nil {
 		return nil, err
 	}
@@ -72,7 +67,7 @@ func (p *artifact) Get(ctx context.Context,
 	artifact := &metav1alpha1.Artifact{}
 
 	uri := fmt.Sprintf("projects/%s/repositories/%s/artifacts/%s", project, repository, artifactName)
-	options = append(options, MetaOpts(p.meta), SecretOpts(p.secret), ResultOpts(artifact))
+	options = append(options, ResultOpts(artifact))
 	if err := p.client.Get(ctx, baseURL, uri, options...); err != nil {
 		return nil, err
 	}
@@ -83,7 +78,6 @@ func (p *artifact) Get(ctx context.Context,
 // Delete artifact using plugin
 func (p *artifact) Delete(ctx context.Context, baseURL *duckv1.Addressable, project string, repsitory string, artifact string, options ...OptionFunc) error {
 	uri := fmt.Sprintf("projects/%s/repositories/%s/artifacts/%s", project, repsitory, artifact)
-	options = append(options, MetaOpts(p.meta), SecretOpts(p.secret))
 	if err := p.client.Delete(ctx, baseURL, uri, options...); err != nil {
 		return err
 	}
@@ -94,11 +88,10 @@ func (p *artifact) Delete(ctx context.Context, baseURL *duckv1.Addressable, proj
 // DeleteTag artifact's tag using plugin
 func (p *artifact) DeleteTag(ctx context.Context,
 	baseURL *duckv1.Addressable,
-	project, repsitory, artifact, tag string,
+	project, repository, artifact, tag string,
 	options ...OptionFunc) error {
 
-	uri := fmt.Sprintf("projects/%s/repositories/%s/artifacts/%s/tags/%s", project, repsitory, artifact, tag)
-	options = append(options, MetaOpts(p.meta), SecretOpts(p.secret))
+	uri := fmt.Sprintf("projects/%s/repositories/%s/artifacts/%s/tags/%s", project, repository, artifact, tag)
 	if err := p.client.Delete(ctx, baseURL, uri, options...); err != nil {
 		return err
 	}

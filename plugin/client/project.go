@@ -20,7 +20,6 @@ import (
 	"context"
 
 	metav1alpha1 "github.com/katanomi/pkg/apis/meta/v1alpha1"
-	corev1 "k8s.io/api/core/v1"
 	duckv1 "knative.dev/pkg/apis/duck/v1"
 )
 
@@ -32,15 +31,11 @@ type ClientProject interface {
 
 type project struct {
 	client Client
-	meta   Meta
-	secret corev1.Secret
 }
 
-func newProject(client Client, meta Meta, secret corev1.Secret) ClientProject {
+func newProject(client Client) ClientProject {
 	return &project{
 		client: client,
-		meta:   meta,
-		secret: secret,
 	}
 }
 
@@ -48,7 +43,7 @@ func newProject(client Client, meta Meta, secret corev1.Secret) ClientProject {
 func (p *project) List(ctx context.Context, baseURL *duckv1.Addressable, options ...OptionFunc) (*metav1alpha1.ProjectList, error) {
 	list := &metav1alpha1.ProjectList{}
 
-	options = append(options, MetaOpts(p.meta), SecretOpts(p.secret), ResultOpts(list))
+	options = append(options, ResultOpts(list))
 	if err := p.client.Get(ctx, baseURL, "projects", options...); err != nil {
 		return nil, err
 	}
@@ -58,7 +53,7 @@ func (p *project) List(ctx context.Context, baseURL *duckv1.Addressable, options
 
 // Create create project using plugin
 func (p *project) Create(ctx context.Context, baseURL *duckv1.Addressable, project *metav1alpha1.Project, options ...OptionFunc) (*metav1alpha1.Project, error) {
-	options = append(options, MetaOpts(p.meta), SecretOpts(p.secret), BodyOpts(project))
+	options = append(options, BodyOpts(project))
 	if err := p.client.Post(ctx, baseURL, "projects", options...); err != nil {
 		return nil, err
 	}
@@ -69,7 +64,7 @@ func (p *project) Create(ctx context.Context, baseURL *duckv1.Addressable, proje
 // Get get project using plugin
 func (p *project) Get(ctx context.Context, baseURL *duckv1.Addressable, id string, options ...OptionFunc) (*metav1alpha1.Project, error) {
 	resp := &metav1alpha1.Project{}
-	options = append(options, MetaOpts(p.meta), SecretOpts(p.secret), ResultOpts(resp))
+	options = append(options, ResultOpts(resp))
 	if err := p.client.Get(ctx, baseURL, "projects/"+id, options...); err != nil {
 		return nil, err
 	}

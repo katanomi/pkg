@@ -123,7 +123,8 @@ func (p *PluginClient) WithIntegrationClassName(integrationClassName string) *Pl
 
 // Get performs a GET request using defined options
 func (p *PluginClient) Get(ctx context.Context, baseURL *duckv1.Addressable, path string, options ...OptionFunc) error {
-	options = append(defaultOptions, options...)
+	clientOptions := append(defaultOptions, MetaOpts(p.meta), SecretOpts(p.secret))
+	options = append(clientOptions, options...)
 
 	request := p.R(ctx, baseURL, options...)
 	response, err := request.Get(p.fullUrl(baseURL, path))
@@ -133,7 +134,8 @@ func (p *PluginClient) Get(ctx context.Context, baseURL *duckv1.Addressable, pat
 
 // Post performs a POST request with the given parameters
 func (p *PluginClient) Post(ctx context.Context, baseURL *duckv1.Addressable, path string, options ...OptionFunc) error {
-	options = append(defaultOptions, options...)
+	clientOptions := append(defaultOptions, MetaOpts(p.meta), SecretOpts(p.secret))
+	options = append(clientOptions, options...)
 
 	request := p.R(ctx, baseURL, options...)
 	response, err := request.Post(p.fullUrl(baseURL, path))
@@ -143,7 +145,8 @@ func (p *PluginClient) Post(ctx context.Context, baseURL *duckv1.Addressable, pa
 
 // Put performs a PUT request with the given parameters
 func (p *PluginClient) Put(ctx context.Context, baseURL *duckv1.Addressable, path string, options ...OptionFunc) error {
-	options = append(defaultOptions, options...)
+	clientOptions := append(defaultOptions, MetaOpts(p.meta), SecretOpts(p.secret))
+	options = append(clientOptions, options...)
 
 	request := p.R(ctx, baseURL, options...)
 	response, err := request.Put(p.fullUrl(baseURL, path))
@@ -153,7 +156,8 @@ func (p *PluginClient) Put(ctx context.Context, baseURL *duckv1.Addressable, pat
 
 // Delete performs a DELETE request with the given parameters
 func (p *PluginClient) Delete(ctx context.Context, baseURL *duckv1.Addressable, path string, options ...OptionFunc) error {
-	options = append(defaultOptions, options...)
+	clientOptions := append(defaultOptions, MetaOpts(p.meta), SecretOpts(p.secret))
+	options = append(clientOptions, options...)
 
 	request := p.R(ctx, baseURL, options...)
 	response, err := request.Delete(p.fullUrl(baseURL, path))
@@ -237,190 +241,228 @@ func (p *PluginClient) GitPluginClient() *GitPluginClient {
 
 // Auth provides an auth methods for clients
 func (p *PluginClient) Auth(meta Meta, secret corev1.Secret) ClientAuth {
-	return newAuthClient(p, meta, secret)
+	clone := p.Clone().WithMeta(meta).WithSecret(secret)
+
+	return newAuthClient(clone)
 }
 
 // NewAuth provides an auth methods for clients
 // Use the internal meta and secret to generate the client, please assign in advance.
 func (p *PluginClient) NewAuth() ClientAuth {
-	return newAuthClient(p, p.meta, p.secret)
+	return newAuthClient(p)
 }
 
 // Project get project client
 func (p *PluginClient) Project(meta Meta, secret corev1.Secret) ClientProject {
-	return newProject(p, meta, secret)
+	clone := p.Clone().WithMeta(meta).WithSecret(secret)
+
+	return newProject(clone)
 }
 
 // NewProject get project client
 // Use the internal meta and secret to generate the client, please assign in advance.
 func (p *PluginClient) NewProject() ClientProject {
-	return newProject(p, p.meta, p.secret)
+	return newProject(p)
 }
 
 // Repository get Repository client
 func (p *PluginClient) Repository(meta Meta, secret corev1.Secret) ClientRepository {
-	return newRepository(p, meta, secret)
+	clone := p.Clone().WithMeta(meta).WithSecret(secret)
+
+	return newRepository(clone)
 }
 
 // NewRepository get Repository client
 // Use the internal meta and secret to generate the client, please assign in advance.
 func (p *PluginClient) NewRepository() ClientRepository {
-	return newRepository(p, p.meta, p.secret)
+	return newRepository(p)
 }
 
 // Artifact get Artifact client
 func (p *PluginClient) Artifact(meta Meta, secret corev1.Secret) ClientArtifact {
-	return newArtifact(p, meta, secret)
+	clone := p.Clone().WithMeta(meta).WithSecret(secret)
+
+	return newArtifact(clone)
 }
 
 // NewArtifact get Artifact client
 // Use the internal meta and secret to generate the client, please assign in advance.
 func (p *PluginClient) NewArtifact() ClientArtifact {
-	return newArtifact(p, p.meta, p.secret)
+	return newArtifact(p)
 }
 
 // GitBranch get branch client
 func (p *PluginClient) GitBranch(meta Meta, secret corev1.Secret) ClientGitBranch {
-	return newGitBranch(p, meta, secret)
+	clone := p.Clone().WithMeta(meta).WithSecret(secret)
+
+	return newGitBranch(clone)
 }
 
 // NewGitBranch get branch client
 // Use the internal meta and secret to generate the client, please assign in advance.
 func (p *PluginClient) NewGitBranch() ClientGitBranch {
-	return newGitBranch(p, p.meta, p.secret)
+	return newGitBranch(p)
 }
 
 // GitContent get content client
 func (p *PluginClient) GitContent(meta Meta, secret corev1.Secret) ClientGitContent {
-	return newGitContent(p, meta, secret)
+	clone := p.Clone().WithMeta(meta).WithSecret(secret)
+
+	return newGitContent(clone)
 }
 
 // NewGitContent get content client
 // Use the internal meta and secret to generate the client, please assign in advance.
 func (p *PluginClient) NewGitContent() ClientGitContent {
-	return newGitContent(p, p.meta, p.secret)
+	return newGitContent(p)
 }
 
 // GitPullRequest get pr client
 func (p *PluginClient) GitPullRequest(meta Meta, secret corev1.Secret) GitPullRequestCRUClient {
-	return newGitPullRequest(p, meta, secret)
+	clone := p.Clone().WithMeta(meta).WithSecret(secret)
+
+	return newGitPullRequest(clone)
 }
 
 // NewGitPullRequest get pr client
 // Use the internal meta and secret to generate the client, please assign in advance.
 func (p *PluginClient) NewGitPullRequest() GitPullRequestCRUClient {
-	return newGitPullRequest(p, p.meta, p.secret)
+	return newGitPullRequest(p)
 }
 
 // GitCommit get pr client
 func (p *PluginClient) GitCommit(meta Meta, secret corev1.Secret) ClientGitCommit {
-	return newGitCommit(p, meta, secret)
+	clone := p.Clone().WithMeta(meta).WithSecret(secret)
+
+	return newGitCommit(clone)
 }
 
 // NewGitCommit get pr client
 // Use the internal meta and secret to generate the client, please assign in advance.
 func (p *PluginClient) NewGitCommit() ClientGitCommit {
-	return newGitCommit(p, p.meta, p.secret)
+	return newGitCommit(p)
 }
 
 // GitRepository get repo client
 func (p *PluginClient) GitRepository(meta Meta, secret corev1.Secret) ClientGitRepository {
-	return newGitRepository(p, meta, secret)
+	clone := p.Clone().WithMeta(meta).WithSecret(secret)
+
+	return newGitRepository(clone)
 }
 
 // NewGitRepository get repo client
 // Use the internal meta and secret to generate the client, please assign in advance.
 func (p *PluginClient) NewGitRepository() ClientGitRepository {
-	return newGitRepository(p, p.meta, p.secret)
+	return newGitRepository(p)
 }
 
 // GitRepositoryFileTree get repo file tree client
 func (p *PluginClient) GitRepositoryFileTree(meta Meta, secret corev1.Secret) ClientGitRepositoryFileTree {
-	return newGitRepositoryFileTree(p, meta, secret)
+	clone := p.Clone().WithMeta(meta).WithSecret(secret)
+
+	return newGitRepositoryFileTree(clone)
 }
 
 // NewGitRepositoryFileTree get repo file tree client
 // Use the internal meta and secret to generate the client, please assign in advance.
 func (p *PluginClient) NewGitRepositoryFileTree() ClientGitRepositoryFileTree {
-	return newGitRepositoryFileTree(p, p.meta, p.secret)
+	return newGitRepositoryFileTree(p)
 }
 
 // GitCommitComment get commit comment client
 func (p *PluginClient) GitCommitComment(meta Meta, secret corev1.Secret) ClientGitCommitComment {
-	return newGitCommitComment(p, meta, secret)
+	clone := p.Clone().WithMeta(meta).WithSecret(secret)
+
+	return newGitCommitComment(clone)
 }
 
 // NewGitCommitComment get commit comment client
 // Use the internal meta and secret to generate the client, please assign in advance.
 func (p *PluginClient) NewGitCommitComment() ClientGitCommitComment {
-	return newGitCommitComment(p, p.meta, p.secret)
+	return newGitCommitComment(p)
 }
 
 // GitCommitStatus get commit comment client
 func (p *PluginClient) GitCommitStatus(meta Meta, secret corev1.Secret) ClientGitCommitStatus {
-	return newGitCommitStatus(p, meta, secret)
+	clone := p.Clone().WithMeta(meta).WithSecret(secret)
+
+	return newGitCommitStatus(clone)
 }
 
 // NewGitCommitStatus get commit comment client
 // Use the internal meta and secret to generate the client, please assign in advance.
 func (p *PluginClient) NewGitCommitStatus() ClientGitCommitStatus {
-	return newGitCommitStatus(p, p.meta, p.secret)
+	return newGitCommitStatus(p)
 }
 
 // CodeQuality get code quality client
 func (p *PluginClient) CodeQuality(meta Meta, secret corev1.Secret) ClientCodeQuality {
-	return newCodeQuality(p, meta, secret)
+	clone := p.Clone().WithMeta(meta).WithSecret(secret)
+
+	return newCodeQuality(clone)
 }
 
 // NewCodeQuality get code quality client
 // Use the internal meta and secret to generate the client, please assign in advance.
 func (p *PluginClient) NewCodeQuality() ClientCodeQuality {
-	return newCodeQuality(p, p.meta, p.secret)
+	return newCodeQuality(p)
 }
 
 // BlobStore get blob store client
 func (p *PluginClient) BlobStore(meta Meta, secret corev1.Secret) ClientBlobStore {
-	return newBlobStore(p, meta, secret)
+	clone := p.Clone().WithMeta(meta).WithSecret(secret)
+
+	return newBlobStore(clone)
 }
 
 // NewBlobStore get blob store client
 // Use the internal meta and secret to generate the client, please assign in advance.
 func (p *PluginClient) NewBlobStore() ClientBlobStore {
-	return newBlobStore(p, p.meta, p.secret)
+	return newBlobStore(p)
 }
 
 // GitRepositoryTag get repository tag client
 func (p *PluginClient) GitRepositoryTag(meta Meta, secret corev1.Secret) ClientGitRepositoryTag {
-	return newGitRepositoryTag(p, meta, secret)
+	clone := p.Clone().WithMeta(meta).WithSecret(secret)
+
+	return newGitRepositoryTag(clone)
 }
 
 // NewGitRepositoryTag get repository tag client
 // Use the internal meta and secret to generate the client, please assign in advance.
 func (p *PluginClient) NewGitRepositoryTag() ClientGitRepositoryTag {
-	return newGitRepositoryTag(p, p.meta, p.secret)
+	return newGitRepositoryTag(p)
 }
 
 // TestPlan get test plan client
 func (p *PluginClient) TestPlan(meta Meta, secret corev1.Secret) ClientTestPlan {
-	return newTestPlan(p, meta, secret)
+	clone := p.Clone().WithMeta(meta).WithSecret(secret)
+
+	return newTestPlan(clone)
 }
 
 // TestCase get test case client
 func (p *PluginClient) TestCase(meta Meta, secret corev1.Secret) ClientTestCase {
-	return newTestCase(p, meta, secret)
+	clone := p.Clone().WithMeta(meta).WithSecret(secret)
+
+	return newTestCase(clone)
 }
 
 // TestModule get test module client
 func (p *PluginClient) TestModule(meta Meta, secret corev1.Secret) ClientTestModule {
-	return newTestModule(p, meta, secret)
+	clone := p.Clone().WithMeta(meta).WithSecret(secret)
+
+	return newTestModule(clone)
 }
 
 // TestCaseExecution get test case execution client
 func (p *PluginClient) TestCaseExecution(meta Meta, secret corev1.Secret) ClientTestCaseExecution {
-	return newTestCaseExecution(p, meta, secret)
+	clone := p.Clone().WithMeta(meta).WithSecret(secret)
+
+	return newTestCaseExecution(clone)
 }
 
 // NewToolService get tool service execution client
 func (p *PluginClient) NewToolService() ClientToolService {
-	return newToolService(p, p.meta, p.secret, p.ClassAddress)
+	return newToolService(p, p.ClassAddress)
 }

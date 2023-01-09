@@ -21,7 +21,6 @@ import (
 	"fmt"
 
 	metav1alpha1 "github.com/katanomi/pkg/apis/meta/v1alpha1"
-	corev1 "k8s.io/api/core/v1"
 	duckv1 "knative.dev/pkg/apis/duck/v1"
 )
 
@@ -41,15 +40,11 @@ type ClientTestCaseExecution interface {
 
 type testCaseExecution struct {
 	client Client
-	meta   Meta
-	secret corev1.Secret
 }
 
-func newTestCaseExecution(client Client, meta Meta, secret corev1.Secret) ClientTestCaseExecution {
+func newTestCaseExecution(client Client) ClientTestCaseExecution {
 	return &testCaseExecution{
 		client: client,
-		meta:   meta,
-		secret: secret,
 	}
 }
 
@@ -66,7 +61,7 @@ func (p *testCaseExecution) List(ctx context.Context,
 		params.TestPlanID,
 		params.TestCaseID,
 	)
-	options = append(options, MetaOpts(p.meta), SecretOpts(p.secret), ResultOpts(list), QueryOpts(map[string]string{
+	options = append(options, ResultOpts(list), QueryOpts(map[string]string{
 		"buildID": params.BuildID,
 	}))
 	if err := p.client.Get(ctx, baseURL, uri, options...); err != nil {
@@ -85,7 +80,7 @@ func (p *testCaseExecution) Create(ctx context.Context,
 
 	uri := fmt.Sprintf("projects/%s/testplans/%s/testcases/%s/executions", params.Project, params.TestPlanID,
 		params.TestCaseID)
-	options = append(options, MetaOpts(p.meta), SecretOpts(p.secret), BodyOpts(payload), ResultOpts(tc))
+	options = append(options, BodyOpts(payload), ResultOpts(tc))
 	if err := p.client.Post(ctx, baseURL, uri, options...); err != nil {
 		return nil, err
 	}

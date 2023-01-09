@@ -20,7 +20,6 @@ import (
 	"context"
 
 	metav1alpha1 "github.com/katanomi/pkg/apis/meta/v1alpha1"
-	corev1 "k8s.io/api/core/v1"
 	duckv1 "knative.dev/pkg/apis/duck/v1"
 )
 
@@ -30,15 +29,11 @@ type ClientBlobStore interface {
 
 type blobStore struct {
 	client Client
-	meta   Meta
-	secret corev1.Secret
 }
 
-func newBlobStore(client Client, meta Meta, secret corev1.Secret) ClientBlobStore {
+func newBlobStore(client Client) ClientBlobStore {
 	return &blobStore{
 		client: client,
-		meta:   meta,
-		secret: secret,
 	}
 }
 
@@ -46,7 +41,7 @@ func newBlobStore(client Client, meta Meta, secret corev1.Secret) ClientBlobStor
 func (p *blobStore) List(ctx context.Context, baseURL *duckv1.Addressable, options ...OptionFunc) (*metav1alpha1.BlobStoreList, error) {
 	list := &metav1alpha1.BlobStoreList{}
 
-	options = append(options, MetaOpts(p.meta), SecretOpts(p.secret), ResultOpts(list))
+	options = append(options, ResultOpts(list))
 	if err := p.client.Get(ctx, baseURL, "blobStores", options...); err != nil {
 		return nil, err
 	}

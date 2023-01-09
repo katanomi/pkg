@@ -19,7 +19,6 @@ package client
 import (
 	"context"
 
-	corev1 "k8s.io/api/core/v1"
 	duckv1 "knative.dev/pkg/apis/duck/v1"
 )
 
@@ -30,28 +29,22 @@ type ClientToolService interface {
 
 type toolService struct {
 	client  Client
-	meta    Meta
-	secret  corev1.Secret
 	baseURL *duckv1.Addressable
 }
 
-func newToolService(client Client, meta Meta, secret corev1.Secret, baseURL *duckv1.Addressable) ClientToolService {
+func newToolService(client Client, baseURL *duckv1.Addressable) ClientToolService {
 	return &toolService{
 		client:  client,
-		meta:    meta,
-		secret:  secret,
 		baseURL: baseURL,
 	}
 }
 
 // CheckAlive to check if the tool service is alive
 func (p *toolService) CheckAlive(ctx context.Context, options ...OptionFunc) error {
-	options = append(options, MetaOpts(p.meta), SecretOpts(p.secret))
 	return p.client.Get(ctx, p.baseURL, "tools/liveness", options...)
 }
 
 // Initialize to initialize the tool service
 func (p *toolService) Initialize(ctx context.Context, options ...OptionFunc) error {
-	options = append(options, MetaOpts(p.meta), SecretOpts(p.secret))
 	return p.client.Get(ctx, p.baseURL, "tools/initialize", options...)
 }

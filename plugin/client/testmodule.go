@@ -21,7 +21,6 @@ import (
 	"fmt"
 
 	metav1alpha1 "github.com/katanomi/pkg/apis/meta/v1alpha1"
-	corev1 "k8s.io/api/core/v1"
 	duckv1 "knative.dev/pkg/apis/duck/v1"
 )
 
@@ -32,15 +31,11 @@ type ClientTestModule interface {
 
 type testModule struct {
 	client Client
-	meta   Meta
-	secret corev1.Secret
 }
 
-func newTestModule(client Client, meta Meta, secret corev1.Secret) ClientTestModule {
+func newTestModule(client Client) ClientTestModule {
 	return &testModule{
 		client: client,
-		meta:   meta,
-		secret: secret,
 	}
 }
 
@@ -49,7 +44,7 @@ func (p *testModule) List(ctx context.Context, baseURL *duckv1.Addressable, para
 	list := &metav1alpha1.TestModuleList{}
 
 	uri := fmt.Sprintf("projects/%s/testplans/%s/testmodules", params.Project, params.TestPlanID)
-	options = append(options, MetaOpts(p.meta), SecretOpts(p.secret), ResultOpts(list))
+	options = append(options, ResultOpts(list))
 	if err := p.client.Get(ctx, baseURL, uri, options...); err != nil {
 		return nil, err
 	}
