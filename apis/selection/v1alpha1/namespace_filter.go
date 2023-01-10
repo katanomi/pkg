@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package filter
+package v1alpha1
 
 import (
 	corev1 "k8s.io/api/core/v1"
@@ -39,20 +39,20 @@ type NamespaceFilter struct {
 	Refs []corev1.ObjectReference `json:"refs,omitempty"`
 }
 
-// NamespaceFilterRule is alias of baseFilterRule
+// NamespaceFilterRule is alias of BaseFilterRule
 // +k8s:deepcopy-gen=true
-type NamespaceFilterRule baseFilterRule
+type NamespaceFilterRule BaseFilterRule
 
 // Filter is a filter for namespaces
 func (n NamespaceFilterRule) Filter(namespaces []corev1.Namespace) []corev1.Namespace {
-	return filterGenericResources(baseFilterRule(n), namespaces)
+	return FilterGenericResources(BaseFilterRule(n), namespaces)
 }
 
 // Validate namespaceFilter validation method
 func (n *NamespaceFilter) Validate(fld *field.Path) field.ErrorList {
-	bFilter := baseFilter{
+	bFilter := BaseFilter{
 		Selector: n.Selector,
-		Filter:   (*baseFilterRule)(n.Filter),
+		Filter:   (*BaseFilterRule)(n.Filter),
 		Refs:     n.Refs,
 	}
 	return bFilter.Validate(fld)

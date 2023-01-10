@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package filter
+package v1alpha1
 
 import (
 	"encoding/json"
@@ -28,9 +28,9 @@ import (
 	"k8s.io/apimachinery/pkg/util/validation/field"
 )
 
-// baseFilter is the base filter struct
+// BaseFilter is the base filter struct
 // Provide some general methods
-type baseFilter struct {
+type BaseFilter struct {
 	// selector is a label query over resources that match the filter.
 	// It must match the resources's labels.
 	// +optional
@@ -38,16 +38,16 @@ type baseFilter struct {
 
 	// a match rule to filter resources based on Selector or Refs
 	// +optional
-	Filter *baseFilterRule `json:"filter,omitempty"`
+	Filter *BaseFilterRule `json:"filter,omitempty"`
 
 	// Refs is a slice of specific references for resources
 	// +optional
 	Refs []corev1.ObjectReference `json:"refs,omitempty"`
 }
 
-// baseFilterRule is the base filter rule
+// BaseFilterRule is the base filter rule
 // +k8s:deepcopy-gen=true
-type baseFilterRule struct {
+type BaseFilterRule struct {
 	// Exact filter namespace by its attributes
 	Exact map[string]string `json:"exact"`
 
@@ -55,7 +55,7 @@ type baseFilterRule struct {
 }
 
 // MatchExact match exact filter rule
-func (n baseFilterRule) MatchExact(obj interface{}) bool {
+func (n BaseFilterRule) MatchExact(obj interface{}) bool {
 	data, _ := json.Marshal(obj)
 
 	for k, v := range n.Exact {
@@ -70,8 +70,8 @@ func (n baseFilterRule) MatchExact(obj interface{}) bool {
 	return true
 }
 
-// Validate baseFilter validation method
-func (n *baseFilter) Validate(fld *field.Path) field.ErrorList {
+// Validate BaseFilter validation method
+func (n *BaseFilter) Validate(fld *field.Path) field.ErrorList {
 	errs := field.ErrorList{}
 
 	if n.Selector == nil && len(n.Refs) == 0 {
@@ -92,8 +92,8 @@ func (n *baseFilter) Validate(fld *field.Path) field.ErrorList {
 	return errs
 }
 
-// filterGenericResources filter generic resources by baseFilterRule
-func filterGenericResources[T any](n baseFilterRule, objs []T) []T {
+// FilterGenericResources filter generic resources by BaseFilterRule
+func FilterGenericResources[T any](n BaseFilterRule, objs []T) []T {
 	result := make([]T, 0)
 	for _, obj := range objs {
 		if n.Exact == nil {

@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package filter
+package v1alpha1
 
 import (
 	"context"
@@ -28,41 +28,21 @@ import (
 
 // GetNamespacesBasedOnFilter lists namespaces based on the namespaceFilter criteria
 func GetNamespacesBasedOnFilter(ctx context.Context, clt client.Client, nsFilter NamespaceFilter) (namespaces []corev1.Namespace, err error) {
+	var nsList []corev1.Namespace
 	// cap of 10 for performance reasons
 	namespaces = make([]corev1.Namespace, 0, 10)
-	if nsFilter.Selector != nil {
-		var selector labels.Selector
-		selector, err = metav1.LabelSelectorAsSelector(nsFilter.Selector)
-		if err != nil {
-			return
-		}
-		nsList := &corev1.NamespaceList{}
-		if err = clt.List(ctx, nsList, client.MatchingLabelsSelector{Selector: selector}); err != nil {
-			return
-		}
 
-		for _, ns := range nsList.Items {
-			if ns.DeletionTimestamp.IsZero() {
-				namespaces = append(namespaces, ns)
-			}
-		}
+	nsList, err = getNamespacesByLabelSelector(ctx, clt, nsFilter.Selector)
+	if err != nil {
+		return nil, err
 	}
+	namespaces = append(namespaces, nsList...)
 
-	if len(nsFilter.Refs) > 0 {
-		for _, nsref := range nsFilter.Refs {
-			ns := &corev1.Namespace{}
-			ref := nsref
-			err = clt.Get(ctx, client.ObjectKey{Name: ref.Name}, ns)
-			err = client.IgnoreNotFound(err)
-			if err != nil {
-				return
-			}
-
-			if ns.Name != "" && ns.DeletionTimestamp.IsZero() {
-				namespaces = append(namespaces, *ns)
-			}
-		}
+	nsList, err = getNamespacesByRefs(ctx, clt, nsFilter.Refs)
+	if err != nil {
+		return nil, err
 	}
+	namespaces = append(namespaces, nsList...)
 
 	// remove duplicates
 	namespaces = RemoveDuplicatesFromList(namespaces)
@@ -71,6 +51,49 @@ func GetNamespacesBasedOnFilter(ctx context.Context, clt client.Client, nsFilter
 		namespaces = nsFilter.Filter.Filter(namespaces)
 	}
 
+	return
+}
+
+func getNamespacesByLabelSelector(ctx context.Context, clt client.Client, labelSelector *metav1.LabelSelector) (namespaces []corev1.Namespace, err error) {
+	if labelSelector == nil {
+		return
+	}
+
+	var selector labels.Selector
+	selector, err = metav1.LabelSelectorAsSelector(labelSelector)
+	if err != nil {
+		return
+	}
+	nsList := &corev1.NamespaceList{}
+	if err = clt.List(ctx, nsList, client.MatchingLabelsSelector{Selector: selector}); err != nil {
+		return
+	}
+
+	for _, ns := range nsList.Items {
+		if ns.DeletionTimestamp.IsZero() {
+			namespaces = append(namespaces, ns)
+		}
+	}
+	return
+}
+
+func getNamespacesByRefs(ctx context.Context, clt client.Client, refs []corev1.ObjectReference) (namespaces []corev1.Namespace, err error) {
+	if len(refs) == 0 {
+		return
+	}
+	for _, nsref := range refs {
+		ns := &corev1.Namespace{}
+		ref := nsref
+		err = clt.Get(ctx, client.ObjectKey{Name: ref.Name}, ns)
+		err = client.IgnoreNotFound(err)
+		if err != nil {
+			return
+		}
+
+		if ns.Name != "" && ns.DeletionTimestamp.IsZero() {
+			namespaces = append(namespaces, *ns)
+		}
+	}
 	return
 }
 

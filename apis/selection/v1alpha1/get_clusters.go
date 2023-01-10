@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package filter
+package v1alpha1
 
 import (
 	"context"
@@ -47,8 +47,10 @@ func GetClustersBasedOnFilter(ctx context.Context, clt dynamic.Interface, cluste
 	if clusterFilter == nil {
 		return nil, fmt.Errorf("clusterFilter is nil")
 	}
+	var ucList *unstructured.UnstructuredList
 	// cap of 10 for performance reasons
 	clusters = make([]corev1.ObjectReference, 0, 10)
+	uClusters := &unstructured.UnstructuredList{}
 
 	defaultNS := clusterFilter.Namespace
 	if defaultNS == "" {
@@ -58,43 +60,17 @@ func GetClustersBasedOnFilter(ctx context.Context, clt dynamic.Interface, cluste
 		return nil, fmt.Errorf("namespace is required")
 	}
 
-	uClusters := &unstructured.UnstructuredList{}
-	if clusterFilter.Selector != nil {
-		opts := metav1.ListOptions{
-			LabelSelector: metav1.FormatLabelSelector(clusterFilter.Selector),
-		}
-		clusterList := &unstructured.UnstructuredList{}
-		dyclient := clt.Resource(ClusterGVR).Namespace(defaultNS)
-		if clusterList, err = dyclient.List(ctx, opts); err != nil {
-			return
-		}
-
-		for _, cluster := range clusterList.Items {
-			if cluster.GetDeletionTimestamp().IsZero() {
-				uClusters.Items = append(uClusters.Items, cluster)
-			}
-		}
+	ucList, err = getClustersByLabelSelector(ctx, clt, clusterFilter.Selector, defaultNS)
+	if err != nil {
+		return
 	}
+	uClusters.Items = append(uClusters.Items, ucList.Items...)
 
-	if len(clusterFilter.Refs) > 0 {
-		for _, clusterRef := range clusterFilter.Refs {
-			ns := clusterRef.Namespace
-			if ns == "" {
-				ns = defaultNS
-			}
-			dyclient := clt.Resource(ClusterGVR).Namespace(ns)
-			var cluster *unstructured.Unstructured
-			cluster, err = dyclient.Get(ctx, clusterRef.Name, metav1.GetOptions{})
-			err = client.IgnoreNotFound(err)
-			if err != nil {
-				return
-			}
-
-			if cluster != nil && cluster.GetDeletionTimestamp().IsZero() {
-				uClusters.Items = append(uClusters.Items, *cluster)
-			}
-		}
+	ucList, err = getClustersByRefs(ctx, clt, clusterFilter.Refs, defaultNS)
+	if err != nil {
+		return
 	}
+	uClusters.Items = append(uClusters.Items, ucList.Items...)
 
 	// remove duplicates
 	uClusters.Items = RemoveDuplicatesFromList(uClusters.Items)
@@ -105,5 +81,52 @@ func GetClustersBasedOnFilter(ctx context.Context, clt dynamic.Interface, cluste
 		clusters = passAllClusterFilterRule.Filter(uClusters.Items)
 	}
 
+	return
+}
+
+func getClustersByLabelSelector(ctx context.Context, clt dynamic.Interface, labelSelector *metav1.LabelSelector, defaultNS string) (uClusters *unstructured.UnstructuredList, err error) {
+	uClusters = &unstructured.UnstructuredList{}
+	if labelSelector == nil {
+		return
+	}
+	opts := metav1.ListOptions{
+		LabelSelector: metav1.FormatLabelSelector(labelSelector),
+	}
+	clusterList := &unstructured.UnstructuredList{}
+	dyclient := clt.Resource(ClusterGVR).Namespace(defaultNS)
+	if clusterList, err = dyclient.List(ctx, opts); err != nil {
+		return
+	}
+
+	for _, cluster := range clusterList.Items {
+		if cluster.GetDeletionTimestamp().IsZero() {
+			uClusters.Items = append(uClusters.Items, cluster)
+		}
+	}
+	return
+}
+
+func getClustersByRefs(ctx context.Context, clt dynamic.Interface, refs []corev1.ObjectReference, defaultNS string) (uClusters *unstructured.UnstructuredList, err error) {
+	uClusters = &unstructured.UnstructuredList{}
+	if len(refs) == 0 {
+		return
+	}
+	for _, clusterRef := range refs {
+		ns := clusterRef.Namespace
+		if ns == "" {
+			ns = defaultNS
+		}
+		dyclient := clt.Resource(ClusterGVR).Namespace(ns)
+		var cluster *unstructured.Unstructured
+		cluster, err = dyclient.Get(ctx, clusterRef.Name, metav1.GetOptions{})
+		err = client.IgnoreNotFound(err)
+		if err != nil {
+			return
+		}
+
+		if cluster != nil && cluster.GetDeletionTimestamp().IsZero() {
+			uClusters.Items = append(uClusters.Items, *cluster)
+		}
+	}
 	return
 }

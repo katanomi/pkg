@@ -29,7 +29,7 @@ import (
 
 const (
 	// Defines the query key value for the search.
-	SearchQueryKey = "name" // NOSONAR
+	SearchQueryKey = "name" // NOSONAR // ignore: "Key" detected here, make sure this is not a hard-coded credential
 )
 
 var DefaultFilters = []restful.FilterFunction{

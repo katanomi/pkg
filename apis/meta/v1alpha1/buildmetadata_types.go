@@ -22,7 +22,7 @@ import (
 
 const (
 	// Build metadata key.
-	BuildMetadataKey = "builds.katanomi.dev/buildrun" // NOSONAR
+	BuildMetadataKey = "builds.katanomi.dev/buildrun" // NOSONAR // ignore: "Key" detected here, make sure this is not a hard-coded credential
 )
 
 // BuildMetaData this structure is a derivative of buildrun and is used for artifacts to record build information.

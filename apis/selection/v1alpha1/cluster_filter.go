@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package filter
+package v1alpha1
 
 import (
 	corev1 "k8s.io/api/core/v1"
@@ -46,9 +46,9 @@ type ClusterFilter struct {
 	Refs []corev1.ObjectReference `json:"refs,omitempty"`
 }
 
-// ClusterFilterRule is alias of baseFilterRule
+// ClusterFilterRule is alias of BaseFilterRule
 // +k8s:deepcopy-gen=true
-type ClusterFilterRule baseFilterRule
+type ClusterFilterRule BaseFilterRule
 
 // Filter is a filter for clusters
 func (n ClusterFilterRule) Filter(uClusters []unstructured.Unstructured) []corev1.ObjectReference {
@@ -57,7 +57,7 @@ func (n ClusterFilterRule) Filter(uClusters []unstructured.Unstructured) []corev
 	for i, cluster := range uClusters {
 		clustersObject[i] = cluster.Object
 	}
-	clustersObject = filterGenericResources(baseFilterRule(n), clustersObject)
+	clustersObject = FilterGenericResources(BaseFilterRule(n), clustersObject)
 	if len(clustersObject) == 0 {
 		return nil
 	}
@@ -80,9 +80,9 @@ func (n *ClusterFilter) Validate(fld *field.Path) field.ErrorList {
 
 	errs = append(errs, kvalidation.ValidateItemName(n.Namespace, false, field.NewPath("namespace"))...)
 
-	bFilter := baseFilter{
+	bFilter := BaseFilter{
 		Selector: n.Selector,
-		Filter:   (*baseFilterRule)(n.Filter),
+		Filter:   (*BaseFilterRule)(n.Filter),
 		Refs:     n.Refs,
 	}
 	errs = append(errs, bFilter.Validate(fld)...)
