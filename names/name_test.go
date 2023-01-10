@@ -1,5 +1,5 @@
 /*
-Copyright 2021 The Katanomi Authors.
+Copyright 2023 The Katanomi Authors.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -17,9 +17,9 @@ limitations under the License.
 package names
 
 import (
-	// "context"
 	"testing"
 
+	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
 	corev1 "k8s.io/api/core/v1"
@@ -97,3 +97,17 @@ func TestGenerateName(t *testing.T) {
 		})
 	}
 }
+
+var _ = Describe("Test.GenerateNameWithHashSuffix", func() {
+	DescribeTable("GenerateNameWithHashSuffix",
+		func(prefix, needHashString, expected string) {
+			actual := GenerateNameWithHashSuffix(prefix, needHashString)
+			Expect(actual).To(Equal(expected))
+		},
+		Entry("prefix is empty", "", "hash", "1nt94id"),
+		Entry("suffix is empty", "prefix", "", "prefix-ztntfp"),
+		Entry("prefix is too long", "prefix01234567890123456789012345678901234567890123456789", "", "prefix012345678901234567890123456789-ztntfp"),
+		Entry("suffix is too long", "prefix", "0123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789", "prefix-1n4g75p"),
+		Entry("prefix has -", "---prefix", "hash", "prefix-1nt94id"),
+	)
+})

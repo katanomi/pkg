@@ -1,0 +1,6 @@
+filter:
+  exact:
+    $(kind): Namespace
+refs:
+- name: namespace-1
+- name: not-exist

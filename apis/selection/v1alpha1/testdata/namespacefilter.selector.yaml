@@ -1,0 +1,6 @@
+filter:
+  exact:
+    $(kind): Namespace
+selector:
+  matchlabels:
+    key-1: value-1

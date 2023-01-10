@@ -58,6 +58,7 @@ require (
 	github.com/spf13/cobra v1.6.0
 	github.com/spf13/pflag v1.0.5
 	github.com/tektoncd/pipeline v0.41.0
+	github.com/tidwall/gjson v1.14.4
 	golang.org/x/net v0.1.0
 	k8s.io/cli-runtime v0.25.2
 	oras.land/oras-go/v2 v2.0.0-rc.5
@@ -118,6 +119,8 @@ require (
 	github.com/prometheus/statsd_exporter v0.21.0 // indirect
 	github.com/sirupsen/logrus v1.9.0 // indirect
 	github.com/stretchr/objx v0.5.0 // indirect
+	github.com/tidwall/match v1.1.1 // indirect
+	github.com/tidwall/pretty v1.2.0 // indirect
 	github.com/xlab/treeprint v1.1.0 // indirect
 	go.opencensus.io v0.23.0 // indirect
 	go.opentelemetry.io/otel/internal/metric v0.25.0 // indirect

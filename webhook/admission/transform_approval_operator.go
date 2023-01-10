@@ -58,7 +58,7 @@ func WithApprovalOperator(getter ChecksGetter) TransformFunc {
 		log := logging.FromContext(ctx)
 		newChecks := getter.GetChecks(runtimeObj)
 		var oldChecks []*metav1alpha1.Check
-		
+
 		if req.Operation == admissionv1.Create {
 			// If it is a the create operation, the base is nil.
 			oldChecks = make([]*metav1alpha1.Check, len(newChecks))
