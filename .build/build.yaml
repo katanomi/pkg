@@ -6,157 +6,150 @@ spec:
         This workspace is shared among all the pipeline tasks to read/write
         common resources
       name: source
-    - description: >
+    - description: |
         Cache for go modules
       name: cache
       optional: true
   tasks:
     - name: boilerplate
-      params:
-        - name: revision
-          value: $(params.git-revision)
+      retries: 0
       taskRef:
         name: katanomi-boilerplate
         kind: ClusterTask
-      runAfter:
-        - gotest
       workspaces:
         - name: source
           workspace: source
-
-    - name: donotsubmit
       params:
         - name: revision
           value: $(params.git-revision)
+    - name: donotsubmit
+      runAfter:
+        - boilerplate
+      retries: 0
       taskRef:
         name: katanomi-donotsubmit
         kind: ClusterTask
-      runAfter:
-        - gotest
       workspaces:
         - name: source
           workspace: source
-
-    - name: gotest
-      taskRef:
-        name: katanomi-gotest
-        kind: ClusterTask
-      runAfter:
-        - generate-version
-      workspaces:
-        - name: source
-          workspace: source
-        - name: cache
-          workspace: cache
-
-    - name: go-style
       params:
         - name: revision
           value: $(params.git-revision)
-      taskRef:
-        name: katanomi-go-style
-        kind: ClusterTask
-      runAfter:
-        - gotest
-      workspaces:
-        - name: source
-          workspace: source
-        - name: cache
-          workspace: cache
-
     - name: knative-style
-      params:
-        - name: ignore-filetypes
-          value: '(\.png|\.drawio|\.DS_Store)$'
-        - name: ignore-dirs
-          value: '(^vendor/|^third_party/|^.git|kodata)'
-        - name: revision
-          value: $(params.git-revision)
+      runAfter:
+        - donotsubmit
+      retries: 0
       taskRef:
         name: katanomi-knative-style
         kind: ClusterTask
-      runAfter:
-        - gotest
       workspaces:
         - name: source
           workspace: source
-
-    - name: generate-version
       params:
-        - name: repo-url
-          value: $(params.git-url)
-        - name: repo-ref
+        - name: ignore-filetypes
+          value: (\.png|\.drawio|\.DS_Store)$
+        - name: ignore-dirs
+          value: (^vendor/|^third_party/|^.git|kodata)
+        - name: revision
           value: $(params.git-revision)
-      runAfter:
-        - git-clone
+    - name: test
+      timeout: 30m
+      retries: 0
       taskRef:
         kind: ClusterTask
-        name: katanomi-generate-version
+        name: go-unit-test
       workspaces:
         - name: source
           workspace: source
-
-
-
-    #################
-    # code-scan
-    #################
-    - name: code-scan
+        - name: cache
+          workspace: cache
       params:
-        - name: address
-          value: https://build-sonar.alauda.cn
-        - name: version
-          value: $(tasks.generate-version.results.semver-version)
-        - name: pr-id
-          value: "$(tasks.generate-version.results.pr-id)"
-        - name: target
-          value: "$(tasks.generate-version.results.target-branch)"
-        - name: branch
-          value: $(tasks.generate-version.results.branch)
+        - name: command
+          value: |
+            export GOPROXY=https://build-nexus.alauda.cn/repository/golang/,direct
+            export GOMAXPROCS=4
+            if [ "$GOCACHE" != "" ]; then
+              export TOOLBIN=$GOCACHE/../toolbin
+              mkdir -p $TOOLBIN
+              ls -la $TOOLBIN
+            fi
 
+            make test
+        - name: test-report-path
+          value: ./test.json
+        - name: coverage-report-path
+          value: ./cover.out
+        - name: quality-gate-rules
+          value:
+            - passed-tests-rate=100
+        - name: tool-image
+          value: registry.alauda.cn:60080/devops/builder-go:1.18-ubuntu-495a3d88
+    - name: golangci-lint
+      timeout: 30m
+      retries: 0
       taskRef:
         kind: ClusterTask
-        name: katanomi-codescan-sonarqube
+        name: golangci-lint
       workspaces:
         - name: source
           workspace: source
-      runAfter:
-      - generate-version
-      - gotest
-      - go-style
-
-    #################
-    # code-scan quality gate
-    #################
-    - name: code-scan-quality-gate
+        - name: cache
+          workspace: cache
       params:
-        - name: address
-          value: https://build-sonar.alauda.cn
+        - name: tool-image
+          value: registry.alauda.cn:60080/devops/builder-go:1.18-ubuntu-495a3d88
+        - name: command
+          value: >
+            export GOPROXY=https://build-nexus.alauda.cn/repository/golang/,direct
 
-        - name: pr-id
-          value: "$(tasks.generate-version.results.pr-id)"
+            golangci-lint run
 
-        - name: branch
-          value: $(tasks.generate-version.results.branch)
-
-        - name: target-branch
-          value: $(tasks.generate-version.results.target-branch)
-
-        - name: task-id
-          value: $(tasks.code-scan.results.task-id)
-
-        - name: project-key
-          value: $(tasks.code-scan.results.project-key)
-
-        - name: sonar-result-url
-          value: $(tasks.code-scan.results.report-html-url)
-
-        - name: repo-url
-          value: $(params.git-url)
-
+        - name: report-path
+          value: ./golangci-lint-report.txt
+        - name: quality-gate
+          value: "false"
+    - name: sonar-scan
+      runAfter:
+        - test
+        - golangci-lint
+      timeout: 30m
+      retries: 0
       taskRef:
         kind: ClusterTask
-        name: katanomi-codescan-sonarqube-qualitygate
+        name: sonarqube-analysis
       workspaces:
         - name: source
           workspace: source
+      params:
+        - name: server
+          value: https://build-sonar.alauda.cn
+  runTemplate:
+    spec:
+      taskRunSpecs:
+        - pipelineTaskName: test
+          stepOverrides:
+            - name: prepare
+              resources:
+                limits:
+                  cpu: 100m
+                  memory: 100Mi
+                requests:
+                  cpu: 50m
+                  memory: 50Mi
+            - name: test
+              resources:
+                requests:
+                  cpu: "4"
+                  memory: 3Gi
+                limits:
+                  cpu: "4"
+                  memory: 3Gi
+            - name: analysis
+              resources:
+                limits:
+                  cpu: 100m
+                  memory: 100Mi
+                requests:
+                  cpu: 50m
+                  memory: 50Mi
+
