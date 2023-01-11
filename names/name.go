@@ -45,7 +45,6 @@ const (
 	maxNameLength          = 63
 	randomLength           = 5
 	MaxGeneratedNameLength = maxNameLength - randomLength
-	PrefixLength           = 36
 )
 
 // copied from https://github.com/kubernetes/kubernetes/blob/c9fb3c8a1b3f407a5e84562843780aa3047d7d06/staging/src/k8s.io/apiserver/pkg/storage/names/generate.go#L49
@@ -68,11 +67,16 @@ func GenerateNameWithHashSuffix(prefix string, needHashString string) string {
 	h := hex.EncodeToString(m.Sum(nil))
 	bi.SetString(h, 16)
 
-	if len(prefix) > PrefixLength {
-		prefix = prefix[:PrefixLength]
+	hashValue := strconv.FormatUint(bi.Uint64(), 36)
+	hashName := fmt.Sprintf("%s-%s", prefix, hashValue)
+	if len(hashName) > validation.DNS1123LabelMaxLength {
+		cut := len(hashName) - validation.DNS1123LabelMaxLength
+		if cut > len(prefix) {
+			cut = len(prefix)
+		}
+		prefix = prefix[:len(prefix)-cut]
+		hashName = fmt.Sprintf("%s-%s", prefix, hashValue)
 	}
-
-	hashName := fmt.Sprintf("%s-%s", prefix, strconv.FormatUint(bi.Uint64(), 36))
 	if len(hashName) > validation.DNS1123LabelMaxLength {
 		hashName = hashName[:validation.DNS1123LabelMaxLength]
 	}
