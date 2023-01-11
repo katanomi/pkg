@@ -21,7 +21,6 @@ import (
 	"fmt"
 
 	metav1alpha1 "github.com/katanomi/pkg/apis/meta/v1alpha1"
-	corev1 "k8s.io/api/core/v1"
 	duckv1 "knative.dev/pkg/apis/duck/v1"
 )
 
@@ -31,15 +30,11 @@ type ClientRepository interface {
 
 type repository struct {
 	client Client
-	meta   Meta
-	secret corev1.Secret
 }
 
-func newRepository(client Client, meta Meta, secret corev1.Secret) ClientRepository {
+func newRepository(client Client) ClientRepository {
 	return &repository{
 		client: client,
-		meta:   meta,
-		secret: secret,
 	}
 }
 
@@ -48,7 +43,7 @@ func (p *repository) List(ctx context.Context, baseURL *duckv1.Addressable, proj
 	list := &metav1alpha1.RepositoryList{}
 
 	uri := fmt.Sprintf("projects/%s/repositories", project)
-	options = append(options, MetaOpts(p.meta), SecretOpts(p.secret), ResultOpts(list))
+	options = append(options, ResultOpts(list))
 	if err := p.client.Get(ctx, baseURL, uri, options...); err != nil {
 		return nil, err
 	}

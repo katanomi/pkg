@@ -22,7 +22,6 @@ import (
 	"github.com/katanomi/pkg/plugin/path"
 
 	metav1alpha1 "github.com/katanomi/pkg/apis/meta/v1alpha1"
-	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	duckv1 "knative.dev/pkg/apis/duck/v1"
 )
@@ -34,21 +33,17 @@ type ClientGitCommitStatus interface {
 
 type gitCommitStatus struct {
 	client Client
-	meta   Meta
-	secret corev1.Secret
 }
 
-func newGitCommitStatus(client Client, meta Meta, secret corev1.Secret) ClientGitCommitStatus {
+func newGitCommitStatus(client Client) ClientGitCommitStatus {
 	return &gitCommitStatus{
 		client: client,
-		meta:   meta,
-		secret: secret,
 	}
 }
 
 func (g *gitCommitStatus) List(ctx context.Context, baseURL *duckv1.Addressable, option metav1alpha1.GitCommitOption, options ...OptionFunc) (*metav1alpha1.GitCommitStatusList, error) {
 	commitStatusList := &metav1alpha1.GitCommitStatusList{}
-	options = append(options, MetaOpts(g.meta), SecretOpts(g.secret), ResultOpts(commitStatusList))
+	options = append(options, ResultOpts(commitStatusList))
 	if option.Repository == "" {
 		return nil, errors.NewBadRequest("repo is empty string")
 	} else if option.Project == "" {
@@ -66,7 +61,7 @@ func (g *gitCommitStatus) List(ctx context.Context, baseURL *duckv1.Addressable,
 
 func (g *gitCommitStatus) Create(ctx context.Context, baseURL *duckv1.Addressable, payload metav1alpha1.CreateCommitStatusPayload, options ...OptionFunc) (*metav1alpha1.GitCommitStatus, error) {
 	statusInfo := &metav1alpha1.GitCommitStatus{}
-	options = append(options, MetaOpts(g.meta), SecretOpts(g.secret), BodyOpts(payload.CreateCommitStatusParam), ResultOpts(statusInfo))
+	options = append(options, BodyOpts(payload.CreateCommitStatusParam), ResultOpts(statusInfo))
 	if payload.Repository == "" {
 		return nil, errors.NewBadRequest("repo is empty string")
 	} else if payload.Project == "" {

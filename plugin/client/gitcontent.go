@@ -23,7 +23,6 @@ import (
 
 	metav1alpha1 "github.com/katanomi/pkg/apis/meta/v1alpha1"
 	"github.com/katanomi/pkg/plugin/path"
-	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	duckv1 "knative.dev/pkg/apis/duck/v1"
 )
@@ -36,21 +35,17 @@ type ClientGitContent interface {
 
 type gitContent struct {
 	client Client
-	meta   Meta
-	secret corev1.Secret
 }
 
-func newGitContent(client Client, meta Meta, secret corev1.Secret) ClientGitContent {
+func newGitContent(client Client) ClientGitContent {
 	return &gitContent{
 		client: client,
-		meta:   meta,
-		secret: secret,
 	}
 }
 
 func (g *gitContent) Get(ctx context.Context, baseURL *duckv1.Addressable, option metav1alpha1.GitRepoFileOption, options ...OptionFunc) (*metav1alpha1.GitRepoFile, error) {
 	fileInfo := &metav1alpha1.GitRepoFile{}
-	options = append(options, MetaOpts(g.meta), SecretOpts(g.secret), QueryOpts(map[string]string{"ref": option.Ref}), ResultOpts(fileInfo))
+	options = append(options, QueryOpts(map[string]string{"ref": option.Ref}), ResultOpts(fileInfo))
 	if option.Repository == "" {
 		return nil, errors.NewBadRequest("repo is empty string")
 	}
@@ -75,7 +70,7 @@ func (g *gitContent) Create(ctx context.Context, baseURL *duckv1.Addressable, pa
 	w.Close()
 	payload.Content = b.Bytes()
 
-	options = append(options, MetaOpts(g.meta), SecretOpts(g.secret), BodyOpts(payload.CreateRepoFileParams), ResultOpts(commitInfo))
+	options = append(options, BodyOpts(payload.CreateRepoFileParams), ResultOpts(commitInfo))
 	if payload.Repository == "" {
 		return nil, errors.NewBadRequest("repo is empty string")
 	}

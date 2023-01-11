@@ -22,7 +22,6 @@ import (
 	"github.com/katanomi/pkg/plugin/path"
 
 	metav1alpha1 "github.com/katanomi/pkg/apis/meta/v1alpha1"
-	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	duckv1 "knative.dev/pkg/apis/duck/v1"
 )
@@ -34,21 +33,17 @@ type ClientGitCommitComment interface {
 
 type gitCommitComment struct {
 	client Client
-	meta   Meta
-	secret corev1.Secret
 }
 
-func newGitCommitComment(client Client, meta Meta, secret corev1.Secret) ClientGitCommitComment {
+func newGitCommitComment(client Client) ClientGitCommitComment {
 	return &gitCommitComment{
 		client: client,
-		meta:   meta,
-		secret: secret,
 	}
 }
 
 func (g *gitCommitComment) List(ctx context.Context, baseURL *duckv1.Addressable, option metav1alpha1.GitCommitOption, options ...OptionFunc) (*metav1alpha1.GitCommitCommentList, error) {
 	commitCommentList := &metav1alpha1.GitCommitCommentList{}
-	options = append(options, MetaOpts(g.meta), SecretOpts(g.secret), ResultOpts(commitCommentList))
+	options = append(options, ResultOpts(commitCommentList))
 	if option.Repository == "" {
 		return nil, errors.NewBadRequest("repo is empty string")
 	} else if option.Project == "" {
@@ -66,7 +61,7 @@ func (g *gitCommitComment) List(ctx context.Context, baseURL *duckv1.Addressable
 
 func (g *gitCommitComment) Create(ctx context.Context, baseURL *duckv1.Addressable, payload metav1alpha1.CreateCommitCommentPayload, options ...OptionFunc) (*metav1alpha1.GitCommitComment, error) {
 	commentInfo := &metav1alpha1.GitCommitComment{}
-	options = append(options, MetaOpts(g.meta), SecretOpts(g.secret), BodyOpts(payload.CreateCommitCommentParam), ResultOpts(commentInfo))
+	options = append(options, BodyOpts(payload.CreateCommitCommentParam), ResultOpts(commentInfo))
 	if payload.Repository == "" {
 		return nil, errors.NewBadRequest("repo is empty string")
 	} else if payload.Project == "" {

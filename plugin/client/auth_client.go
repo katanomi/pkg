@@ -20,7 +20,6 @@ import (
 	"context"
 
 	metav1alpha1 "github.com/katanomi/pkg/apis/meta/v1alpha1"
-	corev1 "k8s.io/api/core/v1"
 	duckv1 "knative.dev/pkg/apis/duck/v1"
 )
 
@@ -32,15 +31,11 @@ type ClientAuth interface {
 
 type authClient struct {
 	client Client
-	meta   Meta
-	secret corev1.Secret
 }
 
-func newAuthClient(client Client, meta Meta, secret corev1.Secret) ClientAuth {
+func newAuthClient(client Client) ClientAuth {
 	return &authClient{
 		client: client,
-		meta:   meta,
-		secret: secret,
 	}
 }
 
@@ -49,7 +44,7 @@ func (auth *authClient) Check(ctx context.Context, baseURL *duckv1.Addressable, 
 	uri := "auth/check"
 	authCheck = &metav1alpha1.AuthCheck{}
 
-	opts = append(opts, MetaOpts(auth.meta), SecretOpts(auth.secret), ResultOpts(authCheck), BodyOpts(options))
+	opts = append(opts, ResultOpts(authCheck), BodyOpts(options))
 	err = auth.client.Post(ctx, baseURL, uri, opts...)
 	return
 }
@@ -59,7 +54,7 @@ func (auth *authClient) Token(ctx context.Context, baseURL *duckv1.Addressable, 
 	uri := "auth/token"
 	authToken = &metav1alpha1.AuthToken{}
 
-	opts = append(opts, MetaOpts(auth.meta), SecretOpts(auth.secret), ResultOpts(authToken))
+	opts = append(opts, ResultOpts(authToken))
 	err = auth.client.Post(ctx, baseURL, uri, opts...)
 	return
 }

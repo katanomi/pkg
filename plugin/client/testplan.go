@@ -21,7 +21,6 @@ import (
 	"fmt"
 
 	metav1alpha1 "github.com/katanomi/pkg/apis/meta/v1alpha1"
-	corev1 "k8s.io/api/core/v1"
 	duckv1 "knative.dev/pkg/apis/duck/v1"
 )
 
@@ -39,15 +38,11 @@ type ClientTestPlan interface {
 
 type testPlan struct {
 	client Client
-	meta   Meta
-	secret corev1.Secret
 }
 
-func newTestPlan(client Client, meta Meta, secret corev1.Secret) ClientTestPlan {
+func newTestPlan(client Client) ClientTestPlan {
 	return &testPlan{
 		client: client,
-		meta:   meta,
-		secret: secret,
 	}
 }
 
@@ -61,7 +56,7 @@ func (p *testPlan) List(
 	list := &metav1alpha1.TestPlanList{}
 
 	uri := fmt.Sprintf("projects/%s/testplans", params.Project)
-	options = append(options, MetaOpts(p.meta), SecretOpts(p.secret), ResultOpts(list),
+	options = append(options, ResultOpts(list),
 		QueryOpts(map[string]string{
 			"name":    params.Search,
 			"buildID": params.BuildID,
@@ -77,7 +72,7 @@ func (p *testPlan) Get(ctx context.Context, baseURL *duckv1.Addressable, params 
 	tc := &metav1alpha1.TestPlan{}
 
 	uri := fmt.Sprintf("projects/%s/testplans/%s", params.Project, params.TestPlanID)
-	options = append(options, MetaOpts(p.meta), SecretOpts(p.secret), ResultOpts(tc), QueryOpts(map[string]string{
+	options = append(options, ResultOpts(tc), QueryOpts(map[string]string{
 		"buildID": params.BuildID,
 	}))
 	if err := p.client.Get(ctx, baseURL, uri, options...); err != nil {

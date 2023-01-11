@@ -22,7 +22,6 @@ import (
 
 	"github.com/katanomi/pkg/plugin/path"
 
-	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 
 	metav1alpha1 "github.com/katanomi/pkg/apis/meta/v1alpha1"
@@ -41,16 +40,12 @@ type ClientGitRepositoryFileTree interface {
 
 type gitRepositoryFileTree struct {
 	client Client
-	meta   Meta
-	secret corev1.Secret
 }
 
 // init gitRepositoryFileTree
-func newGitRepositoryFileTree(client Client, meta Meta, secret corev1.Secret) ClientGitRepositoryFileTree {
+func newGitRepositoryFileTree(client Client) ClientGitRepositoryFileTree {
 	return &gitRepositoryFileTree{
 		client: client,
-		meta:   meta,
-		secret: secret,
 	}
 }
 
@@ -66,8 +61,6 @@ func (g *gitRepositoryFileTree) GetGitRepositoryFileTree(
 
 	options = append(
 		options,
-		MetaOpts(g.meta),
-		SecretOpts(g.secret),
 		QueryOpts(map[string]string{"path": option.Path, "tree_sha": option.TreeSha, "recursive": recursiveValue}),
 		ResultOpts(fileTree),
 	)

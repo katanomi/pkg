@@ -23,7 +23,6 @@ import (
 	"github.com/katanomi/pkg/plugin/path"
 
 	metav1alpha1 "github.com/katanomi/pkg/apis/meta/v1alpha1"
-	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	duckv1 "knative.dev/pkg/apis/duck/v1"
 )
@@ -76,18 +75,13 @@ type GitPullRequestCRUClient interface {
 
 type gitPullRequest struct {
 	client Client
-	meta   Meta
-	secret corev1.Secret
 }
 
 func newGitPullRequest(
 	client Client,
-	meta Meta, secret corev1.Secret,
 ) GitPullRequestCRUClient {
 	return &gitPullRequest{
 		client: client,
-		meta:   meta,
-		secret: secret,
 	}
 }
 
@@ -99,7 +93,7 @@ func (g *gitPullRequest) Create(
 	options ...OptionFunc,
 ) (*metav1alpha1.GitPullRequest, error) {
 	prObj := &metav1alpha1.GitPullRequest{}
-	options = append(options, MetaOpts(g.meta), SecretOpts(g.secret), BodyOpts(payload), ResultOpts(prObj))
+	options = append(options, BodyOpts(payload), ResultOpts(prObj))
 	uri := path.Format("projects/%s/coderepositories/%s/pulls", payload.Source.Project, payload.Source.Repository)
 	if err := g.client.Post(ctx, baseURL, uri, options...); err != nil {
 		return nil, err
@@ -115,7 +109,7 @@ func (g *gitPullRequest) List(
 	options ...OptionFunc,
 ) (*metav1alpha1.GitPullRequestList, error) {
 	prList := &metav1alpha1.GitPullRequestList{}
-	options = append(options, MetaOpts(g.meta), SecretOpts(g.secret), ResultOpts(prList))
+	options = append(options, ResultOpts(prList))
 	if option.State != nil {
 		stateFilter := make(map[string]string)
 		stateFilter["state"] = (string)(*option.State)
@@ -139,7 +133,7 @@ func (g *gitPullRequest) Get(
 	options ...OptionFunc,
 ) (*metav1alpha1.GitPullRequest, error) {
 	prObj := &metav1alpha1.GitPullRequest{}
-	options = append(options, MetaOpts(g.meta), SecretOpts(g.secret), ResultOpts(prObj))
+	options = append(options, ResultOpts(prObj))
 	if option.Repository == "" {
 		return nil, errors.NewBadRequest("repo is empty string")
 	}
@@ -162,7 +156,7 @@ func (g *gitPullRequest) CreateNote(
 	options ...OptionFunc,
 ) (*metav1alpha1.GitPullRequestNote, error) {
 	noteObj := &metav1alpha1.GitPullRequestNote{}
-	options = append(options, MetaOpts(g.meta), SecretOpts(g.secret), BodyOpts(payload.CreatePullRequestCommentParam), ResultOpts(noteObj))
+	options = append(options, BodyOpts(payload.CreatePullRequestCommentParam), ResultOpts(noteObj))
 	if payload.Repository == "" {
 		return nil, errors.NewBadRequest("repo is empty string")
 	}
@@ -184,7 +178,7 @@ func (g *gitPullRequest) UpdateNote(
 	options ...OptionFunc,
 ) (*metav1alpha1.GitPullRequestNote, error) {
 	noteObj := &metav1alpha1.GitPullRequestNote{}
-	options = append(options, MetaOpts(g.meta), SecretOpts(g.secret), BodyOpts(payload.CreatePullRequestCommentParam), ResultOpts(noteObj))
+	options = append(options, BodyOpts(payload.CreatePullRequestCommentParam), ResultOpts(noteObj))
 	if payload.Repository == "" {
 		return nil, errors.NewBadRequest("repo is empty string")
 	}
@@ -211,7 +205,7 @@ func (g *gitPullRequest) ListNote(
 	options ...OptionFunc,
 ) (*metav1alpha1.GitPullRequestNoteList, error) {
 	noteList := &metav1alpha1.GitPullRequestNoteList{}
-	options = append(options, MetaOpts(g.meta), SecretOpts(g.secret), ResultOpts(noteList))
+	options = append(options, ResultOpts(noteList))
 	if option.Repository == "" {
 		return nil, errors.NewBadRequest("repo is empty string")
 	}

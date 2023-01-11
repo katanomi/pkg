@@ -22,7 +22,6 @@ import (
 	"github.com/katanomi/pkg/plugin/path"
 
 	metav1alpha1 "github.com/katanomi/pkg/apis/meta/v1alpha1"
-	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	duckv1 "knative.dev/pkg/apis/duck/v1"
 )
@@ -35,22 +34,18 @@ type ClientGitRepositoryTag interface {
 
 type gitRepositoryTag struct {
 	client Client
-	meta   Meta
-	secret corev1.Secret
 }
 
-func newGitRepositoryTag(client Client, meta Meta, secret corev1.Secret) ClientGitRepositoryTag {
+func newGitRepositoryTag(client Client) ClientGitRepositoryTag {
 	return &gitRepositoryTag{
 		client: client,
-		meta:   meta,
-		secret: secret,
 	}
 }
 
 // Get repository tag info
 func (g *gitRepositoryTag) Get(ctx context.Context, baseURL *duckv1.Addressable, option metav1alpha1.GitRepositoryTagOption, options ...OptionFunc) (*metav1alpha1.GitRepositoryTag, error) {
 	tagObj := &metav1alpha1.GitRepositoryTag{}
-	options = append(options, MetaOpts(g.meta), SecretOpts(g.secret), ResultOpts(tagObj))
+	options = append(options, ResultOpts(tagObj))
 	if option.Repository == "" {
 		return nil, errors.NewBadRequest("repo is empty string")
 	} else if option.Tag == "" {
@@ -70,7 +65,7 @@ func (g *gitRepositoryTag) List(ctx context.Context, baseURL *duckv1.Addressable
 	if option.Repository == "" {
 		return nil, errors.NewBadRequest("repo is empty string")
 	}
-	options = append(options, MetaOpts(g.meta), SecretOpts(g.secret), ResultOpts(result))
+	options = append(options, ResultOpts(result))
 	uri := path.Format("projects/%s/coderepositories/%s/tags", option.Project, option.Repository)
 	if err := g.client.Get(ctx, baseURL, uri, options...); err != nil {
 		return nil, err

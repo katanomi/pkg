@@ -22,7 +22,6 @@ import (
 	"github.com/katanomi/pkg/plugin/path"
 
 	metav1alpha1 "github.com/katanomi/pkg/apis/meta/v1alpha1"
-	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	duckv1 "knative.dev/pkg/apis/duck/v1"
 )
@@ -35,21 +34,17 @@ type ClientGitRepository interface {
 
 type gitRepository struct {
 	client Client
-	meta   Meta
-	secret corev1.Secret
 }
 
-func newGitRepository(client Client, meta Meta, secret corev1.Secret) ClientGitRepository {
+func newGitRepository(client Client) ClientGitRepository {
 	return &gitRepository{
 		client: client,
-		meta:   meta,
-		secret: secret,
 	}
 }
 
 func (g *gitRepository) List(ctx context.Context, baseURL *duckv1.Addressable, project, keyword string, subtype metav1alpha1.ProjectSubType, options ...OptionFunc) (*metav1alpha1.GitRepositoryList, error) {
 	list := &metav1alpha1.GitRepositoryList{}
-	options = append(options, MetaOpts(g.meta), SecretOpts(g.secret), QueryOpts(map[string]string{"keyword": keyword, "subtype": subtype.String()}), ResultOpts(list))
+	options = append(options, QueryOpts(map[string]string{"keyword": keyword, "subtype": subtype.String()}), ResultOpts(list))
 	if project == "" {
 		return nil, errors.NewBadRequest("project is empty string")
 	}
@@ -62,7 +57,7 @@ func (g *gitRepository) List(ctx context.Context, baseURL *duckv1.Addressable, p
 
 func (g *gitRepository) Get(ctx context.Context, baseURL *duckv1.Addressable, project, repo string, options ...OptionFunc) (*metav1alpha1.GitRepository, error) {
 	repoObj := &metav1alpha1.GitRepository{}
-	options = append(options, MetaOpts(g.meta), SecretOpts(g.secret), ResultOpts(repoObj))
+	options = append(options, ResultOpts(repoObj))
 	if project == "" {
 		return nil, errors.NewBadRequest("project is empty string")
 	}
