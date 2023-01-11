@@ -44,6 +44,12 @@ type EntitySpec struct {
 	// Raw is original content of the entity
 	Raw []byte `json:"raw,omitempty"`
 
+	// TypeMeta and ObjectMeta information of the raw content
+	Meta RawMeta `json:"meta,omitempty"`
+}
+
+// RawMeta is the metadata of the raw content
+type RawMeta struct {
 	// metadata of the original resource in the raw
 	// Easy to filter resources at the front end
 	metav1.TypeMeta   `json:",inline"`
