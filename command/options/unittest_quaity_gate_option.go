@@ -78,7 +78,7 @@ func (m *UnitTestQuaityGateOption) ValidateQualityGate(ctx context.Context, test
 
 	logger := logger.NewLoggerFromContext(ctx)
 	if !m.QualityGate {
-		logger.Infow("==> 📢  quality gate disabled, skip checking.")
+		logger.Infof("==> 📢  %s quality gate disabled, skip checking.", m.QualityGateOption.FlagName)
 		return
 	}
 
