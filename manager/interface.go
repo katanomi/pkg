@@ -31,5 +31,5 @@ type ResourceLockFunc func(*rest.Config, recorder.Provider, leaderelection.Optio
 // this will make possible to customize resource lock without
 // having to force it into dependencies
 type ResourceLockSetter interface {
-	SetNewResourceLock(lock ResourceLockFunc)
+	SetNewResourceLock(func(*rest.Config, recorder.Provider, leaderelection.Options) (resourcelock.Interface, error))
 }
