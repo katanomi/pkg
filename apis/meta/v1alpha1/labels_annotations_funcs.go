@@ -56,8 +56,8 @@ func HasAnnotation(obj metav1.Object, key, value string) bool {
 	return MapContainsKeyValue(obj.GetAnnotations(), key, value)
 }
 
-// ExistAnnotation returns true if the object exist the annotation
-func ExistAnnotation(obj metav1.Object, key string) bool {
+// HasAnnotationKey returns true if the object has the annotation key
+func HasAnnotationKey(obj metav1.Object, key string) bool {
 	return MapContainsKey(obj.GetAnnotations(), key)
 }
 
@@ -66,8 +66,8 @@ func HasLabel(obj metav1.Object, key, value string) bool {
 	return MapContainsKeyValue(obj.GetLabels(), key, value)
 }
 
-// ExistLabel returns true if the object exist the label
-func ExistLabel(obj metav1.Object, key string) bool {
+// HasLabelKey returns true if the object has the label key
+func HasLabelKey(obj metav1.Object, key string) bool {
 	return MapContainsKey(obj.GetLabels(), key)
 }
 

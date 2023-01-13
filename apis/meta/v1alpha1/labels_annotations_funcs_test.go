@@ -98,32 +98,32 @@ func TestHasValueLabelsAnnotations(t *testing.T) {
 
 }
 
-func TestExistValueLabelsAnnotations(t *testing.T) {
+func TestHasLabelsAnnotationsKey(t *testing.T) {
 
-	t.Run("ExistAnnotations", func(t *testing.T) {
+	t.Run("HasAnnotationKey", func(t *testing.T) {
 		g := NewGomegaWithT(t)
 
 		obj := &corev1.Secret{}
-		g.Expect(ExistAnnotation(obj, "abc")).To(BeFalse())
+		g.Expect(HasAnnotationKey(obj, "abc")).To(BeFalse())
 
 		obj.SetAnnotations(map[string]string{"abc": "def", "empty": ""})
 
-		g.Expect(ExistAnnotation(obj, "abc")).To(BeTrue())
-		g.Expect(ExistAnnotation(obj, "xyz")).To(BeFalse())
-		g.Expect(ExistAnnotation(obj, "empty")).To(BeTrue())
+		g.Expect(HasAnnotationKey(obj, "abc")).To(BeTrue())
+		g.Expect(HasAnnotationKey(obj, "xyz")).To(BeFalse())
+		g.Expect(HasAnnotationKey(obj, "empty")).To(BeTrue())
 	})
 
-	t.Run("ExistLabels", func(t *testing.T) {
+	t.Run("HasLabelKey", func(t *testing.T) {
 		g := NewGomegaWithT(t)
 
 		obj := &corev1.Secret{}
-		g.Expect(ExistLabel(obj, "abc")).To(BeFalse())
+		g.Expect(HasLabelKey(obj, "abc")).To(BeFalse())
 
 		obj.SetLabels(map[string]string{"abc": "def", "empty": ""})
 
-		g.Expect(ExistLabel(obj, "abc")).To(BeTrue())
-		g.Expect(ExistLabel(obj, "xyz")).To(BeFalse())
-		g.Expect(ExistLabel(obj, "empty")).To(BeTrue())
+		g.Expect(HasLabelKey(obj, "abc")).To(BeTrue())
+		g.Expect(HasLabelKey(obj, "xyz")).To(BeFalse())
+		g.Expect(HasLabelKey(obj, "empty")).To(BeTrue())
 	})
 
 }
