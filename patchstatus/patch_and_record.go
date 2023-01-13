@@ -53,11 +53,15 @@ func PatchStatusAndRecordEvent(
 	patch := client.MergeFrom(oldObj)
 	patchData, _ := patch.Data(clientObj)
 
-	patchErr := clt.Status().Patch(ctx, clientObj, patch)
-	if patchErr != nil {
-		log.Warnw("object patch failed", "err", patchErr, "patchData", string(patchData))
-	} else {
-		log.Debugw("object patch success", "patchData", string(patchData))
+	// Empty patch is {}, hence we check for that.
+	// Execute only when patch is required
+	if len(patchData) > 2 {
+		patchErr := clt.Status().Patch(ctx, clientObj, patch)
+		if patchErr != nil {
+			log.Warnw("object patch failed", "err", patchErr, "patchData", string(patchData))
+		} else {
+			log.Debugw("object patch success", "patchData", string(patchData))
+		}
 	}
 
 	if err != nil {
