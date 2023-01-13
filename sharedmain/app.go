@@ -331,9 +331,10 @@ func (a *AppBuilder) Controllers(ctors ...controllers.SetupChecker) *AppBuilder 
 	// If the value is empty, the default behavior will still be used.
 	// Ref: https://github.com/kubernetes-sigs/controller-runtime/blob/b9219528d95974cb4f5b06f86c9b1c9b7d3045a5/pkg/manager/manager.go#L551
 	// make the struct as an interface to check if it implements the other interface
-	optionsInterface := interface{}(options)
+	optionsInterface := interface{}(&options)
 	if setter, ok := optionsInterface.(kmanager.ResourceLockSetter); ok {
 		setter.SetNewResourceLock(a.newResourceLock)
+		a.Logger.Infow("inject resource lock")
 	}
 
 	a.Manager, err = ctrl.NewManager(a.Config, options)
