@@ -19,9 +19,13 @@ package v1alpha1
 import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	"k8s.io/apimachinery/pkg/api/errors"
+	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/util/validation/field"
 
+	kvalidation "github.com/katanomi/pkg/apis/validation"
 	. "github.com/katanomi/pkg/testing"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 var _ = Describe("Test.ClusterFilterRule", func() {
@@ -59,24 +63,32 @@ var _ = Describe("Test.ClusterFilter.Validate", func() {
 		clusterFilter *ClusterFilter
 		path          *field.Path
 		errs          field.ErrorList
+		err           error
 	)
 
 	BeforeEach(func() {
-		path = field.NewPath("")
+		path = field.NewPath("prefix")
 		clusterFilter = &ClusterFilter{}
 	})
 
 	JustBeforeEach(func() {
 		errs = clusterFilter.Validate(path)
+		err = kvalidation.ReturnInvalidError(schema.GroupKind{}, "kind", errs)
 	})
 
 	Context("empty struct", func() {
 		It("should return validation error", func() {
-			Expect(errs).ToNot(BeNil(), "should return an error")
-			// Filter removes items from the ErrorList that match the provided fns.
-			Expect(errs.Filter(field.NewErrorTypeMatcher(field.ErrorTypeRequired))).To(HaveLen(1))
-			Expect(errs.Filter(field.NewErrorTypeMatcher(field.ErrorTypeInvalid))).To(HaveLen(1))
-			Expect(errs).To(HaveLen(2))
+			Expect(err).ToNot(BeNil(), "should return an error")
+			Expect(errors.IsInvalid(err)).To(BeTrue(), "should return an invalid error")
+
+			statusErr, _ := err.(*errors.StatusError)
+			Expect(statusErr.ErrStatus.Details.Causes).To(ContainElements(
+				metav1.StatusCause{
+					Type:    "FieldValueRequired",
+					Message: "Required value: one of selector OR refs is required",
+					Field:   "prefix",
+				},
+			))
 		})
 	})
 
@@ -86,11 +98,32 @@ var _ = Describe("Test.ClusterFilter.Validate", func() {
 		})
 
 		It("should return validation error", func() {
-			Expect(errs).ToNot(BeNil(), "should return an error")
-			// Filter removes items from the ErrorList that match the provided fns.
-			Expect(errs.Filter(field.NewErrorTypeMatcher(field.ErrorTypeRequired))).To(HaveLen(3))
-			Expect(errs.Filter(field.NewErrorTypeMatcher(field.ErrorTypeInvalid))).To(HaveLen(1))
-			Expect(errs).To(HaveLen(4))
+			Expect(err).ToNot(BeNil(), "should return an error")
+			Expect(errors.IsInvalid(err)).To(BeTrue(), "should return an invalid error")
+
+			statusErr, _ := err.(*errors.StatusError)
+			Expect(statusErr.ErrStatus.Details.Causes).To(ContainElements(
+				metav1.StatusCause{
+					Type:    "FieldValueInvalid",
+					Message: "Invalid value: \"default-\": a lowercase RFC 1123 label must consist of lower case alphanumeric characters or '-', and must start and end with an alphanumeric character (e.g. 'my-name',  or '123-abc', regex used for validation is '[a-z0-9]([-a-z0-9]*[a-z0-9])?')",
+					Field:   "prefix.namespace",
+				},
+				metav1.StatusCause{
+					Type:    "FieldValueInvalid",
+					Message: "Invalid value: \"app-\": name part must consist of alphanumeric characters, '-', '_' or '.', and must start and end with an alphanumeric character (e.g. 'MyName',  or 'my.name',  or '123-abc', regex used for validation is '([A-Za-z0-9][-A-Za-z0-9_.]*)?[A-Za-z0-9]')",
+					Field:   "prefix.selector.matchLabels",
+				},
+				metav1.StatusCause{
+					Type:    "FieldValueInvalid",
+					Message: "Invalid value: \"Unknown\": not a valid selector operator",
+					Field:   "prefix.selector.matchExpressions[0].operator",
+				},
+				metav1.StatusCause{
+					Type:    "FieldValueRequired",
+					Message: "Required value: must be specified when `operator` is 'In' or 'NotIn'",
+					Field:   "prefix.selector.matchExpressions[1].values",
+				},
+			))
 		})
 	})
 
@@ -100,7 +133,7 @@ var _ = Describe("Test.ClusterFilter.Validate", func() {
 		})
 
 		It("should not return validation error", func() {
-			Expect(errs).To(HaveLen(0), "should NOT return an error")
+			Expect(err).To(BeNil(), "should NOT return an error")
 		})
 	})
 

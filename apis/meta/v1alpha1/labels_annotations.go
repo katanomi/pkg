@@ -91,7 +91,9 @@ const (
 	// SecretTypeAnnotationKey annotation key for an existed secret with a different type
 	SecretTypeAnnotationKey = "katanomi.dev/secretType" //nolint:gosec
 	// ClusterNameAnnotationKey annotation key to store resource cluster name
-	ClusterNameAnnotationKey = "integrations.katanomi.dev/clusterName"
+	ClusterNameAnnotationKey = "katanomi.dev/clusterName"
+	// ClusterRefNamespaceAnnotationKey annotation key to store cluster reference namespace
+	ClusterRefNamespaceAnnotationKey = "katanomi.dev/clusterRefNamespace"
 	// TriggerNameAnnotationKey annotation key to store a friendly trigger name
 	TriggerNameAnnotationKey = "katanomi.dev/triggerName"
 	// SettingsConvertTypesKey annotation key to store the setting types need to be converted

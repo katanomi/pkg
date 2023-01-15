@@ -23,19 +23,14 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
-	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/client-go/dynamic"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
+	"github.com/katanomi/pkg/multicluster"
 	knamespace "github.com/katanomi/pkg/namespace"
 )
 
 var (
-	// ClusterRegistryGroupVersion is the group version for the cluster registry
-	ClusterRegistryGroupVersion = schema.GroupVersion{Group: "clusterregistry.k8s.io", Version: "v1alpha1"}
-	// ClusterGVR is the group version resource for the cluster registry
-	ClusterGVR = ClusterRegistryGroupVersion.WithResource("clusters")
-
 	// passAllClusterFilterRule used to pass all clusters
 	passAllClusterFilterRule = ClusterFilterRule{
 		Exact: map[string]string{},
@@ -93,7 +88,7 @@ func getClustersByLabelSelector(ctx context.Context, clt dynamic.Interface, labe
 		LabelSelector: metav1.FormatLabelSelector(labelSelector),
 	}
 	clusterList := &unstructured.UnstructuredList{}
-	dyclient := clt.Resource(ClusterGVR).Namespace(defaultNS)
+	dyclient := clt.Resource(multicluster.ClusterGVR).Namespace(defaultNS)
 	if clusterList, err = dyclient.List(ctx, opts); err != nil {
 		return
 	}
@@ -116,7 +111,7 @@ func getClustersByRefs(ctx context.Context, clt dynamic.Interface, refs []corev1
 		if ns == "" {
 			ns = defaultNS
 		}
-		dyclient := clt.Resource(ClusterGVR).Namespace(ns)
+		dyclient := clt.Resource(multicluster.ClusterGVR).Namespace(ns)
 		var cluster *unstructured.Unstructured
 		cluster, err = dyclient.Get(ctx, clusterRef.Name, metav1.GetOptions{})
 		err = client.IgnoreNotFound(err)

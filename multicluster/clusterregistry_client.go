@@ -69,6 +69,7 @@ func NewClusterRegistryClientOrDie(config *rest.Config) Interface {
 
 var ClusterRegistryGroupVersion = schema.GroupVersion{Group: "clusterregistry.k8s.io", Version: "v1alpha1"}
 var ClusterRegistryGVK = ClusterRegistryGroupVersion.WithKind("Cluster")
+var ClusterGVR = ClusterRegistryGroupVersion.WithResource("clusters")
 
 // GetConfig returns the configuration based on the Cluster
 func (m *ClusterRegistryClient) GetConfig(ctx context.Context, clusterRef *corev1.ObjectReference) (config *rest.Config, err error) {
