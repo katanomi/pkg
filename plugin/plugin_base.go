@@ -32,7 +32,12 @@ import (
 )
 
 // PluginBase is the base struct for all plugins
-type PluginBase struct{}
+type PluginBase struct {
+	DefaultPluginAddresser
+}
+
+// DefaultPluginAddresser provides default methods implementing client.PluginAddressable
+type DefaultPluginAddresser struct{}
 
 // CheckAlive request the tool service with get method to check if it is alive
 func (p PluginBase) CheckAlive(ctx context.Context) error {
@@ -54,7 +59,7 @@ func (p PluginBase) CheckAlive(ctx context.Context) error {
 }
 
 // GetAddressURL get the access url of the plugin service(not tool service)
-func (p PluginBase) GetAddressURL() *apis.URL {
+func (p DefaultPluginAddresser) GetAddressURL() *apis.URL {
 	svcNamespace := system.Namespace()
 	svcName := os.Getenv(config.EnvServiceName)
 	svcMethod := os.Getenv(config.EnvServiceMethod)

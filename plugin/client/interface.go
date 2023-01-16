@@ -38,9 +38,9 @@ type Interface interface {
 // PluginRegister plugin registration methods to update IntegrationClass status
 type PluginRegister interface {
 	Interface
+	PluginAddressable
+	// GetIntegrationClassName returns integration class name
 	GetIntegrationClassName() string
-	// GetAddressURL Returns its own plugin access URL
-	GetAddressURL() *apis.URL
 	// GetWebhookURL Returns a Webhook accessible URL for external tools
 	// If not supported return nil, false
 	GetWebhookURL() (*apis.URL, bool)
@@ -55,6 +55,18 @@ type PluginRegister interface {
 	GetResourceTypes() []string
 	// GetAllowEmptySecret Returns if an empty secret is allowed with IntegrationClass
 	GetAllowEmptySecret() []string
+}
+
+// PluginAddressable provides methods to get plugin address url
+type PluginAddressable interface {
+	// GetAddressURL Returns its own plugin access URL
+	GetAddressURL() *apis.URL
+}
+
+// ResourceReferencesGetter checks and returns dependency resource references
+type ResourceReferencesGetter interface {
+	// GetResourceReferences parses params and returns expected dependency resources
+	GetResourceReferences(ctx context.Context, params []metav1alpha1.Param) ([]corev1.ObjectReference, error)
 }
 
 type AdditionalWebhookRegister interface {
