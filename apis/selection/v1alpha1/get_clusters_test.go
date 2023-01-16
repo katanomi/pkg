@@ -24,6 +24,7 @@ import (
 	. "github.com/onsi/gomega"
 	"knative.dev/pkg/logging"
 
+	"github.com/katanomi/pkg/multicluster"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -51,11 +52,11 @@ var _ = Describe("Test.GetNamespacesBasedOnFilter", func() {
 		objs, err := LoadKubeResourcesAsUnstructured("testdata/clusterfilter.clusters.list.yaml")
 		Expect(err).Should(BeNil())
 		gvrToListKind := map[schema.GroupVersionResource]string{
-			ClusterGVR: "ClusterList",
+			multicluster.ClusterGVR: "ClusterList",
 		}
 		clt = dynamicfake.NewSimpleDynamicClientWithCustomListKinds(scheme, gvrToListKind)
 		for i, obj := range objs {
-			clt.Resource(ClusterGVR).Namespace(obj.GetNamespace()).Create(ctx, &objs[i], metav1.CreateOptions{})
+			clt.Resource(multicluster.ClusterGVR).Namespace(obj.GetNamespace()).Create(ctx, &objs[i], metav1.CreateOptions{})
 		}
 	})
 

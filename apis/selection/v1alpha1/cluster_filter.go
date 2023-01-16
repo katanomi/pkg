@@ -78,7 +78,9 @@ func (n ClusterFilterRule) Filter(uClusters []unstructured.Unstructured) []corev
 func (n *ClusterFilter) Validate(fld *field.Path) field.ErrorList {
 	errs := field.ErrorList{}
 
-	errs = append(errs, kvalidation.ValidateItemName(n.Namespace, false, field.NewPath("namespace"))...)
+	if n.Namespace != "" {
+		errs = append(errs, kvalidation.ValidateItemName(n.Namespace, false, fld.Child("namespace"))...)
+	}
 
 	bFilter := BaseFilter{
 		Selector: n.Selector,
