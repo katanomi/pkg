@@ -89,14 +89,19 @@ func (TestResult) GetObjectWithValues(ctx context.Context, path *field.Path, val
 }
 
 // PassedTestsRate rate of passed tests calculated using passed / (passed + failed) * 100, i.e 96.54
-// if input t is nil, will return "0"
+// if input t is nil, will return "0.00"
 func PassedTestsRate(t *TestResult) string {
 	if t == nil {
-		return "0"
+		return "0.00"
 	}
 
-	passedTestsRate := float64(t.Passed) / float64(t.Passed+t.Failed)
-	passedTestsRate *= 100
+	divisor := float64(t.Passed + t.Failed)
+	var passedTestsRate float64
+	if divisor != 0 {
+		passedTestsRate = float64(t.Passed) / divisor
+		passedTestsRate *= 100
+	}
+
 	return fmt.Sprintf("%.2f", passedTestsRate)
 }
 

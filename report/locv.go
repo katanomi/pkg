@@ -111,8 +111,17 @@ func (p *LcovParser) parseLine(line string) (err error) {
 func (p *LcovParser) ConvertToTestCoverage() v1alpha1.TestCoverage {
 	testCoverage := v1alpha1.TestCoverage{}
 
-	testCoverage.Branches = fmt.Sprintf("%.2f", float64(p.BranchHit)/float64(p.BranchFound)*100)
-	testCoverage.Lines = fmt.Sprintf("%.2f", float64(p.LineHit)/float64(p.LineFound)*100)
+	var line, branch float64
+	if p.BranchFound != 0 {
+		branch = float64(p.BranchHit) / float64(p.BranchFound) * 100
+	}
+
+	if p.LineFound != 0 {
+		line = float64(p.LineHit) / float64(p.LineFound) * 100
+	}
+
+	testCoverage.Branches = fmt.Sprintf("%.2f", branch)
+	testCoverage.Lines = fmt.Sprintf("%.2f", line)
 
 	return testCoverage
 }

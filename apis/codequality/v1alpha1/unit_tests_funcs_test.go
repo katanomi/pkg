@@ -147,7 +147,7 @@ func TestUnitTestsResultPassedTestsRate(t *testing.T) {
 	}{
 		{
 			name: "empty test result",
-			want: "0",
+			want: "0.00",
 		},
 		{
 			name: "PassedTestsRate 33.33",
@@ -166,6 +166,24 @@ func TestUnitTestsResultPassedTestsRate(t *testing.T) {
 				PassedTestsRate: "00.00",
 			},
 			want: "70.00",
+		},
+		{
+			name: "data is 0",
+			testResult: &TestResult{
+				Passed:          0,
+				Failed:          0,
+				PassedTestsRate: "00.00",
+			},
+			want: "0.00",
+		},
+		{
+			name: "pass is 0",
+			testResult: &TestResult{
+				Passed:          0,
+				Failed:          2,
+				PassedTestsRate: "00.00",
+			},
+			want: "0.00",
 		},
 	}
 
