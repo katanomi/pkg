@@ -37,6 +37,13 @@ func TestLcovParser_Coverage(t *testing.T) {
 				Branches: "50.00",
 			},
 		},
+		"coverage is 0": {
+			path: "./testdata/lcovparser-zero.info",
+			wantTestCoverage: v1alpha1.TestCoverage{
+				Lines:    "0.00",
+				Branches: "0.00",
+			},
+		},
 		"lcov file not found": {
 			path:    "./testdata/lcovparser-not-found.info",
 			wantErr: fmt.Errorf("open ./testdata/lcovparser-not-found.info: no such file or directory"),

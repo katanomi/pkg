@@ -17,6 +17,7 @@ limitations under the License.
 package options
 
 import (
+	"strings"
 	"testing"
 
 	. "github.com/onsi/gomega"
@@ -38,8 +39,9 @@ func TestExitCodeOption(t *testing.T) {
 		RegisterFlags(&obj, flagSet)
 		err := flagSet.Parse(args)
 		g.Expect(err).Should(Succeed(), "parse flag succeed.")
-		success, err := obj.Succeed()
+		success, code, err := obj.Succeed()
 		g.Expect(err).To(Succeed())
+		g.Expect(strings.TrimRight(code, "\n")).To(Equal("0"))
 		g.Expect(success).To(Equal(true))
 	})
 
@@ -57,8 +59,9 @@ func TestExitCodeOption(t *testing.T) {
 		RegisterFlags(&obj, flagSet)
 		err := flagSet.Parse(args)
 		g.Expect(err).Should(Succeed(), "parse flag succeed.")
-		success, err := obj.Succeed()
+		success, code, err := obj.Succeed()
 		g.Expect(err).ToNot(Succeed())
+		g.Expect(code).To(Equal(""))
 		g.Expect(success).To(Equal(false))
 	})
 
@@ -74,9 +77,49 @@ func TestExitCodeOption(t *testing.T) {
 		RegisterFlags(&obj, flagSet)
 		err := flagSet.Parse(args)
 		g.Expect(err).Should(Succeed(), "parse flag succeed.")
-		success, err := obj.Succeed()
+		success, code, err := obj.Succeed()
 		g.Expect(err).ToNot(Succeed())
+		g.Expect(code).To(Equal(""))
 		g.Expect(success).To(Equal(false))
 	})
 
+	t.Run("exit code non-zero exit code", func(t *testing.T) {
+		g := NewGomegaWithT(t)
+
+		obj := struct {
+			ExitCodeOption
+		}{}
+		args := []string{
+			"--exit-code-path", "./testdata/exit-code-option-failed.txt",
+		}
+
+		flagSet := pflag.NewFlagSet("test", pflag.ContinueOnError)
+		RegisterFlags(&obj, flagSet)
+		err := flagSet.Parse(args)
+		g.Expect(err).Should(Succeed(), "parse flag succeed.")
+		success, code, err := obj.Succeed()
+		g.Expect(err).To(Succeed())
+		g.Expect(strings.TrimRight(code, "\n")).To(Equal("-1"))
+		g.Expect(success).To(Equal(false))
+	})
+
+	t.Run("exit code file context is empty", func(t *testing.T) {
+		g := NewGomegaWithT(t)
+
+		obj := struct {
+			ExitCodeOption
+		}{}
+		args := []string{
+			"--exit-code-path", "./testdata/exit-code-option-empty.txt",
+		}
+
+		flagSet := pflag.NewFlagSet("test", pflag.ContinueOnError)
+		RegisterFlags(&obj, flagSet)
+		err := flagSet.Parse(args)
+		g.Expect(err).Should(Succeed(), "parse flag succeed.")
+		success, code, err := obj.Succeed()
+		g.Expect(err).To(Succeed())
+		g.Expect(strings.TrimRight(code, "\n")).To(Equal(""))
+		g.Expect(success).To(Equal(true))
+	})
 }
