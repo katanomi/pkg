@@ -98,6 +98,44 @@ func TestHasValueLabelsAnnotations(t *testing.T) {
 
 }
 
+func TestFilterMapKeys(t *testing.T) {
+	g := NewGomegaWithT(t)
+	tests := []struct {
+		mapObj         map[string]string
+		ignorePrefixes []string
+		want           map[string]string
+	}{
+		{
+			mapObj:         nil,
+			ignorePrefixes: nil,
+			want:           nil,
+		},
+		{
+			mapObj:         map[string]string{"a": "b"},
+			ignorePrefixes: []string{"a"},
+			want:           map[string]string{},
+		},
+		{
+			mapObj:         map[string]string{"a": "b"},
+			ignorePrefixes: []string{"b"},
+			want:           map[string]string{"a": "b"},
+		},
+		{
+			mapObj:         map[string]string{"abc": "b"},
+			ignorePrefixes: []string{"ab"},
+			want:           map[string]string{},
+		},
+		{
+			mapObj:         map[string]string{"abc": "b"},
+			ignorePrefixes: []string{"ac", "ab"},
+			want:           map[string]string{},
+		},
+	}
+	for _, tt := range tests {
+		g.Expect(FilterMapKeys(tt.mapObj, tt.ignorePrefixes...)).To(Equal(tt.want))
+	}
+}
+
 func TestHasLabelsAnnotationsKey(t *testing.T) {
 
 	t.Run("HasAnnotationKey", func(t *testing.T) {

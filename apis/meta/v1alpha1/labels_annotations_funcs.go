@@ -17,6 +17,8 @@ limitations under the License.
 package v1alpha1
 
 import (
+	"strings"
+
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -77,6 +79,30 @@ func MapContainsKeyValue(mapObj map[string]string, key, value string) bool {
 		return false
 	}
 	return mapObj[key] == value
+}
+
+// FilterMapKeys filters a map[string]string by a list of keys
+func FilterMapKeys(mapObj map[string]string, ignorePrefixes ...string) map[string]string {
+	if mapObj == nil {
+		return nil
+	}
+
+	hasOneOfPrefix := func(s string) bool {
+		for _, prefix := range ignorePrefixes {
+			if strings.HasPrefix(s, prefix) {
+				return true
+			}
+		}
+		return false
+	}
+	clonedM := make(map[string]string)
+	for k, v := range mapObj {
+		if hasOneOfPrefix(k) {
+			continue
+		}
+		clonedM[k] = v
+	}
+	return clonedM
 }
 
 // MapContainsKey checks if a map[string]string has a key
