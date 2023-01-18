@@ -14,16 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package storage
+package v1alpha1
 
-import (
-	"fmt"
-	"strings"
-
-	"github.com/katanomi/pkg/plugin/client"
-)
-
-// GetPluginAPIPath returns storage plugin web service path
-func GetPluginAPIPath(c client.Interface) string {
-	return fmt.Sprintf("/storage/v1alpha1/%s", strings.TrimPrefix(c.Path(), "/"))
-}
+// StoragePluginClassLabelKey for labeling owner StoragePluginClass
+const StoragePluginClassLabelKey = "storage.katanomi.dev/storagePluginClass"

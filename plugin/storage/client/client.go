@@ -26,7 +26,7 @@ import (
 )
 
 // HeaderFileMeta is the header name of file meta
-const HeaderFileMeta = "X-Katanomi-Meta"
+const HeaderFileMeta = "x-katanomi-meta"
 
 // HeaderFileAnnotationPrefix is the annotation header prefix
 const HeaderFileAnnotationPrefix = "x-katanomi-annotation-"

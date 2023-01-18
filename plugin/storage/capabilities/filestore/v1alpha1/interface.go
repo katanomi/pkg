@@ -14,14 +14,14 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-// Package v1alpha1 defines versioned interfaces for archive capability
+// Package v1alpha1 defines versioned interfaces for file-store capability
 package v1alpha1
 
 import (
 	"context"
 	"io"
 
-	"github.com/katanomi/pkg/apis/meta/v1alpha1"
+	"github.com/katanomi/pkg/apis/storage/v1alpha1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -30,7 +30,8 @@ type FileStoreCapable interface {
 	// GetFileObject for get file object
 	GetFileObject(ctx context.Context, key string) (FileObject, error)
 	// PutFileObject for put file object
-	PutFileObject(ctx context.Context, key string, fileReader io.Reader, meta v1alpha1.FileMeta) (v1alpha1.FileMeta, error)
+	PutFileObject(ctx context.Context, key string, fileReadCloser io.ReadCloser, meta v1alpha1.FileMeta) (v1alpha1.FileMeta,
+		error)
 	// DeleteFileObject for delete file object
 	DeleteFileObject(ctx context.Context) error
 	// ListFileMetas for list file metas
@@ -42,5 +43,5 @@ type FileStoreCapable interface {
 // FileObject wraps FileMeta with file reader for implementing file download
 type FileObject struct {
 	v1alpha1.FileMeta
-	FileReader io.Reader
+	FileReadCloser io.ReadCloser
 }

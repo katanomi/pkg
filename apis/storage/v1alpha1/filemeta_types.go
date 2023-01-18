@@ -21,6 +21,21 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
+// FileType for enum file types
+type FileType string
+
+// TODO: align to contract types after moving contract types in core repo to pkg repo
+const (
+	// FileTypeUnitTest for unitTest file type
+	FileTypeUnitTest FileType = "unitTest"
+	// FileTypeVulnScan for vulnScan file type
+	FileTypeVulnScan FileType = "vulnScan"
+	// FileCodeLiner for codeLiner file type
+	FileCodeLiner FileType = "codeLiner"
+	// FileAutomatedTest for automatedTest file type
+	FileAutomatedTest FileType = "automatedTest"
+)
+
 // FileMetaGVK for GVK of FileMeta
 var FileMetaGVK = GroupVersion.WithKind("FileMeta")
 
@@ -44,7 +59,7 @@ type FileMetaSpec struct {
 	ContentType string `json:"contentType"`
 
 	// FileType for file type
-	FileType string `json:"fileType"`
+	FileType FileType `json:"fileType"`
 }
 
 // FileMetaResourceAttributes returns a ResourceAttribute object to be used in a filter

@@ -37,6 +37,17 @@ const (
 	CapabilityArchive Capability = "archive"
 )
 
+// reflectedCapElmMap for reflection in init func
+var reflectedCapElmMap map[Capability]reflect.Type
+
+func init() {
+	reflectedCapElmMap = make(map[Capability]reflect.Type)
+	for capability, intf := range RegisteredCapabilities {
+		iElem := reflect.TypeOf(intf).Elem()
+		reflectedCapElmMap[capability] = iElem
+	}
+}
+
 // RegisteredCapabilities declares which interface a capability should implement.
 var RegisteredCapabilities = map[Capability]interface{}{
 	CapabilityFileStore: (*filestorev1alpha1.FileStoreCapable)(nil),
@@ -46,14 +57,12 @@ var RegisteredCapabilities = map[Capability]interface{}{
 // GetImplementedCapabilities returns string list of capabilities an object implemented
 func GetImplementedCapabilities(obj interface{}) Capabilities {
 	var capabilities Capabilities
-
 	if obj == nil {
 		return nil
 	}
-
-	for capability, i := range RegisteredCapabilities {
-		iElem := reflect.TypeOf(i).Elem()
-		if reflect.TypeOf(obj).Implements(iElem) {
+	typeOfObj := reflect.TypeOf(obj)
+	for capability, iElem := range reflectedCapElmMap {
+		if typeOfObj.Implements(iElem) {
 			capabilities = append(capabilities, capability)
 		}
 	}
