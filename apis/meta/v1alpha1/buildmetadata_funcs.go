@@ -36,9 +36,13 @@ func (b *BuildGitBranchStatus) AssignByGitBranch(gitBranch *GitBranch) *BuildGit
 		b = &BuildGitBranchStatus{}
 	}
 	b.Name = gitBranch.Name
-	b.Default = *gitBranch.Spec.Default
-	b.Protected = *gitBranch.Spec.Protected
-	if gitBranch.Spec.Properties.Raw != nil {
+	if gitBranch.Spec.Default != nil {
+		b.Default = *gitBranch.Spec.Default
+	}
+	if gitBranch.Spec.Protected != nil {
+		b.Protected = *gitBranch.Spec.Protected
+	}
+	if gitBranch.Spec.Properties != nil && gitBranch.Spec.Properties.Raw != nil {
 		var content map[string]string
 		json.Unmarshal(gitBranch.Spec.Properties.Raw, &content)
 		b.WebURL = content["webURL"]
