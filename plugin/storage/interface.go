@@ -25,7 +25,7 @@ type PluginRegister interface {
 	client.Interface
 	client.LivenessChecker
 	client.Initializer
-	client.ResourceReferencesGetter
+	client.DependentResourceGetter
 	client.PluginAddressable
 
 	// GetStoragePluginClassName returns storage plugin class name

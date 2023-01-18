@@ -63,10 +63,10 @@ type PluginAddressable interface {
 	GetAddressURL() *apis.URL
 }
 
-// ResourceReferencesGetter checks and returns dependency resource references
-type ResourceReferencesGetter interface {
-	// GetResourceReferences parses params and returns expected dependency resources
-	GetResourceReferences(ctx context.Context, params []metav1alpha1.Param) ([]corev1.ObjectReference, error)
+// DependentResourceGetter checks and returns dependent resource references
+type DependentResourceGetter interface {
+	// GetDependentResources parses params and returns expected dependent resources
+	GetDependentResources(ctx context.Context, params []metav1alpha1.Param) ([]corev1.ObjectReference, error)
 }
 
 type AdditionalWebhookRegister interface {
