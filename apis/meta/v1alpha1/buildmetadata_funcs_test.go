@@ -39,6 +39,12 @@ func TestAssignByGitBranch(t *testing.T) {
 	expectStatus := gitBranchStatus
 	actualGitBranchStatus := gitBranchStatus.AssignByGitBranch(&gitBranch)
 	g.Expect(*actualGitBranchStatus).To(Equal(expectStatus))
+
+	// empty struct should not panic
+	gitBranch = GitBranch{}
+	gitBranchStatus = BuildGitBranchStatus{}
+	actualGitBranchStatus = gitBranchStatus.AssignByGitBranch(&gitBranch)
+	g.Expect(actualGitBranchStatus.Default).To(BeFalse())
 }
 
 func TestAssignByGitCommit(t *testing.T) {
