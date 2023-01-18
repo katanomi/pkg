@@ -31,7 +31,8 @@ import (
 )
 
 var (
-	defaultOptions = []OptionFunc{
+	// DefaultOptions for default plugin client options
+	DefaultOptions = []OptionFunc{
 		ErrorOpts(&ResponseStatusErr{}),
 		HeaderOpts("Content-Type", "application/json"),
 	}
@@ -123,44 +124,44 @@ func (p *PluginClient) WithIntegrationClassName(integrationClassName string) *Pl
 
 // Get performs a GET request using defined options
 func (p *PluginClient) Get(ctx context.Context, baseURL *duckv1.Addressable, path string, options ...OptionFunc) error {
-	clientOptions := append(defaultOptions, MetaOpts(p.meta), SecretOpts(p.secret))
+	clientOptions := append(DefaultOptions, MetaOpts(p.meta), SecretOpts(p.secret))
 	options = append(clientOptions, options...)
 
 	request := p.R(ctx, baseURL, options...)
-	response, err := request.Get(p.fullUrl(baseURL, path))
+	response, err := request.Get(p.FullUrl(baseURL, path))
 
 	return p.HandleError(response, err)
 }
 
 // Post performs a POST request with the given parameters
 func (p *PluginClient) Post(ctx context.Context, baseURL *duckv1.Addressable, path string, options ...OptionFunc) error {
-	clientOptions := append(defaultOptions, MetaOpts(p.meta), SecretOpts(p.secret))
+	clientOptions := append(DefaultOptions, MetaOpts(p.meta), SecretOpts(p.secret))
 	options = append(clientOptions, options...)
 
 	request := p.R(ctx, baseURL, options...)
-	response, err := request.Post(p.fullUrl(baseURL, path))
+	response, err := request.Post(p.FullUrl(baseURL, path))
 
 	return p.HandleError(response, err)
 }
 
 // Put performs a PUT request with the given parameters
 func (p *PluginClient) Put(ctx context.Context, baseURL *duckv1.Addressable, path string, options ...OptionFunc) error {
-	clientOptions := append(defaultOptions, MetaOpts(p.meta), SecretOpts(p.secret))
+	clientOptions := append(DefaultOptions, MetaOpts(p.meta), SecretOpts(p.secret))
 	options = append(clientOptions, options...)
 
 	request := p.R(ctx, baseURL, options...)
-	response, err := request.Put(p.fullUrl(baseURL, path))
+	response, err := request.Put(p.FullUrl(baseURL, path))
 
 	return p.HandleError(response, err)
 }
 
 // Delete performs a DELETE request with the given parameters
 func (p *PluginClient) Delete(ctx context.Context, baseURL *duckv1.Addressable, path string, options ...OptionFunc) error {
-	clientOptions := append(defaultOptions, MetaOpts(p.meta), SecretOpts(p.secret))
+	clientOptions := append(DefaultOptions, MetaOpts(p.meta), SecretOpts(p.secret))
 	options = append(clientOptions, options...)
 
 	request := p.R(ctx, baseURL, options...)
-	response, err := request.Delete(p.fullUrl(baseURL, path))
+	response, err := request.Delete(p.FullUrl(baseURL, path))
 
 	return p.HandleError(response, err)
 }
@@ -217,7 +218,7 @@ func (p *PluginClient) Header(key, value string) OptionFunc {
 	return HeaderOpts(key, value)
 }
 
-func (p *PluginClient) fullUrl(address *duckv1.Addressable, uri string) string {
+func (p *PluginClient) FullUrl(address *duckv1.Addressable, uri string) string {
 	url := address.URL.String()
 	return fmt.Sprintf("%s/%s", strings.TrimSuffix(url, "/"), strings.TrimPrefix(uri, "/"))
 }
