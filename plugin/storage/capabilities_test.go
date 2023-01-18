@@ -19,11 +19,11 @@ package storage
 import (
 	"context"
 	"io"
-	"reflect"
 	"testing"
 
 	apistoragev1alpha1 "github.com/katanomi/pkg/apis/storage/v1alpha1"
 	"github.com/katanomi/pkg/plugin/storage/capabilities/filestore/v1alpha1"
+	. "github.com/onsi/gomega"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -68,6 +68,8 @@ type fakeMultipleImp struct {
 }
 
 func TestGetImplementedCapabilities(t *testing.T) {
+	g := NewGomegaWithT(t)
+
 	tests := []struct {
 		name string
 		obj  interface{}
@@ -101,9 +103,7 @@ func TestGetImplementedCapabilities(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := GetImplementedCapabilities(tt.obj); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("GetImplementedCapabilities() = %v, want %v", got, tt.want)
-			}
+			g.Expect(GetImplementedCapabilities(tt.obj)).To(ContainElements(tt.want))
 		})
 	}
 }
