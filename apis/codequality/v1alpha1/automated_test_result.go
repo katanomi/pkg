@@ -24,6 +24,12 @@ type NamedAutomatedTestResults struct {
 	AutomatedTestResult `json:",inline"`
 }
 
+// IsSameResult implements method for generic comparable usage and checking if
+// lists have the same results
+func (n NamedAutomatedTestResults) IsSameResult(y NamedAutomatedTestResults) bool {
+	return n.Name == y.Name
+}
+
 // AutomatedTestResult automatic test result encapsulation
 type AutomatedTestResult struct {
 	// Total test cases number

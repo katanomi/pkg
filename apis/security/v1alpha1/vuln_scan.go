@@ -65,12 +65,21 @@ var AvailableVulnSeverities = []VulnSeverity{
 	VulnSeverityUnknown,
 }
 
+// NamedVulnScanResults list of NamedVulnScanResult
+type NamedVulnScanResults []NamedVulnScanResult
+
 // NamedVulnScanResult adds name over integrated VulnScanResult
 type NamedVulnScanResult struct {
 	// Name of a specific lint result
 	Name string `json:"name,omitempty"`
 
 	VulnScanResult `json:",inline"`
+}
+
+// IsSameResult implements method for generic comparable usage and checking if
+// lists have the same results
+func (n NamedVulnScanResult) IsSameResult(y NamedVulnScanResult) bool {
+	return n.Name == y.Name
 }
 
 // VulnScanResult stores code linting results
