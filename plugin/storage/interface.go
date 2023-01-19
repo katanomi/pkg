@@ -17,6 +17,9 @@ limitations under the License.
 package storage
 
 import (
+	"context"
+
+	"github.com/katanomi/pkg/apis/meta/v1alpha1"
 	"github.com/katanomi/pkg/plugin/client"
 )
 
@@ -27,7 +30,13 @@ type PluginRegister interface {
 	client.Initializer
 	client.DependentResourceGetter
 	client.PluginAddressable
+	AuthChecker
 
 	// GetStoragePluginClassName returns storage plugin class name
 	GetStoragePluginClassName() string
+}
+
+// AuthChecker checks auth according to params values
+type AuthChecker interface {
+	CheckAuth(ctx context.Context, params []v1alpha1.Param) error
 }
