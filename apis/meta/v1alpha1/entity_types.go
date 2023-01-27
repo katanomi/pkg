@@ -56,6 +56,13 @@ type RawMeta struct {
 	metav1.ObjectMeta `json:"metadata,omitempty"`
 }
 
+// EntityList contains a list of Entity
+type EntityList struct {
+	metav1.TypeMeta `json:",inline"`
+	metav1.ListMeta `json:"metadata,omitempty"`
+	Items           []Entity `json:"items"`
+}
+
 // EntityResourceAttributes returns a ResourceAttribute object to be used in a filter
 func EntityResourceAttributes(verb string) authv1.ResourceAttributes {
 	return authv1.ResourceAttributes{
