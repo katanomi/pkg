@@ -21,6 +21,9 @@ import (
 	"context"
 	"fmt"
 
+	"k8s.io/apiserver/pkg/endpoints/request"
+
+	"k8s.io/apiserver/pkg/authentication/user"
 	"k8s.io/client-go/dynamic"
 
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -106,4 +109,10 @@ func Cluster(ctx context.Context) cluster.Cluster {
 		return nil
 	}
 	return val.(cluster.Cluster)
+}
+
+// User returns a user.Info, returns nil if not found
+func User(ctx context.Context) user.Info {
+	u, _ := request.UserFrom(ctx)
+	return u
 }

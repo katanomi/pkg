@@ -19,8 +19,9 @@ package client
 import (
 	"strings"
 
-	"github.com/emicklei/go-restful/v3"
 	"k8s.io/apimachinery/pkg/api/errors"
+
+	"github.com/emicklei/go-restful/v3"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
 	"k8s.io/client-go/tools/clientcmd/api"

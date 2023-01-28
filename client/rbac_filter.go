@@ -19,10 +19,17 @@ package client
 import (
 	"context"
 	"fmt"
+	"net/http"
+	"strings"
+
+	"knative.dev/pkg/injection"
 
 	"github.com/emicklei/go-restful/v3"
+	authnv1 "k8s.io/api/authentication/v1"
 	authv1 "k8s.io/api/authorization/v1"
+	"k8s.io/apiserver/pkg/authentication/user"
 	"knative.dev/pkg/logging"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	// metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	kerrors "github.com/katanomi/pkg/errors"
@@ -30,14 +37,32 @@ import (
 	"k8s.io/apimachinery/pkg/runtime/schema"
 )
 
-// SelfSubjectReviewFilterForResource makes a self subject review based a configuration already present inside the
+// SubjectReviewFilterForResource makes a self subject review based a configuration already present inside the
 // request context using the user's bearer token
-func SelfSubjectReviewFilterForResource(ctx context.Context, resourceAtt authv1.ResourceAttributes, namespaceParameter, nameParameter string) restful.FilterFunction {
+// also, it makes a subject review based on Impersonate User info in request header
+func SubjectReviewFilterForResource(ctx context.Context, resourceAtt authv1.ResourceAttributes, namespaceParameter, nameParameter string) restful.FilterFunction {
 	return func(req *restful.Request, resp *restful.Response, chain *restful.FilterChain) {
-		ctx := req.Request.Context()
-		log := logging.FromContext(ctx).With("resource", resourceAtt.Resource, "group", resourceAtt.Group, "verb", resourceAtt.Verb)
-		ctx = logging.WithLogger(ctx, log)
-		err := SelfSubjectAccessReviewForResource(ctx, req.PathParameter(nameParameter), req.PathParameter(namespaceParameter), resourceAtt, false)
+		reqCtx := req.Request.Context()
+		log := logging.FromContext(reqCtx).With("resource", resourceAtt.Resource, "group", resourceAtt.Group, "verb", resourceAtt.Verb)
+		reqCtx = logging.WithLogger(reqCtx, log)
+
+		var review subjectAccessReviewObjInterface
+		var client = Client(reqCtx)
+
+		if !isImpersonateRequest(reqCtx) {
+			review = makeSelfSubjectAccessReview(req.PathParameter(namespaceParameter), req.PathParameter(nameParameter), resourceAtt)
+		} else {
+			user := User(reqCtx)
+			if user == nil {
+				err := fmt.Errorf("not found impersonate info in config")
+				log.Error(err.Error())
+				kerrors.HandleError(req, resp, err)
+				return
+			}
+			review = makeSubjectAccessReview(req.PathParameter(namespaceParameter), req.PathParameter(nameParameter), resourceAtt, user)
+		}
+
+		err := postSubjectAccessReview(reqCtx, client, review)
 		if err != nil {
 			log.Debugw("error veryfing user permissions", "err", err)
 			kerrors.HandleError(req, resp, err)
@@ -47,16 +72,13 @@ func SelfSubjectReviewFilterForResource(ctx context.Context, resourceAtt authv1.
 	}
 }
 
-func SelfSubjectAccessReviewForResource(ctx context.Context, name, namespace string, resourceAtt authv1.ResourceAttributes, addName bool) (err error) {
-	log := logging.FromContext(ctx)
-	clt := Client(ctx)
-	if clt == nil {
-		// return error
-		log.Debugw("error fetching the client from the context. Make sure the ManagerFilter is added before this filter")
-		// return internal server error
-		err = errors.NewUnauthorized("SelfSubjectReview needs user's client")
-		return
-	}
+func isImpersonateRequest(reqCtx context.Context) bool {
+	var config = injection.GetConfig(reqCtx)
+	return config.Impersonate.UserName != "" || len(config.Impersonate.Groups) != 0 || len(config.Impersonate.Extra) != 0
+}
+
+func makeSubjectAccessReview(namespace, name string, resourceAtt authv1.ResourceAttributes, user user.Info) subjectAccessReviewObjInterface {
+
 	if namespace != "" {
 		resourceAtt.Namespace = namespace
 	}
@@ -64,30 +86,143 @@ func SelfSubjectAccessReviewForResource(ctx context.Context, name, namespace str
 		resourceAtt.Name = name
 	}
 
+	review := &authv1.SubjectAccessReview{
+		Spec: authv1.SubjectAccessReviewSpec{
+			ResourceAttributes: &resourceAtt,
+			User:               user.GetName(),
+			Groups:             user.GetGroups(),
+			UID:                user.GetUID(),
+			Extra:              map[string]authv1.ExtraValue{},
+		},
+	}
+	for key, value := range user.GetExtra() {
+		review.Spec.Extra[key] = value
+	}
+
+	return subjectAccessReviewObject{review}
+}
+
+func impersonateUser(req *http.Request) user.Info {
+
+	u := user.DefaultInfo{}
+	u.Name = req.Header.Get(authnv1.ImpersonateUserHeader)
+
+	u.Groups = req.Header.Values(authnv1.ImpersonateGroupHeader)
+	u.UID = req.Header.Get(authnv1.ImpersonateUIDHeader)
+
+	if u.Name == "" && len(u.Groups) == 0 && u.UID == "" {
+		return nil
+	}
+
+	for key, value := range req.Header {
+		if u.Extra == nil {
+			u.Extra = map[string][]string{}
+		}
+		if strings.HasPrefix(key, authnv1.ImpersonateUserExtraHeaderPrefix) {
+			u.Extra[key] = value
+		}
+	}
+
+	return &u
+}
+
+// SelfSubjectReviewFilterForResource makes a self subject review based a configuration already present inside the
+// request context using the user's bearer token
+//
+// Deprecated: use SubjectReviewFilterForResource
+func SelfSubjectReviewFilterForResource(ctx context.Context, resourceAtt authv1.ResourceAttributes, namespaceParameter, nameParameter string) restful.FilterFunction {
+	return SubjectReviewFilterForResource(ctx, resourceAtt, namespaceParameter, nameParameter)
+}
+
+func makeSelfSubjectAccessReview(namespace, name string, resourceAtt authv1.ResourceAttributes) subjectAccessReviewObjInterface {
+	if namespace != "" {
+		resourceAtt.Namespace = namespace
+	}
+	if name != "" {
+		resourceAtt.Name = name
+	}
 	review := &authv1.SelfSubjectAccessReview{
 		Spec: authv1.SelfSubjectAccessReviewSpec{
 			ResourceAttributes: &resourceAtt,
 		},
 	}
-	// this is only to be used within tests
-	// the fake client somehow requests the name
-	if addName {
-		review.Name = resourceAtt.Name
-		review.Namespace = resourceAtt.Namespace
+
+	return subjectAccessReviewObject{review}
+}
+
+type subjectAccessReviewObject struct {
+	Object client.Object
+}
+
+func (object subjectAccessReviewObject) GetObject() client.Object {
+	return object.Object
+}
+
+func (object subjectAccessReviewObject) GetResourceAttribute() (authv1.ResourceAttributes, error) {
+	switch o := object.Object.(type) {
+	case *authv1.SelfSubjectAccessReview:
+		return *o.Spec.ResourceAttributes, nil
+	case *authv1.SubjectAccessReview:
+		return *o.Spec.ResourceAttributes, nil
+	case *authv1.LocalSubjectAccessReview:
+		return *o.Spec.ResourceAttributes, nil
 	}
-	err = clt.Create(ctx, review)
-	if err != nil {
-		log.Errorw("error evaluating SelfSubjectReview", "err", err)
+
+	return authv1.ResourceAttributes{}, fmt.Errorf("object type %T is not expected", object)
+}
+
+func (object subjectAccessReviewObject) GetSubjectAccessReviewStatus() (authv1.SubjectAccessReviewStatus, error) {
+	switch o := object.Object.(type) {
+	case *authv1.SelfSubjectAccessReview:
+		return o.Status, nil
+	case *authv1.SubjectAccessReview:
+		return o.Status, nil
+	case *authv1.LocalSubjectAccessReview:
+		return o.Status, nil
+	}
+
+	return authv1.SubjectAccessReviewStatus{}, fmt.Errorf("object type %T is not expected", object)
+}
+
+type subjectAccessReviewObjInterface interface {
+	GetObject() client.Object
+	GetResourceAttribute() (authv1.ResourceAttributes, error)
+	GetSubjectAccessReviewStatus() (authv1.SubjectAccessReviewStatus, error)
+}
+
+func postSubjectAccessReview(ctx context.Context, clt client.Client, reviewObj subjectAccessReviewObjInterface) (err error) {
+	log := logging.FromContext(ctx)
+
+	if clt == nil {
+		// return error
+		log.Debugw("error fetching the client from the context. Make sure the ManagerFilter is added before this filter")
+		// return internal server error
+		err = errors.NewUnauthorized("SubjectAccessReview needs client")
 		return
 	}
 
-	log.Debug("checking user permission against the resource",
-		"allowed", review.Status.Allowed,
-		"reason", review.Status.Reason,
-		"evError", review.Status.EvaluationError,
+	review := reviewObj.GetObject()
+	err = clt.Create(ctx, review)
+	if err != nil {
+		log.Errorw("error evaluating SubjectAccessReview", "err", err, "review", review)
+		return
+	}
+
+	reviewStatus, err := reviewObj.GetSubjectAccessReviewStatus()
+	if err != nil {
+		return
+	}
+	log.Infow("checking user permission against the resource",
+		"allowed", reviewStatus.Allowed,
+		"reason", reviewStatus.Reason,
+		"evError", reviewStatus.EvaluationError,
 	)
 
-	if !review.Status.Allowed {
+	resourceAtt, err := reviewObj.GetResourceAttribute()
+	if err != nil {
+		return
+	}
+	if !reviewStatus.Allowed {
 		err = errors.NewForbidden(schema.GroupResource{
 			Group:    resourceAtt.Group,
 			Resource: resourceAtt.Resource,
