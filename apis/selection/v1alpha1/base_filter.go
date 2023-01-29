@@ -30,9 +30,10 @@ import (
 
 // BaseFilter is the base filter struct
 // Provide some general methods
+// +k8s:deepcopy-gen=true
 type BaseFilter struct {
 	// selector is a label query over resources that match the filter.
-	// It must match the resources's labels.
+	// It must match the resource's labels.
 	// +optional
 	Selector *metav1.LabelSelector `json:"selector,omitempty"`
 
@@ -48,14 +49,14 @@ type BaseFilter struct {
 // BaseFilterRule is the base filter rule
 // +k8s:deepcopy-gen=true
 type BaseFilterRule struct {
-	// Exact filter namespace by its attributes
+	// Exact filter objects by attributes
 	Exact map[string]string `json:"exact"`
 
 	//TODO: add more filter rules
 }
 
 // MatchExact match exact filter rule
-func (n BaseFilterRule) MatchExact(obj interface{}) bool {
+func (n *BaseFilterRule) MatchExact(obj interface{}) bool {
 	data, _ := json.Marshal(obj)
 
 	for k, v := range n.Exact {
@@ -94,11 +95,11 @@ func (n *BaseFilter) Validate(fld *field.Path) field.ErrorList {
 
 // FilterGenericResources filter generic resources by BaseFilterRule
 func FilterGenericResources[T any](n BaseFilterRule, objs []T) []T {
-	result := make([]T, 0)
+	if n.Exact == nil {
+		return nil
+	}
+	result := make([]T, 0, len(objs))
 	for _, obj := range objs {
-		if n.Exact == nil {
-			continue
-		}
 		if n.MatchExact(obj) {
 			result = append(result, obj)
 		}
