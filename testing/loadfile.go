@@ -17,14 +17,17 @@ limitations under the License.
 package testing
 
 import (
+	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io/ioutil"
-
-	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"strings"
 
 	. "github.com/onsi/gomega"
+	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	utilyaml "k8s.io/apimachinery/pkg/util/yaml"
 	"sigs.k8s.io/yaml"
 )
 
@@ -54,6 +57,39 @@ func MustLoadJSON(file string, obj interface{}) {
 	err := LoadJSON(file, obj)
 	if err != nil {
 		panic(fmt.Sprintf("load json file failed, file path: %s, err: %s", file, err))
+	}
+}
+
+// LoadMultiYamlOrJson loads multi yamls
+func LoadMultiYamlOrJson[T any](file string, list *[]T) (err error) {
+	if list == nil {
+		return errors.New("list should not be nil")
+	}
+	var data []byte
+	if data, err = ioutil.ReadFile(file); err != nil {
+		return
+	}
+	parts := strings.Split(string(data), "---")
+	for _, y := range parts {
+		if len(strings.TrimSpace(y)) == 0 {
+			continue
+		}
+		obj := new(T)
+		err = utilyaml.NewYAMLOrJSONDecoder(bytes.NewReader([]byte(y)), len([]byte(y))).Decode(obj)
+		if err != nil {
+			return
+		}
+		*list = append(*list, *obj)
+	}
+	return
+
+}
+
+// MustLoadMultiYamlOrJson loads multi yamls or panics if the parse fails.
+func MustLoadMultiYamlOrJson[T any](file string, list *[]T) {
+	err := LoadMultiYamlOrJson(file, list)
+	if err != nil {
+		panic(fmt.Sprintf("load yaml file failed, file path: %s, err: %s", file, err))
 	}
 }
 

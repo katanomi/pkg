@@ -19,7 +19,10 @@ package testing
 import (
 	"testing"
 
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
+
 	. "github.com/onsi/gomega"
+	corev1 "k8s.io/api/core/v1"
 )
 
 func TestMustLoadJSON_success(t *testing.T) {
@@ -39,4 +42,67 @@ func TestMustLoadJSON_fail(t *testing.T) {
 		MustLoadJSON("./testdata/invalid_json.json", &m)
 	}).Should(Panic())
 	g.Expect(m).To(HaveLen(0))
+}
+
+func TestLoadMultiYaml_success(t *testing.T) {
+	g := NewGomegaWithT(t)
+	cms := []corev1.ConfigMap{}
+	g.Expect(LoadMultiYamlOrJson("./testdata/loadMultiYaml.configmap.success.yaml", &cms)).Should(BeNil())
+	g.Expect(cms).To(HaveLen(2))
+	g.Expect(cms[0].Name).To(Equal("abc-1"))
+	g.Expect(cms[1].Name).To(Equal("abc-2"))
+}
+
+func TestLoadMultiJson_success(t *testing.T) {
+	g := NewGomegaWithT(t)
+	cms := []*unstructured.Unstructured{}
+	g.Expect(LoadMultiYamlOrJson("./testdata/loadMultiYaml.configmap.success.json", &cms)).Should(BeNil())
+	g.Expect(cms).To(HaveLen(2))
+	g.Expect(cms[0].GetName()).To(Equal("abc-1"))
+	g.Expect(cms[1].GetName()).To(Equal("abc-2"))
+}
+
+func TestLoadMultiJson_fail(t *testing.T) {
+	g := NewGomegaWithT(t)
+	cms := []corev1.ConfigMap{}
+	g.Expect(LoadMultiYamlOrJson("./testdata/loadMultiYaml.configmap.fail.json", &cms)).ShouldNot(BeNil())
+	g.Expect(cms).To(BeEmpty())
+}
+
+func TestLoadMultiYaml_fail(t *testing.T) {
+	g := NewGomegaWithT(t)
+	cms := []corev1.ConfigMap{}
+	g.Expect(LoadMultiYamlOrJson("./testdata/not-exist.yaml", &cms)).ShouldNot(BeNil())
+}
+
+func TestMustLoadMultiYaml_success(t *testing.T) {
+	g := NewGomegaWithT(t)
+	cms := []corev1.ConfigMap{}
+	g.Expect(func() {
+		MustLoadMultiYamlOrJson("./testdata/loadMultiYaml.configmap.success.yaml", &cms)
+	}).ShouldNot(Panic())
+}
+
+func TestMustLoadMultiJson_success(t *testing.T) {
+	g := NewGomegaWithT(t)
+	cms := []corev1.ConfigMap{}
+	g.Expect(func() {
+		MustLoadMultiYamlOrJson("./testdata/loadMultiYaml.configmap.success.json", &cms)
+	}).ShouldNot(Panic())
+}
+
+func TestMustLoadMultiJson_fail(t *testing.T) {
+	g := NewGomegaWithT(t)
+	cms := []corev1.ConfigMap{}
+	g.Expect(func() {
+		MustLoadMultiYamlOrJson("./testdata/loadMultiYaml.configmap.fail.json", &cms)
+	}).Should(Panic())
+}
+
+func TestMustLoadMultiYaml_fail(t *testing.T) {
+	g := NewGomegaWithT(t)
+	cms := []corev1.ConfigMap{}
+	g.Expect(func() {
+		MustLoadMultiYamlOrJson("./testdata/not-exist.yaml", &cms)
+	}).Should(Panic())
 }

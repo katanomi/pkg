@@ -1,0 +1,35 @@
+{
+  "apiVersion": "v1",
+  "data": {
+    "secret": "123"
+  },
+  "kind": "ConfigMap",
+  "metadata": {
+    "annotations": {
+      "test-annotation": "test-annotation-value-1"
+    },
+    "labels": {
+      "test-label": "test-label-value-1"
+    },
+    "name": "abc-1",
+    "namespace": "default"
+  }
+}
+---
+{
+  "apiVersion": "v1",
+  "data": {
+    "secret": "aaa"
+  },
+  "kind": "ConfigMap",
+  "metadata": {
+    "annotations": {
+      "test-annotation": "test-annotation-value-2"
+    },
+    "labels": {
+      "test-label": "test-label-value-2"
+    },
+    "name": "abc-2",
+    "namespace": "default"
+  }
+}
