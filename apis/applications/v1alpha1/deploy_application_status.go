@@ -25,7 +25,7 @@ import (
 type NamedDeployApplicationResults []NamedDeployApplicationResult
 
 // NamedDeployApplicationResult adds a name for DeployApplicationResults
-// usefull for store deployment data in a list
+// useful for store deployment data in a list
 type NamedDeployApplicationResult struct {
 	// Name for the specific deployment application result
 	Name string `json:"name"`
@@ -34,12 +34,13 @@ type NamedDeployApplicationResult struct {
 	DeployApplicationResults `json:",inline"`
 }
 
-// Equal implements equal method for generic comparable usage
+// IsSameResult implements equal method for generic comparable usage
 func (n NamedDeployApplicationResult) IsSameResult(y NamedDeployApplicationResult) bool {
 	return n.Name == y.Name
 }
 
-// DeployApplicationResults
+// DeployApplicationResults describes a result of an application deployment
+// stating the specific modified object and the modified components and versions
 type DeployApplicationResults struct {
 	// ApplicationRef stores the reference of the deployed application
 	// as a kubernetes resource
