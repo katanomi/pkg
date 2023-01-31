@@ -21,7 +21,12 @@ import (
 	"fmt"
 
 	"strings"
+
+	"k8s.io/apimachinery/pkg/api/equality"
 )
+
+// ArtifactVersions list of artifacts versions
+type ArtifactVersions []ArtifactVersion
 
 // ArtifactVersionCollection collection of artifacts versions
 type ArtifactVersionCollection struct {
@@ -43,6 +48,12 @@ type ArtifactVersion struct {
 	// Versions of current artifact
 	// +optional
 	Versions []string `json:"versions,omitempty"`
+}
+
+// IsSameResult implements method for generic comparable usage and checking if
+// lists have the same results
+func (n ArtifactVersion) IsSameResult(compared ArtifactVersion) bool {
+	return equality.Semantic.DeepEqual(n, compared)
 }
 
 func GetBinaryObjectFromValues(ctx context.Context, array []string) (versions []ArtifactVersion) {

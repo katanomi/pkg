@@ -16,12 +16,21 @@ limitations under the License.
 
 package v1alpha1
 
+// NamedUnitTestsResults list of NamedUnitTestsResult
+type NamedUnitTestsResults []NamedUnitTestsResult
+
 // NamedUnitTestsResult adds name over integrated UnitTestsResult
 type NamedUnitTestsResult struct {
 	// Name of a specific unit tests result
 	Name string `json:"name,omitempty"`
 
 	UnitTestsResult `json:",inline"`
+}
+
+// IsSameResult implements method for generic comparable usage and checking if
+// lists have the same results
+func (n NamedUnitTestsResult) IsSameResult(y NamedUnitTestsResult) bool {
+	return n.Name == y.Name
 }
 
 // UnitTestsResult unit tests results encapsulating

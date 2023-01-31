@@ -16,12 +16,21 @@ limitations under the License.
 
 package v1alpha1
 
+// NamedCodeLintResults list of NamedCodeLintResult
+type NamedCodeLintResults []NamedCodeLintResult
+
 // NamedCodeLintResult adds name over integrated CodeLintResult
 type NamedCodeLintResult struct {
 	// Name of a specific lint result
 	Name string `json:"name,omitempty"`
 
 	CodeLintResult `json:",inline"`
+}
+
+// IsSameResult implements method for generic comparable usage and checking if
+// lists have the same results
+func (n NamedCodeLintResult) IsSameResult(y NamedCodeLintResult) bool {
+	return n.Name == y.Name
 }
 
 // CodeLintResult stores code linting results

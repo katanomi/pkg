@@ -16,12 +16,21 @@ limitations under the License.
 
 package v1alpha1
 
+// NamedAnalysisResults list of NamedAnalysisResult
+type NamedAnalysisResults []NamedAnalysisResult
+
 // NamedAnalysisResult adds name over integrated AnalysisResult
 type NamedAnalysisResult struct {
 	// Name of a specific analsysis result
 	Name string `json:"name,omitempty"`
 
 	AnalysisResult `json:",inline"`
+}
+
+// IsSameResult implements method for generic comparable usage and checking if
+// lists have the same results
+func (n NamedAnalysisResult) IsSameResult(y NamedAnalysisResult) bool {
+	return n.Name == y.Name
 }
 
 // AnalysisResult stores the result of a code analysis performed
