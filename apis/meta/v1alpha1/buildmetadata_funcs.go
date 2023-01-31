@@ -80,7 +80,7 @@ func (b *BuildGitCommitStatus) AssignByGitCommit(gitCommit *GitCommit) *BuildGit
 		b.WebURL = gitCommit.Spec.Address.URL.String()
 	}
 
-	if gitCommit.Spec.Properties.Raw != nil {
+	if gitCommit.Spec.Properties != nil && gitCommit.Spec.Properties.Raw != nil {
 		propertiesInfo := &CommitProperties{}
 		if err := json.Unmarshal(gitCommit.Spec.Properties.Raw, propertiesInfo); err == nil {
 			b.ShortID = propertiesInfo.ShortID
