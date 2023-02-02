@@ -50,6 +50,7 @@ type BaseFilter struct {
 	Refs []corev1.ObjectReference `json:"refs,omitempty"`
 }
 
+// MatchObject check if the object match the filter
 func (p *BaseFilter) MatchObject(obj client.Object) bool {
 	if p == nil {
 		return true
@@ -76,8 +77,8 @@ func (p *BaseFilter) MatchObject(obj client.Object) bool {
 	if !isExcept {
 		return false
 	}
-	if p.Filter != nil && !p.Filter.MatchExact(obj) {
-		return false
+	if p.Filter != nil {
+		return p.Filter.MatchExact(obj)
 	}
 	return true
 }

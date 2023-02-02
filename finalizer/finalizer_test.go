@@ -140,7 +140,7 @@ var _ = Describe("RemoveFinalizer", func() {
 		ctx      context.Context
 		clt      client.Client
 		cm       *corev1.ConfigMap
-		callback func() error
+		callback func(context.Context) error
 		err      error
 	)
 
@@ -160,7 +160,7 @@ var _ = Describe("RemoveFinalizer", func() {
 			testing2.MustLoadYaml("./testdata/configmap.yaml", cm)
 			Expect(clt.Create(ctx, cm)).To(Succeed())
 			var executed bool
-			callback = func() error {
+			callback = func(_ context.Context) error {
 				executed = true
 				return nil
 			}
@@ -183,7 +183,7 @@ var _ = Describe("RemoveFinalizer", func() {
 		When("callback succeed", func() {
 			BeforeEach(func() {
 				var executed bool
-				callback = func() error {
+				callback = func(_ context.Context) error {
 					executed = true
 					return nil
 				}
@@ -201,7 +201,7 @@ var _ = Describe("RemoveFinalizer", func() {
 
 		When("callback failed", func() {
 			BeforeEach(func() {
-				callback = func() error {
+				callback = func(_ context.Context) error {
 					return errors.New("test-error")
 				}
 			})

@@ -63,13 +63,13 @@ func PrependFinalizer(ctx context.Context, clt client.Client, o client.Object, f
 
 // RemoveFinalizer removes a finalizer from the object
 func RemoveFinalizer(ctx context.Context, clt client.Client, o client.Object, finalizerKey string,
-	callback func() error) error {
+	callback func(context.Context) error) error {
 	if !controllerutil.ContainsFinalizer(o, finalizerKey) {
 		return nil
 	}
 
 	if callback != nil {
-		if err := callback(); err != nil {
+		if err := callback(ctx); err != nil {
 			return err
 		}
 	}
