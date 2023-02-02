@@ -20,6 +20,10 @@ import (
 	"encoding/json"
 	"regexp"
 
+	metav1alpha1 "github.com/katanomi/pkg/apis/meta/v1alpha1"
+	"k8s.io/apimachinery/pkg/labels"
+	"sigs.k8s.io/controller-runtime/pkg/client"
+
 	"github.com/katanomi/pkg/apis/validation"
 	"github.com/tidwall/gjson"
 	corev1 "k8s.io/api/core/v1"
@@ -44,6 +48,39 @@ type BaseFilter struct {
 	// Refs is a slice of specific references for resources
 	// +optional
 	Refs []corev1.ObjectReference `json:"refs,omitempty"`
+}
+
+// MatchObject check if the object match the filter
+func (p *BaseFilter) MatchObject(obj client.Object) bool {
+	if p == nil {
+		return true
+	}
+	isExcept := false
+	if p.Selector != nil {
+		labelSelector, _ := metav1.LabelSelectorAsSelector(p.Selector)
+		if labelSelector.Matches(labels.Set(obj.GetLabels())) {
+			isExcept = true
+		}
+	}
+	objRef := metav1alpha1.GetObjectReferenceFromObject(obj,
+		metav1alpha1.ObjectRefWithNamespace(),
+		metav1alpha1.ObjectRefWithTypeMeta(),
+	)
+	if p.Refs != nil {
+		for _, ref := range p.Refs {
+			if metav1alpha1.IsTheSameObject(ref, objRef) {
+				isExcept = true
+				break
+			}
+		}
+	}
+	if !isExcept {
+		return false
+	}
+	if p.Filter != nil {
+		return p.Filter.MatchExact(obj)
+	}
+	return true
 }
 
 // BaseFilterRule is the base filter rule
