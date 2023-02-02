@@ -28,7 +28,6 @@ import (
 	"github.com/tidwall/gjson"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	v1validation "k8s.io/apimachinery/pkg/apis/meta/v1/validation"
 	"k8s.io/apimachinery/pkg/util/validation/field"
 )
@@ -57,7 +56,7 @@ func (p *BaseFilter) MatchObject(obj client.Object) bool {
 	}
 	isExcept := false
 	if p.Selector != nil {
-		labelSelector, _ := v1.LabelSelectorAsSelector(p.Selector)
+		labelSelector, _ := metav1.LabelSelectorAsSelector(p.Selector)
 		if labelSelector.Matches(labels.Set(obj.GetLabels())) {
 			isExcept = true
 		}
