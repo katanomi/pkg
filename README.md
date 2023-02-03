@@ -1,4 +1,4 @@
-# katanomi common packages :package:
+# Katanomi common packages :package:
 
 All shared common packages and code across katanomi repos
 
