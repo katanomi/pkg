@@ -27,7 +27,7 @@ import (
 // RegisterDefaultWebhookFor registers a mutate webhook for the defaulter with transforms
 func RegisterDefaultWebhookFor(ctx context.Context, mgr ctrl.Manager, defaulter Defaulter, transforms ...TransformFunc) (err error) {
 	var gvk schema.GroupVersionKind
-	if gvk, err = apiutil.GVKForObject(defaulter, mgr.GetScheme()); err != nil {
+	if gvk, err = apiutil.GVKForObject(defaulter.DeepCopyObject(), mgr.GetScheme()); err != nil {
 		return
 	}
 	mgr.GetWebhookServer().Register(
@@ -40,7 +40,7 @@ func RegisterDefaultWebhookFor(ctx context.Context, mgr ctrl.Manager, defaulter 
 // RegisterValidateWebhookFor registers a mutate webhook for the defaulter with transforms
 func RegisterValidateWebhookFor(ctx context.Context, mgr ctrl.Manager, validator Validator, validateCreateFuncs []ValidateCreateFunc, validateUpdateFuncs []ValidateUpdateFunc, validateDeleteFuncs []ValidateDeleteFunc) (err error) {
 	var gvk schema.GroupVersionKind
-	if gvk, err = apiutil.GVKForObject(validator, mgr.GetScheme()); err != nil {
+	if gvk, err = apiutil.GVKForObject(validator.DeepCopyObject(), mgr.GetScheme()); err != nil {
 		return
 	}
 	mgr.GetWebhookServer().Register(

@@ -96,6 +96,10 @@ func (h *mutatingHandler) Handle(ctx context.Context, req admission.Request) adm
 		// do nothing
 	}
 
+	if injector, ok := h.defaulter.(ContextInjector); ok {
+		ctx = injector.InjectContext(ctx)
+	}
+
 	// apply some common transformations before handling defaults
 	for _, transform := range h.transforms {
 		transform(ctx, obj, req)
