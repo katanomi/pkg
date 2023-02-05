@@ -164,7 +164,7 @@ func TestIsConditionChanged(t *testing.T) {
 				apis.Condition{Type: SomeCondition, Status: corev1.ConditionUnknown, LastTransitionTime: apis.VolatileTime{Inner: oneSecondAgo}},
 			}}},
 			conditionType: SomeCondition,
-			expected:      true,
+			expected:      false,
 		},
 		"Condition status is the same, last transition same, reason changed": {
 			current: &StatusTest{duckv1.Status{Conditions: duckv1.Conditions{
