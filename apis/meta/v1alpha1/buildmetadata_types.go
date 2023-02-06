@@ -74,6 +74,10 @@ type BuildRunGitStatus struct {
 	// BaseGitStatus is the base git status
 	BaseGitStatus `json:",inline"`
 
+	// VersionPhase is the phase on the versionscheme that matches this git revision.
+	// +optional
+	VersionPhase string `json:"versionPhase,omitempty"`
+
 	// Version is the version generated for this git revision
 	// +optional
 	Version string `json:"version,omitempty"`

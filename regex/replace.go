@@ -17,7 +17,7 @@ package regex
 
 import "regexp"
 
-// Replace provide helper functions for replacing strings
+// Replace provides helper functions for replacing strings
 type Replace struct {
 	// Regex is a regular expression used to modify the original version to generate new variants
 	// +optional
