@@ -17,7 +17,6 @@ limitations under the License.
 // Package maps contains methods to operate maps of all kinds
 package maps
 
-
 import (
 	"testing"
 
@@ -27,46 +26,46 @@ import (
 func TestMergeMap(t *testing.T) {
 
 	table := map[string]struct {
-		Left  map[string]string
+		Left   map[string]string
 		Right  map[string]string
 		Result map[string]string
 	}{
 		"multiple keys and values": {
 			Left: map[string]string{
-				"a":  "b",
+				"a": "b",
 			},
 			Right: map[string]string{
-				"b":  "c",
+				"b": "c",
 				"a": "d",
 			},
 			Result: map[string]string{
-				"b":  "c",
-				"a":  "d",
+				"b": "c",
+				"a": "d",
 			},
 		},
 		"nil left": {
 			Left: nil,
 			Right: map[string]string{
-				"b":  "c",
-				"a":  "d",
+				"b": "c",
+				"a": "d",
 			},
 			Result: map[string]string{
-				"b":  "c",
-				"a":  "d",
+				"b": "c",
+				"a": "d",
 			},
 		},
 		"nil right": {
 			Left: map[string]string{
-				"a":  "b",
+				"a": "b",
 			},
 			Right: nil,
 			Result: map[string]string{
-				"a":  "b",
+				"a": "b",
 			},
 		},
 		"both nil": {
-			Left: nil,
-			Right: nil,
+			Left:   nil,
+			Right:  nil,
 			Result: map[string]string{},
 		},
 	}
@@ -81,25 +80,23 @@ func TestMergeMap(t *testing.T) {
 	}
 }
 
-
-
 func TestMergeMapSlice(t *testing.T) {
 
 	table := map[string]struct {
-		Left  map[string][]string
+		Left   map[string][]string
 		Right  map[string][]string
 		Result map[string][]string
 	}{
 		"multiple keys and values": {
 			Left: map[string][]string{
-				"a":  {"b", "c"},
+				"a": {"b", "c"},
 			},
 			Right: map[string][]string{
-				"b":  {"c", "d"},
+				"b": {"c", "d"},
 				"a": {"d", "e"},
 			},
 			Result: map[string][]string{
-				"b":  {"c", "d"},
+				"b": {"c", "d"},
 				"a": {"d", "e"},
 			},
 		},
@@ -110,7 +107,7 @@ func TestMergeMapSlice(t *testing.T) {
 				"a": {"d", "e"},
 			},
 			Result: map[string][]string{
-				"b":  {"c", "d"},
+				"b": {"c", "d"},
 				"a": {"d", "e"},
 			},
 		},
@@ -126,8 +123,8 @@ func TestMergeMapSlice(t *testing.T) {
 			},
 		},
 		"both nil": {
-			Left: nil,
-			Right: nil,
+			Left:   nil,
+			Right:  nil,
 			Result: map[string][]string{},
 		},
 	}
@@ -142,52 +139,50 @@ func TestMergeMapSlice(t *testing.T) {
 	}
 }
 
-
-
 func TestMergeMapMap(t *testing.T) {
 
 	table := map[string]struct {
-		Left  map[string]map[string]string
+		Left   map[string]map[string]string
 		Right  map[string]map[string]string
 		Result map[string]map[string]string
 	}{
 		"multiple keys and values": {
 			Left: map[string]map[string]string{
-				"a":  {"b":"c"},
+				"a": {"b": "c"},
 			},
 			Right: map[string]map[string]string{
-				"b":  {"c":"d"},
+				"b": {"c": "d"},
 				// b key in a will be replaced
-				"a": {"d":"e", "b": "y"},
+				"a": {"d": "e", "b": "y"},
 			},
 			Result: map[string]map[string]string{
-				"b":  {"c":"d"},
-				"a": {"d":"e", "b": "y"},
+				"b": {"c": "d"},
+				"a": {"d": "e", "b": "y"},
 			},
 		},
 		"left nil": {
 			Left: nil,
 			Right: map[string]map[string]string{
-				"b":  {"c":"d"},
-				"a": {"d":"e", "b": "y"},
+				"b": {"c": "d"},
+				"a": {"d": "e", "b": "y"},
 			},
 			Result: map[string]map[string]string{
-				"b":  {"c":"d"},
-				"a": {"d":"e", "b": "y"},
+				"b": {"c": "d"},
+				"a": {"d": "e", "b": "y"},
 			},
 		},
 		"right nil": {
 			Left: map[string]map[string]string{
-				"a":  {"b":"c"},
+				"a": {"b": "c"},
 			},
 			Right: nil,
 			Result: map[string]map[string]string{
-				"a":  {"b":"c"},
+				"a": {"b": "c"},
 			},
 		},
 		"both nil": {
-			Left: nil,
-			Right: nil,
+			Left:   nil,
+			Right:  nil,
 			Result: map[string]map[string]string{},
 		},
 	}
