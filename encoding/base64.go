@@ -14,17 +14,15 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-// Package common useful functionality for encoding and decoding objects
-package common
+package encoding
 
 import (
 	"encoding/base64"
 	"encoding/json"
 )
 
-// ToJSONBase64 convert obj to json string, and then encode it with base64.
-// Deprecated: use encoding.Base64Encode instead
-func ToJSONBase64(obj interface{}) (string, error) {
+// Base64Encode convert obj to json string, and then encode it with base64.
+func Base64Encode(obj interface{}) (string, error) {
 	objBytes, err := json.Marshal(obj)
 	if err != nil {
 		return "", err
@@ -33,9 +31,8 @@ func ToJSONBase64(obj interface{}) (string, error) {
 	return base64.StdEncoding.EncodeToString(objBytes), nil
 }
 
-// FromJSONBase64 decode encodeStr using base64, and then use json to convert to obj.
-// Deprecated: use encoding.Base64Decode instead
-func FromJSONBase64(encodeStr string, obj interface{}) error {
+// Base64Decode decode encodeStr using base64, and then use json to convert to obj.
+func Base64Decode(encodeStr string, obj interface{}) error {
 	decodeBytes, err := base64.StdEncoding.DecodeString(encodeStr)
 	if err != nil {
 		return err

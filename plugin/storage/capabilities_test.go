@@ -21,6 +21,7 @@ import (
 	"io"
 	"testing"
 
+	archivev1alpha1 "github.com/katanomi/pkg/apis/archive/v1alpha1"
 	apistoragev1alpha1 "github.com/katanomi/pkg/apis/storage/v1alpha1"
 	"github.com/katanomi/pkg/plugin/storage/capabilities/filestore/v1alpha1"
 	. "github.com/onsi/gomega"
@@ -57,8 +58,33 @@ func (f fakeFileStoreImp) GetFileMeta(ctx context.Context, key string) (apistora
 
 type fakeArchiveImp struct{}
 
-func (f fakeArchiveImp) Foo() {
-	// TODO implement me
+func (f fakeArchiveImp) Upsert(ctx context.Context, record *archivev1alpha1.Record) error {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (f fakeArchiveImp) Delete(ctx context.Context, cluster string, uid string, opts *archivev1alpha1.DeleteOption) error {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (f fakeArchiveImp) DeleteBatch(ctx context.Context, conditions []archivev1alpha1.Condition, opts *archivev1alpha1.DeleteOption) error {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (f fakeArchiveImp) ListRecords(ctx context.Context, query archivev1alpha1.Query, opts *archivev1alpha1.ListOptions) (*archivev1alpha1.RecordList, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (f fakeArchiveImp) ListRelatedRecords(ctx context.Context, query archivev1alpha1.Query, opts *archivev1alpha1.ListOptions) (*archivev1alpha1.RecordList, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (f fakeArchiveImp) Aggregate(ctx context.Context, aggs archivev1alpha1.AggregateQuery, opts *archivev1alpha1.ListOptions) (*archivev1alpha1.AggregateResult, error) {
+	//TODO implement me
 	panic("implement me")
 }
 
