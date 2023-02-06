@@ -19,8 +19,40 @@ package v1alpha1
 import (
 	"context"
 
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/validation/field"
 )
+
+var (
+	// GitRevisionGVK is the GVK for GitRevision
+	GitRevisionGVK = GroupVersion.WithKind("GitRevision")
+	// GitRevisionListGVK is the GVK for GitRevisionList
+	GitRevisionListGVK = GroupVersion.WithKind("GitRevisionList")
+)
+
+// GitRevisionList is a list of GitRevision
+type GitRevisionList struct {
+	metav1.TypeMeta `json:",inline"`
+	ListMeta        `json:"metadata,omitempty"`
+
+	Items []GitRevisionDetail `json:"items"`
+}
+
+// GitRevisionDetail is the detail of a GitRevision
+type GitRevisionDetail struct {
+	metav1.TypeMeta   `json:",inline"`
+	metav1.ObjectMeta `json:"metadata,omitempty"`
+
+	Spec GitRevisionSpec `json:"spec"`
+}
+
+type GitRevisionSpec struct {
+	BaseGitStatus `json:",inline"`
+
+	// Attributes stores additional attributes for the revision
+	// +optional
+	Attributes map[string]string `json:"attribute,omitempty"`
+}
 
 // GitRevisionType revision types used in scm
 type GitRevisionType string

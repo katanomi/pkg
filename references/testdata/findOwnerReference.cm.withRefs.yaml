@@ -1,0 +1,16 @@
+apiVersion: v1
+data:
+  secret: b
+kind: ConfigMap
+metadata:
+  name: abc
+  namespace: default
+  ownerReferences:
+  - apiVersion: v1
+    kind: ConfigMap
+    name: ref-1
+    uid: 3611ab5b-09fd-4876-9ccb-a218651ed55f
+  - apiVersion: v1
+    kind: ConfigMap
+    name: ref-2
+    uid: 3611ab5b-09fd-4876-9ccb-a218651ed55e

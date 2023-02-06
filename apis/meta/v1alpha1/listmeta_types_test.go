@@ -48,8 +48,10 @@ func TestGetSearchValue(t *testing.T) {
 
 func TestListOptions_DefaultPager(t *testing.T) {
 	opt := ListOptions{
-		Page:         0,
-		ItemsPerPage: 0,
+		Pager: Pager{
+			Page:         0,
+			ItemsPerPage: 0,
+		},
 	}
 
 	opt.DefaultPager()
@@ -57,8 +59,10 @@ func TestListOptions_DefaultPager(t *testing.T) {
 	Equal(opt.ItemsPerPage).Match(common.DefaultPerPage)
 
 	opt1 := ListOptions{
-		Page:         10,
-		ItemsPerPage: 0,
+		Pager: Pager{
+			Page:         10,
+			ItemsPerPage: 0,
+		},
 	}
 	opt1.DefaultPager()
 	opt1.DefaultPager()
@@ -67,8 +71,10 @@ func TestListOptions_DefaultPager(t *testing.T) {
 	Equal(opt1.ItemsPerPage).Match(common.DefaultPerPage)
 
 	opt2 := ListOptions{
-		Page:         10,
-		ItemsPerPage: 30,
+		Pager: Pager{
+			Page:         10,
+			ItemsPerPage: 30,
+		},
 	}
 	opt2.DefaultPager()
 
