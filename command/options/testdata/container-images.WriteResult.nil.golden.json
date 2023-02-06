@@ -1,1 +1,114 @@
-[]
+{
+    Items: [
+        {
+            "Name": "BuildRunGitStatus.url",
+            "Example": "https://github.com/katanomi/spec/tree/release-0.3",
+            "Labels": "",
+        },
+        {
+            "Name": "BuildRunGitStatus.revision",
+            "Example": "refs/head/main",
+            "Labels": "",
+        },
+        {
+            "Name": "BuildRunGitStatus.lastCommit",
+            "Example": "3cb8901f",
+            "Labels": "",
+        },
+        {
+            "Name": "BuildRunGitStatus.lastCommit.id",
+            "Example": "3cb8901fb325228ea27b751fcf0d6c0658a57f01",
+            "Labels": "",
+        },
+        {
+            "Name": "BuildRunGitStatus.lastCommit.title",
+            "Example": "Update build.yaml",
+            "Labels": "",
+        },
+        {
+            "Name": "BuildRunGitStatus.lastCommit.message",
+            "Example": "Author email when running build",
+            "Labels": "",
+        },
+        {
+            "Name": "BuildRunGitStatus.lastCommit.authorEmail",
+            "Example": "3cb8901fb325228ea27b751fcf0d6c0658a57f01",
+            "Labels": "",
+        },
+        {
+            "Name": "BuildRunGitStatus.lastCommit.pushedAt",
+            "Example": "2022-08-04T17:21:36Z",
+            "Labels": "",
+        },
+        {
+            "Name": "BuildRunGitStatus.lastCommit.webURL",
+            "Example": "https://github.com/katanomi/commit/3cb8901fb325228ea27b751fcf0d6c0658a57f01",
+            "Labels": "",
+        },
+        {
+            "Name": "BuildRunGitStatus.pullRequest",
+            "Example": "123",
+            "Labels": "",
+        },
+        {
+            "Name": "BuildRunGitStatus.pullRequest.title",
+            "Example": "Lets merge code",
+            "Labels": "",
+        },
+        {
+            "Name": "BuildRunGitStatus.pullRequest.authorEmail",
+            "Example": "joedoe@example.com",
+            "Labels": "",
+        },
+        {
+            "Name": "BuildRunGitStatus.pullRequest.webURL",
+            "Example": "https://github.com/katanomi/spec/pull/123",
+            "Labels": "",
+        },
+        {
+            "Name": "BuildRunGitStatus.pullRequest.hasConflicts",
+            "Example": "false",
+            "Labels": "",
+        },
+        {
+            "Name": "BuildRunGitStatus.branch",
+            "Example": "main",
+            "Labels": "",
+        },
+        {
+            "Name": "BuildRunGitStatus.branch.protected",
+            "Example": "true",
+            "Labels": "",
+        },
+        {
+            "Name": "BuildRunGitStatus.branch.default",
+            "Example": "true",
+            "Labels": "",
+        },
+        {
+            "Name": "BuildRunGitStatus.branch.webURL",
+            "Example": "https://github.com/katanomi/spec/tree/main",
+            "Labels": "",
+        },
+        {
+            "Name": "BuildRunGitStatus.target",
+            "Example": "main",
+            "Labels": "",
+        },
+        {
+            "Name": "BuildRunGitStatus.target.protected",
+            "Example": "true",
+            "Labels": "",
+        },
+        {
+            "Name": "BuildRunGitStatus.target.default",
+            "Example": "true",
+            "Labels": "",
+        },
+        {
+            "Name": "BuildRunGitStatus.target.webURL",
+            "Example": "https://github.com/katanomi/spec/tree/main",
+            "Labels": "",
+        },
+    ],
+}

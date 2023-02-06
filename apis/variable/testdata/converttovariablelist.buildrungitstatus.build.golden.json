@@ -1,0 +1,34 @@
+{
+    "items": [
+        {
+            "name": "lastCommit.shortID",
+            "example": "3cb8901f",
+            "label": "common"
+        },
+        {
+            "name": "pullRequest.id",
+            "example": "123",
+            "label": "common"
+        },
+        {
+            "name": "pullRequest.source",
+            "example": "fix/author-email",
+            "label": "common"
+        },
+        {
+            "name": "pullRequest.target",
+            "example": "main",
+            "label": "common"
+        },
+        {
+            "name": "branch.name",
+            "example": "main",
+            "label": "common"
+        },
+        {
+            "name": "target.name",
+            "example": "main",
+            "label": "common"
+        }
+    ]
+}
