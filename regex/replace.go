@@ -5,7 +5,7 @@ Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
 
-	http://www.apache.org/licenses/LICENSE-2.0
+    http://www.apache.org/licenses/LICENSE-2.0
 
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
@@ -13,9 +13,14 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
+
 package regex
 
-import "regexp"
+import (
+	"regexp"
+
+	"k8s.io/apimachinery/pkg/util/validation/field"
+)
 
 // Replace provides helper functions for replacing strings
 type Replace struct {
@@ -46,4 +51,33 @@ func (rs *Replaces) ReplaceAllString(s string) string {
 		s = r.ReplaceAllString(s)
 	}
 	return s
+}
+
+// Validate Replace validation method
+func (r *Replace) Validate(fld *field.Path) field.ErrorList {
+	errs := field.ErrorList{}
+
+	if r.Regex == "" {
+		return nil
+	}
+	_, err := regexp.Compile(r.Regex)
+	if err != nil {
+		errs = append(errs, field.Invalid(fld.Child("regex"), r.Regex, err.Error()))
+	}
+
+	return errs
+}
+
+// Validate Replaces validation method
+func (r *Replaces) Validate(fld *field.Path) field.ErrorList {
+	errs := field.ErrorList{}
+
+	if r == nil {
+		return nil
+	}
+	for i, replace := range *r {
+		errs = append(errs, replace.Validate(fld.Index(i))...)
+	}
+
+	return errs
 }
