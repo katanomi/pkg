@@ -18,7 +18,13 @@ package route
 
 import (
 	"context"
+	"net/http"
+	"net/url"
+	"reflect"
 	"testing"
+	"time"
+
+	"github.com/emicklei/go-restful/v3"
 
 	metav1alpha1 "github.com/katanomi/pkg/apis/meta/v1alpha1"
 	. "github.com/onsi/ginkgo/v2"
@@ -96,3 +102,104 @@ var _ = Describe("test for get sort params", func() {
 		})
 	})
 })
+
+var _ = Describe("TestParsePagerFromRequest", func() {
+	var (
+		req   *restful.Request
+		pager metav1alpha1.Pager
+	)
+
+	BeforeEach(func() {
+		req = &restful.Request{
+			Request: &http.Request{},
+		}
+		pager = metav1alpha1.Pager{}
+	})
+
+	JustBeforeEach(func() {
+		pager = ParsePagerFromRequest(req)
+	})
+
+	Context("no parameters were specified in the request", func() {
+		It("should use default value", func() {
+			Expect(pager.Page).To(Equal(1))
+			Expect(pager.ItemsPerPage).To(Equal(20))
+		})
+	})
+
+	Context("parameters were specified in the request", func() {
+		BeforeEach(func() {
+			req.Request.URL = &url.URL{
+				RawQuery: "page=2&itemsPerPage=30",
+			}
+		})
+
+		It("should use the value provided in the request", func() {
+			Expect(pager.Page).To(Equal(2))
+			Expect(pager.ItemsPerPage).To(Equal(30))
+		})
+	})
+})
+
+var _ = Describe("ParseTimeCursorFormRequest", func() {
+	var (
+		req       *restful.Request
+		cursor    *metav1alpha1.TimeCursor
+		startTime time.Time
+	)
+
+	BeforeEach(func() {
+		req = &restful.Request{
+			Request: &http.Request{},
+		}
+		cursor = &metav1alpha1.TimeCursor{}
+		startTime = time.Now()
+	})
+
+	JustBeforeEach(func() {
+		cursor = ParseTimeCursorFormRequest(req)
+	})
+
+	Context("no parameters were specified in the request", func() {
+		It("should use default value", func() {
+			Expect(cursor.QueryStartAt <= time.Now().Unix() && cursor.QueryStartAt >= startTime.Unix()).
+				To(BeTrue())
+			Expect(cursor.Page).To(Equal(1))
+			Expect(cursor.ItemsPerPage).To(Equal(20))
+		})
+	})
+
+	Context("continue param were specified in the request", func() {
+		BeforeEach(func() {
+			req.Request.URL = &url.URL{
+				RawQuery: "continue=eyJpdGVtc1BlclBhZ2UiOjMwLCJwYWdlIjoyLCJxdWVyeVN0YXJ0QXQiOjE2NzU2NTAwODJ9",
+			}
+		})
+
+		It("should use the value provided in the request", func() {
+			Expect(cursor.QueryStartAt).To(Equal(int64(1675650082)))
+			Expect(cursor.Page).To(Equal(2))
+			Expect(cursor.ItemsPerPage).To(Equal(30))
+		})
+	})
+})
+
+func TestParsePagerFromRequest(t *testing.T) {
+	type args struct {
+		req *restful.Request
+	}
+	tests := []struct {
+		name string
+		args args
+		want metav1alpha1.Pager
+	}{
+		// TODO: Add test cases.
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := ParsePagerFromRequest(tt.args.req); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("ParsePagerFromRequest() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}

@@ -1,0 +1,5 @@
+operator: in
+key: uid
+value:
+  - uid1
+  - uid2

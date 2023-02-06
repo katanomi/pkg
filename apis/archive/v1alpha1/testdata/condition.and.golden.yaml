@@ -1,0 +1,8 @@
+operator: and
+value:
+  - operator: eq
+    key: uid
+    value: test-uid
+  - operator: eq
+    key: name
+    value: test-name
