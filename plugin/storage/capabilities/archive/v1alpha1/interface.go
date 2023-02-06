@@ -24,7 +24,6 @@ import (
 )
 
 // ArchiveCapable defines methods of archive capability
-//
 //go:generate ../../../../../bin/mockgen -source=interface.go -destination=../../testing/mock/github.com/katanomi/pkg/storage/capabilities/archive/v1alpha1/interface.go -package=v1alpha1 ArchiveCapable
 type ArchiveCapable interface {
 	// Upsert create or update a record
