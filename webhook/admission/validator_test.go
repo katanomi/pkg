@@ -22,6 +22,8 @@ import (
 	"net/http"
 	"testing"
 
+	"github.com/onsi/gomega"
+
 	"github.com/google/go-cmp/cmp"
 	admissionv1 "k8s.io/api/admission/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -326,6 +328,63 @@ func TestValidatorDelete(t *testing.T) {
 			if returned.Allowed != test.Response.Allowed {
 				t.Fail()
 			}
+		})
+	}
+}
+
+type injectContextObject struct {
+	MyObject
+}
+
+func (m *injectContextObject) DeepCopyObject() runtime.Object {
+	return &injectContextObject{
+		MyObject: m.MyObject,
+	}
+}
+
+func (i *injectContextObject) InjectContext(ctx context.Context) context.Context {
+	return context.WithValue(ctx, "foo", "bar")
+}
+
+func (i *injectContextObject) ValidateDelete(ctx context.Context) error {
+	value := ctx.Value("foo")
+	if value.(string) != "bar" {
+		panic("context not injected")
+	}
+	return nil
+}
+
+func TestValidatorContextInjector(t *testing.T) {
+	g := gomega.NewGomegaWithT(t)
+	req := admission.Request{
+		AdmissionRequest: admissionv1.AdmissionRequest{
+			Operation: admissionv1.Delete,
+			OldObject: runtime.RawExtension{
+				Raw:    []byte(`{"metadata":{"name":"def","namespace":"default"}}`),
+				Object: &injectContextObject{},
+			},
+		},
+	}
+	table := map[string]struct {
+		Validator *admission.Webhook
+	}{
+		"object not implementing context injector interface": {
+			Validator: ValidatingWebhookFor(context.TODO(), &MyObject{}, nil, nil, nil),
+		},
+		"object implement the context injector interface": {
+			Validator: ValidatingWebhookFor(context.TODO(), &injectContextObject{}, nil, nil, nil),
+		},
+	}
+	decoder, _ := admission.NewDecoder(scheme.Scheme)
+	ctx := context.Background()
+	for name, test := range table {
+		if inject, ok := test.Validator.Handler.(admission.DecoderInjector); ok {
+			_ = inject.InjectDecoder(decoder)
+		}
+		t.Run(name, func(t *testing.T) {
+			g.Expect(func() {
+				test.Validator.Handle(ctx, req)
+			}).NotTo(gomega.Panic())
 		})
 	}
 }

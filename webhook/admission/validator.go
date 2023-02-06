@@ -83,6 +83,10 @@ func (h *validatingHandler) Handle(ctx context.Context, req admission.Request) a
 	ctx = logging.WithLogger(ctx, h.SugaredLogger)
 	ctx = WithAdmissionRequest(ctx, req)
 
+	if injector, ok := h.validator.(ContextInjector); ok {
+		ctx = injector.InjectContext(ctx)
+	}
+
 	// Get the object in the request
 	obj := h.validator.DeepCopyObject().(Validator)
 	switch req.Operation {
