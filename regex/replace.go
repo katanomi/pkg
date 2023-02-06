@@ -38,13 +38,16 @@ type Replaces []Replace
 
 // ReplaceAllString replace all string
 func (r *Replace) ReplaceAllString(s string) string {
+	if r == nil || r.Regex == "" {
+		return s
+	}
 	re := regexp.MustCompile(r.Regex)
 	return re.ReplaceAllString(s, r.Replacement)
 }
 
 // ReplaceAllString replace all string
 func (rs *Replaces) ReplaceAllString(s string) string {
-	if rs == nil {
+	if rs == nil || len(*rs) == 0 {
 		return s
 	}
 	for _, r := range *rs {
@@ -54,30 +57,26 @@ func (rs *Replaces) ReplaceAllString(s string) string {
 }
 
 // Validate Replace validation method
-func (r *Replace) Validate(fld *field.Path) field.ErrorList {
-	errs := field.ErrorList{}
-
+func (r *Replace) Validate(fld *field.Path) (errs field.ErrorList) {
 	if r.Regex == "" {
-		return nil
+		return
 	}
 	_, err := regexp.Compile(r.Regex)
 	if err != nil {
 		errs = append(errs, field.Invalid(fld.Child("regex"), r.Regex, err.Error()))
 	}
 
-	return errs
+	return
 }
 
 // Validate Replaces validation method
-func (r *Replaces) Validate(fld *field.Path) field.ErrorList {
-	errs := field.ErrorList{}
-
+func (r *Replaces) Validate(fld *field.Path) (errs field.ErrorList) {
 	if r == nil {
-		return nil
+		return
 	}
 	for i, replace := range *r {
 		errs = append(errs, replace.Validate(fld.Index(i))...)
 	}
 
-	return errs
+	return
 }
