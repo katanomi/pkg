@@ -17,17 +17,26 @@ limitations under the License.
 // Package v1alpha1 defines versioned interfaces for archive capability
 package v1alpha1
 
-// ArchiveCapable defines methods of archive capability
-// TODO: will be updated later
-type ArchiveCapable interface {
-	// Foo is temporary for demo
-	Foo()
-	// Upsert(ctx context.Context, record *v1alpha1.Record) error
-	// Delete(ctx context.Context, cluster string, uid string, opts *DeleteOption) error
-	// DeleteBatch(ctx context.Context, conditions []Condition, opts *DeleteOption) error
+import (
+	"context"
 
-	// ListRecords(ctx context.Context, query Query, opts *ListOptions) (*v1alpha1.RecordList, error)
-	// ListRelatedRecords(ctx context.Context, query Query, opts *ListOptions) (*v1alpha1.RecordList, error)
-	// Aggregate(ctx context.Context, aggs AggregateQuery, opts *ListOptions) ([]map[string]interface{}, error)
-	//
+	archivev1alpha1 "github.com/katanomi/pkg/apis/archive/v1alpha1"
+)
+
+// ArchiveCapable defines methods of archive capability
+//go:generate ../../../../../bin/mockgen -source=interface.go -destination=../../testing/mock/github.com/katanomi/pkg/storage/capabilities/archive/v1alpha1/interface.go -package=v1alpha1 ArchiveCapable
+type ArchiveCapable interface {
+	// Upsert create or update a record
+	Upsert(ctx context.Context, record *archivev1alpha1.Record) error
+	// Delete delete a record
+	Delete(ctx context.Context, cluster string, uid string, opts *archivev1alpha1.DeleteOption) error
+	// DeleteBatch delete records by conditions
+	DeleteBatch(ctx context.Context, conditions []archivev1alpha1.Condition, opts *archivev1alpha1.DeleteOption) error
+
+	// ListRecords list records by conditions
+	ListRecords(ctx context.Context, query archivev1alpha1.Query, opts *archivev1alpha1.ListOptions) (*archivev1alpha1.RecordList, error)
+	// ListRelatedRecords list related records by conditions
+	ListRelatedRecords(ctx context.Context, query archivev1alpha1.Query, opts *archivev1alpha1.ListOptions) (*archivev1alpha1.RecordList, error)
+	// Aggregate aggregate records by conditions
+	Aggregate(ctx context.Context, aggs archivev1alpha1.AggregateQuery, opts *archivev1alpha1.ListOptions) (*archivev1alpha1.AggregateResult, error)
 }

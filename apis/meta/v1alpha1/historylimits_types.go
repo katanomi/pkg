@@ -26,6 +26,11 @@ type HistoryLimits struct {
 	Count *int `json:"count,omitempty"`
 }
 
+// IsInvalid returns true if the history limits is empty
+func (h *HistoryLimits) IsInvalid() bool {
+	return h == nil || h.Count == nil || *h.Count < 0
+}
+
 // Validate make sure the data is legitimate..
 func (h *HistoryLimits) Validate(path *field.Path) (errs field.ErrorList) {
 	errs = field.ErrorList{}
@@ -33,7 +38,7 @@ func (h *HistoryLimits) Validate(path *field.Path) (errs field.ErrorList) {
 		return
 	}
 	if h.Count != nil && *h.Count < 0 {
-		errs = append(errs, field.Invalid(path.Child("count"), *h.Count, "should be greater than zero"))
+		errs = append(errs, field.Invalid(path.Child("count"), *h.Count, "should not be less than zero"))
 	}
 	return
 }
