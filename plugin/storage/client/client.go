@@ -20,8 +20,9 @@ import (
 	"context"
 	"path"
 
-	"github.com/go-resty/resty/v2"
 	pkgClient "github.com/katanomi/pkg/client"
+
+	"github.com/go-resty/resty/v2"
 	perrors "github.com/katanomi/pkg/errors"
 	"github.com/katanomi/pkg/plugin/client"
 	"github.com/katanomi/pkg/tracing"
@@ -63,16 +64,18 @@ type StoragePluginClient struct {
 
 // NewStoragePluginClient creates a new plugin client
 func NewStoragePluginClient(baseURL *duckv1.Addressable, opts ...BuildOptions) *StoragePluginClient {
-	restyClient := resty.NewWithClient(pkgClient.NewHTTPClient())
-	restyClient.SetDisableWarn(true)
-
 	pluginClient := &StoragePluginClient{
-		client:       restyClient,
 		classAddress: baseURL,
 	}
 
 	for _, op := range opts {
 		op(pluginClient)
+	}
+
+	if pluginClient.client == nil {
+		restyClient := resty.NewWithClient(pkgClient.NewHTTPClient())
+		restyClient.SetDisableWarn(true)
+		pluginClient.client = restyClient
 	}
 
 	tracing.WrapTransportForRestyClient(pluginClient.client)

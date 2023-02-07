@@ -34,8 +34,8 @@ type FileStoreV1alpha1Client struct {
 }
 
 // New creates a new FileStoreV1alpha1Client for the given RESTClient.
-func New(c client.Interface) *FileStoreV1alpha1Client {
-	return &FileStoreV1alpha1Client{restClient: c}
+func New(c client.Interface, pluginName string) *FileStoreV1alpha1Client {
+	return &FileStoreV1alpha1Client{restClient: c, pluginName: pluginName}
 }
 
 // RESTClient returns a RESTClient that is used to communicate
@@ -47,12 +47,12 @@ func (c *FileStoreV1alpha1Client) RESTClient() client.Interface {
 	return c.restClient
 }
 
-func (c *FileStoreV1alpha1Client) FileObject(pluginName string) FileObjectInterface {
-	return newFileObjects(c, pluginName)
+func (c *FileStoreV1alpha1Client) FileObject() FileObjectInterface {
+	return newFileObjects(c, c.pluginName)
 }
 
-func (c *FileStoreV1alpha1Client) FileMeta(pluginName string) FileMetaInterface {
-	return newFileMetas(c, pluginName)
+func (c *FileStoreV1alpha1Client) FileMeta() FileMetaInterface {
+	return newFileMetas(c, c.pluginName)
 }
 
 func NewForClient(pClient *client.StoragePluginClient) *FileStoreV1alpha1Client {

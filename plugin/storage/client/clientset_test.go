@@ -14,12 +14,14 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package v1alpha1
+package client
 
 import (
-	"github.com/katanomi/pkg/plugin/storage/capabilities/archive"
-	"k8s.io/apimachinery/pkg/runtime/schema"
+	"context"
+	"testing"
 )
 
-// ArchiveV1alpha1GV is group version used to register these objects
-var ArchiveV1alpha1GV = schema.GroupVersion{Group: archive.CapabilityName, Version: "v1alpha1"}
+func TestNewForClient(t *testing.T) {
+	clt, _ := NewForClient(nil, nil)
+	_, _ = clt.V1alpha1().FileStore("minio").FileMeta().GET(context.Background(), "a")
+}

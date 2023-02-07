@@ -28,7 +28,7 @@ import (
 
 // FileObjectGetter returns FileObject getter object
 type FileObjectGetter interface {
-	FileObject(pluginName string) FileObjectInterface
+	FileObject() FileObjectInterface
 }
 
 // FileObjectInterface is interface for FileObject client
@@ -40,8 +40,8 @@ type FileObjectInterface interface {
 }
 
 type fileObjects struct {
-	client     sclient.Interface
 	pluginName string
+	client     sclient.Interface
 }
 
 func (f *fileObjects) PUT(ctx context.Context, fileObj filestorev1alpha1.FileObject,
