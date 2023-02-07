@@ -20,6 +20,7 @@ import (
 	"context"
 	"testing"
 
+	"github.com/google/go-cmp/cmp"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	"k8s.io/apimachinery/pkg/util/validation/field"
@@ -78,6 +79,7 @@ var _ = Describe("Test.BuildRunGitStatus.GetValWithKey", func() {
 		ctx       context.Context
 		gitStatus *BuildRunGitStatus
 		actual    map[string]string
+		expected  map[string]string
 		//
 		// log level. It can be debug, info, warn, error, dpanic, panic, fatal.
 		log, _ = logging.NewLogger("", "debug")
@@ -86,6 +88,7 @@ var _ = Describe("Test.BuildRunGitStatus.GetValWithKey", func() {
 	BeforeEach(func() {
 		ctx = context.TODO()
 		gitStatus = &BuildRunGitStatus{}
+		expected = map[string]string{}
 		Expect(ktesting.LoadYAML("testdata/gitstatus.golden.yaml", &gitStatus)).To(Succeed())
 	})
 
@@ -97,96 +100,22 @@ var _ = Describe("Test.BuildRunGitStatus.GetValWithKey", func() {
 	When("struct is empty", func() {
 		BeforeEach(func() {
 			gitStatus = &BuildRunGitStatus{}
+			ktesting.MustLoadYaml("testdata/gitstatus.emptymap.golden.yaml", &expected)
 		})
 
 		It("should have values", func() {
-			Expect(actual).To(Equal(map[string]string{
-				"git":         "",
-				"git.url":     "",
-				"git.version": "",
-				//
-				"git.revision":      "",
-				"git.revision.raw":  "",
-				"git.revision.id":   "",
-				"git.revision.type": "",
-				//
-				"git.lastCommit":             "",
-				"git.lastCommit.id":          "",
-				"git.lastCommit.shortID":     "",
-				"git.lastCommit.title":       "",
-				"git.lastCommit.message":     "",
-				"git.lastCommit.authorEmail": "",
-				"git.lastCommit.pushedAt":    "",
-				"git.lastCommit.webURL":      "",
-				//
-				"git.pullRequest":              "",
-				"git.pullRequest.id":           "",
-				"git.pullRequest.title":        "",
-				"git.pullRequest.source":       "",
-				"git.pullRequest.target":       "",
-				"git.pullRequest.webURL":       "",
-				"git.pullRequest.authorEmail":  "",
-				"git.pullRequest.hasConflicts": "false",
-				// branch
-				"git.branch":           "",
-				"git.branch.name":      "",
-				"git.branch.protected": "false",
-				"git.branch.default":   "false",
-				"git.branch.webURL":    "",
-				// target
-				"git.target":           "",
-				"git.target.name":      "",
-				"git.target.protected": "false",
-				"git.target.default":   "false",
-				"git.target.webURL":    "",
-			}))
+			diff := cmp.Diff(actual, expected)
+			Expect(diff).To(BeEmpty())
 		})
 	})
 
 	When("struct is not empty", func() {
+		BeforeEach(func() {
+			ktesting.MustLoadYaml("testdata/gitstatus.map.golden.yaml", &expected)
+		})
 		It("should have values", func() {
-			Expect(actual).To(Equal(map[string]string{
-				"git":                "",
-				"git.url":            "https://github.com/katanomi/pkg",
-				"git.version":        "v1.2.3",
-				"git.version.docker": "v1.2.3",
-				"git.version.custom": "v1.2.3-custom",
-				//
-				"git.revision":      "refs/pulls/123/head",
-				"git.revision.raw":  "refs/pulls/123/head",
-				"git.revision.id":   "123",
-				"git.revision.type": "PullRequest",
-				//
-				"git.lastCommit":             "abe83942",
-				"git.lastCommit.id":          "abe83942450308432a12e9679519795f938b2bed",
-				"git.lastCommit.shortID":     "abe83942",
-				"git.lastCommit.title":       "Initial commit 406",
-				"git.lastCommit.message":     "Initial commit 406\n",
-				"git.lastCommit.authorEmail": "alauda@github.com",
-				"git.lastCommit.pushedAt":    "2020-01-01T01:02:03Z",
-				"git.lastCommit.webURL":      "https://github.com",
-				//
-				"git.pullRequest":              "1",
-				"git.pullRequest.id":           "1",
-				"git.pullRequest.title":        "test-build ==> master",
-				"git.pullRequest.source":       "test-build",
-				"git.pullRequest.target":       "master",
-				"git.pullRequest.webURL":       "https://github.com/katanomi/pkg/merge_requests/1",
-				"git.pullRequest.hasConflicts": "true",
-				"git.pullRequest.authorEmail":  "alauda@github.com",
-				// source in pr
-				"git.branch":           "test-build",
-				"git.branch.name":      "test-build",
-				"git.branch.protected": "true",
-				"git.branch.default":   "true",
-				"git.branch.webURL":    "https://github.com/katanomi/pkg/tree/test",
-				// target in pr
-				"git.target":           "release",
-				"git.target.name":      "release",
-				"git.target.protected": "true",
-				"git.target.default":   "false",
-				"git.target.webURL":    "https://github.com/katanomi/pkg/tree/release",
-			}))
+			diff := cmp.Diff(actual, expected)
+			Expect(diff).To(BeEmpty())
 		})
 	})
 

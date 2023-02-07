@@ -1,0 +1,8 @@
+- regex: \+.*$
+
+- regex: ^(.{0,128})(.*)$
+  replacement: ${1}
+
+- regex: ^(.{0,128})(.*)$
+  replacement: ${1}
+

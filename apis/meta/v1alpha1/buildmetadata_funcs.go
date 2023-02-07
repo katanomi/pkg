@@ -24,6 +24,7 @@ import (
 
 	"k8s.io/apimachinery/pkg/util/validation/field"
 
+	kregex "github.com/katanomi/pkg/regex"
 	ksubstitute "github.com/katanomi/pkg/substitution"
 )
 
@@ -150,6 +151,8 @@ func (b *BuildRunGitStatus) GetValWithKey(ctx context.Context, path *field.Path)
 	//
 	stringReplacements[path.Child("version").String()] = b.Version
 	//
+	stringReplacements[path.Child("versionPhase").String()] = b.VersionPhase
+	//
 	variantsMap := map[string]string{}
 	for variant, version := range b.VersionVariants {
 		// the key is `version` not `versionVariants`, convenient for users.
@@ -198,8 +201,27 @@ func (b *BuildGitBranchStatus) GetValWithKey(ctx context.Context, path *field.Pa
 	}
 	stringVals := map[string]string{path.String(): b.Name}
 	stringVals[path.Child("name").String()] = b.Name
+	stringVals[path.Child("nameAsTag").String()] = nameAsTagReplaces.ReplaceAllString(b.Name)
 	stringVals[path.Child("protected").String()] = strconv.FormatBool(b.Protected)
 	stringVals[path.Child("default").String()] = strconv.FormatBool(b.Default)
 	stringVals[path.Child("webURL").String()] = b.WebURL
 	return stringVals
 }
+
+var (
+	// nameAsTagReplaces used to generate the tag name from the branch name.
+	// 1. replacing `/` and `_` to `-`
+	// 2. remove the ending non [0-9a-zA-Z] characters
+	// 3. maximum length limit is 30 (extra characters in the prefix will be removed.)
+	nameAsTagReplaces = kregex.Replaces{
+		// replacing `/` and `_` to `-`
+		{Regex: `[/_]`, Replacement: "-"},
+		// remove the ending non [0-9a-zA-Z] characters
+		{Regex: `[^0-9a-zA-Z]*$`, Replacement: ""},
+		// maximum length limit is 30 (extra characters in the prefix will be removed.)
+		// (?U) indicates that the regex is non-greedy regex.
+		{Regex: `^(?U)(.*)(.{0,30})$`, Replacement: "${2}"},
+		// remove the starting non [0-9a-zA-Z] characters
+		{Regex: `^[^0-9a-zA-Z]*`, Replacement: ""},
+	}
+)
