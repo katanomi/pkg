@@ -481,11 +481,15 @@ func (a *AppBuilder) StoragePlugins(plugins ...client.Interface) *AppBuilder {
 		if err := plugin.Setup(a.Context, a.Logger); err != nil {
 			a.Logger.Fatalw("plugin could not be setup correctly", "err", err, "plugin", plugin.Path())
 		}
-		ws, err := storageroute.NewService(plugin)
+		wss, err := storageroute.NewServices(plugin)
 		if err != nil {
 			a.Logger.Fatalw("plugin could not start correctly", "err", err, "plugin", plugin.Path())
 		}
-		a.container.Add(ws)
+
+		for _, ws := range wss {
+			a.container.Add(ws)
+		}
+
 	}
 	return a
 }
@@ -566,6 +570,12 @@ func (a *AppBuilder) Run() error {
 			// TODO: find a better way to get this configuration
 			for _, filter := range a.filters {
 				a.container.Filter(filter)
+			}
+
+			for _, ws := range a.container.RegisteredWebServices() {
+				for _, route := range ws.Routes() {
+					fmt.Println(route.String())
+				}
 			}
 
 			port := 8100
