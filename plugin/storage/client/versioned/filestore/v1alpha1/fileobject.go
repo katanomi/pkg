@@ -28,24 +28,25 @@ import (
 
 // FileObjectGetter returns FileObject getter object
 type FileObjectGetter interface {
-	FileObject() FileObjectInterface
+	FileObject(pluginName string) FileObjectInterface
 }
 
 // FileObjectInterface is interface for FileObject client
 type FileObjectInterface interface {
-	PUT(ctx context.Context, pluginName string, fileObj filestorev1alpha1.FileObject,
+	PUT(ctx context.Context, fileObj filestorev1alpha1.FileObject,
 		options ...client.OptionFunc) (*v1alpha1.FileMeta, error)
-	GET(ctx context.Context, pluginName, key string) (*filestorev1alpha1.FileObject, error)
-	DELETE(ctx context.Context, pluginName, key string) error
+	GET(ctx context.Context, key string) (*filestorev1alpha1.FileObject, error)
+	DELETE(ctx context.Context, key string) error
 }
 
 type fileObjects struct {
-	client sclient.Interface
+	client     sclient.Interface
+	pluginName string
 }
 
-func (f *fileObjects) PUT(ctx context.Context, pluginName string, fileObj filestorev1alpha1.FileObject,
+func (f *fileObjects) PUT(ctx context.Context, fileObj filestorev1alpha1.FileObject,
 	options ...client.OptionFunc) (*v1alpha1.FileMeta, error) {
-	path := fmt.Sprintf("storageplugin/%s/fileobjects/%s", pluginName, fileObj.Spec.Key)
+	path := fmt.Sprintf("storageplugin/%s/fileobjects/%s", f.pluginName, fileObj.Spec.Key)
 	fileMeta := v1alpha1.FileMeta{}
 	err := f.client.Get(ctx, path, client.ResultOpts(&fileMeta))
 	if err != nil {
@@ -54,8 +55,8 @@ func (f *fileObjects) PUT(ctx context.Context, pluginName string, fileObj filest
 	return &fileMeta, nil
 }
 
-func (f *fileObjects) GET(ctx context.Context, pluginName, key string) (*filestorev1alpha1.FileObject, error) {
-	path := fmt.Sprintf("storageplugin/%s/fileobjects/%s", pluginName, key)
+func (f *fileObjects) GET(ctx context.Context, key string) (*filestorev1alpha1.FileObject, error) {
+	path := fmt.Sprintf("storageplugin/%s/fileobjects/%s", f.pluginName, key)
 	fileObject := filestorev1alpha1.FileObject{}
 	err := f.client.Get(ctx, path, client.ResultOpts(&fileObject))
 	if err != nil {
@@ -64,8 +65,8 @@ func (f *fileObjects) GET(ctx context.Context, pluginName, key string) (*filesto
 	return &fileObject, nil
 }
 
-func (f *fileObjects) DELETE(ctx context.Context, pluginName, key string) error {
-	path := fmt.Sprintf("storageplugin/%s/fileobjects/%s", pluginName, key)
+func (f *fileObjects) DELETE(ctx context.Context, key string) error {
+	path := fmt.Sprintf("storageplugin/%s/fileobjects/%s", f.pluginName, key)
 	err := f.client.Get(ctx, path)
 	if err != nil {
 		return err
@@ -74,8 +75,9 @@ func (f *fileObjects) DELETE(ctx context.Context, pluginName, key string) error 
 }
 
 // newFileObjects returns a FileObjects
-func newFileObjects(c *FileStoreV1alpha1Client) *fileObjects {
+func newFileObjects(c *FileStoreV1alpha1Client, pluginName string) *fileObjects {
 	return &fileObjects{
-		client: c.RESTClient(),
+		client:     c.RESTClient(),
+		pluginName: pluginName,
 	}
 }

@@ -26,27 +26,28 @@ import (
 )
 
 type FileMetaGetter interface {
-	FileMeta() FileMetaInterface
+	FileMeta(pluginName string) FileMetaInterface
 }
 
 type FileMetaInterface interface {
-	GET(ctx context.Context, pluginName string, key string) (*v1alpha1.FileMeta, error)
+	GET(ctx context.Context, key string) (*v1alpha1.FileMeta, error)
 	// TODO: Add List methods
 }
 
 type fileMetas struct {
-	client client.Interface
+	client     client.Interface
+	pluginName string
 }
 
 // newFileMetas returns a FileMetas
-func newFileMetas(c *FileStoreV1alpha1Client) *fileMetas {
+func newFileMetas(c *FileStoreV1alpha1Client, pluginName string) *fileMetas {
 	return &fileMetas{
 		client: c.RESTClient(),
 	}
 }
 
-func (f *fileMetas) GET(ctx context.Context, pluginName, key string) (*v1alpha1.FileMeta, error) {
-	path := fmt.Sprintf("storageplugin/%s/filemetas/%s", pluginName, key)
+func (f *fileMetas) GET(ctx context.Context, key string) (*v1alpha1.FileMeta, error) {
+	path := fmt.Sprintf("storageplugin/%s/filemetas/%s", f.pluginName, key)
 	fileMeta := v1alpha1.FileMeta{}
 	err := f.client.Get(ctx, path, client2.ResultOpts(&fileMeta))
 	if err != nil {

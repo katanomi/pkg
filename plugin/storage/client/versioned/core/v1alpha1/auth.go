@@ -48,7 +48,7 @@ func (a *auth) Check(ctx context.Context, request v1alpha1.StorageAuthCheckReque
 	return
 }
 
-// newAuth returns a Auth
+// newAuth returns an auth
 func newAuth(c *CoreV1alpha1Client) *auth {
 	return &auth{
 		client: c.RESTClient(),

@@ -65,7 +65,7 @@ func (a *fileMeta) GetFileMeta(req *restful.Request, resp *restful.Response) {
 
 	ctx := req.Request.Context()
 
-	meta, err := a.impl.GetFileMeta(storage.CtxWithPluginName(ctx, pluginName), pluginName, key)
+	meta, err := a.impl.GetFileMeta(storage.CtxWithPluginName(ctx, pluginName), key)
 	if err != nil {
 		kerrors.HandleError(req, resp, err)
 		return
