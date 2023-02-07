@@ -23,12 +23,12 @@ import (
 
 	"github.com/go-resty/resty/v2"
 	"github.com/jarcoal/httpmock"
-	client2 "github.com/katanomi/pkg/plugin/client"
+	pclient "github.com/katanomi/pkg/plugin/client"
 	. "github.com/onsi/gomega"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"knative.dev/pkg/apis"
-	duckv1 "knative.dev/pkg/apis/duck/v1"
+	v1 "knative.dev/pkg/apis/duck/v1"
 )
 
 type Body struct {
@@ -42,50 +42,25 @@ func TestStoragePluginClientGet(t *testing.T) {
 
 	responder, _ := httpmock.NewJsonResponder(200, Body{Message: "Your message", Code: 200})
 
-	fakeUrl := "https://example.com/api/v1/projects"
+	fakeUrl := "https://example.com/api/core/v1alpha1/projects"
 	httpmock.RegisterResponder("GET", fakeUrl, responder)
 
 	RESTClient := resty.New()
 	httpmock.ActivateNonDefault(RESTClient.GetClient())
-	client := NewStoragePluginClient(client2.ClientOpts(RESTClient))
-
-	result := &Body{}
-
-	url, _ := apis.ParseURL("https://example.com/api/v1")
-	err := client.Get(context.Background(), &duckv1.Addressable{
+	url, _ := apis.ParseURL("https://example.com/api/")
+	client := NewStoragePluginClient(&v1.Addressable{
 		URL: url,
-	}, "projects",
-		client.Dest(result),
+	}, WithGroupVersion(&schema.GroupVersion{
+		Group:   "core",
+		Version: "v1alpha1",
+	}), WithRestClient(RESTClient))
+	result := &Body{}
+	err := client.Get(context.Background(), "projects",
+		pclient.ResultOpts(result),
 	)
-
 	g.Expect(err).To(BeNil())
 	g.Expect(result.Message).To(Equal("Your message"))
 	g.Expect(result.Code).To(Equal(200))
-}
-
-func TestStoragePluginClientPut(t *testing.T) {
-	g := NewGomegaWithT(t)
-	httpmock.Reset()
-
-	responder, _ := httpmock.NewJsonResponder(200, Body{Message: "Changed", Code: 201})
-
-	fakeUrl := "https://example.com/api/v1/projects"
-	httpmock.RegisterResponder("PUT", fakeUrl, responder)
-
-	RESTClient := resty.New()
-	httpmock.ActivateNonDefault(RESTClient.GetClient())
-	client := NewStoragePluginClient(client2.ClientOpts(RESTClient))
-
-	result := &Body{}
-
-	url, _ := apis.ParseURL("https://example.com/api/v1")
-	err := client.Put(context.Background(), &duckv1.Addressable{
-		URL: url,
-	}, "projects", client.Body(Body{Message: "Changed", Code: 200}), client.Dest(result))
-
-	g.Expect(err).To(BeNil())
-	g.Expect(result.Message).To(Equal("Changed"))
-	g.Expect(result.Code).To(Equal(201))
 }
 
 func TestStoragePluginClientError(t *testing.T) {
@@ -99,12 +74,12 @@ func TestStoragePluginClientError(t *testing.T) {
 
 	RESTClient := resty.New()
 	httpmock.ActivateNonDefault(RESTClient.GetClient())
-	client := NewStoragePluginClient(client2.ClientOpts(RESTClient))
-
 	url, _ := apis.ParseURL("https://example.com/api/v1")
-	err := client.Get(context.Background(), &duckv1.Addressable{
+	client := NewStoragePluginClient(&v1.Addressable{
 		URL: url,
-	}, "projects")
+	}, WithRestClient(RESTClient))
+
+	err := client.Get(context.Background(), "projects")
 
 	g.Expect(err).NotTo(BeNil())
 
@@ -125,15 +100,12 @@ func TestStoragePluginClientErrorReason(t *testing.T) {
 
 	RESTClient := resty.New()
 	httpmock.ActivateNonDefault(RESTClient.GetClient())
-	client := NewStoragePluginClient(client2.ClientOpts(RESTClient))
-
 	url, _ := apis.ParseURL("https://example.com/api/v1")
-	err := client.Get(context.Background(), &duckv1.Addressable{
+	client := NewStoragePluginClient(&v1.Addressable{
 		URL: url,
-	}, "projects")
-
+	}, WithRestClient(RESTClient))
+	err := client.Get(context.Background(), "projects")
 	g.Expect(err).NotTo(BeNil())
-
 	statusError := &errors.StatusError{}
 	g.Expect(goerrors.As(err, &statusError)).To(BeTrue())
 	g.Expect(errors.IsNotFound(err)).To(BeTrue())

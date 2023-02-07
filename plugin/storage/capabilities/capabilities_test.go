@@ -14,77 +14,78 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package storage
+package capabilities
 
 import (
 	"context"
 	"io"
 	"testing"
 
+	"github.com/katanomi/pkg/apis/storage/v1alpha1"
+
 	archivev1alpha1 "github.com/katanomi/pkg/apis/archive/v1alpha1"
-	apistoragev1alpha1 "github.com/katanomi/pkg/apis/storage/v1alpha1"
-	"github.com/katanomi/pkg/plugin/storage/capabilities/filestore/v1alpha1"
+	archivecapv1alpha1 "github.com/katanomi/pkg/plugin/storage/capabilities/archive/v1alpha1"
+	filestorev1alpha1 "github.com/katanomi/pkg/plugin/storage/capabilities/filestore/v1alpha1"
 	. "github.com/onsi/gomega"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 type fakeFileStoreImp struct{}
 
-func (f fakeFileStoreImp) GetFileObject(ctx context.Context, key string) (v1alpha1.FileObject, error) {
+func (f fakeFileStoreImp) GetFileObject(ctx context.Context, pluginName string, key string) (*filestorev1alpha1.FileObject, error) {
 	// TODO implement me
 	panic("implement me")
 }
 
-func (f fakeFileStoreImp) PutFileObject(ctx context.Context, key string, fileReader io.ReadCloser,
-	meta apistoragev1alpha1.FileMeta) (apistoragev1alpha1.FileMeta, error) {
+func (f fakeFileStoreImp) PutFileObject(ctx context.Context, pluginName string, fileReadCloser io.ReadCloser, meta v1alpha1.FileMeta) (*v1alpha1.FileMeta, error) {
 	// TODO implement me
 	panic("implement me")
 }
 
-func (f fakeFileStoreImp) DeleteFileObject(ctx context.Context) error {
+func (f fakeFileStoreImp) DeleteFileObject(ctx context.Context, pluginName string, key string) error {
 	// TODO implement me
 	panic("implement me")
 }
 
-func (f fakeFileStoreImp) ListFileMetas(ctx context.Context, opt *metav1.ListOptions) ([]apistoragev1alpha1.FileMeta, error) {
+func (f fakeFileStoreImp) ListFileMetas(ctx context.Context, pluginName string, opt *metav1.ListOptions) ([]v1alpha1.FileMeta, error) {
 	// TODO implement me
 	panic("implement me")
 }
 
-func (f fakeFileStoreImp) GetFileMeta(ctx context.Context, key string) (apistoragev1alpha1.FileMeta, error) {
+func (f fakeFileStoreImp) GetFileMeta(ctx context.Context, pluginName string, key string) (*v1alpha1.FileMeta, error) {
 	// TODO implement me
 	panic("implement me")
 }
 
 type fakeArchiveImp struct{}
 
-func (f fakeArchiveImp) Upsert(ctx context.Context, record *archivev1alpha1.Record) error {
-	//TODO implement me
+func (f *fakeArchiveImp) Upsert(ctx context.Context, record *archivev1alpha1.Record) error {
+	// TODO implement me
 	panic("implement me")
 }
 
 func (f fakeArchiveImp) Delete(ctx context.Context, cluster string, uid string, opts *archivev1alpha1.DeleteOption) error {
-	//TODO implement me
+	// TODO implement me
 	panic("implement me")
 }
 
 func (f fakeArchiveImp) DeleteBatch(ctx context.Context, conditions []archivev1alpha1.Condition, opts *archivev1alpha1.DeleteOption) error {
-	//TODO implement me
+	// TODO implement me
 	panic("implement me")
 }
 
 func (f fakeArchiveImp) ListRecords(ctx context.Context, query archivev1alpha1.Query, opts *archivev1alpha1.ListOptions) (*archivev1alpha1.RecordList, error) {
-	//TODO implement me
+	// TODO implement me
 	panic("implement me")
 }
 
 func (f fakeArchiveImp) ListRelatedRecords(ctx context.Context, query archivev1alpha1.Query, opts *archivev1alpha1.ListOptions) (*archivev1alpha1.RecordList, error) {
-	//TODO implement me
+	// TODO implement me
 	panic("implement me")
 }
 
 func (f fakeArchiveImp) Aggregate(ctx context.Context, aggs archivev1alpha1.AggregateQuery, opts *archivev1alpha1.ListOptions) (*archivev1alpha1.AggregateResult, error) {
-	//TODO implement me
+	// TODO implement me
 	panic("implement me")
 }
 
@@ -99,7 +100,7 @@ func TestGetImplementedCapabilities(t *testing.T) {
 	tests := []struct {
 		name string
 		obj  interface{}
-		want Capabilities
+		want []string
 	}{
 		{
 			name: "nil object returns nil",
@@ -109,22 +110,22 @@ func TestGetImplementedCapabilities(t *testing.T) {
 		{
 			name: "file-store capability",
 			obj:  fakeFileStoreImp{},
-			want: Capabilities{CapabilityFileStore},
+			want: []string{},
 		},
 		{
 			name: "file-store capability pointer",
 			obj:  &fakeFileStoreImp{},
-			want: Capabilities{CapabilityFileStore},
+			want: []string{filestorev1alpha1.FileStoreV1alpha1GV.String()},
 		},
 		{
 			name: "archive capability",
-			obj:  fakeArchiveImp{},
-			want: Capabilities{CapabilityArchive},
+			obj:  &fakeArchiveImp{},
+			want: []string{archivecapv1alpha1.ArchiveV1alpha1.String()},
 		},
 		{
 			name: "multiple capabilities",
-			obj:  fakeMultipleImp{},
-			want: Capabilities{CapabilityFileStore, CapabilityArchive},
+			obj:  &fakeMultipleImp{},
+			want: []string{filestorev1alpha1.FileStoreV1alpha1GV.String(), archivecapv1alpha1.ArchiveV1alpha1.String()},
 		},
 	}
 	for _, tt := range tests {

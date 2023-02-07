@@ -13,3 +13,13 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
+
+// Package v1alpha1 defines versioned api server routes of core v1alpha1
+package v1alpha1
+
+import (
+	"k8s.io/apimachinery/pkg/runtime/schema"
+)
+
+// CoreV1alpha1GV is group version used to register versioned resources
+var CoreV1alpha1GV = schema.GroupVersion{Group: "core", Version: "v1alpha1"}

@@ -13,3 +13,18 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
+
+package v1alpha1
+
+import (
+	"context"
+
+	"github.com/katanomi/pkg/apis/meta/v1alpha1"
+	apistoragev1alpha1 "github.com/katanomi/pkg/apis/storage/v1alpha1"
+)
+
+// AuthChecker checks auth according to params values
+type AuthChecker interface {
+	// CheckAuth used for auth checking of storage plugins
+	CheckAuth(ctx context.Context, params []v1alpha1.Param) (*apistoragev1alpha1.StorageAuthCheck, error)
+}

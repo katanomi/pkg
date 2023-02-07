@@ -27,17 +27,28 @@ import (
 
 // FileStoreCapable defines methods of file-store capability
 type FileStoreCapable interface {
+	FileObjectInterface
+	FileMetaInterface
+}
+
+// FileObjectInterface for file object
+type FileObjectInterface interface {
 	// GetFileObject for get file object
-	GetFileObject(ctx context.Context, key string) (FileObject, error)
+	GetFileObject(ctx context.Context, pluginName string, key string) (*FileObject, error)
 	// PutFileObject for put file object
-	PutFileObject(ctx context.Context, key string, fileReadCloser io.ReadCloser, meta v1alpha1.FileMeta) (v1alpha1.FileMeta,
+	PutFileObject(ctx context.Context, pluginName string, fileReadCloser io.ReadCloser,
+		meta v1alpha1.FileMeta) (*v1alpha1.FileMeta,
 		error)
 	// DeleteFileObject for delete file object
-	DeleteFileObject(ctx context.Context) error
+	DeleteFileObject(ctx context.Context, pluginName string, key string) error
+}
+
+// FileMetaInterface for file meta
+type FileMetaInterface interface {
 	// ListFileMetas for list file metas
-	ListFileMetas(ctx context.Context, opt *metav1.ListOptions) ([]v1alpha1.FileMeta, error)
+	ListFileMetas(ctx context.Context, pluginName string, opt *metav1.ListOptions) ([]v1alpha1.FileMeta, error)
 	// GetFileMeta for get file meta
-	GetFileMeta(ctx context.Context, key string) (v1alpha1.FileMeta, error)
+	GetFileMeta(ctx context.Context, pluginName string, key string) (*v1alpha1.FileMeta, error)
 }
 
 // FileObject wraps FileMeta with file reader for implementing file download

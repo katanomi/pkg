@@ -13,3 +13,9 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
+
+// Package filestore for file store capability
+package filestore
+
+// CapabilityName for rest api group name of file store capability
+const CapabilityName = "file-store"

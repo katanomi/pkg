@@ -13,3 +13,22 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
+
+package storage
+
+import "context"
+
+type storagePluginNameKey struct{}
+
+// CtxWithPluginName return context.Context with plugin name
+func CtxWithPluginName(ctx context.Context, pluginName string) context.Context {
+	return context.WithValue(ctx, storagePluginNameKey{}, pluginName)
+}
+
+func PluginNameFromCtx(ctx context.Context) string {
+	val := ctx.Value(storagePluginNameKey{})
+	if val == nil {
+		return ""
+	}
+	return val.(string)
+}

@@ -58,8 +58,19 @@ type FileMetaSpec struct {
 	// ContentType for file content type
 	ContentType string `json:"contentType"`
 
+	// ContentLength for file content size
+	ContentLength int64 `json:"contentLength"`
+
 	// FileType for file type
 	FileType FileType `json:"fileType"`
+}
+
+// FileMetaList list of FileMetas
+type FileMetaList struct {
+	metav1.TypeMeta `json:",inline"`
+	metav1.ListMeta `json:"metadata,omitempty"`
+
+	Items []FileMeta `json:"items"`
 }
 
 // FileMetaResourceAttributes returns a ResourceAttribute object to be used in a filter
