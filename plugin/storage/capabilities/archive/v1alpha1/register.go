@@ -16,8 +16,10 @@ limitations under the License.
 
 package v1alpha1
 
-// StoragePluginClassLabelKey for labeling owner StoragePluginClass
-const StoragePluginClassLabelKey = "storage.katanomi.dev/storagePluginClass"
+import (
+	"github.com/katanomi/pkg/plugin/storage/capabilities/archive"
+	"k8s.io/apimachinery/pkg/runtime/schema"
+)
 
-// FileObjectLastModifiedAnnotation for recording last modified time
-const FileObjectLastModifiedAnnotation = "storage.katanomi.dev/fileObject.lastModified"
+// ArchiveV1alpha1 is group version used to register these objects
+var ArchiveV1alpha1 = schema.GroupVersion{Group: archive.CapabilityName, Version: "v1alpha1"}

@@ -14,10 +14,5 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+// Package v1alpha1 for core v1alpha1 routes
 package v1alpha1
-
-// StoragePluginClassLabelKey for labeling owner StoragePluginClass
-const StoragePluginClassLabelKey = "storage.katanomi.dev/storagePluginClass"
-
-// FileObjectLastModifiedAnnotation for recording last modified time
-const FileObjectLastModifiedAnnotation = "storage.katanomi.dev/fileObject.lastModified"

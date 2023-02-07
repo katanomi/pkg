@@ -16,8 +16,15 @@ limitations under the License.
 
 package v1alpha1
 
-// StoragePluginClassLabelKey for labeling owner StoragePluginClass
-const StoragePluginClassLabelKey = "storage.katanomi.dev/storagePluginClass"
+import (
+	"context"
 
-// FileObjectLastModifiedAnnotation for recording last modified time
-const FileObjectLastModifiedAnnotation = "storage.katanomi.dev/fileObject.lastModified"
+	"github.com/katanomi/pkg/apis/meta/v1alpha1"
+	apistoragev1alpha1 "github.com/katanomi/pkg/apis/storage/v1alpha1"
+)
+
+// AuthChecker checks auth according to params values
+type AuthChecker interface {
+	// CheckAuth used for auth checking of storage plugins
+	CheckAuth(ctx context.Context, params []v1alpha1.Param) (*apistoragev1alpha1.StorageAuthCheck, error)
+}
