@@ -18,6 +18,7 @@ package accessmode
 
 import (
 	"testing"
+	"time"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
@@ -59,6 +60,7 @@ var _ = BeforeSuite(func() {
 })
 
 var _ = AfterSuite(func() {
-	err := testEnv.Stop()
-	Expect(err).NotTo(HaveOccurred())
+	Eventually(func() error {
+		return testEnv.Stop()
+	}, 30*time.Second, 5*time.Second).ShouldNot(HaveOccurred())
 })
