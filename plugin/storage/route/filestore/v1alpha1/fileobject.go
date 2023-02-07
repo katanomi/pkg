@@ -101,7 +101,9 @@ func (a *fileObject) PutFileObject(req *restful.Request, resp *restful.Response)
 		},
 	}
 
-	newMeta, err := a.impl.PutFileObject(req.Request.Context(), pluginName, req.Request.Body, filemeta)
+	ctx := req.Request.Context()
+
+	newMeta, err := a.impl.PutFileObject(storage.CtxWithPluginName(ctx, pluginName), req.Request.Body, filemeta)
 	if err != nil {
 		log.Errorw("PutFileObject err", "err", err)
 		kerrors.HandleError(req, resp, err)
@@ -115,7 +117,8 @@ func (a *fileObject) GetFileObject(req *restful.Request, resp *restful.Response)
 	key := path.Parameter(req, "key")
 	pluginName := path.Parameter(req, "storageplugin")
 
-	fileObject, err := a.impl.GetFileObject(req.Request.Context(), pluginName, key)
+	ctx := req.Request.Context()
+	fileObject, err := a.impl.GetFileObject(storage.CtxWithPluginName(ctx, pluginName), key)
 
 	if err != nil {
 		kerrors.HandleError(req, resp, err)
@@ -137,7 +140,8 @@ func (a *fileObject) DeleteFileObject(req *restful.Request, resp *restful.Respon
 	key := path.Parameter(req, "key")
 	pluginName := path.Parameter(req, "storageplugin")
 
-	err := a.impl.DeleteFileObject(req.Request.Context(), pluginName, key)
+	ctx := req.Request.Context()
+	err := a.impl.DeleteFileObject(storage.CtxWithPluginName(ctx, pluginName), key)
 
 	if err != nil {
 		kerrors.HandleError(req, resp, err)

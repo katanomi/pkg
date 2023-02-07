@@ -32,27 +32,30 @@ import (
 
 type fakeFileStoreImp struct{}
 
-func (f fakeFileStoreImp) GetFileObject(ctx context.Context, pluginName string, key string) (*filestorev1alpha1.FileObject, error) {
+func (f fakeFileStoreImp) GetFileObject(ctx context.Context,
+	key string) (*filestorev1alpha1.FileObject, error) {
 	// TODO implement me
 	panic("implement me")
 }
 
-func (f fakeFileStoreImp) PutFileObject(ctx context.Context, pluginName string, fileReadCloser io.ReadCloser, meta v1alpha1.FileMeta) (*v1alpha1.FileMeta, error) {
+func (f fakeFileStoreImp) PutFileObject(ctx context.Context, fileReadCloser io.ReadCloser,
+	meta v1alpha1.FileMeta) (*v1alpha1.FileMeta, error) {
 	// TODO implement me
 	panic("implement me")
 }
 
-func (f fakeFileStoreImp) DeleteFileObject(ctx context.Context, pluginName string, key string) error {
+func (f fakeFileStoreImp) DeleteFileObject(ctx context.Context, key string) error {
 	// TODO implement me
 	panic("implement me")
 }
 
-func (f fakeFileStoreImp) ListFileMetas(ctx context.Context, pluginName string, opt *metav1.ListOptions) ([]v1alpha1.FileMeta, error) {
+func (f fakeFileStoreImp) ListFileMetas(ctx context.Context,
+	opt *metav1.ListOptions) ([]v1alpha1.FileMeta, error) {
 	// TODO implement me
 	panic("implement me")
 }
 
-func (f fakeFileStoreImp) GetFileMeta(ctx context.Context, pluginName string, key string) (*v1alpha1.FileMeta, error) {
+func (f fakeFileStoreImp) GetFileMeta(ctx context.Context, key string) (*v1alpha1.FileMeta, error) {
 	// TODO implement me
 	panic("implement me")
 }
