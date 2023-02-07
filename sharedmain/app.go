@@ -30,6 +30,7 @@ import (
 	"time"
 
 	"github.com/katanomi/pkg/config"
+	storageroute "github.com/katanomi/pkg/plugin/storage/route"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	utilyaml "k8s.io/apimachinery/pkg/util/yaml"
@@ -115,6 +116,9 @@ type AppBuilder struct {
 
 	// plugins
 	plugins []client.Interface
+
+	// storage plugins
+	storagePlugins []client.Interface
 
 	// restful container
 	container *restful.Container
@@ -458,6 +462,26 @@ func (a *AppBuilder) Plugins(plugins ...client.Interface) *AppBuilder {
 		// MetaFilter and AuthFilter are dedicated to plugin api,
 		// so register the filters when the service is initialized.
 		ws, err := route.NewService(plugin, client.MetaFilter, client.AuthFilter)
+		if err != nil {
+			a.Logger.Fatalw("plugin could not start correctly", "err", err, "plugin", plugin.Path())
+		}
+		a.container.Add(ws)
+	}
+	return a
+}
+
+// StoragePlugins adds storage plugins to this app
+func (a *AppBuilder) StoragePlugins(plugins ...client.Interface) *AppBuilder {
+	a.init()
+
+	// will init a client if not already initiated
+	a.initClient(nil)
+	a.storagePlugins = plugins
+	for _, plugin := range a.storagePlugins {
+		if err := plugin.Setup(a.Context, a.Logger); err != nil {
+			a.Logger.Fatalw("plugin could not be setup correctly", "err", err, "plugin", plugin.Path())
+		}
+		ws, err := storageroute.NewService(plugin)
 		if err != nil {
 			a.Logger.Fatalw("plugin could not start correctly", "err", err, "plugin", plugin.Path())
 		}

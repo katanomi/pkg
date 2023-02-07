@@ -14,54 +14,42 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package storage
+package capabilities
 
 import (
 	"reflect"
 
 	archivev1alpha1 "github.com/katanomi/pkg/plugin/storage/capabilities/archive/v1alpha1"
 	filestorev1alpha1 "github.com/katanomi/pkg/plugin/storage/capabilities/filestore/v1alpha1"
-)
-
-// Capability for enum of capability values
-type Capability string
-
-// Capabilities for slice of Capability
-type Capabilities []Capability
-
-const (
-	// CapabilityFileStore for file-store capability
-	CapabilityFileStore Capability = "file-store"
-
-	// CapabilityArchive for archive capability
-	CapabilityArchive Capability = "archive"
+	"k8s.io/apimachinery/pkg/runtime/schema"
 )
 
 // reflectedCapElmMap for reflection in init func
-var reflectedCapElmMap map[Capability]reflect.Type
+var reflectedCapElmMap map[string]reflect.Type
 
 func init() {
-	reflectedCapElmMap = make(map[Capability]reflect.Type)
+	reflectedCapElmMap = make(map[string]reflect.Type)
 	for capability, intf := range RegisteredCapabilities {
 		iElem := reflect.TypeOf(intf).Elem()
-		reflectedCapElmMap[capability] = iElem
+		reflectedCapElmMap[capability.String()] = iElem
 	}
 }
 
-// RegisteredCapabilities declares which interface a capability should implement.
-var RegisteredCapabilities = map[Capability]interface{}{
-	CapabilityFileStore: (*filestorev1alpha1.FileStoreCapable)(nil),
-	CapabilityArchive:   (*archivev1alpha1.ArchiveCapable)(nil),
+// RegisteredCapabilities declares which interface a versioned capability should implement.
+var RegisteredCapabilities = map[schema.GroupVersion]interface{}{
+	filestorev1alpha1.FileStoreV1alpha1GV: (*filestorev1alpha1.FileStoreCapable)(nil),
+	archivev1alpha1.ArchiveV1alpha1:       (*archivev1alpha1.ArchiveCapable)(nil),
 }
 
 // GetImplementedCapabilities returns string list of capabilities an object implemented
-func GetImplementedCapabilities(obj interface{}) Capabilities {
-	var capabilities Capabilities
+func GetImplementedCapabilities(obj interface{}) []string {
+	var capabilities []string
 	if obj == nil {
 		return nil
 	}
 	typeOfObj := reflect.TypeOf(obj)
 	for capability, iElem := range reflectedCapElmMap {
+		// TODO: to cover non-pointer receiver
 		if typeOfObj.Implements(iElem) {
 			capabilities = append(capabilities, capability)
 		}

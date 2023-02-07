@@ -16,8 +16,12 @@ limitations under the License.
 
 package v1alpha1
 
-// StoragePluginClassLabelKey for labeling owner StoragePluginClass
-const StoragePluginClassLabelKey = "storage.katanomi.dev/storagePluginClass"
+func GetParamByName(params []Param, name string) *Param {
+	for _, param := range params {
+		if param.Name == name {
+			return &param
+		}
+	}
 
-// FileObjectLastModifiedAnnotation for recording last modified time
-const FileObjectLastModifiedAnnotation = "storage.katanomi.dev/fileObject.lastModified"
+	return nil
+}
