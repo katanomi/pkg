@@ -34,29 +34,40 @@ func GetPluginAPIPath(c client.Interface) string {
 	return path.Join("/storage", c.Path())
 }
 
-// NewService new service from storage plugin client
-func NewService(c client.Interface, filters ...restful.FilterFunction) (*restful.WebService, error) {
+// NewServices new service from storage plugin client
+func NewServices(c client.Interface, filters ...restful.FilterFunction) ([]*restful.WebService, error) {
 	routes := match(c)
 	if len(routes) == 0 {
 		return nil, fmt.Errorf("no route for provider %s", c.Path())
 	}
 
-	group := &restful.WebService{}
-
-	// adds standard prefix for plugins
 	pluginAPIPath := GetPluginAPIPath(c)
-	// group.Path(pluginAPIPath)
-	for _, filter := range filters {
-		group.Filter(filter)
-	}
+	// Nesting web services haven't been implemented so far, we return multiple webservices here.
+	// https://github.com/emicklei/go-restful/issues/399
+	groups := make([]*restful.WebService, 0)
+
+	// routes with same rootPath must in the same restful.WebService, use a map to avoid duplicate
+	servicesMap := make(map[string]*restful.WebService)
 
 	for _, r := range routes {
-		group.Path(path.Join(pluginAPIPath, r.GroupVersion().Identifier())).
-			Consumes(restful.MIME_JSON).Produces(restful.MIME_JSON)
+		// adds versioned api prefix for plugins route
+		groupVersionedPath := path.Join(pluginAPIPath, r.GroupVersion().Identifier())
+		var group *restful.WebService
+		if svc, ok := servicesMap[groupVersionedPath]; ok {
+			group = svc
+		} else {
+			group = &restful.WebService{}
+			group.Path(groupVersionedPath).Consumes(restful.MIME_JSON).Produces(restful.MIME_JSON)
+			for _, filter := range filters {
+				group.Filter(filter)
+			}
+			groups = append(groups, group)
+			servicesMap[groupVersionedPath] = group
+		}
 		r.Register(group)
 	}
 
-	return group, nil
+	return groups, nil
 }
 
 // match math route with plugin storage plugin client
