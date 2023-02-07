@@ -14,10 +14,21 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package v1alpha1
+package storage
 
-// StoragePluginClassLabelKey for labeling owner StoragePluginClass
-const StoragePluginClassLabelKey = "storage.katanomi.dev/storagePluginClass"
+import "context"
 
-// FileObjectLastModifiedAnnotation for recording last modified time
-const FileObjectLastModifiedAnnotation = "storage.katanomi.dev/fileObject.lastModified"
+type storagePluginNameKey struct{}
+
+// CtxWithPluginName return context.Context with plugin name
+func CtxWithPluginName(ctx context.Context, pluginName string) context.Context {
+	return context.WithValue(ctx, storagePluginNameKey{}, pluginName)
+}
+
+func PluginNameFromCtx(ctx context.Context) string {
+	val := ctx.Value(storagePluginNameKey{})
+	if val == nil {
+		return ""
+	}
+	return val.(string)
+}

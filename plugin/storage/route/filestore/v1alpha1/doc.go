@@ -14,16 +14,5 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package storage
-
-import (
-	"fmt"
-	"strings"
-
-	"github.com/katanomi/pkg/plugin/client"
-)
-
-// GetPluginAPIPath returns storage plugin web service path
-func GetPluginAPIPath(c client.Interface) string {
-	return fmt.Sprintf("/storage/v1alpha1/%s", strings.TrimPrefix(c.Path(), "/"))
-}
+// Package v1alpha1 for file store v1alpha1 routes
+package v1alpha1
