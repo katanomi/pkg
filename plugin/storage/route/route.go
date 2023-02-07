@@ -74,8 +74,8 @@ func NewServices(c client.Interface, filters ...restful.FilterFunction) ([]*rest
 func match(c client.Interface) []storage.VersionedRouter {
 	routes := make([]storage.VersionedRouter, 0)
 
-	if authCheck, ok := c.(v1alpha1.AuthChecker); ok {
-		routes = append(routes, v1alpha12.NewAuthCheck(authCheck))
+	if core, ok := c.(v1alpha1.CoreInterface); ok {
+		routes = append(routes, v1alpha12.NewAuthCheck(core))
 	}
 
 	if filestore, ok := c.(filestorev1alpha1.FileStoreCapable); ok {

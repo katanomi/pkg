@@ -42,7 +42,8 @@ type fileMetas struct {
 // newFileMetas returns a FileMetas
 func newFileMetas(c *FileStoreV1alpha1Client, pluginName string) *fileMetas {
 	return &fileMetas{
-		client: c.RESTClient(),
+		client:     c.RESTClient(),
+		pluginName: pluginName,
 	}
 }
 
