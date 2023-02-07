@@ -55,6 +55,8 @@ func (a *fileObject) Register(ws *restful.WebService) {
 	fileTypeParam := ws.QueryParameter("filetype", "business type of file")
 	ws.Route(
 		ws.PUT("storageplugin/{storageplugin}/fileobjects/{key:*}").To(a.PutFileObject).
+			AllowedMethodsWithoutContentType([]string{http.MethodPut}).
+			Produces(restful.MIME_OCTET).
 			Doc("Storage plugin put raw file").
 			Param(storagePluginParam).Param(keyParam).Param(fileTypeParam).
 			Metadata(restfulspec.KeyOpenAPITags, a.tags).
@@ -63,7 +65,7 @@ func (a *fileObject) Register(ws *restful.WebService) {
 
 	ws.Route(
 		ws.GET("storageplugin/{storageplugin}/fileobjects/{key:*}").To(a.GetFileObject).
-			Produces(restful.MIME_OCTET).
+			AllowedMethodsWithoutContentType([]string{http.MethodGet}).
 			Doc("Storage plugin get raw file").
 			Param(storagePluginParam).Param(keyParam).Param(fileTypeParam).
 			Metadata(restfulspec.KeyOpenAPITags, a.tags).
@@ -105,7 +107,7 @@ func (a *fileObject) PutFileObject(req *restful.Request, resp *restful.Response)
 		kerrors.HandleError(req, resp, err)
 		return
 	}
-	resp.WriteHeaderAndEntity(http.StatusOK, newMeta)
+	resp.WriteHeaderAndEntity(http.StatusCreated, newMeta)
 }
 
 // GetFileObject is handler of put file object
