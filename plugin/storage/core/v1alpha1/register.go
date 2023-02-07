@@ -14,10 +14,12 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+// Package v1alpha1 defines versioned api server routes of core v1alpha1
 package v1alpha1
 
-// StoragePluginClassLabelKey for labeling owner StoragePluginClass
-const StoragePluginClassLabelKey = "storage.katanomi.dev/storagePluginClass"
+import (
+	"k8s.io/apimachinery/pkg/runtime/schema"
+)
 
-// FileObjectLastModifiedAnnotation for recording last modified time
-const FileObjectLastModifiedAnnotation = "storage.katanomi.dev/fileObject.lastModified"
+// CoreV1alpha1GV is group version used to register versioned resources
+var CoreV1alpha1GV = schema.GroupVersion{Group: "core", Version: "v1alpha1"}

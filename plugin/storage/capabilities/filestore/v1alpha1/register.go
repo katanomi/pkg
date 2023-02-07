@@ -16,8 +16,10 @@ limitations under the License.
 
 package v1alpha1
 
-// StoragePluginClassLabelKey for labeling owner StoragePluginClass
-const StoragePluginClassLabelKey = "storage.katanomi.dev/storagePluginClass"
+import (
+	"github.com/katanomi/pkg/plugin/storage/capabilities/filestore"
+	"k8s.io/apimachinery/pkg/runtime/schema"
+)
 
-// FileObjectLastModifiedAnnotation for recording last modified time
-const FileObjectLastModifiedAnnotation = "storage.katanomi.dev/fileObject.lastModified"
+// FileStoreV1alpha1GV is group version used to register versioned resource
+var FileStoreV1alpha1GV = schema.GroupVersion{Group: filestore.CapabilityName, Version: "v1alpha1"}
