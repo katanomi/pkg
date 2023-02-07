@@ -37,6 +37,8 @@ type PluginRegister interface {
 	client.DependentResourceGetter
 	client.PluginAddressable
 
+	corev1alpha1.CoreInterface
+
 	// interfaces below are for core restful api implementation
 	corev1alpha1.AuthChecker
 
