@@ -53,12 +53,6 @@ func (a *authCheck) Register(ws *restful.WebService) {
 			Reads(v1alpha1.StorageAuthCheckRequest{}, "request storage plugin for auth check").
 			Returns(http.StatusOK, "OK", v1alpha1.StorageAuthCheck{}),
 	)
-
-	ws.Route(ws.GET("/ok").To(func(request *restful.Request, response *restful.Response) {
-		response.WriteAsJson(map[string]string{
-			"xx": "yy",
-		})
-	}))
 }
 
 // AuthCheck is handler of auth check route
