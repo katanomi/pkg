@@ -52,8 +52,13 @@ type FileMeta struct {
 
 // FileMetaSpec spec for FileMeta
 type FileMetaSpec struct {
-	// Key for file key of file object
-	Key string `json:"key"`
+	// Entry shows the index file of a directory if the contentType is a site
+	// +optional
+	Entry string `json:"entry,omitempty"`
+
+	// Key for file key of file object, following format:  {storage-plugin-name}:{file-object-name}
+	// +optional
+	Key string `json:"key,omitempty"`
 
 	// ContentType for file content type
 	ContentType string `json:"contentType"`
@@ -62,6 +67,7 @@ type FileMetaSpec struct {
 	ContentLength int64 `json:"contentLength"`
 
 	// FileType for file type
+	// +optional
 	FileType FileType `json:"fileType"`
 }
 

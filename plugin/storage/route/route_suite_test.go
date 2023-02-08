@@ -18,10 +18,8 @@ package route
 
 import (
 	"context"
-	"io"
 	"testing"
 
-	alpha1 "github.com/katanomi/pkg/apis/archive/v1alpha1"
 	metav1alpha1 "github.com/katanomi/pkg/apis/meta/v1alpha1"
 	"github.com/katanomi/pkg/apis/storage/v1alpha1"
 	filestorev1alpha1 "github.com/katanomi/pkg/plugin/storage/capabilities/filestore/v1alpha1"
@@ -32,6 +30,41 @@ import (
 )
 
 type fakeFileStorePlugin struct{}
+
+func (f *fakeFileStorePlugin) Path() string {
+	return "fake-filestore"
+}
+
+func (f *fakeFileStorePlugin) Setup(ctx context.Context, logger *zap.SugaredLogger) error {
+	// TODO implement me
+	panic("implement me")
+}
+
+func (f *fakeFileStorePlugin) GetFileObject(ctx context.Context, objectName string) (*filestorev1alpha1.FileObject, error) {
+	// TODO implement me
+	panic("implement me")
+}
+
+func (f *fakeFileStorePlugin) PutFileObject(ctx context.Context, objectName string, obj *filestorev1alpha1.FileObject) (*v1alpha1.FileMeta, error) {
+	// TODO implement me
+	panic("implement me")
+}
+
+func (f *fakeFileStorePlugin) DeleteFileObject(ctx context.Context, objectName string) error {
+	// TODO implement me
+	panic("implement me")
+}
+
+func (f *fakeFileStorePlugin) ListFileMetas(ctx context.Context, opt *metav1.ListOptions) ([]v1alpha1.FileMeta, error) {
+	// TODO implement me
+	panic("implement me")
+}
+
+func (f *fakeFileStorePlugin) GetFileMeta(ctx context.Context, objectName string) (*v1alpha1.FileMeta, error) {
+	// TODO implement me
+	panic("implement me")
+}
+
 type fakeCorePlugin struct{}
 
 func (f *fakeCorePlugin) Path() string {
@@ -44,45 +77,6 @@ func (f *fakeCorePlugin) Setup(ctx context.Context, logger *zap.SugaredLogger) e
 }
 
 func (f *fakeCorePlugin) CheckAuth(ctx context.Context, params []metav1alpha1.Param) (*v1alpha1.StorageAuthCheck, error) {
-	// TODO implement me
-	panic("implement me")
-}
-
-func (f *fakeFileStorePlugin) Aggregate(ctx context.Context, aggs alpha1.AggregateQuery, opts *alpha1.ListOptions) (*alpha1.AggregateResult, error) {
-	// TODO implement me
-	panic("implement me")
-}
-
-func (f *fakeFileStorePlugin) GetFileObject(ctx context.Context, key string) (*filestorev1alpha1.FileObject, error) {
-	// TODO implement me
-	panic("implement me")
-}
-
-func (f *fakeFileStorePlugin) PutFileObject(ctx context.Context, fileReadCloser io.ReadCloser, meta v1alpha1.FileMeta) (*v1alpha1.FileMeta, error) {
-	// TODO implement me
-	panic("implement me")
-}
-
-func (f *fakeFileStorePlugin) DeleteFileObject(ctx context.Context, key string) error {
-	// TODO implement me
-	panic("implement me")
-}
-
-func (f *fakeFileStorePlugin) ListFileMetas(ctx context.Context, opt *metav1.ListOptions) ([]v1alpha1.FileMeta, error) {
-	// TODO implement me
-	panic("implement me")
-}
-
-func (f *fakeFileStorePlugin) GetFileMeta(ctx context.Context, key string) (*v1alpha1.FileMeta, error) {
-	// TODO implement me
-	panic("implement me")
-}
-
-func (f *fakeFileStorePlugin) Path() string {
-	return "fake-filestore"
-}
-
-func (f *fakeFileStorePlugin) Setup(ctx context.Context, logger *zap.SugaredLogger) error {
 	// TODO implement me
 	panic("implement me")
 }

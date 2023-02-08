@@ -37,10 +37,8 @@ type PluginRegister interface {
 	client.DependentResourceGetter
 	client.PluginAddressable
 
+	// core interface must be implemented, will be served
 	corev1alpha1.CoreInterface
-
-	// interfaces below are for core restful api implementation
-	corev1alpha1.AuthChecker
 
 	// GetStoragePluginClassName returns storage plugin class name
 	GetStoragePluginClassName() string
