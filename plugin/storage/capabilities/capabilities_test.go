@@ -18,7 +18,6 @@ package capabilities
 
 import (
 	"context"
-	"io"
 	"testing"
 
 	"github.com/katanomi/pkg/apis/storage/v1alpha1"
@@ -32,19 +31,17 @@ import (
 
 type fakeFileStoreImp struct{}
 
-func (f fakeFileStoreImp) GetFileObject(ctx context.Context,
-	key string) (*filestorev1alpha1.FileObject, error) {
+func (f fakeFileStoreImp) GetFileObject(ctx context.Context, objectName string) (*filestorev1alpha1.FileObject, error) {
 	// TODO implement me
 	panic("implement me")
 }
 
-func (f fakeFileStoreImp) PutFileObject(ctx context.Context, fileReadCloser io.ReadCloser,
-	meta v1alpha1.FileMeta) (*v1alpha1.FileMeta, error) {
+func (f fakeFileStoreImp) PutFileObject(ctx context.Context, objectName string, obj *filestorev1alpha1.FileObject) (*v1alpha1.FileMeta, error) {
 	// TODO implement me
 	panic("implement me")
 }
 
-func (f fakeFileStoreImp) DeleteFileObject(ctx context.Context, key string) error {
+func (f fakeFileStoreImp) DeleteFileObject(ctx context.Context, objectName string) error {
 	// TODO implement me
 	panic("implement me")
 }
