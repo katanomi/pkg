@@ -47,25 +47,24 @@ func NewFileMeta(impl filestorev1alpha1.FileMetaInterface) storage.VersionedRout
 }
 
 func (a *fileMeta) Register(ws *restful.WebService) {
-	storagePluginParam := ws.PathParameter("storageplugin", "storage plugin to be used")
-	keyParam := ws.PathParameter("key", "file key for naming file in storage")
+	storagePluginParam := ws.PathParameter("storagePlugin", "storage plugin to be used")
+	objectNameParam := ws.PathParameter("objectName", "file object name in storage plugin")
 	ws.Route(
-		ws.GET("storageplugin/{storageplugin}/filemeta/{key}").To(a.GetFileMeta).
+		ws.GET("/storageplugin/{storagePlugin}/filemetas/{objectName:*}").To(a.GetFileMeta).
 			Doc("Storage plugin put raw file").
-			Param(storagePluginParam).Param(keyParam).
+			Param(objectNameParam).Param(storagePluginParam).
 			Metadata(restfulspec.KeyOpenAPITags, a.tags).
 			Returns(http.StatusOK, "OK", v1alpha1.FileMeta{}),
 	)
+	// TODO: add list filemetas route
 }
 
 // GetFileMeta is handler of auth check route
 func (a *fileMeta) GetFileMeta(req *restful.Request, resp *restful.Response) {
-	key := path.Parameter(req, "key")
-	pluginName := path.Parameter(req, "storageplugin")
-
+	pluginName := path.Parameter(req, "storagePlugin")
+	objectNameParam := path.Parameter(req, "objectName")
 	ctx := req.Request.Context()
-
-	meta, err := a.impl.GetFileMeta(storage.CtxWithPluginName(ctx, pluginName), key)
+	meta, err := a.impl.GetFileMeta(storage.CtxWithPluginName(ctx, pluginName), objectNameParam)
 	if err != nil {
 		kerrors.HandleError(req, resp, err)
 		return
