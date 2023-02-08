@@ -139,12 +139,12 @@ func (p *StoragePluginClient) APIVersion() *schema.GroupVersion {
 	return p.groupVersion
 }
 
-// FullUrl returns actual url of
+// FullUrl returns actual url
 func (p *StoragePluginClient) FullUrl(uri string) string {
 	if p.classAddress == nil {
 		return uri
 	}
-	url := p.classAddress.URL
+	url := p.classAddress.URL.DeepCopy()
 	if p.groupVersion != nil {
 		url.Path = path.Join(url.Path, p.groupVersion.Identifier())
 	}
