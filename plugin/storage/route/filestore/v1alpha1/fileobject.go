@@ -145,7 +145,6 @@ func (a *fileObject) DeleteFileObject(req *restful.Request, resp *restful.Respon
 
 	ctx := req.Request.Context()
 	err := a.impl.DeleteFileObject(storage.CtxWithPluginName(ctx, pluginName), objectName)
-
 	if err != nil {
 		kerrors.HandleError(req, resp, err)
 		return
