@@ -202,4 +202,11 @@ func TestStoragePluginClientErrorReason(t *testing.T) {
 	statusError := &errors.StatusError{}
 	g.Expect(goerrors.As(err, &statusError)).To(BeTrue())
 	g.Expect(errors.IsNotFound(err)).To(BeTrue())
+
+	// get again to verify the full url
+	err = client.Get(context.Background(), "projects")
+	g.Expect(err).NotTo(BeNil())
+	statusError = &errors.StatusError{}
+	g.Expect(goerrors.As(err, &statusError)).To(BeTrue())
+	g.Expect(errors.IsNotFound(err)).To(BeTrue())
 }
