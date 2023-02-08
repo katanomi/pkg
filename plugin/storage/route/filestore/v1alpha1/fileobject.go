@@ -50,32 +50,32 @@ func (a *fileObject) GroupVersion() schema.GroupVersion {
 }
 
 func (a *fileObject) Register(ws *restful.WebService) {
-	storagePluginParam := ws.PathParameter("storageplugin", "storage plugin to be used")
-	keyParam := ws.PathParameter("key", "file key for naming file in storage")
-	fileTypeParam := ws.QueryParameter("filetype", "business type of file")
+	storagePluginParam := ws.PathParameter("storagePlugin", "storage plugin to be used")
+	objectNameParam := ws.PathParameter("objectName", "file object name in storage tools")
+	fileTypeParam := ws.QueryParameter("fileType", "business type of file")
 	ws.Route(
-		ws.PUT("storageplugin/{storageplugin}/fileobjects/{key:*}").To(a.PutFileObject).
+		ws.PUT("storageplugin/{storagePlugin}/fileobjects/{objectName:*}").To(a.PutFileObject).
 			AllowedMethodsWithoutContentType([]string{http.MethodPut}).
 			Produces(restful.MIME_OCTET).
 			Doc("Storage plugin put raw file").
-			Param(storagePluginParam).Param(keyParam).Param(fileTypeParam).
+			Param(storagePluginParam).Param(objectNameParam).Param(fileTypeParam).
 			Metadata(restfulspec.KeyOpenAPITags, a.tags).
 			Returns(http.StatusOK, "OK", v1alpha1.FileMeta{}),
 	)
 
 	ws.Route(
-		ws.GET("storageplugin/{storageplugin}/fileobjects/{key:*}").To(a.GetFileObject).
+		ws.GET("storageplugin/{storagePlugin}/fileobjects/{objectName:*}").To(a.GetFileObject).
 			AllowedMethodsWithoutContentType([]string{http.MethodGet}).
 			Doc("Storage plugin get raw file").
-			Param(storagePluginParam).Param(keyParam).Param(fileTypeParam).
+			Param(storagePluginParam).Param(objectNameParam).Param(fileTypeParam).
 			Metadata(restfulspec.KeyOpenAPITags, a.tags).
 			Returns(http.StatusOK, "OK", v1alpha1.FileMeta{}),
 	)
 
 	ws.Route(
-		ws.DELETE("storageplugin/{storageplugin}/fileobjects/{key:*}").To(a.DeleteFileObject).
+		ws.DELETE("storageplugin/{storagePlugin}/fileobjects/{objectName:*}").To(a.DeleteFileObject).
 			Doc("Storage plugin delete file by key").
-			Param(storagePluginParam).Param(keyParam).Param(fileTypeParam).
+			Param(storagePluginParam).Param(objectNameParam).Param(fileTypeParam).
 			Metadata(restfulspec.KeyOpenAPITags, a.tags).
 			Returns(http.StatusOK, "OK", v1alpha1.FileMeta{}),
 	)
@@ -85,25 +85,28 @@ func (a *fileObject) Register(ws *restful.WebService) {
 // PutFileObject is handler of put file object
 func (a *fileObject) PutFileObject(req *restful.Request, resp *restful.Response) {
 	log := logging.FromContext(req.Request.Context())
-	key := path.Parameter(req, "key")
-	pluginName := path.Parameter(req, "storageplugin")
+	objectName := path.Parameter(req, "objectName")
+	pluginName := path.Parameter(req, "storagePlugin")
+	fileType := req.QueryParameter("fileType")
 
 	fileSizeHeader := req.Request.Header.Get("Content-Length")
 	fileSize, _ := strconv.Atoi(fileSizeHeader)
 
-	// TODO: get filemeta from header x-katanomi-meta
-	filemeta := v1alpha1.FileMeta{
-		Spec: v1alpha1.FileMetaSpec{
-			Key:           key,
-			ContentType:   req.Request.Header.Get(restful.HEADER_ContentType),
-			FileType:      "",
-			ContentLength: int64(fileSize),
+	// TODO: get filemeta and annotation from header x-katanomi-meta and x-katanomi-annotation-
+
+	fileObject := filestorev1alpha1.FileObject{
+		FileMeta: v1alpha1.FileMeta{
+			Spec: v1alpha1.FileMetaSpec{
+				ContentType:   req.Request.Header.Get(restful.HEADER_ContentType),
+				FileType:      v1alpha1.FileType(fileType),
+				ContentLength: int64(fileSize),
+			},
 		},
+		FileReadCloser: req.Request.Body,
 	}
 
 	ctx := req.Request.Context()
-
-	newMeta, err := a.impl.PutFileObject(storage.CtxWithPluginName(ctx, pluginName), req.Request.Body, filemeta)
+	newMeta, err := a.impl.PutFileObject(storage.CtxWithPluginName(ctx, pluginName), objectName, &fileObject)
 	if err != nil {
 		log.Errorw("PutFileObject err", "err", err)
 		kerrors.HandleError(req, resp, err)
@@ -114,11 +117,11 @@ func (a *fileObject) PutFileObject(req *restful.Request, resp *restful.Response)
 
 // GetFileObject is handler of put file object
 func (a *fileObject) GetFileObject(req *restful.Request, resp *restful.Response) {
-	key := path.Parameter(req, "key")
-	pluginName := path.Parameter(req, "storageplugin")
+	objectName := path.Parameter(req, "objectName")
+	pluginName := path.Parameter(req, "storagePlugin")
 
 	ctx := req.Request.Context()
-	fileObject, err := a.impl.GetFileObject(storage.CtxWithPluginName(ctx, pluginName), key)
+	fileObject, err := a.impl.GetFileObject(storage.CtxWithPluginName(ctx, pluginName), objectName)
 
 	if err != nil {
 		kerrors.HandleError(req, resp, err)
@@ -137,11 +140,11 @@ func (a *fileObject) GetFileObject(req *restful.Request, resp *restful.Response)
 
 // DeleteFileObject is handler of delete file object
 func (a *fileObject) DeleteFileObject(req *restful.Request, resp *restful.Response) {
-	key := path.Parameter(req, "key")
-	pluginName := path.Parameter(req, "storageplugin")
+	objectName := path.Parameter(req, "objectName")
+	pluginName := path.Parameter(req, "storagePlugin")
 
 	ctx := req.Request.Context()
-	err := a.impl.DeleteFileObject(storage.CtxWithPluginName(ctx, pluginName), key)
+	err := a.impl.DeleteFileObject(storage.CtxWithPluginName(ctx, pluginName), objectName)
 
 	if err != nil {
 		kerrors.HandleError(req, resp, err)
