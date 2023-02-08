@@ -28,7 +28,7 @@ type NamedDeployApplicationResults []NamedDeployApplicationResult
 // useful for store deployment data in a list
 type NamedDeployApplicationResult struct {
 	// Name for the specific deployment application result
-	Name string `json:"name"`
+	Name string `json:"name,omitempty"`
 
 	// DeployApplicationResults result of the deployment
 	DeployApplicationResults `json:",inline"`
