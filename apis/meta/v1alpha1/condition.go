@@ -92,8 +92,8 @@ func IsConditionChanged(current, old apis.ConditionAccessor, conditionType apis.
 		return false
 	}
 	return (currentCondition.Status != oldCondition.Status) ||
-		!currentCondition.LastTransitionTime.Inner.Equal(&oldCondition.LastTransitionTime.Inner) ||
-		currentCondition.Reason != oldCondition.Reason
+		currentCondition.Reason != oldCondition.Reason ||
+		currentCondition.Message != oldCondition.Message
 }
 
 // GetCondition will return the first condition pointer filter by type in conditions
