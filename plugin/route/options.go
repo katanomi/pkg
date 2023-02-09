@@ -75,7 +75,9 @@ func ParsePagerFromRequest(req *restful.Request) metav1alpha1.Pager {
 
 // GetListOptionsFromRequest returns ListOptions based on a request
 func GetListOptionsFromRequest(req *restful.Request) (opts metav1alpha1.ListOptions) {
-	opts.Pager = ParsePagerFromRequest(req)
+	pager := ParsePagerFromRequest(req)
+	opts.Page = pager.Page
+	opts.ItemsPerPage = pager.ItemsPerPage
 	opts.Search = req.Request.URL.Query()
 	if _, exist := opts.Search[FetchAllQueryKey]; exist {
 		opts.All = true

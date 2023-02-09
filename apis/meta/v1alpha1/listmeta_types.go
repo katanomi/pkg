@@ -63,7 +63,11 @@ type ListMeta struct {
 
 // ListOptions options for list
 type ListOptions struct {
-	Pager
+	// ItemsPerPage desired number of items to be returned in each page
+	ItemsPerPage int `json:"itemsPerPage"`
+
+	// Page desired to be returned
+	Page int `json:"page"`
 
 	// All if true, return all items
 	All bool `json:"all"`
