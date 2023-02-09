@@ -48,6 +48,6 @@ type GitRepoFileSpec struct {
 	// Content file content
 	Content []byte `json:"content"`
 	// NodeSHA same as sha for file tree node.
-	NodeSHA    string                `json:"NodeSHA"`
+	NodeSHA    string                `json:"nodeSHA"`
 	Properties *runtime.RawExtension `json:"properties,omitempty"`
 }
