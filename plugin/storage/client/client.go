@@ -29,12 +29,6 @@ import (
 	duckv1 "knative.dev/pkg/apis/duck/v1"
 )
 
-// HeaderFileMeta is the header name of file meta
-const HeaderFileMeta = "x-katanomi-meta"
-
-// HeaderFileAnnotationPrefix is the annotation header prefix
-const HeaderFileAnnotationPrefix = "x-katanomi-annotation-"
-
 // Interface captures the set of operations for generically interacting with Kubernetes REST apis.
 type Interface interface {
 	Get(ctx context.Context, path string,
@@ -171,8 +165,8 @@ func (p *StoragePluginClient) Clone() *StoragePluginClient {
 	if p == nil {
 		return nil
 	}
-	p = &(*p)
-	return p
+	newP := *p
+	return &newP
 }
 
 func (p *StoragePluginClient) ForGroupVersion(gv *schema.GroupVersion) *StoragePluginClient {

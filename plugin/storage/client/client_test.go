@@ -135,9 +135,14 @@ var _ = Describe("Test.StoragePluginClient", func() {
 	})
 
 	Context("clone client with group version", func() {
+		beforeGV := &schema.GroupVersion{
+			Group:   "core",
+			Version: "v1alpha1",
+		}
 		BeforeEach(func() {
 			baseUrl = "https://example.com/api"
 			fakeUrl = "https://example.com/api/foo/v1/bar"
+			opts = []BuildOptions{WithGroupVersion(beforeGV)}
 		})
 		JustAfterEach(func() {
 			Expect(err).To(BeNil())
@@ -146,12 +151,12 @@ var _ = Describe("Test.StoragePluginClient", func() {
 		})
 
 		It("return new client with group version", func() {
-			storageClient = storageClient.ForGroupVersion(&schema.GroupVersion{
+			newClient := storageClient.ForGroupVersion(&schema.GroupVersion{
 				Group:   "foo",
 				Version: "v1",
 			})
-			err = storageClient.Get(context.Background(), "bar", pclient.ResultOpts(result))
-
+			err = newClient.Get(context.Background(), "bar", pclient.ResultOpts(result))
+			Expect(storageClient.groupVersion).To(Equal(beforeGV))
 		})
 	})
 })
