@@ -38,7 +38,7 @@ func init() {
 // RegisteredCapabilities declares which interface a versioned capability should implement.
 var RegisteredCapabilities = map[schema.GroupVersion]interface{}{
 	filestorev1alpha1.FileStoreV1alpha1GV: (*filestorev1alpha1.FileStoreCapable)(nil),
-	archivev1alpha1.ArchiveV1alpha1:       (*archivev1alpha1.ArchiveCapable)(nil),
+	archivev1alpha1.ArchiveV1alpha1GV:     (*archivev1alpha1.ArchiveCapable)(nil),
 }
 
 // GetImplementedCapabilities returns string list of capabilities an object implemented

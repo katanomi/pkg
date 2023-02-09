@@ -21,5 +21,5 @@ import (
 	"k8s.io/apimachinery/pkg/runtime/schema"
 )
 
-// ArchiveV1alpha1 is group version used to register these objects
-var ArchiveV1alpha1 = schema.GroupVersion{Group: archive.CapabilityName, Version: "v1alpha1"}
+// ArchiveV1alpha1GV is group version used to register these objects
+var ArchiveV1alpha1GV = schema.GroupVersion{Group: archive.CapabilityName, Version: "v1alpha1"}

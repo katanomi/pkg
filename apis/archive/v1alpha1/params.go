@@ -1,5 +1,5 @@
 /*
-Copyright 2022 The Katanomi Authors.
+Copyright 2023 The Katanomi Authors.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -14,18 +14,19 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package config
+package v1alpha1
 
-const (
-	// EnvServiceName is the environment variable name for service name
-	EnvServiceName = "SERVICE_NAME"
+type AggregateParams struct {
+	Query   AggregateQuery `json:"query,omitempty"`
+	Options *ListOptions   `json:"options,omitempty"`
+}
 
-	// EnvServiceMethod is the environment variable name for service access method
-	EnvServiceMethod = "SERVICE_METHOD"
+type ListParams struct {
+	Query   Query        `json:"query,omitempty"`
+	Options *ListOptions `json:"options,omitempty"`
+}
 
-	// EnvWebhookAddress is the environment variable name for webhook address
-	EnvWebhookAddress = "WEBHOOK_ADDRESS"
-
-	// EnvServiceAddress is the environment variable name for service address
-	EnvServiceAddress = "SERVICE_ADDRESS"
-)
+type DeleteParams struct {
+	Conditions []Condition   `json:"conditions,omitempty"`
+	Options    *DeleteOption `json:"options,omitempty"`
+}

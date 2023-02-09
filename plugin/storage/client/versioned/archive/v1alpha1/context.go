@@ -23,15 +23,15 @@ import (
 type storageKey struct{}
 
 // WithStorage inject storage client into context
-func WithStorage(ctx context.Context, storage ArchiveCapable) context.Context {
+func WithStorage(ctx context.Context, storage RecordInterface) context.Context {
 	return context.WithValue(ctx, storageKey{}, storage)
 }
 
 // GetStorage get storage client from context
-func GetStorage(ctx context.Context) ArchiveCapable {
+func GetStorage(ctx context.Context) RecordInterface {
 	val := ctx.Value(storageKey{})
 	if val == nil {
 		return nil
 	}
-	return val.(ArchiveCapable)
+	return val.(RecordInterface)
 }

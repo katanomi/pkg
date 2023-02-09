@@ -120,12 +120,12 @@ func TestGetImplementedCapabilities(t *testing.T) {
 		{
 			name: "archive capability",
 			obj:  &fakeArchiveImp{},
-			want: []string{archivecapv1alpha1.ArchiveV1alpha1.String()},
+			want: []string{archivecapv1alpha1.ArchiveV1alpha1GV.String()},
 		},
 		{
 			name: "multiple capabilities",
 			obj:  &fakeMultipleImp{},
-			want: []string{filestorev1alpha1.FileStoreV1alpha1GV.String(), archivecapv1alpha1.ArchiveV1alpha1.String()},
+			want: []string{filestorev1alpha1.FileStoreV1alpha1GV.String(), archivecapv1alpha1.ArchiveV1alpha1GV.String()},
 		},
 	}
 	for _, tt := range tests {
