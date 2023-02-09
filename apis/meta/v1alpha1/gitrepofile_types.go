@@ -46,6 +46,8 @@ type GitRepoFileSpec struct {
 	// Encoding maybe text or base64 when path is a file
 	Encoding *string `json:"encoding"`
 	// Content file content
-	Content    []byte                `json:"content"`
+	Content []byte `json:"content"`
+	// NodeSHA same as sha for file tree node.
+	NodeSHA    string                `json:"NodeSHA"`
 	Properties *runtime.RawExtension `json:"properties,omitempty"`
 }
