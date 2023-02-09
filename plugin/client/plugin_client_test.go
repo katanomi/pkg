@@ -22,6 +22,7 @@ import (
 	"testing"
 
 	"github.com/go-resty/resty/v2"
+	"github.com/google/go-cmp/cmp"
 	. "github.com/onsi/gomega"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime/schema"
@@ -141,4 +142,25 @@ func TestPluginClientErrorReason(t *testing.T) {
 	statusError := &errors.StatusError{}
 	g.Expect(goerrors.As(err, &statusError)).To(BeTrue())
 	g.Expect(errors.IsNotFound(err)).To(BeTrue())
+}
+
+func TestPluginClientClone(t *testing.T) {
+	beforeMeta := Meta{
+		Version: "v1",
+		BaseURL: "https://v1.com",
+	}
+
+	afterMeta := Meta{
+		Version: "v2",
+		BaseURL: "https://v2.com",
+	}
+
+	g := NewGomegaWithT(t)
+	client := NewPluginClient()
+	client.WithMeta(beforeMeta)
+
+	newClient := client.Clone()
+	newClient.WithMeta(afterMeta)
+
+	g.Expect(cmp.Diff(client.meta, beforeMeta)).To(BeEmpty())
 }
