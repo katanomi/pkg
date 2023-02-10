@@ -52,7 +52,7 @@ func TestConvertToVariableList(t *testing.T) {
 		g.Expect(diff).To(BeEmpty())
 	})
 
-	t.Run("test BuildRunGitStatus with label", func(t *testing.T) {
+	t.Run("test BuildRunGitStatus with label filter", func(t *testing.T) {
 		g := NewGomegaWithT(t)
 
 		expected := VariableList{}
