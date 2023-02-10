@@ -37,6 +37,7 @@ func IsTemporaryError(err error) bool {
 		errors.IsGone(err),
 		errors.IsRequestEntityTooLargeError(err),
 		errors.IsNotAcceptable(err),
+		errors.IsBadRequest(err),
 		errors.IsUnauthorized(err):
 		// TODO: this will not be possible for now, should fail
 		return false
