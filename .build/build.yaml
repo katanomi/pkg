@@ -83,7 +83,7 @@ spec:
           value:
             - passed-tests-rate=100
         - name: tool-image
-          value: registry.alauda.cn:60080/devops/builder-go:1.18-ubuntu-495a3d88
+          value: registry.alauda.cn:60080/devops/builder-go:1.19-ubuntu-5a018f69
     - name: golangci-lint
       timeout: 30m
       retries: 0
@@ -97,7 +97,7 @@ spec:
           workspace: cache
       params:
         - name: tool-image
-          value: registry.alauda.cn:60080/devops/builder-go:1.18-ubuntu-495a3d88
+          value: registry.alauda.cn:60080/devops/builder-go:1.19-ubuntu-5a018f69
         - name: command
           value: >
             export GOPROXY=https://build-nexus.alauda.cn/repository/golang/,direct
