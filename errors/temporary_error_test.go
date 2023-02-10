@@ -54,6 +54,10 @@ func TestIsTemporaryError(t *testing.T) {
 			errors.NewUnauthorized("error"),
 			false,
 		},
+		"BadRequest is not temporary ": {
+			errors.NewBadRequest("bad request"),
+			false,
+		},
 		// ... and so on
 
 		"Internal server error is a temporary error": {
