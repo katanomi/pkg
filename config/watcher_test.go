@@ -14,22 +14,32 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package v1alpha1
+package config
 
-// AggregateParams params for aggregating archive data
-type AggregateParams struct {
-	Query   AggregateQuery `json:"query,omitempty"`
-	Options *ListOptions   `json:"options,omitempty"`
-}
+import (
+	"sync"
+	"testing"
+	"time"
 
-// ListParams params for fetching list archive data
-type ListParams struct {
-	Query   Query        `json:"query,omitempty"`
-	Options *ListOptions `json:"options,omitempty"`
-}
+	"github.com/onsi/gomega"
+)
 
-// DeleteParams params for deleting archive data
-type DeleteParams struct {
-	Conditions []Condition   `json:"conditions,omitempty"`
-	Options    *DeleteOption `json:"options,omitempty"`
+func TestNewConfigWatcher(t *testing.T) {
+	g := gomega.NewGomegaWithT(t)
+	w := NewConfigWatcher(func(config *Config) {
+		g.Expect(config.Data).To(gomega.BeEmpty())
+		time.Sleep(2 * time.Second)
+	})
+
+	now := time.Now()
+	wg := sync.WaitGroup{}
+	wg.Add(2)
+	go func() {
+		for i := 0; i < 2; i++ {
+			w.Watch(&Config{})
+			wg.Done()
+		}
+	}()
+	wg.Wait()
+	g.Expect(time.Since(now)).To(gomega.BeNumerically(">", 2*time.Second))
 }

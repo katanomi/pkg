@@ -22,13 +22,10 @@ import (
 	"os"
 	"sync"
 
-	"github.com/katanomi/pkg/watcher"
-
-	"go.uber.org/zap"
-
-	corev1 "k8s.io/api/core/v1"
-
 	"github.com/katanomi/pkg/storage/configmap"
+	"github.com/katanomi/pkg/watcher"
+	"go.uber.org/zap"
+	corev1 "k8s.io/api/core/v1"
 	"knative.dev/pkg/system"
 )
 
@@ -47,6 +44,7 @@ type Manager struct {
 	Informer watcher.DefaultingWatcherWithOnChange
 	Logger   *zap.SugaredLogger
 	lock     sync.RWMutex
+	watchers []Watcher
 	*Config
 }
 
@@ -71,6 +69,14 @@ func NewManager(informer watcher.DefaultingWatcherWithOnChange, logger *zap.Suga
 	return &manager
 }
 
+// AddWatcher add a watcher to manager
+// the watcher will be called when the configmap is changed
+func (manager *Manager) AddWatcher(w Watcher) {
+	manager.lock.Lock()
+	defer manager.lock.Unlock()
+	manager.watchers = append(manager.watchers, w)
+}
+
 // GetConfig will return the config of manager
 func (manager *Manager) GetConfig() *Config {
 	if manager == nil {
@@ -92,12 +98,22 @@ func (manager *Manager) applyConfig(cm *corev1.ConfigMap) {
 		return
 	}
 
-	manager.lock.Lock()
-	defer manager.lock.Unlock()
-	// whole replacement
-	manager.Config = &Config{
+	newConfig := &Config{
 		Data: cm.Data,
 	}
+
+	manager.lock.Lock()
+	defer manager.lock.Unlock()
+	if len(manager.watchers) > 0 {
+		watchers := append([]Watcher{}, manager.watchers...)
+		go func() {
+			for _, f := range watchers {
+				f.Watch(newConfig)
+			}
+		}()
+	}
+	// whole replacement
+	manager.Config = newConfig
 }
 
 // Name return config name for configuration

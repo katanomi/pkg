@@ -54,7 +54,7 @@ const (
 	// CreationTimestampField the name of creation timestamp field
 	CreationTimestampField = "creationTimestamp"
 	// CleanupTimeField the name of deletion timestamp field
-	CleanupTimeField = "cleanupAt"
+	CleanupTimeField = "cleanupTime"
 )
 
 // MetadataKey returns the metadata key
