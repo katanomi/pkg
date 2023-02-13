@@ -21,6 +21,10 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"errors"
+	"sync"
+
+	"github.com/katanomi/pkg/parallel"
+	"knative.dev/pkg/logging"
 
 	"github.com/katanomi/pkg/tracing"
 	corev1 "k8s.io/api/core/v1"
@@ -29,6 +33,7 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/client-go/dynamic"
+	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
 	"k8s.io/client-go/rest"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
@@ -195,8 +200,67 @@ func (m *ClusterRegistryClient) GetConfigFromCluster(ctx context.Context, cluste
 	return
 }
 
+// ListClustersNamespaces will list namespace with name "namespace" in all clusters
 func (m *ClusterRegistryClient) ListClustersNamespaces(ctx context.Context, namespace string) (clusterNamespaces map[*corev1.ObjectReference][]corev1.Namespace, err error) {
-	return map[*corev1.ObjectReference][]corev1.Namespace{}, err
+	clusters, err := m.Interface.
+		Resource(ClusterRegistryGroupVersion.WithResource("clusters")).
+		Namespace(namespace).
+		List(ctx, metav1.ListOptions{ResourceVersion: "0"})
+
+	maxConcurrency := 10
+	log := logging.FromContext(ctx)
+	p := parallel.P(log, "ListClusterNamespace").SetConcurrent(maxConcurrency)
+
+	resultMap := sync.Map{}
+
+	for _, _item := range clusters.Items {
+		clusterRef := &corev1.ObjectReference{
+			Kind:       _item.GetKind(),
+			Namespace:  _item.GetNamespace(),
+			Name:       _item.GetName(),
+			APIVersion: _item.GetAPIVersion(),
+		}
+
+		p.Add(func() (interface{}, error) {
+
+			clusterClient, err := m.GetClient(ctx, clusterRef, clientgoscheme.Scheme)
+			if err != nil {
+				log.Errorw("error to get cluster client", "cluster", clusterRef.Namespace+"/"+clusterRef.Name, "err", err.Error())
+				return nil, err
+			}
+
+			ns := &corev1.Namespace{}
+			err = clusterClient.Get(ctx, client.ObjectKey{Name: namespace}, ns)
+			if err != nil {
+				return nil, err
+			}
+
+			resultMap.Store(clusterRef, ns)
+			return nil, nil
+		})
+	}
+
+	_, err = p.Do().Wait()
+	if err != nil {
+		return nil, err
+	}
+
+	clusterNamespaces = map[*corev1.ObjectReference][]corev1.Namespace{}
+	resultMap.Range(func(key, value interface{}) bool {
+		clusterRef, ok := key.(corev1.ObjectReference)
+		if !ok {
+			return true
+		}
+		ns, ok := value.(*corev1.Namespace)
+		if !ok {
+			return true
+		}
+
+		clusterNamespaces[&clusterRef] = []corev1.Namespace{*ns}
+		return true
+	})
+
+	return clusterNamespaces, nil
 }
 
 func (m *ClusterRegistryClient) StartWarmUpClientCache(ctx context.Context) {

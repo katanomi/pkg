@@ -20,6 +20,8 @@ import (
 	"context"
 	"strings"
 
+	"github.com/katanomi/pkg/multicluster"
+
 	"go.uber.org/zap"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/util/rand"
@@ -29,10 +31,10 @@ import (
 
 // TestContext a test context
 type TestContext struct {
-	Context context.Context
-	Config  *rest.Config
-	Client  client.Client
-
+	Context            context.Context
+	Config             *rest.Config
+	Client             client.Client
+	MultiClusterClient multicluster.Interface
 	*zap.SugaredLogger
 
 	Namespace string
