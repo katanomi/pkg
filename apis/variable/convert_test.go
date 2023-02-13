@@ -52,6 +52,16 @@ func TestConvertToVariableList(t *testing.T) {
 		g.Expect(diff).To(BeEmpty())
 	})
 
+	t.Run("test object is nil", func(t *testing.T) {
+		g := NewGomegaWithT(t)
+
+		expected := VariableList{}
+		convertor := VariableConverter{}
+		got, err := convertor.ConvertToVariableList(nil)
+		g.Expect(err).To(Succeed())
+		g.Expect(expected).To(Equal(got))
+	})
+
 	t.Run("test BuildRunGitStatus with label filter", func(t *testing.T) {
 		g := NewGomegaWithT(t)
 

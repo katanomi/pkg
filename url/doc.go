@@ -14,31 +14,5 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package variable
-
-import (
-	"strings"
-
-	"k8s.io/utils/strings/slices"
-)
-
-// LabelFilter label filter func
-func LabelFilter(label string) FilterFunc {
-	return func(variable *Variable) bool {
-		if variable == nil {
-			return false
-		}
-
-		varLabels := strings.Split(variable.Label, ",")
-		return slices.Contains(varLabels, label)
-	}
-}
-
-func filtVariable(s *Variable, filters ...FilterFunc) bool {
-	for _, f := range filters {
-		if f != nil && f(s) == false {
-			return false
-		}
-	}
-	return true
-}
+// Package url contains general processing functions for some urls.
+package url

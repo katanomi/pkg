@@ -131,6 +131,9 @@
             "example": "https://github.com/katanomi/spec/tree/main"
         },
         {
+            "name": "versionPhase"
+        },
+        {
             "name": "version",
             "example": "v1.2.3",
             "label": "version"
