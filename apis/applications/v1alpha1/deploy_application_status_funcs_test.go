@@ -19,7 +19,6 @@ package v1alpha1
 import (
 	"testing"
 
-	// . "github.com/katanomi/pkg/testing"
 	"github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
 )
@@ -38,7 +37,7 @@ func TestDeployApplicationResults_IsEmpty(t *testing.T) {
 		deployApp = &DeployApplicationResults{ApplicationRef: &corev1.ObjectReference{}}
 		g.Expect(deployApp.IsEmpty()).To(gomega.BeTrue())
 	})
-	t.Run("has application reference and after, should return false", func(t *testing.T) {
+	t.Run("has empty data should return true", func(t *testing.T) {
 		g := gomega.NewGomegaWithT(t)
 
 		// only checks if there is an item, the contents are not checked
@@ -47,16 +46,23 @@ func TestDeployApplicationResults_IsEmpty(t *testing.T) {
 			After: []DeployApplicationStatus{
 				{},
 			},
+			Before: []DeployApplicationStatus{
+				{},
+			},
 		}
-		g.Expect(deployApp.IsEmpty()).To(gomega.BeFalse())
+		g.Expect(deployApp.IsEmpty()).To(gomega.BeTrue())
 	})
-	t.Run("has application reference and before, should return false", func(t *testing.T) {
+	t.Run("has application reference before with data, should return false", func(t *testing.T) {
 		g := gomega.NewGomegaWithT(t)
 
 		deployApp = &DeployApplicationResults{
-			ApplicationRef: &corev1.ObjectReference{},
+			ApplicationRef: &corev1.ObjectReference{
+				Name: "abc",
+			},
 			Before: []DeployApplicationStatus{
-				{},
+				{
+					Name: "abc",
+				},
 			},
 		}
 		g.Expect(deployApp.IsEmpty()).To(gomega.BeFalse())

@@ -16,8 +16,25 @@ limitations under the License.
 
 package v1alpha1
 
+import (
+	corev1 "k8s.io/api/core/v1"
+)
+
 // IsEmpty returns true if there is not enought information
 // regarding the application deployment
 func (app *DeployApplicationResults) IsEmpty() bool {
-	return app == nil || app.ApplicationRef == nil || (len(app.After) == 0 && len(app.Before) == 0)
+	return app == nil || isAppRefEmpty(app.ApplicationRef) || (isDeployApplicationStatusEmpty(app.After) && isDeployApplicationStatusEmpty(app.Before))
+}
+
+func isAppRefEmpty(ref *corev1.ObjectReference) bool {
+	return ref == nil || (ref.Kind == "" && ref.Name == "" && ref.Namespace == "")
+}
+
+func isDeployApplicationStatusEmpty(items []DeployApplicationStatus) bool {
+	for _, item := range items {
+		if item.Name != "" || item.Version != "" || item.Status != "" {
+			return false
+		}
+	}
+	return true
 }
