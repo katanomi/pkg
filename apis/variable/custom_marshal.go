@@ -17,6 +17,7 @@ limitations under the License.
 package variable
 
 import (
+	"fmt"
 	"reflect"
 
 	corev1 "k8s.io/api/core/v1"
@@ -24,14 +25,28 @@ import (
 	"k8s.io/utils/field"
 )
 
+var (
+	rbacv1SubjectName         = reflect.TypeOf(rbacv1.Subject{}).Name()
+	corev1ObjectReferenceName = reflect.TypeOf(corev1.ObjectReference{}).Name()
+
+	rbacv1SubjectPkgPath         = reflect.TypeOf(rbacv1.Subject{}).PkgPath()
+	corev1ObjectReferencePkgPath = reflect.TypeOf(corev1.ObjectReference{}).PkgPath()
+)
+
 // DefaultNameMarshalFuncs define a default custom type conversion function
 var DefaultNameMarshalFuncs = map[string]ConvertFunc{
-	reflect.TypeOf(rbacv1.Subject{}).Name():         MarshalSubject,
-	reflect.TypeOf(corev1.ObjectReference{}).Name(): MarshalObjectReference,
+	rbacv1SubjectName:         MarshalSubject,
+	corev1ObjectReferenceName: MarshalObjectReference,
 }
 
 // MarshalSubject marshal the Subject of k8s.io/api/rbac/v1 to variables.
-func MarshalSubject(st reflect.Type, base *field.Path, convertFuncs MarshalFuncManager) ([]Variable, error) {
+func MarshalSubject(st reflect.Type, base *field.Path, _ MarshalFuncManager) ([]Variable, error) {
+	if rbacv1SubjectName != st.Name() || st.PkgPath() != rbacv1SubjectPkgPath {
+		return []Variable{}, fmt.Errorf(
+			"get marshal type[%s/%s] don't match %s/%s",
+			st.PkgPath(), st.Name(), rbacv1SubjectPkgPath, rbacv1SubjectName)
+	}
+
 	return []Variable{
 		{Name: base.Child("kind").String(), Example: "User"},
 		{Name: base.Child("apiGroup").String()},
@@ -41,7 +56,13 @@ func MarshalSubject(st reflect.Type, base *field.Path, convertFuncs MarshalFuncM
 }
 
 // MarshalObjectReference marshal the ObjectReference of k8s.io/api/core/v1 to variables.
-func MarshalObjectReference(st reflect.Type, base *field.Path, convertFuncs MarshalFuncManager) ([]Variable, error) {
+func MarshalObjectReference(st reflect.Type, base *field.Path, _ MarshalFuncManager) ([]Variable, error) {
+	if corev1ObjectReferenceName != st.Name() || st.PkgPath() != corev1ObjectReferencePkgPath {
+		return []Variable{}, fmt.Errorf(
+			"get marshal type[%s/%s] don't match %s/%s",
+			st.PkgPath(), st.Name(), corev1ObjectReferencePkgPath, corev1ObjectReferenceName)
+	}
+
 	return []Variable{
 		{Name: base.Child("kind").String(), Example: "DeliveryRun"},
 		{Name: base.Child("namespace").String(), Example: "default"},

@@ -20,6 +20,8 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/google/go-cmp/cmp"
+	. "github.com/onsi/gomega"
 	"k8s.io/utils/field"
 )
 
@@ -80,6 +82,60 @@ func TestNewVariable(t *testing.T) {
 			if got := NewVariable(tt.field, tt.base); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("NewVariable() = %v, want %v", got, tt.want)
 			}
+		})
+	}
+}
+
+func TestVariableList_Filter(t *testing.T) {
+	variableList := VariableList{
+		Items: []Variable{
+			{Name: "var1", Example: "1", Label: "label"},
+			{Name: "var2", Example: "1", Label: "label2"},
+			{Name: "var3", Example: "2", Label: "label3,label2"},
+			{Name: "var4", Example: "3", Label: "label2"},
+		},
+	}
+	tests := map[string]struct {
+		filters      []FilterFunc
+		variableList VariableList
+		want         VariableList
+	}{
+		"filter not set": {
+			variableList: variableList,
+			want:         variableList,
+		},
+		"set label filter": {
+			variableList: variableList,
+			filters:      []FilterFunc{LabelFilter("label2")},
+			want: VariableList{
+				Items: []Variable{
+					{Name: "var2", Example: "1", Label: "label2"},
+					{Name: "var3", Example: "2", Label: "label3,label2"},
+					{Name: "var4", Example: "3", Label: "label2"}},
+			},
+		},
+		"set label filter with empty label": {
+			variableList: variableList,
+			filters:      []FilterFunc{LabelFilter("")},
+			want:         VariableList{Items: []Variable{}},
+		},
+		"set mulit filter": {
+			variableList: variableList,
+			filters:      []FilterFunc{LabelFilter("label2"), LabelFilter("label3")},
+			want: VariableList{
+				Items: []Variable{
+					{Name: "var3", Example: "2", Label: "label3,label2"},
+				},
+			},
+		},
+	}
+	for name, tt := range tests {
+		t.Run(name, func(t *testing.T) {
+			g := NewGomegaWithT(t)
+
+			tt.variableList.Filter(tt.filters...)
+			diff := cmp.Diff(tt.variableList, tt.want)
+			g.Expect(diff).To(BeEmpty())
 		})
 	}
 }

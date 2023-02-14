@@ -38,6 +38,13 @@ var DefaultKindMarshalFuncs = map[reflect.Kind]ConvertFunc{
 	reflect.Pointer: convertPointer,
 }
 
+// Marshal returns a list of variables based on v.
+// use the default parameters of VariableMarshaller to call Marshal for processing.
+func Marshal(v interface{}) (VariableList, error) {
+	marshaller := VariableMarshaller{Object: v}
+	return marshaller.Marshal()
+}
+
 // VariableMarshaller variable converter
 type VariableMarshaller struct {
 	NameMarshalFuncs map[string]ConvertFunc
