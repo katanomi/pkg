@@ -29,10 +29,11 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes/fake"
 	"knative.dev/pkg/configmap/informer"
+	"knative.dev/pkg/system"
 	_ "knative.dev/pkg/system/testing"
 )
 
-var _ = Describe("NewManger and GetConfig", func() {
+var _ = Describe("NewManger and GetConfig and GetFeatureFlags", func() {
 
 	var (
 		configmap  *corev1.ConfigMap
@@ -78,6 +79,15 @@ var _ = Describe("NewManger and GetConfig", func() {
 			})
 		})
 
+		When("get config before configmap change", func() {
+			It("return default feature flags", func() {
+				Expect(manager.GetFeatureFlag(VersionEnabledFeatureKey)).To(Equal(DefaultVersionEnabled))
+				Expect(manager.GetFeatureFlag(InitializeAllowLocalRequestsFeatureKey)).To(Equal(DefaultInitializeAllowLocalRequests))
+				Expect(manager.GetFeatureFlag(PrunerDelayAfterCompletedFeatureKey)).To(Equal(DefaultPrunerDelayAfterCompleted))
+				Expect(manager.GetFeatureFlag(PrunerKeepFeatureKey)).To(Equal(DefaultPrunerKeep))
+			})
+		})
+
 		When("get config after update configmap ", func() {
 			It("should return updated data", func() {
 				By("change the manger watched configmap")
@@ -107,6 +117,51 @@ var _ = Describe("NewManger and GetConfig", func() {
 				Expect(manager.GetConfig().Data).To(Equal(data), "should return updated config again")
 			})
 		})
+
+		When("get config after update configmap ", func() {
+			It("should return updated data", func() {
+				By("change the manger watched configmap")
+
+				data := map[string]string{
+					VersionEnabledFeatureKey: "true",
+					PrunerKeepFeatureKey:     "6000",
+					"other.test":             "1",
+				}
+				watcher.OnChange(&corev1.ConfigMap{
+					ObjectMeta: metav1.ObjectMeta{
+						Name:      cmName,
+						Namespace: ns,
+					},
+					Data: data,
+				})
+				Expect(manager.GetFeatureFlag(VersionEnabledFeatureKey)).To(Equal(FeatureValue("true")))
+				Expect(manager.GetFeatureFlag(PrunerKeepFeatureKey)).To(Equal(FeatureValue("6000")))
+				Expect(manager.GetFeatureFlag(InitializeAllowLocalRequestsFeatureKey)).To(Equal(DefaultInitializeAllowLocalRequests))
+				Expect(manager.GetFeatureFlag(PrunerDelayAfterCompletedFeatureKey)).To(Equal(DefaultPrunerDelayAfterCompleted))
+
+				By("change the manger watched configmap again")
+
+				data = map[string]string{
+					VersionEnabledFeatureKey: "false",
+					PrunerKeepFeatureKey:     "1000",
+					"other.test":             "1",
+				}
+
+				watcher.OnChange(&corev1.ConfigMap{
+					ObjectMeta: metav1.ObjectMeta{
+						Name:      cmName,
+						Namespace: ns,
+					},
+					Data: data,
+				})
+				Expect(manager.GetFeatureFlag(VersionEnabledFeatureKey)).To(Equal(FeatureValue("false")))
+				Expect(manager.GetFeatureFlag(PrunerKeepFeatureKey)).To(Equal(FeatureValue("1000")))
+				Expect(manager.GetFeatureFlag(InitializeAllowLocalRequestsFeatureKey)).To(Equal(DefaultInitializeAllowLocalRequests))
+				Expect(manager.GetFeatureFlag(PrunerDelayAfterCompletedFeatureKey)).To(Equal(DefaultPrunerDelayAfterCompleted))
+				Expect(manager.GetFeatureFlag("other.test")).To(Equal(FeatureValue("1")))
+
+			})
+		})
 	})
 })
 
@@ -130,4 +185,41 @@ func TestKCMContext(t *testing.T) {
 
 	ctx = WithKatanomiConfigManager(ctx, manager)
 	g.Expect(KatanomiConfigManager(ctx)).To(Equal(manager))
+}
+
+func TestIsSameConfigMap(t *testing.T) {
+	t.Run("objectmeta match, return true", func(t *testing.T) {
+		g := NewGomegaWithT(t)
+		client := fake.NewSimpleClientset()
+
+		watcher := informer.NewInformedWatcher(client, "cm")
+		manager := NewManager(watcher, nil, "cm")
+
+		sameConfig := corev1.ConfigMap{ObjectMeta: metav1.ObjectMeta{Name: "cm", Namespace: system.Namespace()}}
+		g.Expect(manager.isSameConfigMap(&sameConfig)).To(Equal(true))
+	})
+
+	t.Run("when objectmeta not match, return false", func(t *testing.T) {
+		g := NewGomegaWithT(t)
+		client := fake.NewSimpleClientset()
+
+		watcher := informer.NewInformedWatcher(client, "cm")
+		manager := NewManager(watcher, nil, "cm")
+
+		sameConfig := corev1.ConfigMap{ObjectMeta: metav1.ObjectMeta{Name: "other", Namespace: system.Namespace()}}
+		g.Expect(manager.isSameConfigMap(&sameConfig)).To(Equal(false))
+	})
+
+	t.Run("when objectmeta not match, return false", func(t *testing.T) {
+		g := NewGomegaWithT(t)
+		client := fake.NewSimpleClientset()
+
+		watcher := informer.NewInformedWatcher(client, "cm")
+		manager := NewManager(watcher, nil, "cm")
+
+		manager = nil
+		sameConfig := corev1.ConfigMap{ObjectMeta: metav1.ObjectMeta{Name: "other", Namespace: system.Namespace()}}
+		g.Expect(manager.isSameConfigMap(&sameConfig)).To(Equal(false), "when manager is nil, return false")
+	})
+
 }

@@ -42,12 +42,12 @@ type GitRevision struct {
 	// Raw revision in git clone format
 	// refs/head/main or refs/pulls/1/head etc
 	// +optional
-	Raw string `json:"raw,omitempty"`
+	Raw string `json:"raw,omitempty" variable:"example=refs/head/main"`
 
 	// Type stores the type of revision:
 	// Branch, PullRequest, Tag, or Commit
 	// +optional
-	Type GitRevisionType `json:"type,omitempty"`
+	Type GitRevisionType `json:"type,omitempty" variable:"example=Branch"`
 
 	// ID for the specific revision type:
 	// Branch: branch name
@@ -55,7 +55,7 @@ type GitRevision struct {
 	// Tag: tag name
 	// Commit: commit short ID
 	// +optional
-	ID string `json:"id,omitempty"`
+	ID string `json:"id,omitempty" variable:"example=1"`
 }
 
 // GetValWithKey returns the list of keys and values to support variable substitution

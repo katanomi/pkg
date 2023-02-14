@@ -27,6 +27,7 @@ import (
 	"go.uber.org/zap"
 
 	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/katanomi/pkg/storage/configmap"
 	"knative.dev/pkg/system"
@@ -47,6 +48,10 @@ type Manager struct {
 	Informer watcher.DefaultingWatcherWithOnChange
 	Logger   *zap.SugaredLogger
 	lock     sync.RWMutex
+
+	// source store mange config source object.
+	configMapRef *corev1.ObjectReference
+
 	*Config
 }
 
@@ -63,12 +68,24 @@ func NewManager(informer watcher.DefaultingWatcherWithOnChange, logger *zap.Suga
 	coreCM.Namespace = system.Namespace()
 	coreCM.Name = cmName
 
+	manager.configMapRef = &corev1.ObjectReference{
+		Name:      coreCM.Name,
+		Namespace: coreCM.Namespace,
+	}
+
 	watcher := configmap.NewWatcher(cmName, manager.Informer)
 	watcher.AddWatch(coreCM.GetName(), configmap.NewConfigConstructor(coreCM, func(cm *corev1.ConfigMap) {
 		manager.applyConfig(cm)
 	}))
 	watcher.Run()
 	return &manager
+}
+
+func (manager *Manager) isSameConfigMap(obj metav1.Object) bool {
+	if manager == nil || manager.configMapRef == nil {
+		return false
+	}
+	return obj.GetName() == manager.configMapRef.Name && obj.GetNamespace() == manager.configMapRef.Namespace
 }
 
 // GetConfig will return the config of manager
@@ -79,6 +96,20 @@ func (manager *Manager) GetConfig() *Config {
 	manager.lock.Lock()
 	defer manager.lock.Unlock()
 	return manager.Config
+}
+
+// GetFeatureFlag get the function switch data, if the function switch is not set,
+// return the default value of the switch.
+func (manager *Manager) GetFeatureFlag(flag string) FeatureValue {
+	defaultValue := defaultFeatureValue[flag]
+	if manager == nil {
+		return defaultValue
+	}
+
+	if value, ok := manager.Data[flag]; ok {
+		return FeatureValue(value)
+	}
+	return defaultValue
 }
 
 func (manager *Manager) applyConfig(cm *corev1.ConfigMap) {

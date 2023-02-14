@@ -52,7 +52,7 @@ var DefinitionTriggeredTypeValues = definitionTriggeredTypeValuesType{
 type TriggeredBy struct {
 	// Reference to the user that triggered the object. Any Kubernetes `Subject` is accepted.
 	// +optional
-	User *rbacv1.Subject `json:"user,omitempty"`
+	User *rbacv1.Subject `json:"user,omitempty" variable:"example=admin"`
 
 	// Cloud Event data for the event that triggered.
 	// +optional
@@ -65,11 +65,11 @@ type TriggeredBy struct {
 	// Date time of creation of triggered event. Will match a resource's metadata.creationTimestamp
 	// it is added here for convinience only
 	// +optional
-	TriggeredTimestamp *metav1.Time `json:"triggeredTimestamp,omitempty"`
+	TriggeredTimestamp *metav1.Time `json:"triggeredTimestamp,omitempty" variable:"label=default;example=2022-08-05T05:34:39Z"`
 
 	// Indicates trigger type, such as Manual Automated.
 	// +optional
-	TriggeredType DefinitionTriggeredType `json:"triggeredType,omitempty"`
+	TriggeredType DefinitionTriggeredType `json:"triggeredType,omitempty" variable:"example=Automated"`
 }
 
 // IsZero basic function returns true when all attributes of the object are empty

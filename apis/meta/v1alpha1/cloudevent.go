@@ -28,16 +28,16 @@ import (
 )
 
 type CloudEvent struct {
-	ID      string `json:"id,omitempty"`
-	Source  string `json:"source,omitempty"`
-	Subject string `json:"subject,omitempty"`
+	ID      string `json:"id,omitempty" variable:"example=b51b6a90be6a6f7a2aa65049ad.2022-08-05-05-34"`
+	Source  string `json:"source,omitempty" variable:"example=https://github.com/repository"`
+	Subject string `json:"subject,omitempty" variable:"example=58127"`
 	// Type of event
-	Type string `json:"type,omitempty"`
+	Type string `json:"type,omitempty" variable:"example=dev.katanomi.cloudevents.gitlab.Merge Request Hook"`
 	// Data event payload
-	Data            string            `json:"data,omitempty"`
-	Time            metav1.Time       `json:"time,omitempty"`
-	SpecVersion     string            `json:"specversion,omitempty"`
-	DataContentType string            `json:"datacontenttype,omitempty"`
+	Data            string            `json:"data,omitempty" variable:"-"`
+	Time            metav1.Time       `json:"time,omitempty" variable:"example=2022-08-05T05:34:39Z"`
+	SpecVersion     string            `json:"specversion,omitempty" variable:"example=1.0"`
+	DataContentType string            `json:"datacontenttype,omitempty" variable:"example=application/json"`
 	Extensions      map[string]string `json:"extensions,omitempty"`
 }
 
