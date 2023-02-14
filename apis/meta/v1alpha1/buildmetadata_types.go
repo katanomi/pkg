@@ -47,7 +47,7 @@ type BuildMetaDataStatus struct {
 type BaseGitStatus struct {
 	// URL means git repository url of current buildrun
 	// +optional
-	URL string `json:"url,omitempty" variable:"example=https://github.com/katanomi/spec/tree/release-0.3"`
+	URL string `json:"url,omitempty" variable:"example=https://github.com/repository/tree/main"`
 
 	// Revision code revision used. uses a git clone format
 	// refs/head/main or refs/pulls/1/head etc
@@ -59,7 +59,7 @@ type BaseGitStatus struct {
 	LastCommit *BuildGitCommitStatus `json:"lastCommit,omitempty" variable:"example=3cb8901f"`
 	// PullRequest means pull request status of current build
 	// +optional
-	PullRequest *BuildGitPullRequestStatus `json:"pullRequest,omitempty" variable:"example=123"`
+	PullRequest *BuildGitPullRequestStatus `json:"pullRequest,omitempty" variable:"example=1"`
 	// Branch status of current build
 	// +optional
 	Branch *BuildGitBranchStatus `json:"branch,omitempty" variable:"example=main"`
@@ -92,7 +92,7 @@ type BuildRunGitStatus struct {
 type BuildGitBranchStatus struct {
 	// Name of git branch
 	// +optional
-	Name string `json:"name,omitempty" variable:"label=common;example=main"`
+	Name string `json:"name,omitempty" variable:"label=default;example=main"`
 	// Protected represent if is the protected branch
 	// +optional
 	Protected bool `json:"protected" variable:"example=true"`
@@ -101,19 +101,19 @@ type BuildGitBranchStatus struct {
 	Default bool `json:"default" variable:"example=true"`
 	// WebURL to access the branch
 	// +optional
-	WebURL string `json:"webURL,omitempty" variable:"example=https://github.com/katanomi/spec/tree/main"`
+	WebURL string `json:"webURL,omitempty" variable:"example=https://github.com/repository/tree/main"`
 }
 
 type BuildGitCommitStatus struct {
 	// ShortID means last commit short id
 	// +optional
-	ShortID string `json:"shortID,omitempty" variable:"label=common;example=3cb8901f"`
+	ShortID string `json:"shortID,omitempty" variable:"label=default;example=3cb8901f"`
 	// ID represent last commit id
 	// +optional
 	ID string `json:"id,omitempty" variable:"example=3cb8901fb325228ea27b751fcf0d6c0658a57f01"`
 	// Title represent last commit title
 	// +optional
-	Title string `json:"title,omitempty" variable:"example=Update build.yaml"`
+	Title string `json:"title,omitempty" variable:"example=Update README.md"`
 	// Message of last commit
 	// +optional
 	Message string `json:"message,omitempty" variable:"example=Author email when running build"`
@@ -125,28 +125,28 @@ type BuildGitCommitStatus struct {
 	PushedAt *metav1.Time `json:"pushedAt,omitempty" variable:"example=2022-08-04T17:21:36Z"`
 	// webURL access link of the commit
 	// +optional
-	WebURL string `json:"webURL,omitempty" variable:"example=https://github.com/katanomi/commit/3cb8901fb325228ea27b751fcf0d6c0658a57f01"`
+	WebURL string `json:"webURL,omitempty" variable:"example=https://github.com/repository/commit/3cb8901fb325228ea27b751fcf0d6c0658a57f01"`
 }
 
 type BuildGitPullRequestStatus struct {
 	// ID is identity of pull request
 	// +optional
-	ID string `json:"id,omitempty" variable:"label=common;example=123"`
+	ID string `json:"id,omitempty" variable:"label=default;example=1"`
 	// Title of pullrequest if current build is building a pull request
 	// +optional
 	Title string `json:"title,omitempty" variable:"example=Lets merge code"`
 	// Source of pullrequest if current build is building a pull request
 	// +optional
-	Source string `json:"source,omitempty" variable:"label=common;example=fix/author-email"`
+	Source string `json:"source,omitempty" variable:"label=default;example=branch"`
 	// Target of pullrequest if current build is building a pull request
 	// +optional
-	Target string `json:"target,omitempty" variable:"label=common;example=main"`
+	Target string `json:"target,omitempty" variable:"label=default;example=main"`
 	// AuthorEmail of pull request
 	// +optional
 	AuthorEmail string `json:"authorEmail,omitempty" variable:"example=joedoe@example.com"`
 	// WebURL to access pull request
 	// +optional
-	WebURL string `json:"webURL,omitempty" variable:"example=https://github.com/katanomi/spec/pull/123"`
+	WebURL string `json:"webURL,omitempty" variable:"example=https://github.com/repository/pull/1"`
 	// HasConflicts represent if has conflicts in pull request
 	// +optional
 	HasConflicts bool `json:"hasConflicts" variable:"example=false"`

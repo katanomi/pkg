@@ -28,7 +28,7 @@
         },
         {
             "name": "cloudEvent.source",
-            "example": "https://github.com/katanomi/spec"
+            "example": "https://github.com/repository"
         },
         {
             "name": "cloudEvent.subject",
@@ -76,7 +76,7 @@
         {
             "name": "triggeredTimestamp",
             "example": "2022-08-05T05:34:39Z",
-            "label": "common"
+            "label": "default"
         },
         {
             "name": "triggeredType",

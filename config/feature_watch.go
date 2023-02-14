@@ -99,8 +99,8 @@ func predicatesUpdateFunc(manager *Manager, featureChanged HasFeatureChangedFunc
 			featureChanged = defaultFeatureChanged
 		}
 
-		newConfig, _ := NewFeatureFlagsFromMap(new.Data)
-		oldConfig, _ := NewFeatureFlagsFromMap(old.Data)
+		newConfig := &FeatureFlags{Data: new.Data}
+		oldConfig := &FeatureFlags{Data: old.Data}
 		return featureChanged(newConfig, oldConfig)
 	}
 }

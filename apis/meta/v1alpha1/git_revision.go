@@ -55,7 +55,7 @@ type GitRevision struct {
 	// Tag: tag name
 	// Commit: commit short ID
 	// +optional
-	ID string `json:"id,omitempty" variable:"example=12"`
+	ID string `json:"id,omitempty" variable:"example=1"`
 }
 
 // GetValWithKey returns the list of keys and values to support variable substitution

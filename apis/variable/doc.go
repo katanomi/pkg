@@ -14,5 +14,5 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-// Package variable generate a list of environment variables (jsonPath) based on the structure.
+// Package variable generate a list of variables (jsonPath) based on the structure.
 package variable

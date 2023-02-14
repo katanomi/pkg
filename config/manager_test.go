@@ -21,7 +21,6 @@ import (
 	"os"
 	"testing"
 
-	"github.com/google/go-cmp/cmp"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
@@ -82,14 +81,10 @@ var _ = Describe("NewManger and GetConfig and GetFeatureFlags", func() {
 
 		When("get config before configmap change", func() {
 			It("return default feature flags", func() {
-				defaultFeatureFlags := &FeatureFlags{
-					VersionEnabled:               DefaultVersionEnabled,
-					InitializeAllowLocalRequests: DefaultInitializeAllowLocalRequests,
-					PrunerDelayAfterCompleted:    DefaultPrunerDelayAfterCompleted,
-					PrunerKeep:                   DefaultPrunerKeep,
-				}
-				diff := cmp.Diff(defaultFeatureFlags, manager.GetFeatureFlags())
-				Expect(diff).To(BeEmpty())
+				Expect(manager.GetFeatureFlag(VersionEnabledFeatureKey)).To(Equal(DefaultVersionEnabled))
+				Expect(manager.GetFeatureFlag(InitializeAllowLocalRequestsFeatureKey)).To(Equal(DefaultInitializeAllowLocalRequests))
+				Expect(manager.GetFeatureFlag(PrunerDelayAfterCompletedFeatureKey)).To(Equal(DefaultPrunerDelayAfterCompleted))
+				Expect(manager.GetFeatureFlag(PrunerKeepFeatureKey)).To(Equal(DefaultPrunerKeep))
 			})
 		})
 
@@ -126,12 +121,7 @@ var _ = Describe("NewManger and GetConfig and GetFeatureFlags", func() {
 		When("get config after update configmap ", func() {
 			It("should return updated data", func() {
 				By("change the manger watched configmap")
-				defaultFeatureFlags := &FeatureFlags{
-					VersionEnabled:               true,
-					InitializeAllowLocalRequests: DefaultInitializeAllowLocalRequests,
-					PrunerDelayAfterCompleted:    DefaultPrunerDelayAfterCompleted,
-					PrunerKeep:                   6000,
-				}
+
 				data := map[string]string{
 					VersionEnabledFeatureKey: "true",
 					PrunerKeepFeatureKey:     "6000",
@@ -144,8 +134,10 @@ var _ = Describe("NewManger and GetConfig and GetFeatureFlags", func() {
 					},
 					Data: data,
 				})
-				diff := cmp.Diff(defaultFeatureFlags, manager.GetFeatureFlags())
-				Expect(diff).To(BeEmpty(), "should return updated feature")
+				Expect(manager.GetFeatureFlag(VersionEnabledFeatureKey)).To(Equal(FeatureValue("true")))
+				Expect(manager.GetFeatureFlag(PrunerKeepFeatureKey)).To(Equal(FeatureValue("6000")))
+				Expect(manager.GetFeatureFlag(InitializeAllowLocalRequestsFeatureKey)).To(Equal(DefaultInitializeAllowLocalRequests))
+				Expect(manager.GetFeatureFlag(PrunerDelayAfterCompletedFeatureKey)).To(Equal(DefaultPrunerDelayAfterCompleted))
 
 				By("change the manger watched configmap again")
 
@@ -155,13 +147,6 @@ var _ = Describe("NewManger and GetConfig and GetFeatureFlags", func() {
 					"other.test":             "1",
 				}
 
-				defaultFeatureFlags = &FeatureFlags{
-					VersionEnabled:               false,
-					InitializeAllowLocalRequests: DefaultInitializeAllowLocalRequests,
-					PrunerDelayAfterCompleted:    DefaultPrunerDelayAfterCompleted,
-					PrunerKeep:                   1000,
-				}
-
 				watcher.OnChange(&corev1.ConfigMap{
 					ObjectMeta: metav1.ObjectMeta{
 						Name:      cmName,
@@ -169,8 +154,12 @@ var _ = Describe("NewManger and GetConfig and GetFeatureFlags", func() {
 					},
 					Data: data,
 				})
-				diff = cmp.Diff(defaultFeatureFlags, manager.GetFeatureFlags())
-				Expect(diff).To(BeEmpty(), "should return updated config again")
+				Expect(manager.GetFeatureFlag(VersionEnabledFeatureKey)).To(Equal(FeatureValue("false")))
+				Expect(manager.GetFeatureFlag(PrunerKeepFeatureKey)).To(Equal(FeatureValue("1000")))
+				Expect(manager.GetFeatureFlag(InitializeAllowLocalRequestsFeatureKey)).To(Equal(DefaultInitializeAllowLocalRequests))
+				Expect(manager.GetFeatureFlag(PrunerDelayAfterCompletedFeatureKey)).To(Equal(DefaultPrunerDelayAfterCompleted))
+				Expect(manager.GetFeatureFlag("other.test")).To(Equal(FeatureValue("1")))
+
 			})
 		})
 	})
@@ -199,17 +188,38 @@ func TestKCMContext(t *testing.T) {
 }
 
 func TestIsSameConfigMap(t *testing.T) {
-	g := NewGomegaWithT(t)
-	client := fake.NewSimpleClientset()
+	t.Run("objectmeta match, return true", func(t *testing.T) {
+		g := NewGomegaWithT(t)
+		client := fake.NewSimpleClientset()
 
-	watcher := informer.NewInformedWatcher(client, "cm")
-	manager := NewManager(watcher, nil, "cm")
+		watcher := informer.NewInformedWatcher(client, "cm")
+		manager := NewManager(watcher, nil, "cm")
 
-	sameConfig := corev1.ConfigMap{ObjectMeta: metav1.ObjectMeta{Name: "cm", Namespace: system.Namespace()}}
-	g.Expect(manager.isSameConfigMap(&sameConfig)).To(Equal(true), "objectmeta match, return true")
-	sameConfig = corev1.ConfigMap{ObjectMeta: metav1.ObjectMeta{Name: "other", Namespace: system.Namespace()}}
-	g.Expect(manager.isSameConfigMap(&sameConfig)).To(Equal(false), "when objectmeta not match, return false")
+		sameConfig := corev1.ConfigMap{ObjectMeta: metav1.ObjectMeta{Name: "cm", Namespace: system.Namespace()}}
+		g.Expect(manager.isSameConfigMap(&sameConfig)).To(Equal(true))
+	})
 
-	manager = nil
-	g.Expect(manager.isSameConfigMap(&sameConfig)).To(Equal(false), "when manager is nil, return false")
+	t.Run("when objectmeta not match, return false", func(t *testing.T) {
+		g := NewGomegaWithT(t)
+		client := fake.NewSimpleClientset()
+
+		watcher := informer.NewInformedWatcher(client, "cm")
+		manager := NewManager(watcher, nil, "cm")
+
+		sameConfig := corev1.ConfigMap{ObjectMeta: metav1.ObjectMeta{Name: "other", Namespace: system.Namespace()}}
+		g.Expect(manager.isSameConfigMap(&sameConfig)).To(Equal(false))
+	})
+
+	t.Run("when objectmeta not match, return false", func(t *testing.T) {
+		g := NewGomegaWithT(t)
+		client := fake.NewSimpleClientset()
+
+		watcher := informer.NewInformedWatcher(client, "cm")
+		manager := NewManager(watcher, nil, "cm")
+
+		manager = nil
+		sameConfig := corev1.ConfigMap{ObjectMeta: metav1.ObjectMeta{Name: "other", Namespace: system.Namespace()}}
+		g.Expect(manager.isSameConfigMap(&sameConfig)).To(Equal(false), "when manager is nil, return false")
+	})
+
 }

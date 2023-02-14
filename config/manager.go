@@ -98,18 +98,18 @@ func (manager *Manager) GetConfig() *Config {
 	return manager.Config
 }
 
-// GetFeatureFlags get the function switch data, if the function switch is not set,
+// GetFeatureFlag get the function switch data, if the function switch is not set,
 // return the default value of the switch.
-func (manager *Manager) GetFeatureFlags() *FeatureFlags {
-	managerConfig := manager.GetConfig()
-
-	configData := map[string]string{}
-	if managerConfig != nil && managerConfig.Data != nil {
-		configData = managerConfig.Data
+func (manager *Manager) GetFeatureFlag(flag string) FeatureValue {
+	defaultValue := defaultFeatureValue[flag]
+	if manager == nil {
+		return defaultValue
 	}
 
-	featureFlags, _ := NewFeatureFlagsFromMap(configData)
-	return featureFlags
+	if value, ok := manager.Data[flag]; ok {
+		return FeatureValue(value)
+	}
+	return defaultValue
 }
 
 func (manager *Manager) applyConfig(cm *corev1.ConfigMap) {

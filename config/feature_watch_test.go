@@ -132,7 +132,9 @@ func Test_predicatesUpdateFunc(t *testing.T) {
 					return false
 				}
 
-				return new.PrunerKeep == old.PrunerKeep
+				newVersionEnable, _ := new.FeatureValue(VersionEnabledFeatureKey).AsBool()
+				oldVersionEnable, _ := old.FeatureValue(VersionEnabledFeatureKey).AsBool()
+				return newVersionEnable == oldVersionEnable
 			},
 			want: true,
 		},

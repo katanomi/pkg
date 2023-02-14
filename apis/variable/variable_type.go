@@ -41,6 +41,20 @@ type VariableList struct {
 	Items []Variable `json:"items"`
 }
 
+func (v *VariableList) Filter(filters ...FilterFunc) {
+	if v == nil {
+		return
+	}
+
+	vars := []Variable{}
+	for i := range v.Items {
+		if filtVariable(&v.Items[i], filters...) {
+			vars = append(vars, v.Items[i])
+		}
+	}
+	v.Items = vars
+}
+
 // NewVariable return variable from StructField.
 func NewVariable(field reflect.StructField, base *field.Path) *Variable {
 	switch field.Type.Kind() {

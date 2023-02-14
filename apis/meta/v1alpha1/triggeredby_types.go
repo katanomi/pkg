@@ -65,7 +65,7 @@ type TriggeredBy struct {
 	// Date time of creation of triggered event. Will match a resource's metadata.creationTimestamp
 	// it is added here for convinience only
 	// +optional
-	TriggeredTimestamp *metav1.Time `json:"triggeredTimestamp,omitempty" variable:"label=common;example=2022-08-05T05:34:39Z"`
+	TriggeredTimestamp *metav1.Time `json:"triggeredTimestamp,omitempty" variable:"label=default;example=2022-08-05T05:34:39Z"`
 
 	// Indicates trigger type, such as Manual Automated.
 	// +optional

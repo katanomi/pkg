@@ -23,71 +23,70 @@ import (
 	"k8s.io/utils/field"
 )
 
-// ConvertFuncManager defines an interface for getting and returning conversion functions.
-type ConvertFuncManager interface {
+// MarshalFuncManager defines an interface for getting and returning conversion functions.
+type MarshalFuncManager interface {
 	NameFuncs() map[string]ConvertFunc
 	KindFuncs() map[reflect.Kind]ConvertFunc
 }
 
 // ConvertFunc define variable transformation function
-type ConvertFunc func(reflect.Type, *field.Path, ConvertFuncManager) ([]Variable, error)
+type ConvertFunc func(reflect.Type, *field.Path, MarshalFuncManager) ([]Variable, error)
 
 // DefaultKindConvertFuncs provides a default Kind conversion function.
-var DefaultKindConvertFuncs = map[reflect.Kind]ConvertFunc{
-	reflect.Struct:  ConvertStruct,
-	reflect.Pointer: ConvertPointer,
+var DefaultKindMarshalFuncs = map[reflect.Kind]ConvertFunc{
+	reflect.Struct:  convertStruct,
+	reflect.Pointer: convertPointer,
 }
 
-// FilterFunc define a filter function for a variable
-type FilterFunc func(*Variable) bool
+// VariableMarshaller variable converter
+type VariableMarshaller struct {
+	NameMarshalFuncs map[string]ConvertFunc
+	KindMarshalFuncs map[reflect.Kind]ConvertFunc
 
-// VariableConverter variable converter
-type VariableConverter struct {
-	NameConvertFuncs map[string]ConvertFunc
-	KindConvertFuncs map[reflect.Kind]ConvertFunc
-
-	Filter []FilterFunc
+	Object interface{}
 }
 
 // NameFuncs return name convert funcs
-func (v *VariableConverter) NameFuncs() map[string]ConvertFunc {
-	if v.NameConvertFuncs == nil {
-		v.NameConvertFuncs = DefaultNameConvertFuncs
+func (v *VariableMarshaller) NameFuncs() map[string]ConvertFunc {
+	if v.NameMarshalFuncs == nil {
+		v.NameMarshalFuncs = DefaultNameMarshalFuncs
+	} else {
+		// Add the default marshal function, if user-defined, ignore it.
+		for name, value := range DefaultNameMarshalFuncs {
+			if _, ok := v.NameMarshalFuncs[name]; !ok {
+				v.NameMarshalFuncs[name] = value
+			}
+		}
 	}
-	return v.NameConvertFuncs
+
+	return v.NameMarshalFuncs
 }
 
 // KindFuncs return kind convert funcs
-func (v *VariableConverter) KindFuncs() map[reflect.Kind]ConvertFunc {
-	if v.KindConvertFuncs == nil {
-		v.KindConvertFuncs = DefaultKindConvertFuncs
+func (v *VariableMarshaller) KindFuncs() map[reflect.Kind]ConvertFunc {
+	if v.KindMarshalFuncs == nil {
+		v.KindMarshalFuncs = DefaultKindMarshalFuncs
 	}
-	return v.KindConvertFuncs
+	return DefaultKindMarshalFuncs
 }
 
 // ConvertToVariableList convert object to variable list.
-func (v *VariableConverter) ConvertToVariableList(obj interface{}, filters ...FilterFunc) (VariableList, error) {
-	if obj == nil {
+func (v *VariableMarshaller) Marshal() (VariableList, error) {
+	if v.Object == nil {
 		return VariableList{}, nil
 	}
 
-	st := reflect.TypeOf(obj)
-	list, err := ConvertType(st, nil, v)
+	st := reflect.TypeOf(v.Object)
+	list, err := convertType(st, nil, v)
 	if err != nil {
 		return VariableList{}, err
 	}
 
-	varList := VariableList{}
-	for i := range list {
-		if filtVariable(&list[i], filters...) {
-			varList.Items = append(varList.Items, list[i])
-		}
-	}
-	return varList, nil
+	return VariableList{Items: list}, nil
 }
 
-// ConvertType convert type to variable list.
-func ConvertType(st reflect.Type, base *field.Path, convertFuncs ConvertFuncManager) ([]Variable, error) {
+// convertType convert type to variable list.
+func convertType(st reflect.Type, base *field.Path, convertFuncs MarshalFuncManager) ([]Variable, error) {
 	// prioritize custom conversion based on the structure name.
 	if f, ok := convertFuncs.NameFuncs()[st.Name()]; ok {
 		return f(st, base, convertFuncs)
@@ -115,7 +114,7 @@ func isValidVariableKind(st reflect.Type) bool {
 }
 
 // ConvertStruct convert struct to variable list.
-func ConvertStruct(st reflect.Type, base *field.Path, convertFuncs ConvertFuncManager) (list []Variable, err error) {
+func convertStruct(st reflect.Type, base *field.Path, convertFuncs MarshalFuncManager) (list []Variable, err error) {
 	for i := 0; i < st.NumField(); i++ {
 		field := st.Field(i)
 		nextBase := base
@@ -127,7 +126,7 @@ func ConvertStruct(st reflect.Type, base *field.Path, convertFuncs ConvertFuncMa
 			nextBase = base.Child(getJsonTagName(field))
 		}
 
-		subList, err := ConvertType(field.Type, nextBase, convertFuncs)
+		subList, err := convertType(field.Type, nextBase, convertFuncs)
 		if err != nil {
 			return list, err
 		}
@@ -138,6 +137,6 @@ func ConvertStruct(st reflect.Type, base *field.Path, convertFuncs ConvertFuncMa
 }
 
 // ConvertPointer convert pointer to variable list.
-func ConvertPointer(st reflect.Type, base *field.Path, convertFuncs ConvertFuncManager) ([]Variable, error) {
-	return ConvertType(st.Elem(), base, convertFuncs)
+func convertPointer(st reflect.Type, base *field.Path, convertFuncs MarshalFuncManager) ([]Variable, error) {
+	return convertType(st.Elem(), base, convertFuncs)
 }

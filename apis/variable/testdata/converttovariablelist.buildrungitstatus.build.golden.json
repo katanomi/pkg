@@ -3,32 +3,32 @@
         {
             "name": "lastCommit.shortID",
             "example": "3cb8901f",
-            "label": "common"
+            "label": "default"
         },
         {
             "name": "pullRequest.id",
-            "example": "123",
-            "label": "common"
+            "example": "1",
+            "label": "default"
         },
         {
             "name": "pullRequest.source",
-            "example": "fix/author-email",
-            "label": "common"
+            "example": "branch",
+            "label": "default"
         },
         {
             "name": "pullRequest.target",
             "example": "main",
-            "label": "common"
+            "label": "default"
         },
         {
             "name": "branch.name",
             "example": "main",
-            "label": "common"
+            "label": "default"
         },
         {
             "name": "target.name",
             "example": "main",
-            "label": "common"
+            "label": "default"
         }
     ]
 }

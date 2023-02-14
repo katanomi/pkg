@@ -29,7 +29,7 @@ import (
 
 type CloudEvent struct {
 	ID      string `json:"id,omitempty" variable:"example=b51b6a90be6a6f7a2aa65049ad.2022-08-05-05-34"`
-	Source  string `json:"source,omitempty" variable:"example=https://github.com/katanomi/spec"`
+	Source  string `json:"source,omitempty" variable:"example=https://github.com/repository"`
 	Subject string `json:"subject,omitempty" variable:"example=58127"`
 	// Type of event
 	Type string `json:"type,omitempty" variable:"example=dev.katanomi.cloudevents.gitlab.Merge Request Hook"`

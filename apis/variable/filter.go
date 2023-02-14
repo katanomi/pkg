@@ -22,6 +22,9 @@ import (
 	"k8s.io/utils/strings/slices"
 )
 
+// FilterFunc define a filter function for a variable
+type FilterFunc func(*Variable) bool
+
 // LabelFilter label filter func
 func LabelFilter(label string) FilterFunc {
 	return func(variable *Variable) bool {
@@ -36,7 +39,7 @@ func LabelFilter(label string) FilterFunc {
 
 func filtVariable(s *Variable, filters ...FilterFunc) bool {
 	for _, f := range filters {
-		if f != nil && f(s) == false {
+		if f != nil && !f(s) {
 			return false
 		}
 	}

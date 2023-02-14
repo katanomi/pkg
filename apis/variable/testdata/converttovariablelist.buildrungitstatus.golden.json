@@ -2,7 +2,7 @@
     "items": [
         {
             "name": "url",
-            "example": "https://github.com/katanomi/spec/tree/release-0.3"
+            "example": "https://github.com/repository/tree/main"
         },
         {
             "name": "revision",
@@ -18,7 +18,7 @@
         },
         {
             "name": "revision.id",
-            "example": "12"
+            "example": "1"
         },
         {
             "name": "lastCommit",
@@ -27,7 +27,7 @@
         {
             "name": "lastCommit.shortID",
             "example": "3cb8901f",
-            "label": "common"
+            "label": "default"
         },
         {
             "name": "lastCommit.id",
@@ -35,7 +35,7 @@
         },
         {
             "name": "lastCommit.title",
-            "example": "Update build.yaml"
+            "example": "Update README.md"
         },
         {
             "name": "lastCommit.message",
@@ -51,16 +51,16 @@
         },
         {
             "name": "lastCommit.webURL",
-            "example": "https://github.com/katanomi/commit/3cb8901fb325228ea27b751fcf0d6c0658a57f01"
+            "example": "https://github.com/repository/commit/3cb8901fb325228ea27b751fcf0d6c0658a57f01"
         },
         {
             "name": "pullRequest",
-            "example": "123"
+            "example": "1"
         },
         {
             "name": "pullRequest.id",
-            "example": "123",
-            "label": "common"
+            "example": "1",
+            "label": "default"
         },
         {
             "name": "pullRequest.title",
@@ -68,13 +68,13 @@
         },
         {
             "name": "pullRequest.source",
-            "example": "fix/author-email",
-            "label": "common"
+            "example": "branch",
+            "label": "default"
         },
         {
             "name": "pullRequest.target",
             "example": "main",
-            "label": "common"
+            "label": "default"
         },
         {
             "name": "pullRequest.authorEmail",
@@ -82,7 +82,7 @@
         },
         {
             "name": "pullRequest.webURL",
-            "example": "https://github.com/katanomi/spec/pull/123"
+            "example": "https://github.com/repository/pull/1"
         },
         {
             "name": "pullRequest.hasConflicts",
@@ -95,7 +95,7 @@
         {
             "name": "branch.name",
             "example": "main",
-            "label": "common"
+            "label": "default"
         },
         {
             "name": "branch.protected",
@@ -107,7 +107,7 @@
         },
         {
             "name": "branch.webURL",
-            "example": "https://github.com/katanomi/spec/tree/main"
+            "example": "https://github.com/repository/tree/main"
         },
         {
             "name": "target",
@@ -116,7 +116,7 @@
         {
             "name": "target.name",
             "example": "main",
-            "label": "common"
+            "label": "default"
         },
         {
             "name": "target.protected",
@@ -128,7 +128,7 @@
         },
         {
             "name": "target.webURL",
-            "example": "https://github.com/katanomi/spec/tree/main"
+            "example": "https://github.com/repository/tree/main"
         },
         {
             "name": "versionPhase"

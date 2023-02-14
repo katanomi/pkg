@@ -33,8 +33,8 @@ func TestConvertToVariableList(t *testing.T) {
 
 		expected := VariableList{}
 		g.Expect(LoadYAML("testdata/converttovariablelist.buildrungitstatus.golden.json", &expected)).To(Succeed())
-		convertor := VariableConverter{}
-		got, err := convertor.ConvertToVariableList(v1alpha1.BuildRunGitStatus{})
+		marshaller := VariableMarshaller{Object: v1alpha1.BuildRunGitStatus{}}
+		got, err := marshaller.Marshal()
 		g.Expect(err).To(Succeed())
 		diff := cmp.Diff(got, expected)
 		g.Expect(diff).To(BeEmpty())
@@ -45,8 +45,8 @@ func TestConvertToVariableList(t *testing.T) {
 
 		expected := VariableList{}
 		g.Expect(LoadYAML("testdata/converttovariablelist.triggeredby.golden.json", &expected)).To(Succeed())
-		convertor := VariableConverter{}
-		got, err := convertor.ConvertToVariableList(v1alpha1.TriggeredBy{})
+		marshaller := VariableMarshaller{Object: v1alpha1.TriggeredBy{}}
+		got, err := marshaller.Marshal()
 		g.Expect(err).To(Succeed())
 		diff := cmp.Diff(got, expected)
 		g.Expect(diff).To(BeEmpty())
@@ -56,8 +56,8 @@ func TestConvertToVariableList(t *testing.T) {
 		g := NewGomegaWithT(t)
 
 		expected := VariableList{}
-		convertor := VariableConverter{}
-		got, err := convertor.ConvertToVariableList(nil)
+		marshaller := VariableMarshaller{}
+		got, err := marshaller.Marshal()
 		g.Expect(err).To(Succeed())
 		g.Expect(expected).To(Equal(got))
 	})
@@ -67,9 +67,11 @@ func TestConvertToVariableList(t *testing.T) {
 
 		expected := VariableList{}
 		g.Expect(LoadYAML("testdata/converttovariablelist.buildrungitstatus.build.golden.json", &expected)).To(Succeed())
-		convertor := VariableConverter{}
-		got, err := convertor.ConvertToVariableList(v1alpha1.BuildRunGitStatus{}, LabelFilter("common"))
+		marshaller := VariableMarshaller{Object: v1alpha1.BuildRunGitStatus{}}
+		got, err := marshaller.Marshal()
 		g.Expect(err).To(Succeed())
+
+		got.Filter(LabelFilter("default"))
 		diff := cmp.Diff(got, expected)
 		g.Expect(diff).To(BeEmpty())
 	})
@@ -77,7 +79,6 @@ func TestConvertToVariableList(t *testing.T) {
 	t.Run("has unsupported type", func(t *testing.T) {
 		g := NewGomegaWithT(t)
 
-		convertor := VariableConverter{}
 		obj := struct {
 			Number int    `json:"number"`
 			Func   func() `json:"channel"`
@@ -86,7 +87,8 @@ func TestConvertToVariableList(t *testing.T) {
 			Func:   func() {},
 		}
 
-		_, err := convertor.ConvertToVariableList(obj)
+		marshaller := VariableMarshaller{Object: obj}
+		_, err := marshaller.Marshal()
 		g.Expect(err).To(Equal(fmt.Errorf("unsupported type [%s]", reflect.Func.String())))
 	})
 }

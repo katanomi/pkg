@@ -24,14 +24,14 @@ import (
 	"k8s.io/utils/field"
 )
 
-// DefaultNameConvertFuncs define a default custom type conversion function
-var DefaultNameConvertFuncs = map[string]ConvertFunc{
-	reflect.TypeOf(rbacv1.Subject{}).Name():         ConvertSubeject,
-	reflect.TypeOf(corev1.ObjectReference{}).Name(): ConvertObjectReference,
+// DefaultNameMarshalFuncs define a default custom type conversion function
+var DefaultNameMarshalFuncs = map[string]ConvertFunc{
+	reflect.TypeOf(rbacv1.Subject{}).Name():         MarshalSubject,
+	reflect.TypeOf(corev1.ObjectReference{}).Name(): MarshalObjectReference,
 }
 
-// ConvertSubeject convert the Subject of k8s.io/api/rbac/v1 to variables.
-func ConvertSubeject(st reflect.Type, base *field.Path, convertFuncs ConvertFuncManager) ([]Variable, error) {
+// MarshalSubject marshal the Subject of k8s.io/api/rbac/v1 to variables.
+func MarshalSubject(st reflect.Type, base *field.Path, convertFuncs MarshalFuncManager) ([]Variable, error) {
 	return []Variable{
 		{Name: base.Child("kind").String(), Example: "User"},
 		{Name: base.Child("apiGroup").String()},
@@ -40,8 +40,8 @@ func ConvertSubeject(st reflect.Type, base *field.Path, convertFuncs ConvertFunc
 	}, nil
 }
 
-// ConvertObjectReference convert the Subject of k8s.io/api/rbac/v1 to variables.
-func ConvertObjectReference(st reflect.Type, base *field.Path, convertFuncs ConvertFuncManager) ([]Variable, error) {
+// MarshalObjectReference marshal the ObjectReference of k8s.io/api/core/v1 to variables.
+func MarshalObjectReference(st reflect.Type, base *field.Path, convertFuncs MarshalFuncManager) ([]Variable, error) {
 	return []Variable{
 		{Name: base.Child("kind").String(), Example: "DeliveryRun"},
 		{Name: base.Child("namespace").String(), Example: "default"},
