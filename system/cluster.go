@@ -14,16 +14,12 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package v1alpha1
+package env
 
-// HeaderRunMeta is the header name of pipelinerun meta
-const HeaderRunMeta = "x-katanomi-run-meta"
+// GetCurrentClusterName returns current cluster name
+var GetCurrentClusterName = defaultGetCurrentClusterName
 
-// HeaderFileMeta is the header name of file meta
-const HeaderFileMeta = "x-katanomi-file-meta"
-
-// HeaderFileAnnotationPrefix is the annotation header prefix
-const HeaderFileAnnotationPrefix = "x-katanomi-annotation-"
-
-// HeaderFilePath is the file path to saved
-const HeaderFilePath = "x-katanomi-file-path"
+// defaultGetCurrentClusterName is a default implementation of GetCurrentClusterName
+func defaultGetCurrentClusterName() string {
+	return "default"
+}

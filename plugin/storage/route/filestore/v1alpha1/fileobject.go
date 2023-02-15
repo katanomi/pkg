@@ -17,9 +17,10 @@ limitations under the License.
 package v1alpha1
 
 import (
+	"encoding/json"
+	"fmt"
 	"io"
 	"net/http"
-	"strconv"
 
 	restfulspec "github.com/emicklei/go-restful-openapi/v2"
 	"github.com/emicklei/go-restful/v3"
@@ -87,26 +88,32 @@ func (a *fileObject) PutFileObject(req *restful.Request, resp *restful.Response)
 	log := logging.FromContext(req.Request.Context())
 	objectName := path.Parameter(req, "objectName")
 	pluginName := path.Parameter(req, "storagePlugin")
-	fileType := req.QueryParameter("fileType")
 
-	fileSizeHeader := req.Request.Header.Get("Content-Length")
-	fileSize, _ := strconv.Atoi(fileSizeHeader)
-
-	// TODO: get filemeta and annotation from header x-katanomi-meta and x-katanomi-annotation-
+	fileMetaString := req.HeaderParameter(v1alpha1.HeaderFileMeta)
+	if fileMetaString == "" {
+		log.Errorw("get empty file meta from header",
+			"objectName", objectName, "pluginName", pluginName,
+		)
+		kerrors.HandleError(req, resp, fmt.Errorf("empty filemeta from header"))
+		return
+	}
+	fileMeta := v1alpha1.FileMeta{}
+	err := json.Unmarshal([]byte(fileMetaString), &fileMeta)
+	if err != nil {
+		log.Errorw("unmarshal file meta err",
+			"err", err,
+		)
+		kerrors.HandleError(req, resp, err)
+		return
+	}
 
 	fileObject := filestorev1alpha1.FileObject{
-		FileMeta: v1alpha1.FileMeta{
-			Spec: v1alpha1.FileMetaSpec{
-				ContentType:   req.Request.Header.Get(restful.HEADER_ContentType),
-				FileType:      v1alpha1.FileType(fileType),
-				ContentLength: int64(fileSize),
-			},
-		},
+		FileMeta:       fileMeta,
 		FileReadCloser: req.Request.Body,
 	}
 
 	ctx := req.Request.Context()
-	newMeta, err := a.impl.PutFileObject(storage.CtxWithPluginName(ctx, pluginName), objectName, &fileObject)
+	newMeta, err := a.impl.PutFileObject(storage.CtxWithPluginName(ctx, pluginName), &fileObject)
 	if err != nil {
 		log.Errorw("PutFileObject err", "err", err)
 		kerrors.HandleError(req, resp, err)

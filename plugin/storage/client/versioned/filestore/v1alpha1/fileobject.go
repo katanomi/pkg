@@ -18,6 +18,7 @@ package v1alpha1
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 
 	"github.com/katanomi/pkg/apis/storage/v1alpha1"
@@ -35,8 +36,8 @@ type FileObjectGetter interface {
 type FileObjectInterface interface {
 	PUT(ctx context.Context, fileObj filestorev1alpha1.FileObject,
 		options ...client.OptionFunc) (*v1alpha1.FileMeta, error)
-	GET(ctx context.Context, key string) (*filestorev1alpha1.FileObject, error)
-	DELETE(ctx context.Context, key string) error
+	GET(ctx context.Context, fileObjectName string) (*filestorev1alpha1.FileObject, error)
+	DELETE(ctx context.Context, fileObjectName string) error
 }
 
 type fileObjects struct {
@@ -46,9 +47,18 @@ type fileObjects struct {
 
 func (f *fileObjects) PUT(ctx context.Context, fileObj filestorev1alpha1.FileObject,
 	options ...client.OptionFunc) (*v1alpha1.FileMeta, error) {
-	path := fmt.Sprintf("storageplugin/%s/fileobjects/%s", f.pluginName, fileObj.Spec.Key)
+	path := fmt.Sprintf("storageplugin/%s/fileobjects/%s", f.pluginName, fileObj.Name)
+
+	marshaledMeta, err := json.Marshal(fileObj.FileMeta)
+	if err != nil {
+		return nil, err
+	}
+
 	fileMeta := v1alpha1.FileMeta{}
-	err := f.client.Get(ctx, path, client.ResultOpts(&fileMeta))
+	err = f.client.Put(ctx, path, client.ResultOpts(&fileMeta),
+		client.HeaderOpts(v1alpha1.HeaderFileMeta, string(marshaledMeta)),
+		client.BodyOpts(fileObj.FileReadCloser),
+	)
 	if err != nil {
 		return nil, err
 	}
@@ -67,7 +77,7 @@ func (f *fileObjects) GET(ctx context.Context, key string) (*filestorev1alpha1.F
 
 func (f *fileObjects) DELETE(ctx context.Context, key string) error {
 	path := fmt.Sprintf("storageplugin/%s/fileobjects/%s", f.pluginName, key)
-	err := f.client.Get(ctx, path)
+	err := f.client.Delete(ctx, path)
 	if err != nil {
 		return err
 	}

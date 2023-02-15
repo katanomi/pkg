@@ -31,6 +31,11 @@ import (
 
 type fakeFileStorePlugin struct{}
 
+func (f *fakeFileStorePlugin) PutFileObject(ctx context.Context, obj *filestorev1alpha1.FileObject) (*v1alpha1.FileMeta, error) {
+	// TODO implement me
+	panic("implement me")
+}
+
 func (f *fakeFileStorePlugin) Path() string {
 	return "fake-filestore"
 }
@@ -41,11 +46,6 @@ func (f *fakeFileStorePlugin) Setup(ctx context.Context, logger *zap.SugaredLogg
 }
 
 func (f *fakeFileStorePlugin) GetFileObject(ctx context.Context, objectName string) (*filestorev1alpha1.FileObject, error) {
-	// TODO implement me
-	panic("implement me")
-}
-
-func (f *fakeFileStorePlugin) PutFileObject(ctx context.Context, objectName string, obj *filestorev1alpha1.FileObject) (*v1alpha1.FileMeta, error) {
 	// TODO implement me
 	panic("implement me")
 }
