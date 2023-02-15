@@ -22,10 +22,9 @@ import (
 	"os"
 	"sync"
 
+	"github.com/katanomi/pkg/storage/configmap"
 	"github.com/katanomi/pkg/watcher"
-
 	"go.uber.org/zap"
-
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
@@ -52,6 +51,7 @@ type Manager struct {
 	// source store mange config source object.
 	configMapRef *corev1.ObjectReference
 
+	watchers []Watcher
 	*Config
 }
 
@@ -86,6 +86,14 @@ func (manager *Manager) isSameConfigMap(obj metav1.Object) bool {
 		return false
 	}
 	return obj.GetName() == manager.configMapRef.Name && obj.GetNamespace() == manager.configMapRef.Namespace
+}
+
+// AddWatcher add a watcher to manager
+// the watcher will be called when the configmap is changed
+func (manager *Manager) AddWatcher(w Watcher) {
+	manager.lock.Lock()
+	defer manager.lock.Unlock()
+	manager.watchers = append(manager.watchers, w)
 }
 
 // GetConfig will return the config of manager
@@ -123,12 +131,22 @@ func (manager *Manager) applyConfig(cm *corev1.ConfigMap) {
 		return
 	}
 
-	manager.lock.Lock()
-	defer manager.lock.Unlock()
-	// whole replacement
-	manager.Config = &Config{
+	newConfig := &Config{
 		Data: cm.Data,
 	}
+
+	manager.lock.Lock()
+	defer manager.lock.Unlock()
+	if len(manager.watchers) > 0 {
+		watchers := append([]Watcher{}, manager.watchers...)
+		go func() {
+			for _, f := range watchers {
+				f.Watch(newConfig)
+			}
+		}()
+	}
+	// whole replacement
+	manager.Config = newConfig
 }
 
 // Name return config name for configuration

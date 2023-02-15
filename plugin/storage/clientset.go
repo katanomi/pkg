@@ -21,6 +21,7 @@ import (
 
 	"github.com/go-resty/resty/v2"
 	client2 "github.com/katanomi/pkg/plugin/storage/client"
+	archivev1alpha1 "github.com/katanomi/pkg/plugin/storage/client/versioned/archive/v1alpha1"
 	corev1alpha1 "github.com/katanomi/pkg/plugin/storage/client/versioned/core/v1alpha1"
 	"github.com/katanomi/pkg/plugin/storage/client/versioned/filestore/v1alpha1"
 	v1 "knative.dev/pkg/apis/duck/v1"
@@ -29,12 +30,14 @@ import (
 type Interface interface {
 	CoreV1alpha1() corev1alpha1.CoreV1alpha1Interface
 	FileStoreV1alpha1() v1alpha1.FileStoreV1alpha1Interface
+	ArchiveV1alpha1() archivev1alpha1.ArchiveInterface
 }
 
 // Clientset contains the  core and capabilities plugin clients.
 type Clientset struct {
 	coreV1alpha1      *corev1alpha1.CoreV1alpha1Client
 	fileStoreV1alpha1 *v1alpha1.FileStoreV1alpha1Client
+	archiveV1alpha1   *archivev1alpha1.ArchiveClient
 }
 
 // CoreV1alpha1 return core v1alpha1 interface
@@ -45,6 +48,11 @@ func (c *Clientset) CoreV1alpha1() corev1alpha1.CoreV1alpha1Interface {
 // FileStoreV1alpha1 return file store v1alpha1 interface
 func (c *Clientset) FileStoreV1alpha1() v1alpha1.FileStoreV1alpha1Interface {
 	return c.fileStoreV1alpha1
+}
+
+// ArchiveV1alpha1 return archive v1alpha1 interface
+func (c *Clientset) ArchiveV1alpha1() archivev1alpha1.ArchiveInterface {
+	return c.archiveV1alpha1
 }
 
 // NewForClient return a new clientset instance
@@ -62,6 +70,7 @@ func NewForClient(classAddress *v1.Addressable, client *resty.Client) (*Clientse
 	pluginClient := client2.NewStoragePluginClient(classAddress, client2.WithRestClient(client))
 	cs.coreV1alpha1 = corev1alpha1.NewForClient(pluginClient)
 	cs.fileStoreV1alpha1 = v1alpha1.NewForClient(pluginClient)
+	cs.archiveV1alpha1 = archivev1alpha1.NewForClient(pluginClient)
 
 	return &cs, err
 }

@@ -51,13 +51,20 @@ type Condition interface {
 	Condition(testCtx *TestContext) error
 }
 
-// TestNamespaceCondition generate namespace for testing
-type TestNamespaceCondition struct{}
+// NewNamespaceCondition construct a namespace condition
+func NewNamespaceCondition(ns string) Condition {
+	return &NamespaceCondition{Namespace: ns}
+}
+
+// NamespaceCondition generate namespace for testing
+type NamespaceCondition struct {
+	Namespace string
+}
 
 // Condition implement the Condition interface
 // Delete the namespace when it already exists, then create a new one.
 // After the testing is completed, delete the namespace as well.
-func (t *TestNamespaceCondition) Condition(testCtx *TestContext) error {
+func (t *NamespaceCondition) Condition(testCtx *TestContext) error {
 	var (
 		clt = testCtx.Client
 		ctx = testCtx.Context
@@ -65,7 +72,7 @@ func (t *TestNamespaceCondition) Condition(testCtx *TestContext) error {
 	)
 
 	ns := v1.Namespace{}
-	key := types.NamespacedName{Name: testCtx.Namespace}
+	key := types.NamespacedName{Name: t.Namespace}
 	err = clt.Get(ctx, key, &ns)
 	if client.IgnoreNotFound(err) != nil {
 		return err
@@ -79,7 +86,7 @@ func (t *TestNamespaceCondition) Condition(testCtx *TestContext) error {
 	}
 
 	ns = v1.Namespace{
-		ObjectMeta: metav1.ObjectMeta{Name: testCtx.Namespace},
+		ObjectMeta: metav1.ObjectMeta{Name: t.Namespace},
 	}
 	if err = clt.Create(ctx, &ns); err != nil {
 		return err
@@ -90,6 +97,17 @@ func (t *TestNamespaceCondition) Condition(testCtx *TestContext) error {
 		return nil
 	})
 	return nil
+}
+
+// TestNamespaceCondition generate namespace for testing
+type TestNamespaceCondition struct{}
+
+// Condition implement the Condition interface
+// Delete the namespace when it already exists, then create a new one.
+// After the testing is completed, delete the namespace as well.
+func (t *TestNamespaceCondition) Condition(testCtx *TestContext) error {
+	nc := NamespaceCondition{Namespace: testCtx.Namespace}
+	return nc.Condition(testCtx)
 }
 
 // NewReconcileCondition helper function for constructing a `ReconcileCondition` object

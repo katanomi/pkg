@@ -23,8 +23,10 @@ import (
 	"github.com/emicklei/go-restful/v3"
 	"github.com/katanomi/pkg/plugin/client"
 	"github.com/katanomi/pkg/plugin/storage"
+	archivev1alpha1 "github.com/katanomi/pkg/plugin/storage/capabilities/archive/v1alpha1"
 	filestorev1alpha1 "github.com/katanomi/pkg/plugin/storage/capabilities/filestore/v1alpha1"
 	"github.com/katanomi/pkg/plugin/storage/core/v1alpha1"
+	archiveroute "github.com/katanomi/pkg/plugin/storage/route/archive/v1alpha1"
 	v1alpha12 "github.com/katanomi/pkg/plugin/storage/route/core/v1alpha1"
 	v1alpha13 "github.com/katanomi/pkg/plugin/storage/route/filestore/v1alpha1"
 )
@@ -81,6 +83,10 @@ func match(c client.Interface) []storage.VersionedRouter {
 	if filestore, ok := c.(filestorev1alpha1.FileStoreCapable); ok {
 		routes = append(routes, v1alpha13.NewFileObject(filestore))
 		routes = append(routes, v1alpha13.NewFileMeta(filestore))
+	}
+
+	if archive, ok := c.(archivev1alpha1.ArchiveCapable); ok {
+		routes = append(routes, archiveroute.NewArchive(archive))
 	}
 	return routes
 }
