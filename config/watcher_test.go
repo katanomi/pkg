@@ -1,5 +1,5 @@
 /*
-Copyright 2022 The Katanomi Authors.
+Copyright 2023 The Katanomi Authors.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -16,16 +16,30 @@ limitations under the License.
 
 package config
 
-const (
-	// EnvServiceName is the environment variable name for service name
-	EnvServiceName = "SERVICE_NAME"
+import (
+	"sync"
+	"testing"
+	"time"
 
-	// EnvServiceMethod is the environment variable name for service access method
-	EnvServiceMethod = "SERVICE_METHOD"
-
-	// EnvWebhookAddress is the environment variable name for webhook address
-	EnvWebhookAddress = "WEBHOOK_ADDRESS"
-
-	// EnvServiceAddress is the environment variable name for service address
-	EnvServiceAddress = "SERVICE_ADDRESS"
+	"github.com/onsi/gomega"
 )
+
+func TestNewConfigWatcher(t *testing.T) {
+	g := gomega.NewGomegaWithT(t)
+	w := NewConfigWatcher(func(config *Config) {
+		g.Expect(config.Data).To(gomega.BeEmpty())
+		time.Sleep(2 * time.Second)
+	})
+
+	now := time.Now()
+	wg := sync.WaitGroup{}
+	wg.Add(2)
+	go func() {
+		for i := 0; i < 2; i++ {
+			w.Watch(&Config{})
+			wg.Done()
+		}
+	}()
+	wg.Wait()
+	g.Expect(time.Since(now)).To(gomega.BeNumerically(">", 2*time.Second))
+}

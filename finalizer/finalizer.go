@@ -31,15 +31,20 @@ func AddFinalizer(ctx context.Context, clt client.Client, o client.Object, final
 	if controllerutil.ContainsFinalizer(o, finalizerKey) {
 		return nil
 	}
-	o.SetFinalizers(append(finalizers, finalizerKey))
-	err := clt.Update(ctx, o)
+
+	toUpdate := o.DeepCopyObject().(client.Object)
+	toUpdate.SetFinalizers(append(finalizers, finalizerKey))
+	err := clt.Patch(ctx, toUpdate, client.MergeFrom(o))
 	if err != nil {
 		logging.FromContext(ctx).Errorw("failed to add finalizer", "err", err,
 			"namespacedName", client.ObjectKeyFromObject(o),
 			"finalizerKey", finalizerKey,
 		)
+		return err
 	}
-	return err
+	o.SetFinalizers(append(finalizers, finalizerKey))
+	o.SetResourceVersion(toUpdate.GetResourceVersion())
+	return nil
 }
 
 // PrependFinalizer adds a finalizer to the object and prepends it to the list
@@ -50,15 +55,19 @@ func PrependFinalizer(ctx context.Context, clt client.Client, o client.Object, f
 		return nil
 
 	}
-	o.SetFinalizers(append([]string{finalizerKey}, finalizers...))
-	err := clt.Update(ctx, o)
+	toUpdate := o.DeepCopyObject().(client.Object)
+	toUpdate.SetFinalizers(append([]string{finalizerKey}, finalizers...))
+	err := clt.Patch(ctx, toUpdate, client.MergeFrom(o))
 	if err != nil {
 		logging.FromContext(ctx).Errorw("failed to append finalizer", "err", err,
 			"namespacedName", client.ObjectKeyFromObject(o),
 			"finalizerKey", finalizerKey,
 		)
+		return err
 	}
-	return err
+	o.SetFinalizers(append([]string{finalizerKey}, finalizers...))
+	o.SetResourceVersion(toUpdate.GetResourceVersion())
+	return nil
 }
 
 // RemoveFinalizer removes a finalizer from the object
@@ -74,13 +83,17 @@ func RemoveFinalizer(ctx context.Context, clt client.Client, o client.Object, fi
 		}
 	}
 
-	controllerutil.RemoveFinalizer(o, finalizerKey)
-	err := clt.Update(ctx, o)
-	if err != nil {
+	toUpdate := o.DeepCopyObject().(client.Object)
+	controllerutil.RemoveFinalizer(toUpdate, finalizerKey)
+	err := clt.Patch(ctx, toUpdate, client.MergeFrom(o))
+	if client.IgnoreNotFound(err) != nil {
 		logging.FromContext(ctx).Errorw("failed to remove finalizer", "err", err,
 			"namespacedName", client.ObjectKeyFromObject(o),
 			"finalizerKey", finalizerKey,
 		)
+		return err
 	}
-	return err
+	controllerutil.RemoveFinalizer(o, finalizerKey)
+	o.SetResourceVersion(toUpdate.GetResourceVersion())
+	return nil
 }

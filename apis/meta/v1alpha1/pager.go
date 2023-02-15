@@ -35,7 +35,7 @@ func (p *Pager) GetPageLimit() int {
 
 // GetOffset get the offset for next query
 func (p *Pager) GetOffset() int {
-	return p.GetPageLimit() * p.GetPage()
+	return p.GetPageLimit() * (p.GetPage() - 1)
 }
 
 // GetPage get the current page

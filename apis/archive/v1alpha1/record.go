@@ -81,8 +81,8 @@ type RecordSpec struct {
 	Kind string `json:"kind"`
 	// CreationTimestamp the creation timestamp of the resource
 	CreationTimestamp int64 `json:"creationTimestamp,omitempty"`
-	// DeletionTimestamp the deletion timestamp of the resource
-	DeletionTimestamp int64 `json:"deletionTimestamp,omitempty"`
+	// CleanupTime the cleanup time of the resource
+	CleanupTime int64 `json:"cleanupTime,omitempty"`
 
 	// Metadata the metadata of the resource
 	Metadata map[string]string `json:"metadata"`
