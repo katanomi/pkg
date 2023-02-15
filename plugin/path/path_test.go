@@ -44,6 +44,10 @@ func TestPathEscape(t *testing.T) {
 			path: "a.b",
 			want: "a.b",
 		},
+		{
+			path: "a://b",
+			want: "a%253A%252F%252Fb",
+		},
 	}
 	for _, tt := range tests {
 		if got := Escape(tt.path); got != tt.want {
@@ -68,6 +72,11 @@ func TestFormatPath(t *testing.T) {
 			tmpl:   "%s/%s",
 			params: []string{"a/b", "c/d"},
 			want:   "a%252Fb/c%252Fd",
+		},
+		{
+			tmpl:   "/base/path/%s",
+			params: []string{"minio:///path/to/file"},
+			want:   "/base/path/minio%253A%252F%252F%252Fpath%252Fto%252Ffile",
 		},
 	}
 	for _, tt := range tests {

@@ -18,10 +18,10 @@ package v1alpha1
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/katanomi/pkg/apis/storage/v1alpha1"
 	client2 "github.com/katanomi/pkg/plugin/client"
+	"github.com/katanomi/pkg/plugin/path"
 	"github.com/katanomi/pkg/plugin/storage/client"
 )
 
@@ -48,7 +48,7 @@ func newFileMetas(c *FileStoreV1alpha1Client, pluginName string) *fileMetas {
 }
 
 func (f *fileMetas) GET(ctx context.Context, key string) (*v1alpha1.FileMeta, error) {
-	path := fmt.Sprintf("storageplugin/%s/filemetas/%s", f.pluginName, key)
+	path := path.Format("storageplugin/%s/filemetas/%s", f.pluginName, key)
 	fileMeta := v1alpha1.FileMeta{}
 	err := f.client.Get(ctx, path, client2.ResultOpts(&fileMeta))
 	if err != nil {
