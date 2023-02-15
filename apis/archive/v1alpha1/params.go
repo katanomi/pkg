@@ -16,10 +16,20 @@ limitations under the License.
 
 package v1alpha1
 
-import (
-	"github.com/katanomi/pkg/plugin/storage/capabilities/archive"
-	"k8s.io/apimachinery/pkg/runtime/schema"
-)
+// AggregateParams params for aggregating archive data
+type AggregateParams struct {
+	Query   AggregateQuery `json:"query,omitempty"`
+	Options *ListOptions   `json:"options,omitempty"`
+}
 
-// ArchiveV1alpha1GV is group version used to register these objects
-var ArchiveV1alpha1GV = schema.GroupVersion{Group: archive.CapabilityName, Version: "v1alpha1"}
+// ListParams params for fetching list archive data
+type ListParams struct {
+	Query   Query        `json:"query,omitempty"`
+	Options *ListOptions `json:"options,omitempty"`
+}
+
+// DeleteParams params for deleting archive data
+type DeleteParams struct {
+	Conditions []Condition   `json:"conditions,omitempty"`
+	Options    *DeleteOption `json:"options,omitempty"`
+}
