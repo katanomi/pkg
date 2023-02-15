@@ -80,20 +80,20 @@ func TestPager_GetOffset(t *testing.T) {
 		want  int
 	}{
 		"neither page nor limit is set": {
-			want: 20,
+			want: 0,
 		},
 		"page is set and limit is not set": {
 			Page: 2,
-			want: 40,
+			want: 20,
 		},
 		"page is not set and limit is set": {
 			Limit: 2,
-			want:  2,
+			want:  0,
 		},
 		"page and limit are set": {
 			Limit: 2,
 			Page:  2,
-			want:  4,
+			want:  2,
 		},
 	}
 	for name, tt := range tests {
