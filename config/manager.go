@@ -22,7 +22,6 @@ import (
 	"os"
 	"sync"
 
-	"github.com/katanomi/pkg/storage/configmap"
 	"github.com/katanomi/pkg/watcher"
 	"go.uber.org/zap"
 	corev1 "k8s.io/api/core/v1"
