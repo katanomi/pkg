@@ -35,8 +35,8 @@ type FileStoreCapable interface {
 type FileObjectInterface interface {
 	// GetFileObject for get file object
 	GetFileObject(ctx context.Context, objectName string) (*FileObject, error)
-	// PutFileObject for put file object
-	PutFileObject(ctx context.Context, objectName string, obj *FileObject) (*v1alpha1.FileMeta,
+	// PutFileObject for put file object, use FileObject.Name to store objectName
+	PutFileObject(ctx context.Context, obj *FileObject) (*v1alpha1.FileMeta,
 		error)
 	// DeleteFileObject for delete file object
 	DeleteFileObject(ctx context.Context, objectName string) error
