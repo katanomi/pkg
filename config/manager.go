@@ -102,11 +102,14 @@ func (manager *Manager) GetConfig() *Config {
 // return the default value of the switch.
 func (manager *Manager) GetFeatureFlag(flag string) FeatureValue {
 	defaultValue := defaultFeatureValue[flag]
-	if manager == nil {
+	if manager == nil || manager.Config == nil {
 		return defaultValue
 	}
 
-	if value, ok := manager.Data[flag]; ok {
+	manager.lock.Lock()
+	defer manager.lock.Unlock()
+	value, ok := manager.Data[flag]
+	if ok {
 		return FeatureValue(value)
 	}
 	return defaultValue

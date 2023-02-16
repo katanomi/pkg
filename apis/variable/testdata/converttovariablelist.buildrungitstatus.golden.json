@@ -129,14 +129,6 @@
         {
             "name": "target.webURL",
             "example": "https://github.com/repository/tree/main"
-        },
-        {
-            "name": "versionPhase"
-        },
-        {
-            "name": "version",
-            "example": "v1.2.3",
-            "label": "version"
         }
     ]
 }

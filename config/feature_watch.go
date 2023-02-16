@@ -48,14 +48,14 @@ func defaultFeatureChanged(new *FeatureFlags, old *FeatureFlags) bool {
 func (manager *Manager) WatchFeatureFlagChanged(ctx context.Context, listFunc ListByFeatureFlagChanged, featureChanged HasFeatureChangedFunc) (source.Source, handler.EventHandler, builder.WatchesOption) {
 
 	return &source.Kind{Type: &corev1.ConfigMap{}},
-		handler.EnqueueRequestsFromMapFunc(enqueueRequestsConfigMapFunc(ctx, listFunc)),
+		handler.EnqueueRequestsFromMapFunc(enqueueRequestsConfigMapFunc(ctx, manager, listFunc)),
 		// determine whether the function switch has changed, and return true when it changes.
 		builder.WithPredicates(predicate.Funcs{
 			UpdateFunc: predicatesUpdateFunc(manager, featureChanged),
 		})
 }
 
-func enqueueRequestsConfigMapFunc(ctx context.Context, listFunc ListByFeatureFlagChanged) func(client.Object) []reconcile.Request {
+func enqueueRequestsConfigMapFunc(ctx context.Context, manager *Manager, listFunc ListByFeatureFlagChanged) func(client.Object) []reconcile.Request {
 	return func(obj client.Object) (reqs []reconcile.Request) {
 		reqs = []reconcile.Request{}
 		if listFunc == nil {
@@ -65,6 +65,11 @@ func enqueueRequestsConfigMapFunc(ctx context.Context, listFunc ListByFeatureFla
 		configMap, ok := obj.(*corev1.ConfigMap)
 		if !ok {
 			return
+		}
+
+		// Update configuration files manually. the update of the watch may be later than the time trigger.
+		if manager != nil && manager.Informer != nil {
+			manager.Informer.OnChange(configMap)
 		}
 
 		key := types.NamespacedName{Name: configMap.Name, Namespace: configMap.Namespace}

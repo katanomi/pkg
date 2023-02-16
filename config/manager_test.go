@@ -221,5 +221,4 @@ func TestIsSameConfigMap(t *testing.T) {
 		sameConfig := corev1.ConfigMap{ObjectMeta: metav1.ObjectMeta{Name: "other", Namespace: system.Namespace()}}
 		g.Expect(manager.isSameConfigMap(&sameConfig)).To(Equal(false), "when manager is nil, return false")
 	})
-
 }

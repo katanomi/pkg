@@ -67,13 +67,39 @@ func Test_enqueueRequestsMapFunc(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			g := NewGomegaWithT(t)
 
-			getFunc := enqueueRequestsConfigMapFunc(ctx, tt.listFunc)
+			getFunc := enqueueRequestsConfigMapFunc(ctx, nil, tt.listFunc)
 			got := getFunc(tt.obj)
 
 			diff := cmp.Diff(got, tt.want)
 			g.Expect(diff).To(BeEmpty())
 		})
 	}
+}
+
+func Test_enqueueRequestsMapFunc_onChange(t *testing.T) {
+	g := NewGomegaWithT(t)
+	ctx := context.TODO()
+	cm := corev1.ConfigMap{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "cm",
+			Namespace: system.Namespace(),
+		},
+		Data: map[string]string{
+			"key": "value",
+		},
+	}
+
+	client := fake.NewSimpleClientset()
+
+	watcher := informer.NewInformedWatcher(client, system.Namespace())
+	manager := NewManager(watcher, nil, "cm")
+	getFunc := enqueueRequestsConfigMapFunc(ctx, manager, func(ctx context.Context) []metav1.Object { return []metav1.Object{&cm} })
+
+	getFunc(&cm)
+	config := manager.GetConfig()
+
+	g.Expect(config).NotTo(BeNil(), "config should not nil.")
+	g.Expect(cmp.Diff(config.Data, cm.Data)).To(BeEmpty(), "data should be update.")
 }
 
 func Test_predicatesUpdateFunc(t *testing.T) {
