@@ -54,3 +54,20 @@ func ClusterNames(ctx context.Context) []string {
 	names, _ := val.([]string)
 	return names
 }
+
+type ignoreForbiddenKey struct{}
+
+// WithIgnoreForbidden adds ignore forbidden flag to the context
+func WithIgnoreForbidden(ctx context.Context, ignoreForbidden bool) context.Context {
+	return context.WithValue(ctx, clusterNamesKey{}, ignoreForbidden)
+}
+
+// IgnoreForbidden return a ignore forbidden flag in context
+func IgnoreForbidden(ctx context.Context) bool {
+	val := ctx.Value(clusterNamesKey{})
+	if val == nil {
+		return false
+	}
+	ignoreForbidden, _ := val.(bool)
+	return ignoreForbidden
+}

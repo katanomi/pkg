@@ -45,8 +45,13 @@ func TestContext(t *testing.T) {
 		ctx := context.TODO()
 
 		ctx = WithMultiCluster(ctx, clusterClient)
-
 		g.Expect(MultiCluster(ctx)).To(Equal(clusterClient))
+
+		ctx = WithIgnoreForbidden(ctx, true)
+		g.Expect(IgnoreForbidden(ctx)).To(BeTrue())
+		//
+		ctx = WithIgnoreForbidden(ctx, false)
+		g.Expect(IgnoreForbidden(ctx)).To(BeFalse())
 
 	})
 }

@@ -32,7 +32,7 @@ type MarshalFuncManager interface {
 // ConvertFunc define variable transformation function
 type ConvertFunc func(reflect.Type, *field.Path, MarshalFuncManager) ([]Variable, error)
 
-// DefaultKindConvertFuncs provides a default Kind conversion function.
+// DefaultKindMarshalFuncs provides a default Kind conversion function.
 var DefaultKindMarshalFuncs = map[reflect.Kind]ConvertFunc{
 	reflect.Struct:  convertStruct,
 	reflect.Pointer: convertPointer,
@@ -77,7 +77,7 @@ func (v *VariableMarshaller) KindFuncs() map[reflect.Kind]ConvertFunc {
 	return DefaultKindMarshalFuncs
 }
 
-// ConvertToVariableList convert object to variable list.
+// Marshal convert object to variable list.
 func (v *VariableMarshaller) Marshal() (VariableList, error) {
 	if v.Object == nil {
 		return VariableList{}, nil
