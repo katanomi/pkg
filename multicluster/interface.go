@@ -28,7 +28,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
-//go:generate ../bin/mockgen -package=multicluster -destination=../testing/mock/github.com/katanomi/pkg/multicluster/interface.go  github.com/katanomi/pkg/multicluster Interface
+//go:generate mockgen -package=multicluster -destination=../testing/mock/github.com/katanomi/pkg/multicluster/interface.go  github.com/katanomi/pkg/multicluster Interface
 
 // Interface interface for a multi-cluster functionality
 type Interface interface {
@@ -37,6 +37,7 @@ type Interface interface {
 	GetDynamic(ctx context.Context, clusterRef *corev1.ObjectReference) (dyn dynamic.Interface, err error)
 	GetConfigFromCluster(ctx context.Context, cluster *unstructured.Unstructured) (config *rest.Config, err error)
 
+	// ListClustersNamespaces lists all namespaces in all clusters
 	// TODO: add this method to the interface and implementation
 	ListClustersNamespaces(ctx context.Context, namespace string) (clusterNamespaces map[*corev1.ObjectReference][]corev1.Namespace, err error)
 	// StartWarmUpClientCache used to start warming the client cache, only needs to be called once.

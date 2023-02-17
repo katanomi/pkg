@@ -263,5 +263,6 @@ func (m *ClusterRegistryClient) ListClustersNamespaces(ctx context.Context, name
 	return clusterNamespaces, nil
 }
 
+// StartWarmUpClientCache used to start warming the client cache, only needs to be called once.
 func (m *ClusterRegistryClient) StartWarmUpClientCache(ctx context.Context) {
 }
