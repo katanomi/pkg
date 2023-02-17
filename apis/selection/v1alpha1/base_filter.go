@@ -116,7 +116,7 @@ func (n *BaseFilter) Validate(fld *field.Path) field.ErrorList {
 		errs = append(errs, field.Required(fld, "one of selector OR refs is required"))
 	}
 	if n.Selector != nil {
-		errs = append(errs, v1validation.ValidateLabelSelector(n.Selector, fld.Child("selector"))...)
+		errs = append(errs, v1validation.ValidateLabelSelector(n.Selector, v1validation.LabelSelectorValidationOptions{}, fld.Child("selector"))...)
 	}
 	if len(n.Refs) > 0 {
 		fld := fld.Child("refs")

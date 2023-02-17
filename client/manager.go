@@ -18,8 +18,14 @@ package client
 
 import (
 	"context"
+	"strings"
 	"time"
 
+	apiserverrequest "k8s.io/apiserver/pkg/endpoints/request"
+
+	"k8s.io/apiserver/pkg/authentication/user"
+
+	"github.com/golang-jwt/jwt"
 	"github.com/katanomi/pkg/tracing"
 	"k8s.io/client-go/dynamic"
 
@@ -48,6 +54,7 @@ type Manager struct {
 
 // NewManager initializes a new manager based on func
 func NewManager(ctx context.Context, get GetConfigFunc, baseConfig GetBaseConfigFunc) *Manager {
+
 	if get == nil {
 		get = FromBearerToken
 	}
@@ -73,6 +80,16 @@ func (m *Manager) Filter(ctx context.Context) restful.FilterFunction {
 	return ManagerFilter(ctx, m)
 }
 
+// Filters returns manager.Filter with ImpersonateFilter
+func (m *Manager) Filters(ctx context.Context) (filters []restful.FilterFunction, err error) {
+
+	return []restful.FilterFunction{
+		ManagerFilter(ctx, m),
+		ImpersonateFilter(ctx),
+	}, nil
+
+}
+
 // ManagerFilter generates filter based on a manager to create a config based in a request and injects into context
 func ManagerFilter(ctx context.Context, mgr *Manager) restful.FilterFunction {
 	log := logging.FromContext(ctx).Named("manager-filter")
@@ -81,7 +98,6 @@ func ManagerFilter(ctx context.Context, mgr *Manager) restful.FilterFunction {
 
 	return func(req *restful.Request, resp *restful.Response, chain *restful.FilterChain) {
 		start := time.Now()
-
 		config, err := mgr.GetConfig(req, mgr.GetBasicConfig)
 		log.Debugw("ManagerFilter, got config", "totalElapsed", time.Since(start).String())
 		step := time.Now()
@@ -91,13 +107,22 @@ func ManagerFilter(ctx context.Context, mgr *Manager) restful.FilterFunction {
 			return
 		}
 
-		ctx := req.Request.Context()
+		reqCtx := req.Request.Context()
 
 		// setting defaults to the config
 		config.Burst = DefaultBurst
 		config.QPS = DefaultQPS
 		config.Timeout = DefaultTimeout
-		ctx = injection.WithConfig(ctx, config)
+
+		reqCtx = injection.WithConfig(reqCtx, config)
+
+		user, err := userFromBearerToken(strings.TrimPrefix(req.Request.Header.Get("Authorization"), "Bearer "))
+		if err != nil {
+			log.Errorw("cannot get user info from token", "err", err)
+			kerrors.HandleError(req, resp, err)
+			return
+		}
+		reqCtx = apiserverrequest.WithUser(reqCtx, user)
 
 		directClient, err := client.New(config, client.Options{Scheme: scheme, Mapper: serviceAccountClient.RESTMapper()})
 		log.Debugw("ManagerFilter, got direct client", "totalElapsed", time.Since(start).String(), "elapsed", time.Since(step).String())
@@ -107,7 +132,7 @@ func ManagerFilter(ctx context.Context, mgr *Manager) restful.FilterFunction {
 			kerrors.HandleError(req, resp, err)
 			return
 		}
-		ctx = WithClient(ctx, directClient)
+		reqCtx = WithClient(reqCtx, directClient)
 
 		dynamicClient, err := dynamic.NewForConfig(config)
 		log.Debugw("ManagerFilter, got dynamic client", "totalElapsed", time.Since(start).String(), "elapsed", time.Since(step).String())
@@ -116,11 +141,36 @@ func ManagerFilter(ctx context.Context, mgr *Manager) restful.FilterFunction {
 			kerrors.HandleError(req, resp, err)
 			return
 		}
-		ctx = WithDynamicClient(ctx, dynamicClient)
+		reqCtx = WithDynamicClient(reqCtx, dynamicClient)
 
-		req.Request = req.Request.WithContext(ctx)
+		req.Request = req.Request.WithContext(reqCtx)
 
 		log.Debugw("config,client,dynamicclient context done", "totalElapsed", time.Since(start).String())
 		chain.ProcessFilter(req, resp)
 	}
+}
+
+func userFromBearerToken(rawToken string) (user.Info, error) {
+	mapClaims := jwt.MapClaims{}
+
+	_, _, err := new(jwt.Parser).ParseUnverified(rawToken, mapClaims)
+	if err != nil {
+		return nil, err
+	}
+	info := user.DefaultInfo{}
+	// username is claim by sub when current token is generated serviceaccount
+	if val, ok := mapClaims["sub"].(string); ok {
+		info.Name = val
+	}
+
+	// username is claim by email
+	if val, ok := mapClaims["email"].(string); ok {
+		info.Name = val
+	}
+
+	if val, ok := mapClaims["groups"].([]string); ok {
+		info.Groups = val
+	}
+
+	return &info, nil
 }
