@@ -76,7 +76,7 @@ func GenerateGitPluginClient(ctx context.Context, secretRef *corev1.ObjectRefere
 		}
 		secret, err = ksecret.GetSecretByRefOrLabel(ctx, clt, secretRef)
 		if err != nil {
-			err = fmt.Errorf("get secret for version steam failed: %w", err)
+			err = fmt.Errorf("get secret by ref or label failed: %w", err)
 			return
 		}
 		pclient = pclient.WithSecret(*secret)
