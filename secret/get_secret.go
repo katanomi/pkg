@@ -88,12 +88,12 @@ func GetSecretByRefOrLabel(ctx context.Context, clt client.Client, ref *corev1.O
 	}
 
 	if len(secretList.Items) == 0 {
-		log.Errorw("not found any secret by labels", "labels", matchingLabels, "secretRef", ref)
+		log.Errorw("not found any secret by labels", "ns", ns, "labels", matchingLabels, "secretRef", ref)
 		err = fmt.Errorf("secret %s not exist or matching by labels '%v'", objKey.String(), matchingLabels)
 		return nil, err
 	}
 	if len(secretList.Items) > 1 {
-		log.Infow("found multiple secrets by labels", "labels", matchingLabels, "#secretList.Items", len(secretList.Items))
+		log.Infow("found multiple secrets by labels", "ns", ns, "labels", matchingLabels, "#secretList.Items", len(secretList.Items))
 	}
 	return &secretList.Items[0], nil
 }
