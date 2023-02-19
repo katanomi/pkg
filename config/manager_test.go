@@ -24,6 +24,7 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
+	kclient "github.com/katanomi/pkg/client"
 	"go.uber.org/zap"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -31,6 +32,7 @@ import (
 	"knative.dev/pkg/configmap/informer"
 	"knative.dev/pkg/system"
 	_ "knative.dev/pkg/system/testing"
+	kfake "sigs.k8s.io/controller-runtime/pkg/client/fake"
 )
 
 var _ = Describe("NewManger and GetConfig and GetFeatureFlags", func() {
@@ -220,5 +222,56 @@ func TestIsSameConfigMap(t *testing.T) {
 		manager = nil
 		sameConfig := corev1.ConfigMap{ObjectMeta: metav1.ObjectMeta{Name: "other", Namespace: system.Namespace()}}
 		g.Expect(manager.isSameConfigMap(&sameConfig)).To(Equal(false), "when manager is nil, return false")
+	})
+}
+
+func Test_GetFeatureFlagByClient(t *testing.T) {
+	t.Run("manager is empty", func(t *testing.T) {
+		g := NewGomegaWithT(t)
+
+		var manager *Manager
+		got := manager.GetFeatureFlagByClient(context.TODO(), VersionEnabledFeatureKey)
+		g.Expect(got).To(Equal(FeatureValue("false")))
+	})
+
+	t.Run("context client is empty", func(t *testing.T) {
+		g := NewGomegaWithT(t)
+		client := fake.NewSimpleClientset()
+
+		watcher := informer.NewInformedWatcher(client, "cm")
+		manager := NewManager(watcher, nil, "cm")
+
+		got := manager.GetFeatureFlagByClient(context.TODO(), VersionEnabledFeatureKey)
+		g.Expect(got).To(Equal(FeatureValue("false")))
+	})
+
+	t.Run("configmap object not found", func(t *testing.T) {
+		g := NewGomegaWithT(t)
+		client := fake.NewSimpleClientset()
+		watcher := informer.NewInformedWatcher(client, "cm")
+		manager := NewManager(watcher, nil, "cm")
+
+		ctx := context.TODO()
+		clt := kfake.NewClientBuilder().Build()
+		ctx = kclient.WithClient(ctx, clt)
+
+		got := manager.GetFeatureFlagByClient(ctx, VersionEnabledFeatureKey)
+		g.Expect(got).To(Equal(FeatureValue("false")))
+	})
+
+	t.Run("get feature flag success.", func(t *testing.T) {
+		g := NewGomegaWithT(t)
+		client := fake.NewSimpleClientset()
+
+		watcher := informer.NewInformedWatcher(client, "cm")
+		manager := NewManager(watcher, nil, "cm")
+
+		cm := &corev1.ConfigMap{ObjectMeta: metav1.ObjectMeta{Name: "cm", Namespace: system.Namespace()}, Data: map[string]string{"flag": "true"}}
+		ctx := context.TODO()
+		clt := kfake.NewClientBuilder().WithObjects(cm).Build()
+		ctx = kclient.WithClient(ctx, clt)
+
+		got := manager.GetFeatureFlagByClient(ctx, "flag")
+		g.Expect(got).To(Equal(FeatureValue("true")))
 	})
 }
