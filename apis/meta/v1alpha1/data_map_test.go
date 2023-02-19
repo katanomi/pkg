@@ -197,6 +197,12 @@ func TestConfig_MustTimeDurationVal(t *testing.T) {
 			dft:  time.Second,
 			want: time.Minute,
 		},
+		"config contains the expected key, and has day unit": {
+			m:    map[string]string{"exist-key": "1d"},
+			key:  "exist-key",
+			dft:  time.Hour * 24,
+			want: time.Hour * 24,
+		},
 	}
 	for name, tt := range tests {
 		t.Run(name, func(t *testing.T) {

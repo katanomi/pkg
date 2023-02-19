@@ -19,6 +19,8 @@ package v1alpha1
 import (
 	"github.com/katanomi/pkg/encoding"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
+	"knative.dev/pkg/apis"
+	"knative.dev/pkg/apis/duck/v1beta1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
@@ -42,4 +44,17 @@ func ObjectToRecord(obj client.Object) Record {
 			CreationTimestamp: data.GetCreationTimestamp().Time.Unix(),
 		},
 	}
+}
+
+// TopConditionToMetadata convert top level condition to metadata
+func TopConditionToMetadata(conds v1beta1.Conditions) map[string]string {
+	for _, cond := range conds {
+		if cond.Type == apis.ConditionSucceeded {
+			metadata := map[string]string{}
+			metadata["status"] = string(cond.Status)
+			metadata["reason"] = cond.Reason
+			return metadata
+		}
+	}
+	return nil
 }
