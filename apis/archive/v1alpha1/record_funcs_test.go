@@ -19,13 +19,11 @@ package v1alpha1
 import (
 	"testing"
 
-	"knative.dev/pkg/apis"
-
 	"github.com/google/go-cmp/cmp"
 	ktesting "github.com/katanomi/pkg/testing"
 	"github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
-	"knative.dev/pkg/apis/duck/v1beta1"
+	"knative.dev/pkg/apis"
 )
 
 func TestObjectToRecord(t *testing.T) {
@@ -40,7 +38,7 @@ func TestObjectToRecord(t *testing.T) {
 
 func TestTopConditionToMetadata(t *testing.T) {
 	g := gomega.NewGomegaWithT(t)
-	conds := v1beta1.Conditions{
+	conds := apis.Conditions{
 		apis.Condition{
 			Type:   apis.ConditionSucceeded,
 			Status: corev1.ConditionTrue,
