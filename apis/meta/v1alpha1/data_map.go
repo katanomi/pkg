@@ -19,6 +19,8 @@ package v1alpha1
 import (
 	"strconv"
 	"time"
+
+	"github.com/k1LoW/duration"
 )
 
 // DataMap describe a map[string]string struct
@@ -104,7 +106,7 @@ func (c DataMap) TimeDurationVal(key string) (*time.Duration, error) {
 	if v == nil {
 		return nil, nil
 	}
-	d, err := time.ParseDuration(*v)
+	d, err := duration.Parse(*v)
 	if err != nil {
 		return nil, err
 	}

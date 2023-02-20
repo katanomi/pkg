@@ -31,11 +31,11 @@ func TestHistoryLimits_IsInvalid(t *testing.T) {
 	}{
 		"HistoryLimits is nil": {
 			limit: nil,
-			want:  true,
+			want:  false,
 		},
 		"HistoryLimits.Count is nil": {
 			limit: &HistoryLimits{},
-			want:  true,
+			want:  false,
 		},
 		"HistoryLimits.Count is zero": {
 			limit: &HistoryLimits{Count: pointer.Int(0)},
@@ -53,6 +53,40 @@ func TestHistoryLimits_IsInvalid(t *testing.T) {
 	for name, tt := range tests {
 		t.Run(name, func(t *testing.T) {
 			g.Expect(tt.limit.IsInvalid()).To(gomega.Equal(tt.want))
+		})
+	}
+}
+
+func TestHistoryLimits_IsNotSet(t *testing.T) {
+	g := gomega.NewGomegaWithT(t)
+	tests := map[string]struct {
+		limit *HistoryLimits
+		want  bool
+	}{
+		"HistoryLimits is nil": {
+			limit: nil,
+			want:  true,
+		},
+		"HistoryLimits.Count is nil": {
+			limit: &HistoryLimits{},
+			want:  true,
+		},
+		"HistoryLimits.Count is zero": {
+			limit: &HistoryLimits{Count: pointer.Int(0)},
+			want:  false,
+		},
+		"HistoryLimits.Count is -1": {
+			limit: &HistoryLimits{Count: pointer.Int(-1)},
+			want:  false,
+		},
+		"HistoryLimits.Count is 1": {
+			limit: &HistoryLimits{Count: pointer.Int(1)},
+			want:  false,
+		},
+	}
+	for name, tt := range tests {
+		t.Run(name, func(t *testing.T) {
+			g.Expect(tt.limit.IsNotSet()).To(gomega.Equal(tt.want))
 		})
 	}
 }

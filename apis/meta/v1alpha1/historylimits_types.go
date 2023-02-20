@@ -26,9 +26,14 @@ type HistoryLimits struct {
 	Count *int `json:"count,omitempty"`
 }
 
-// IsInvalid returns true if the history limits is empty
+// IsNotSet returns true if the history limits is set
+func (h *HistoryLimits) IsNotSet() bool {
+	return h == nil || h.Count == nil
+}
+
+// IsInvalid returns true if the history limits is set but the value is invalid
 func (h *HistoryLimits) IsInvalid() bool {
-	return h == nil || h.Count == nil || *h.Count < 0
+	return !h.IsNotSet() && *h.Count < 0
 }
 
 // Validate make sure the data is legitimate..

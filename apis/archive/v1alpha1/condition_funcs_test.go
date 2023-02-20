@@ -169,3 +169,12 @@ func TestIn(t *testing.T) {
 	cond.Value = ToInterfaceSlice(cond.Value)
 	g.Expect(cmp.Diff(cond, expect)).To(gomega.BeEmpty())
 }
+
+func TestCompleteStatus(t *testing.T) {
+	g := gomega.NewGomegaWithT(t)
+
+	expect := Condition{}
+	ktesting.MustLoadYaml("testdata/condition.completedStatus.golden.yaml", &expect)
+	cond := CompletedStatus()
+	g.Expect(cmp.Diff(cond, expect)).To(gomega.BeEmpty())
+}

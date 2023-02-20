@@ -19,6 +19,7 @@ package v1alpha1
 import (
 	"reflect"
 
+	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 )
 
@@ -175,6 +176,14 @@ func NamespacedName(ns, name string) []Condition {
 		Equal(NamespaceField, ns),
 		Equal(NameField, name),
 	}
+}
+
+// CompletedStatus generate condition for completed status
+func CompletedStatus() Condition {
+	return Or(
+		Equal(MetadataKey("status"), string(corev1.ConditionFalse)),
+		Equal(MetadataKey("status"), string(corev1.ConditionTrue)),
+	)
 }
 
 // ToInterfaceSlice convert slice to interface slice

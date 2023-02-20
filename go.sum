@@ -296,6 +296,8 @@ github.com/jstemmer/go-junit-report v0.9.1/go.mod h1:Brl9GWCQeLvo8nXZwPNNblvFj/X
 github.com/julienschmidt/httprouter v1.2.0/go.mod h1:SYymIcj16QtmaHHD7aYtjjsJG7VTCxuUUipMqKk8s4w=
 github.com/julienschmidt/httprouter v1.3.0/go.mod h1:JR6WtHb+2LUe8TCKY3cZOxFyyO8IZAc4RVcycCCAKdM=
 github.com/jung-kurt/gofpdf v1.0.3-0.20190309125859-24315acbbda5/go.mod h1:7Id9E/uU8ce6rXgefFLlgrJj/GYY22cpxn+r32jIOes=
+github.com/k1LoW/duration v1.2.0 h1:qq1gWtPh7YROFyerBufVP+ATR11mOOHDInrcC/Xe/6A=
+github.com/k1LoW/duration v1.2.0/go.mod h1:qUa0NptIiUl5EUsCc8wIiSaHuNjS4wmpYNMHp0l6pos=
 github.com/katanomi/knative-pkg v0.0.0-20230205123800-ec0dda2ef42f h1:1CMTqVoH2Mk5Ue6q9JQYBicH2mxHDmuxBhCCVgB6OV8=
 github.com/katanomi/knative-pkg v0.0.0-20230205123800-ec0dda2ef42f/go.mod h1:M46Mmv9WvEJ+w0Op0mnN/ITbJD4DiVa2ezARxiWyVxg=
 github.com/katanomi/zap v1.18.2 h1:CiuSeUue4rtxEw/DYhKF9Kzy2EssGDz3OPN+4C2x3Bw=
