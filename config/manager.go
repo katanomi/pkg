@@ -23,12 +23,14 @@ import (
 	"sync"
 
 	"github.com/katanomi/pkg/watcher"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"go.uber.org/zap"
 
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
+	kclient "github.com/katanomi/pkg/client"
 	"github.com/katanomi/pkg/storage/configmap"
 	"knative.dev/pkg/system"
 )
@@ -98,6 +100,29 @@ func (manager *Manager) GetConfig() *Config {
 	return manager.Config
 }
 
+// GetFeatureFlagByClient get the config configuration by requesting configmap from the client.
+// prioritize the use of GetFeatureFlag, and use the current function in scenarios that require high real-time data.
+func (manager *Manager) GetFeatureFlagByClient(ctx context.Context, flag string) FeatureValue {
+	if manager == nil || manager.configMapRef == nil {
+		// returns the default value of flag.
+		return getFeatureFlag(flag, nil)
+	}
+
+	clt := kclient.Client(ctx)
+	if clt == nil {
+		// When the client is not specified in the context, it behaves the same as GetFeatureFlag.
+		return manager.GetFeatureFlag(flag)
+	}
+
+	cm := &corev1.ConfigMap{}
+	err := clt.Get(ctx, client.ObjectKey{Name: manager.configMapRef.Name, Namespace: manager.configMapRef.Namespace}, cm)
+	if err != nil {
+		// When getting configmap and reporting an error, it behaves the same as GetFeatureFlag.
+		return manager.GetFeatureFlag(flag)
+	}
+	return getFeatureFlag(flag, &Config{Data: cm.Data})
+}
+
 // GetFeatureFlag get the function switch data, if the function switch is not set,
 // return the default value of the switch.
 func (manager *Manager) GetFeatureFlag(flag string) FeatureValue {
@@ -106,7 +131,19 @@ func (manager *Manager) GetFeatureFlag(flag string) FeatureValue {
 		return defaultValue
 	}
 
-	if value, ok := manager.Data[flag]; ok {
+	manager.lock.Lock()
+	defer manager.lock.Unlock()
+	return getFeatureFlag(flag, manager.Config)
+}
+
+func getFeatureFlag(flag string, config *Config) FeatureValue {
+	defaultValue := defaultFeatureValue[flag]
+	if config == nil || config.Data == nil {
+		return defaultValue
+	}
+
+	value, ok := config.Data[flag]
+	if ok {
 		return FeatureValue(value)
 	}
 	return defaultValue

@@ -66,7 +66,7 @@ type FeatureFlags struct {
 // FeatureValue returns the value of the implemented feature flag, or the default if not found.
 func (f *FeatureFlags) FeatureValue(flag string) FeatureValue {
 	defaultValue := defaultFeatureValue[flag]
-	if f == nil {
+	if f == nil || f.Data == nil {
 		return defaultValue
 	}
 

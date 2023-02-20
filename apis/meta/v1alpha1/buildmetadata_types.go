@@ -76,11 +76,11 @@ type BuildRunGitStatus struct {
 
 	// VersionPhase is the phase on the versionscheme that matches this git revision.
 	// +optional
-	VersionPhase string `json:"versionPhase,omitempty"`
+	VersionPhase string `json:"versionPhase,omitempty" variable:"-"`
 
 	// Version is the version generated for this git revision
 	// +optional
-	Version string `json:"version,omitempty" variable:"label=version;example=v1.2.3"`
+	Version string `json:"version,omitempty" variable:"-"`
 
 	// VersionVariants are different variants generated based on version
 	// key is the name of the variant, value is the value after the variant.
