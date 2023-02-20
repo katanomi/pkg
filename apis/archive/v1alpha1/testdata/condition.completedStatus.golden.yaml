@@ -1,0 +1,8 @@
+operator: or
+value:
+  - operator: eq
+    key: metadata.status
+    value: "False"
+  - operator: eq
+    key: metadata.status
+    value: "True"

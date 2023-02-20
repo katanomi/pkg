@@ -124,8 +124,11 @@ type GetOptions struct {
 
 // ListOptions options for querying a list of records
 type ListOptions struct {
-	Orders []Order
 	metav1alpha1.Pager
+	Orders []Order
+
+	// WithDeletedData describe the deleted data should be returned
+	WithDeletedData bool
 }
 
 // Field describe the field to be returned

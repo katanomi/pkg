@@ -23,6 +23,7 @@ import (
 	ktesting "github.com/katanomi/pkg/testing"
 	"github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
+	"knative.dev/pkg/apis"
 )
 
 func TestObjectToRecord(t *testing.T) {
@@ -33,4 +34,21 @@ func TestObjectToRecord(t *testing.T) {
 	ktesting.MustLoadYaml("testdata/objectToRecord.cm.golden.yaml", &wantRecord)
 	gotRecord := ObjectToRecord(cm)
 	g.Expect(cmp.Diff(gotRecord, wantRecord)).To(gomega.BeEmpty())
+}
+
+func TestTopConditionToMetadata(t *testing.T) {
+	g := gomega.NewGomegaWithT(t)
+	conds := apis.Conditions{
+		apis.Condition{
+			Type:   apis.ConditionSucceeded,
+			Status: corev1.ConditionTrue,
+			Reason: "test",
+		},
+	}
+	got := TopConditionToMetadata(conds)
+	expect := map[string]string{
+		"status": "True",
+		"reason": "test",
+	}
+	g.Expect(cmp.Diff(got, expect)).To(gomega.BeEmpty())
 }
