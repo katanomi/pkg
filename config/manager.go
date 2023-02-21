@@ -22,17 +22,14 @@ import (
 	"os"
 	"sync"
 
+	kclient "github.com/katanomi/pkg/client"
 	"github.com/katanomi/pkg/storage/configmap"
 	"github.com/katanomi/pkg/watcher"
-	"sigs.k8s.io/controller-runtime/pkg/client"
-
 	"go.uber.org/zap"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-
-	kclient "github.com/katanomi/pkg/client"
-	"github.com/katanomi/pkg/storage/configmap"
 	"knative.dev/pkg/system"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 const (
