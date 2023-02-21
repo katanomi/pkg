@@ -47,6 +47,9 @@ func Format(tmpl string, params ...string) string {
 // Parameter gets the path parameter from the request
 func Parameter(request *restful.Request, key string) string {
 	path := request.PathParameter(key)
+	if unescaped, err := url.PathUnescape(path); err == nil {
+		path = unescaped
+	}
 	path = strings.ReplaceAll(path, "%2F", "/")
 	path = strings.ReplaceAll(path, "%3A", ":")
 	return path

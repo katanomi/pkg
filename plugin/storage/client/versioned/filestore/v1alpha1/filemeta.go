@@ -48,7 +48,7 @@ func newFileMetas(c *FileStoreV1alpha1Client, pluginName string) *fileMetas {
 }
 
 func (f *fileMetas) GET(ctx context.Context, key string) (*v1alpha1.FileMeta, error) {
-	path := path.Format("storageplugin/%s/filemetas/%s", f.pluginName, key)
+	path := path.Format("storageplugins/%s/filemetas/%s", f.pluginName, path.Escape(key))
 	fileMeta := v1alpha1.FileMeta{}
 	err := f.client.Get(ctx, path, client2.ResultOpts(&fileMeta))
 	if err != nil {
