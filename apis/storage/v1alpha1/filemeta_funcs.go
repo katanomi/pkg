@@ -16,7 +16,11 @@ limitations under the License.
 
 package v1alpha1
 
-import "strings"
+import (
+	"encoding/base64"
+	"encoding/json"
+	"strings"
+)
 
 // ParseFileKey returns pluginName and fileObjectName
 func ParseFileKey(key string) (pluginName, fileObjectName string) {
@@ -25,4 +29,27 @@ func ParseFileKey(key string) (pluginName, fileObjectName string) {
 		return keySplit[0], keySplit[1]
 	}
 	return "", ""
+}
+
+// Encode returns json base64 encoded string
+func (in *FileMeta) Encode() string {
+	marshaledMeta, err := json.Marshal(in)
+	if err != nil {
+		return ""
+	}
+	return base64.StdEncoding.EncodeToString(marshaledMeta)
+}
+
+// DecodeAsFileMeta decodes encoded string to a pointer FileMeta
+func DecodeAsFileMeta(encoded string) (*FileMeta, error) {
+	decodedBytes, err := base64.StdEncoding.DecodeString(encoded)
+	if err != nil {
+		return nil, err
+	}
+	fileMeta := &FileMeta{}
+	err = json.Unmarshal(decodedBytes, fileMeta)
+	if err != nil {
+		return nil, err
+	}
+	return fileMeta, nil
 }

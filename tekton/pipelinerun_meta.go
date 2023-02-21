@@ -32,6 +32,14 @@ type PipelineRunMeta struct {
 	RunRefs []*v1.ObjectReference `json:"runRefs,omitempty"`
 }
 
+func (m *PipelineRunMeta) Encode() (string, error) {
+	data, err := json.Marshal(m)
+	if err != nil {
+		return "", err
+	}
+	return base64.StdEncoding.EncodeToString(data), nil
+}
+
 // InjectPipelineRunMeta injects encoded meta.json into pipelinerun's annotation
 func InjectPipelineRunMeta(pr *v1beta1.PipelineRun, meta PipelineRunMeta) error {
 	if pr == nil {

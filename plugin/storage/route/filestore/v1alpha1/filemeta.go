@@ -62,9 +62,10 @@ func (a *fileMeta) Register(ws *restful.WebService) {
 // GetFileMeta is handler of auth check route
 func (a *fileMeta) GetFileMeta(req *restful.Request, resp *restful.Response) {
 	pluginName := path.Parameter(req, "storagePlugin")
-	objectNameParam := path.Parameter(req, "objectName")
+	objectName := path.Parameter(req, "objectName")
+
 	ctx := req.Request.Context()
-	meta, err := a.impl.GetFileMeta(storage.CtxWithPluginName(ctx, pluginName), objectNameParam)
+	meta, err := a.impl.GetFileMeta(storage.CtxWithPluginName(ctx, pluginName), objectName)
 	if err != nil {
 		kerrors.HandleError(req, resp, err)
 		return
