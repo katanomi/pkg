@@ -61,7 +61,9 @@ func TestRBACFilter(t *testing.T) {
 		ctx := context.TODO()
 
 		client := Client(ctx)
-		review := makeSelfSubjectAccessReview("default", "def", attr)
+		attr.Namespace = "default"
+		attr.Name = "def"
+		review := makeSelfSubjectAccessReview(attr)
 		review.GetObject().SetName("default")
 		err := postSubjectAccessReview(ctx, client, review)
 
@@ -76,7 +78,9 @@ func TestRBACFilter(t *testing.T) {
 		ctx = WithClient(ctx, clt)
 
 		client := Client(ctx)
-		review := makeSelfSubjectAccessReview("default", "xyz", attr)
+		attr.Namespace = "default"
+		attr.Name = "xyz"
+		review := makeSelfSubjectAccessReview(attr)
 		review.GetObject().SetName("default")
 		err := postSubjectAccessReview(ctx, client, review)
 
@@ -96,7 +100,9 @@ func TestRBACFilter(t *testing.T) {
 			Groups: []string{"system:authenticated"},
 			UID:    "39f88a8e-9090-4495-830c-fabf0d0cc7a3",
 		}
-		review := makeSubjectAccessReview("default", "xyz", attr, user)
+		attr.Namespace = "default"
+		attr.Name = "xyz"
+		review := makeSubjectAccessReview(attr, user)
 		review.GetObject().SetName("default")
 		err := postSubjectAccessReview(ctx, client, review)
 
@@ -104,7 +110,7 @@ func TestRBACFilter(t *testing.T) {
 		g.Expect(errors.IsForbidden(err)).To(BeTrue())
 	})
 
-	t.Run("when is impersonate request", func(t *testing.T) {
+	t.Run("when is impersonated request", func(t *testing.T) {
 		g := NewGomegaWithT(t)
 		mockCtl := gomock.NewController(t)
 
@@ -137,4 +143,13 @@ func TestRBACFilter(t *testing.T) {
 
 		g.Expect(recorder.Code).Should(Not(BeEquivalentTo(http.StatusOK)))
 	})
+}
+
+func TestGetResourceAttributesFunc_GetResourceAttributes(t *testing.T) {
+	g := NewGomegaWithT(t)
+	getter := GetResourceAttributesFunc(func(ctx context.Context, req *restful.Request) authv1.ResourceAttributes {
+		return authv1.ResourceAttributes{Name: "test"}
+	})
+	got := getter.GetResourceAttributes(context.Background(), &restful.Request{})
+	g.Expect(got.Name).Should(BeEquivalentTo("test"))
 }

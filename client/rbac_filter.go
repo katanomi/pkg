@@ -37,32 +37,45 @@ import (
 	"k8s.io/apimachinery/pkg/runtime/schema"
 )
 
-// SubjectReviewFilterForResource makes a self subject review based a configuration already present inside the
-// request context using the user's bearer token
-// also, it makes a subject review based on Impersonate User info in request header
-func SubjectReviewFilterForResource(ctx context.Context, resourceAtt authv1.ResourceAttributes, namespaceParameter, nameParameter string) restful.FilterFunction {
+// GetResourceAttributesFunc helper function to warp a function to ResourceAttributeGetter
+type GetResourceAttributesFunc func(ctx context.Context, req *restful.Request) authv1.ResourceAttributes
+
+func (p GetResourceAttributesFunc) GetResourceAttributes(ctx context.Context, req *restful.Request) authv1.ResourceAttributes {
+	return p(ctx, req)
+}
+
+// ResourceAttributeGetter describe an interface to get resource attributes form request
+type ResourceAttributeGetter interface {
+	GetResourceAttributes(ctx context.Context, req *restful.Request) authv1.ResourceAttributes
+}
+
+// DynamicSubjectReviewFilter makes a subject review and the ResourceAttribute can be dynamically obtained
+func DynamicSubjectReviewFilter(ctx context.Context, resourceAttGetter ResourceAttributeGetter) restful.FilterFunction {
 	return func(req *restful.Request, resp *restful.Response, chain *restful.FilterChain) {
+		resourceAtt := resourceAttGetter.GetResourceAttributes(ctx, req)
 		reqCtx := req.Request.Context()
-		log := logging.FromContext(reqCtx).With("resource", resourceAtt.Resource, "group", resourceAtt.Group, "verb", resourceAtt.Verb)
+		log := logging.FromContext(reqCtx).With(
+			"resource", resourceAtt.Resource,
+			"group", resourceAtt.Group,
+			"verb", resourceAtt.Verb,
+		)
 		reqCtx = logging.WithLogger(reqCtx, log)
 
 		var review subjectAccessReviewObjInterface
-		var client = Client(reqCtx)
-
 		if !isImpersonateRequest(reqCtx) {
-			review = makeSelfSubjectAccessReview(req.PathParameter(namespaceParameter), req.PathParameter(nameParameter), resourceAtt)
+			review = makeSelfSubjectAccessReview(resourceAtt)
 		} else {
-			user := User(reqCtx)
-			if user == nil {
+			u := User(reqCtx)
+			if u == nil {
 				err := fmt.Errorf("not found impersonate info in config")
 				log.Error(err.Error())
 				kerrors.HandleError(req, resp, err)
 				return
 			}
-			review = makeSubjectAccessReview(req.PathParameter(namespaceParameter), req.PathParameter(nameParameter), resourceAtt, user)
+			review = makeSubjectAccessReview(resourceAtt, u)
 		}
 
-		err := postSubjectAccessReview(reqCtx, client, review)
+		err := postSubjectAccessReview(reqCtx, Client(reqCtx), review)
 		if err != nil {
 			log.Debugw("error veryfing user permissions", "err", err)
 			kerrors.HandleError(req, resp, err)
@@ -72,20 +85,29 @@ func SubjectReviewFilterForResource(ctx context.Context, resourceAtt authv1.Reso
 	}
 }
 
+// SubjectReviewFilterForResource makes a self subject review based a configuration already present inside the
+// request context using the user's bearer token
+// also, it makes a subject review based on Impersonate User info in request header
+func SubjectReviewFilterForResource(ctx context.Context, resourceAtt authv1.ResourceAttributes, namespaceParameter, nameParameter string) restful.FilterFunction {
+	getter := GetResourceAttributesFunc(func(ctx context.Context, req *restful.Request) authv1.ResourceAttributes {
+		attr := resourceAtt.DeepCopy()
+		if ns := req.PathParameter(namespaceParameter); ns != "" {
+			attr.Namespace = ns
+		}
+		if name := req.PathParameter(nameParameter); name != "" {
+			attr.Name = name
+		}
+		return *attr
+	})
+	return DynamicSubjectReviewFilter(ctx, getter)
+}
+
 func isImpersonateRequest(reqCtx context.Context) bool {
 	var config = injection.GetConfig(reqCtx)
 	return config.Impersonate.UserName != "" || len(config.Impersonate.Groups) != 0 || len(config.Impersonate.Extra) != 0
 }
 
-func makeSubjectAccessReview(namespace, name string, resourceAtt authv1.ResourceAttributes, user user.Info) subjectAccessReviewObjInterface {
-
-	if namespace != "" {
-		resourceAtt.Namespace = namespace
-	}
-	if name != "" {
-		resourceAtt.Name = name
-	}
-
+func makeSubjectAccessReview(resourceAtt authv1.ResourceAttributes, user user.Info) subjectAccessReviewObjInterface {
 	review := &authv1.SubjectAccessReview{
 		Spec: authv1.SubjectAccessReviewSpec{
 			ResourceAttributes: &resourceAtt,
@@ -134,13 +156,7 @@ func SelfSubjectReviewFilterForResource(ctx context.Context, resourceAtt authv1.
 	return SubjectReviewFilterForResource(ctx, resourceAtt, namespaceParameter, nameParameter)
 }
 
-func makeSelfSubjectAccessReview(namespace, name string, resourceAtt authv1.ResourceAttributes) subjectAccessReviewObjInterface {
-	if namespace != "" {
-		resourceAtt.Namespace = namespace
-	}
-	if name != "" {
-		resourceAtt.Name = name
-	}
+func makeSelfSubjectAccessReview(resourceAtt authv1.ResourceAttributes) subjectAccessReviewObjInterface {
 	review := &authv1.SelfSubjectAccessReview{
 		Spec: authv1.SelfSubjectAccessReviewSpec{
 			ResourceAttributes: &resourceAtt,
