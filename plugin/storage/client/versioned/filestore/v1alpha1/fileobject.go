@@ -18,11 +18,11 @@ package v1alpha1
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 
 	"github.com/katanomi/pkg/apis/storage/v1alpha1"
 	"github.com/katanomi/pkg/plugin/client"
+	pluginpath "github.com/katanomi/pkg/plugin/path"
 	filestorev1alpha1 "github.com/katanomi/pkg/plugin/storage/capabilities/filestore/v1alpha1"
 	sclient "github.com/katanomi/pkg/plugin/storage/client"
 )
@@ -47,26 +47,25 @@ type fileObjects struct {
 
 func (f *fileObjects) PUT(ctx context.Context, fileObj filestorev1alpha1.FileObject,
 	options ...client.OptionFunc) (*v1alpha1.FileMeta, error) {
-	path := fmt.Sprintf("storageplugin/%s/fileobjects/%s", f.pluginName, fileObj.Name)
+	path := fmt.Sprintf("storageplugins/%s/fileobjects/%s",
+		f.pluginName, pluginpath.Escape(fileObj.Name))
 
-	marshaledMeta, err := json.Marshal(fileObj.FileMeta)
-	if err != nil {
-		return nil, err
-	}
-
-	fileMeta := v1alpha1.FileMeta{}
-	err = f.client.Put(ctx, path, client.ResultOpts(&fileMeta),
-		client.HeaderOpts(v1alpha1.HeaderFileMeta, string(marshaledMeta)),
+	retMeta := v1alpha1.FileMeta{}
+	err := f.client.Put(ctx, path, client.ResultOpts(&retMeta),
+		client.HeaderOpts(v1alpha1.HeaderFileMeta, fileObj.FileMeta.Encode()),
+		client.HeaderOpts("Content-Type", "application/octet-stream"),
+		// this must be set or 406 status code will be returned
+		client.HeaderOpts("Accept", "application/json"),
 		client.BodyOpts(fileObj.FileReadCloser),
 	)
 	if err != nil {
 		return nil, err
 	}
-	return &fileMeta, nil
+	return &retMeta, nil
 }
 
 func (f *fileObjects) GET(ctx context.Context, key string) (*filestorev1alpha1.FileObject, error) {
-	path := fmt.Sprintf("storageplugin/%s/fileobjects/%s", f.pluginName, key)
+	path := fmt.Sprintf("storageplugins/%s/fileobjects/%s", f.pluginName, pluginpath.Escape(key))
 	fileObject := filestorev1alpha1.FileObject{}
 	err := f.client.Get(ctx, path, client.ResultOpts(&fileObject))
 	if err != nil {
@@ -76,7 +75,7 @@ func (f *fileObjects) GET(ctx context.Context, key string) (*filestorev1alpha1.F
 }
 
 func (f *fileObjects) DELETE(ctx context.Context, key string) error {
-	path := fmt.Sprintf("storageplugin/%s/fileobjects/%s", f.pluginName, key)
+	path := fmt.Sprintf("storageplugins/%s/fileobjects/%s", f.pluginName, pluginpath.Escape(key))
 	err := f.client.Delete(ctx, path)
 	if err != nil {
 		return err

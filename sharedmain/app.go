@@ -82,6 +82,7 @@ var (
 	QPS            float64
 	ConfigFile     string
 
+	WebServerPort      int
 	InsecureSkipVerify bool
 )
 
@@ -149,6 +150,7 @@ func ParseFlag() {
 			"Command-line flags override configuration from this file.")
 	flag.BoolVar(&InsecureSkipVerify, "insecure-skip-tls-verify", false,
 		"skip TLS verification and disable cert checking (default: false)")
+	flag.IntVar(&WebServerPort, "web-server-port", 8100, "http web server port")
 	flag.Parse()
 }
 
@@ -572,15 +574,8 @@ func (a *AppBuilder) Run() error {
 				a.container.Filter(filter)
 			}
 
-			for _, ws := range a.container.RegisteredWebServices() {
-				for _, route := range ws.Routes() {
-					fmt.Println(route.String())
-				}
-			}
-
-			port := 8100
 			srv := &http.Server{
-				Addr:    fmt.Sprintf(":%d", port),
+				Addr:    fmt.Sprintf(":%d", WebServerPort),
 				Handler: a.container,
 			}
 			return srv.ListenAndServe()

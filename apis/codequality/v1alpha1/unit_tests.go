@@ -62,7 +62,7 @@ type TestCoverage struct {
 
 // TestResult test results aggregation
 // stores the number of passed, skipped and failed test cases
-// also stores an calculated passed tests rate value
+// also stores a calculated passed tests rate value
 type TestResult struct {
 	// Passed test cases number
 	// +optional
@@ -81,4 +81,16 @@ type TestResult struct {
 	// calculated using  passed / (passed + failed) * 100
 	// +optional
 	PassedTestsRate string `json:"passedTestsRate"`
+
+	// ReportFiles are collection of report file object from storage plugin
+	// +optional
+	ReportFiles []ReportFile `json:"reportFiles"`
+}
+
+// ReportFile refers to a report object, could be a directory or a file depending on contentType
+type ReportFile struct {
+	// ContentType for content type
+	ContentType string `json:"contentType"`
+	// Key for file key returned from katanomi-data server
+	Key string `json:"key"`
 }

@@ -59,6 +59,7 @@ type StoragePluginClient struct {
 func NewStoragePluginClient(baseURL *duckv1.Addressable, opts ...BuildOptions) *StoragePluginClient {
 	restyClient := resty.NewWithClient(pkgClient.NewHTTPClient())
 	restyClient.SetDisableWarn(true)
+	restyClient.SetTimeout(0)
 
 	pluginClient := &StoragePluginClient{
 		client:       restyClient,
@@ -98,10 +99,11 @@ func (p *StoragePluginClient) Post(ctx context.Context, path string,
 // Put performs a PUT request with the given parameters
 func (p *StoragePluginClient) Put(ctx context.Context, path string,
 	options ...client.OptionFunc) error {
-	clientOptions := append(client.DefaultOptions)
-	options = append(clientOptions, options...)
+	clientOptions := client.DefaultOptions
+	clientOptions = append(clientOptions, options...)
 
-	request := p.R(ctx, options...)
+	request := p.R(ctx, clientOptions...)
+	request.SetContentLength(true)
 	response, err := request.Put(p.FullUrl(path))
 
 	return p.HandleError(response, err)
