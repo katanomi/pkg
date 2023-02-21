@@ -50,15 +50,15 @@ func (a *fileObject) GroupVersion() schema.GroupVersion {
 }
 
 func (a *fileObject) Register(ws *restful.WebService) {
-	storagePluginParam := ws.PathParameter("storagePlugin", "storage plugin to be used")
+	storagePluginParam := ws.PathParameter("storagePlugin", "storage plugin toe used")
 	objectNameParam := ws.PathParameter("objectName", "file object name in storage tools")
-	fileTypeParam := ws.QueryParameter("fileType", "business type of file")
 	ws.Route(
 		ws.PUT("storageplugins/{storagePlugin}/fileobjects/{objectName:*}").To(a.PutFileObject).
 			AllowedMethodsWithoutContentType([]string{http.MethodPut}).
+			Consumes(v1alpha1.SupportedContentTypeList...).
 			Produces(restful.MIME_JSON).
 			Doc("Storage plugin put raw file").
-			Param(storagePluginParam).Param(objectNameParam).Param(fileTypeParam).
+			Param(storagePluginParam).Param(objectNameParam).
 			Metadata(restfulspec.KeyOpenAPITags, a.tags).
 			Returns(http.StatusOK, "OK", v1alpha1.FileMeta{}),
 	)
@@ -67,7 +67,7 @@ func (a *fileObject) Register(ws *restful.WebService) {
 		ws.GET("storageplugins/{storagePlugin}/fileobjects/{objectName:*}").To(a.GetFileObject).
 			AllowedMethodsWithoutContentType([]string{http.MethodGet}).
 			Doc("Storage plugin get raw file").
-			Param(storagePluginParam).Param(objectNameParam).Param(fileTypeParam).
+			Param(storagePluginParam).Param(objectNameParam).
 			Metadata(restfulspec.KeyOpenAPITags, a.tags).
 			Returns(http.StatusOK, "OK", v1alpha1.FileMeta{}),
 	)
@@ -75,7 +75,7 @@ func (a *fileObject) Register(ws *restful.WebService) {
 	ws.Route(
 		ws.DELETE("storageplugins/{storagePlugin}/fileobjects/{objectName:*}").To(a.DeleteFileObject).
 			Doc("Storage plugin delete file by key").
-			Param(storagePluginParam).Param(objectNameParam).Param(fileTypeParam).
+			Param(storagePluginParam).Param(objectNameParam).
 			Metadata(restfulspec.KeyOpenAPITags, a.tags).
 			Returns(http.StatusOK, "OK", v1alpha1.FileMeta{}),
 	)
