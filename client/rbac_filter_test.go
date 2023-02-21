@@ -144,3 +144,12 @@ func TestRBACFilter(t *testing.T) {
 		g.Expect(recorder.Code).Should(Not(BeEquivalentTo(http.StatusOK)))
 	})
 }
+
+func TestGetResourceAttributesFunc_GetResourceAttributes(t *testing.T) {
+	g := NewGomegaWithT(t)
+	getter := GetResourceAttributesFunc(func(ctx context.Context, req *restful.Request) authv1.ResourceAttributes {
+		return authv1.ResourceAttributes{Name: "test"}
+	})
+	got := getter.GetResourceAttributes(context.Background(), &restful.Request{})
+	g.Expect(got.Name).Should(BeEquivalentTo("test"))
+}

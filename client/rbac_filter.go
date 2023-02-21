@@ -38,22 +38,22 @@ import (
 )
 
 // GetResourceAttributesFunc helper function to warp a function to ResourceAttributeGetter
-type GetResourceAttributesFunc func(req *restful.Request) authv1.ResourceAttributes
+type GetResourceAttributesFunc func(ctx context.Context, req *restful.Request) authv1.ResourceAttributes
 
-func (p GetResourceAttributesFunc) GetResourceAttributes(req *restful.Request) authv1.ResourceAttributes {
-	return p(req)
+func (p GetResourceAttributesFunc) GetResourceAttributes(ctx context.Context, req *restful.Request) authv1.ResourceAttributes {
+	return p(ctx, req)
 }
 
 // ResourceAttributeGetter describe an interface to get resource attributes form request
 type ResourceAttributeGetter interface {
-	GetResourceAttributes(req *restful.Request) authv1.ResourceAttributes
+	GetResourceAttributes(ctx context.Context, req *restful.Request) authv1.ResourceAttributes
 }
 
 // DynamicSubjectReviewFilter makes a subject review and the ResourceAttribute can be dynamically obtained
 func DynamicSubjectReviewFilter(ctx context.Context, resourceAttGetter ResourceAttributeGetter) restful.FilterFunction {
 	return func(req *restful.Request, resp *restful.Response, chain *restful.FilterChain) {
+		resourceAtt := resourceAttGetter.GetResourceAttributes(ctx, req)
 		reqCtx := req.Request.Context()
-		resourceAtt := resourceAttGetter.GetResourceAttributes(req)
 		log := logging.FromContext(reqCtx).With(
 			"resource", resourceAtt.Resource,
 			"group", resourceAtt.Group,
@@ -85,32 +85,20 @@ func DynamicSubjectReviewFilter(ctx context.Context, resourceAttGetter ResourceA
 	}
 }
 
-type namespacedNameGetter struct {
-	baseResourceAtt    authv1.ResourceAttributes
-	namespaceParameter string
-	nameParameter      string
-}
-
-func (a namespacedNameGetter) GetResourceAttributes(req *restful.Request) authv1.ResourceAttributes {
-	attr := a.baseResourceAtt.DeepCopy()
-	if ns := req.PathParameter(a.namespaceParameter); ns != "" {
-		attr.Namespace = ns
-	}
-	if name := req.PathParameter(a.nameParameter); name != "" {
-		attr.Name = name
-	}
-	return *attr
-}
-
 // SubjectReviewFilterForResource makes a self subject review based a configuration already present inside the
 // request context using the user's bearer token
 // also, it makes a subject review based on Impersonate User info in request header
 func SubjectReviewFilterForResource(ctx context.Context, resourceAtt authv1.ResourceAttributes, namespaceParameter, nameParameter string) restful.FilterFunction {
-	getter := namespacedNameGetter{
-		baseResourceAtt:    resourceAtt,
-		namespaceParameter: namespaceParameter,
-		nameParameter:      nameParameter,
-	}
+	getter := GetResourceAttributesFunc(func(ctx context.Context, req *restful.Request) authv1.ResourceAttributes {
+		attr := resourceAtt.DeepCopy()
+		if ns := req.PathParameter(namespaceParameter); ns != "" {
+			attr.Namespace = ns
+		}
+		if name := req.PathParameter(nameParameter); name != "" {
+			attr.Name = name
+		}
+		return *attr
+	})
 	return DynamicSubjectReviewFilter(ctx, getter)
 }
 
