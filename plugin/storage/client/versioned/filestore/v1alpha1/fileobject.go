@@ -20,6 +20,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/go-resty/resty/v2"
 	"github.com/katanomi/pkg/apis/storage/v1alpha1"
 	"github.com/katanomi/pkg/plugin/client"
 	pluginpath "github.com/katanomi/pkg/plugin/path"
@@ -67,10 +68,13 @@ func (f *fileObjects) PUT(ctx context.Context, fileObj filestorev1alpha1.FileObj
 func (f *fileObjects) GET(ctx context.Context, key string) (*filestorev1alpha1.FileObject, error) {
 	path := fmt.Sprintf("storageplugins/%s/fileobjects/%s", f.pluginName, pluginpath.Escape(key))
 	fileObject := filestorev1alpha1.FileObject{}
-	err := f.client.Get(ctx, path, client.ResultOpts(&fileObject))
+	resp, err := f.client.GetResponse(ctx, path, func(request *resty.Request) {
+		request.SetDoNotParseResponse(true)
+	})
 	if err != nil {
 		return nil, err
 	}
+	fileObject.FileReadCloser = resp.RawBody()
 	return &fileObject, nil
 }
 

@@ -33,6 +33,8 @@ import (
 type Interface interface {
 	Get(ctx context.Context, path string,
 		options ...client.OptionFunc) error
+	GetResponse(ctx context.Context, path string,
+		options ...client.OptionFunc) (*resty.Response, error)
 	Put(ctx context.Context, path string,
 		options ...client.OptionFunc) error
 	Post(ctx context.Context, path string,
@@ -72,6 +74,14 @@ func NewStoragePluginClient(baseURL *duckv1.Addressable, opts ...BuildOptions) *
 
 	tracing.WrapTransportForRestyClient(pluginClient.client)
 	return pluginClient
+}
+
+// GetResponse performs a GET request using defined options and return raw resty.Response
+func (p *StoragePluginClient) GetResponse(ctx context.Context, path string,
+	options ...client.OptionFunc) (*resty.Response, error) {
+	options = append(client.DefaultOptions, options...)
+	request := p.R(ctx, options...)
+	return request.Get(p.FullUrl(path))
 }
 
 // Get performs a GET request using defined options
