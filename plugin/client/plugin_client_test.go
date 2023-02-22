@@ -19,6 +19,7 @@ package client
 import (
 	"context"
 	goerrors "errors"
+	"fmt"
 	"testing"
 
 	"github.com/go-resty/resty/v2"
@@ -141,4 +142,14 @@ func TestPluginClientErrorReason(t *testing.T) {
 	statusError := &errors.StatusError{}
 	g.Expect(goerrors.As(err, &statusError)).To(BeTrue())
 	g.Expect(errors.IsNotFound(err)).To(BeTrue())
+}
+
+func TestPluginClientClone(t *testing.T) {
+	g := NewGomegaWithT(t)
+
+	original := &PluginClient{}
+	clone := original.Clone()
+
+	g.Expect(clone).To(Equal(original))
+	g.Expect(fmt.Sprintf("%p", original)).NotTo(Equal(fmt.Sprintf("%p", clone)))
 }

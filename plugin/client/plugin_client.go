@@ -98,8 +98,8 @@ func (p *PluginClient) Clone() *PluginClient {
 	if p == nil {
 		return nil
 	}
-	p = &(*p)
-	return p
+	new := (*p)
+	return &new
 }
 
 func (p *PluginClient) WithMeta(meta Meta) *PluginClient {
