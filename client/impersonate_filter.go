@@ -18,8 +18,12 @@ package client
 
 import (
 	"context"
-	"fmt"
 	"time"
+
+	kerrors "github.com/katanomi/pkg/errors"
+
+	"k8s.io/client-go/dynamic"
+	"knative.dev/pkg/logging"
 
 	apiserverrequest "k8s.io/apiserver/pkg/endpoints/request"
 
@@ -40,27 +44,36 @@ func ImpersonateFilter(_ context.Context) restful.FilterFunction {
 	return func(request *restful.Request, response *restful.Response, chain *restful.FilterChain) {
 
 		reqCtx := request.Request.Context()
+		log := logging.FromContext(reqCtx)
 
 		user := impersonateUser(request.Request)
 		if user == nil {
-			fmt.Println("user is nil")
-
 			chain.ProcessFilter(request, response)
 			return
 		}
 
-		reqConfig := injection.GetConfig(reqCtx)
+		configInRequest := injection.GetConfig(reqCtx)
 
 		// change config to impersonate config
-		reqConfig.Impersonate.UID = user.GetUID()
-		reqConfig.Impersonate.Groups = user.GetGroups()
-		reqConfig.Impersonate.UserName = user.GetName()
-		reqConfig.Impersonate.Extra = user.GetExtra()
-
-		reqCtx = injection.WithConfig(reqCtx, reqConfig)
+		log.Debugw("impersonate user", "uid", user.GetUID(), "username",
+			user.GetName(), "groups", user.GetGroups(), "extra", user.GetExtra())
+		configInRequest.Impersonate.UID = user.GetUID()
+		configInRequest.Impersonate.Groups = user.GetGroups()
+		configInRequest.Impersonate.UserName = user.GetName()
+		configInRequest.Impersonate.Extra = user.GetExtra()
+		reqCtx = injection.WithConfig(reqCtx, configInRequest)
 		reqCtx = apiserverrequest.WithUser(reqCtx, user)
-		request.Request = request.Request.WithContext(reqCtx)
 
+		// overrite dynamic client
+		dynamicClient, err := dynamic.NewForConfig(configInRequest)
+		if err != nil {
+			log.Errorw("error to create dynamic client", "err", err)
+			kerrors.HandleError(request, response, err)
+			return
+		}
+		reqCtx = WithDynamicClient(reqCtx, dynamicClient)
+
+		request.Request = request.Request.WithContext(reqCtx)
 		chain.ProcessFilter(request, response)
 	}
 }
