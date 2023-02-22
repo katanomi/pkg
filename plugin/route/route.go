@@ -17,6 +17,7 @@ limitations under the License.
 package route
 
 import (
+	"context"
 	"fmt"
 	"strings"
 
@@ -45,8 +46,14 @@ func GetPluginWebPath(c client.Interface) string {
 }
 
 // Route a service should implement register func to register go restful webservice
+// Deprecated: replaced by ContextRoute
 type Route interface {
 	Register(ws *restful.WebService)
+}
+
+// ContextRoute is a service should implement register func to register go restful webservice
+type ContextRoute interface {
+	Register(ctx context.Context, ws *restful.WebService) error
 }
 
 // match math route with plugin client

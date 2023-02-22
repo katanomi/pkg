@@ -25,7 +25,7 @@ import (
 
 // VersionedRouter defines route with group version method
 type VersionedRouter interface {
-	route.Route
+	route.ContextRoute
 	GroupVersion() schema.GroupVersion
 }
 
