@@ -483,7 +483,7 @@ func (a *AppBuilder) StoragePlugins(plugins ...client.Interface) *AppBuilder {
 		if err := plugin.Setup(a.Context, a.Logger); err != nil {
 			a.Logger.Fatalw("plugin could not be setup correctly", "err", err, "plugin", plugin.Path())
 		}
-		wss, err := storageroute.NewServices(plugin)
+		wss, err := storageroute.NewServicesWithContext(a.Context, plugin)
 		if err != nil {
 			a.Logger.Fatalw("plugin could not start correctly", "err", err, "plugin", plugin.Path())
 		}
