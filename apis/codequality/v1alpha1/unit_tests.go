@@ -84,7 +84,7 @@ type TestResult struct {
 
 	// ReportFiles are collection of report file object from storage plugin
 	// +optional
-	ReportFiles []ReportFile `json:"reportFiles"`
+	ReportFiles []ReportFile `json:"reportFiles,omitempty"`
 }
 
 // ReportFile refers to a report object, could be a directory or a file depending on contentType
