@@ -1,0 +1,23 @@
+apiVersion: tekton.dev/v1beta1
+kind: TaskRun
+metadata:
+  name: test-nnvcr-git-clone
+  namespace: devops
+  labels:
+    pipelineruns.tekton.dev/name: test-nnvcr
+spec:
+  taskSpec:
+    workspaces:
+    - description: The git repo will be cloned onto the volume backing this workspace
+      name: source
+  workspaces:
+  - name: source
+    persistentVolumeClaim:
+      claimName: pvc-3192a25e6f
+  - name: cache
+    persistentVolumeClaim:
+      claimName: build-cache
+  - name: not-exist
+    persistentVolumeClaim:
+      claimName: pvc-not-exist
+
