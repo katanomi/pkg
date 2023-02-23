@@ -21,7 +21,7 @@ import (
 )
 
 const (
-	PathKtnSettingCli = "ktn-settings"
+	PathKtnSettingCli = "ktn-task"
 )
 
 // SourcePathOption describe source path option
