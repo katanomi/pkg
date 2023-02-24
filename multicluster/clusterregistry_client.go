@@ -202,10 +202,10 @@ func (m *ClusterRegistryClient) GetConfigFromCluster(ctx context.Context, cluste
 
 // ListClustersNamespaces will list namespace with name "namespace" in all clusters
 func (m *ClusterRegistryClient) ListClustersNamespaces(ctx context.Context, namespace string) (clusterNamespaces map[*corev1.ObjectReference][]corev1.Namespace, err error) {
-	clusters, err := m.Interface.
-		Resource(ClusterRegistryGroupVersion.WithResource("clusters")).
-		Namespace(namespace).
-		List(ctx, metav1.ListOptions{ResourceVersion: "0"})
+	clusterRefs, err := m.GetNamespaceClusters(ctx, namespace)
+	if err != nil {
+		return nil, err
+	}
 
 	maxConcurrency := 10
 	log := logging.FromContext(ctx)
@@ -213,17 +213,11 @@ func (m *ClusterRegistryClient) ListClustersNamespaces(ctx context.Context, name
 
 	resultMap := sync.Map{}
 
-	for _, _item := range clusters.Items {
-		clusterRef := &corev1.ObjectReference{
-			Kind:       _item.GetKind(),
-			Namespace:  _item.GetNamespace(),
-			Name:       _item.GetName(),
-			APIVersion: _item.GetAPIVersion(),
-		}
-
+	for _, clusterRef := range clusterRefs {
+		_clusterRef := clusterRef
 		p.Add(func() (interface{}, error) {
 
-			clusterClient, err := m.GetClient(ctx, clusterRef, clientgoscheme.Scheme)
+			clusterClient, err := m.GetClient(ctx, &_clusterRef, clientgoscheme.Scheme)
 			if err != nil {
 				log.Errorw("error to get cluster client", "cluster", clusterRef.Namespace+"/"+clusterRef.Name, "err", err.Error())
 				return nil, err
@@ -265,4 +259,26 @@ func (m *ClusterRegistryClient) ListClustersNamespaces(ctx context.Context, name
 
 // StartWarmUpClientCache used to start warming the client cache, only needs to be called once.
 func (m *ClusterRegistryClient) StartWarmUpClientCache(ctx context.Context) {
+}
+
+// GetNamespaceClusters returns a list of clusters related by namespace
+func (m *ClusterRegistryClient) GetNamespaceClusters(ctx context.Context, namespace string) (clusterRefs []corev1.ObjectReference, err error) {
+	clusters, err := m.Interface.
+		Resource(ClusterRegistryGroupVersion.WithResource("clusters")).
+		Namespace(namespace).
+		List(ctx, metav1.ListOptions{ResourceVersion: "0"})
+	if err != nil {
+		return nil, err
+	}
+	clusterRefs = make([]corev1.ObjectReference, 0, len(clusters.Items))
+	for _, cluster := range clusters.Items {
+		clusterRef := corev1.ObjectReference{
+			Kind:       cluster.GetKind(),
+			Namespace:  cluster.GetNamespace(),
+			Name:       cluster.GetName(),
+			APIVersion: cluster.GetAPIVersion(),
+		}
+		clusterRefs = append(clusterRefs, clusterRef)
+	}
+	return clusterRefs, nil
 }

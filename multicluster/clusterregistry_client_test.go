@@ -76,5 +76,4 @@ func TestClusterRegistryClientGetConfig(t *testing.T) {
 		g.Expect(err).To(BeNil())
 		g.Expect(client).ToNot(BeNil())
 	})
-
 }
