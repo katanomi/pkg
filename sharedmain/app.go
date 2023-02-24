@@ -30,6 +30,7 @@ import (
 	"time"
 
 	"github.com/katanomi/pkg/config"
+	storageroute "github.com/katanomi/pkg/plugin/storage/route"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	utilyaml "k8s.io/apimachinery/pkg/util/yaml"
@@ -115,6 +116,9 @@ type AppBuilder struct {
 
 	// plugins
 	plugins []client.Interface
+
+	// storage plugins
+	storagePlugins []client.Interface
 
 	// restful container
 	container *restful.Container
@@ -466,6 +470,30 @@ func (a *AppBuilder) Plugins(plugins ...client.Interface) *AppBuilder {
 	return a
 }
 
+// StoragePlugins adds storage plugins to this app
+func (a *AppBuilder) StoragePlugins(plugins ...client.Interface) *AppBuilder {
+	a.init()
+
+	// will init a client if not already initiated
+	a.initClient(nil)
+	a.storagePlugins = plugins
+	for _, plugin := range a.storagePlugins {
+		if err := plugin.Setup(a.Context, a.Logger); err != nil {
+			a.Logger.Fatalw("plugin could not be setup correctly", "err", err, "plugin", plugin.Path())
+		}
+		wss, err := storageroute.NewServices(plugin)
+		if err != nil {
+			a.Logger.Fatalw("plugin could not start correctly", "err", err, "plugin", plugin.Path())
+		}
+
+		for _, ws := range wss {
+			a.container.Add(ws)
+		}
+
+	}
+	return a
+}
+
 // PluginAttributes set plugin attributes from yaml file
 func (a *AppBuilder) PluginAttributes(plugin client.PluginAttributes, file string) *AppBuilder {
 	data, err := ioutil.ReadFile(file)
@@ -542,6 +570,12 @@ func (a *AppBuilder) Run() error {
 			// TODO: find a better way to get this configuration
 			for _, filter := range a.filters {
 				a.container.Filter(filter)
+			}
+
+			for _, ws := range a.container.RegisteredWebServices() {
+				for _, route := range ws.Routes() {
+					fmt.Println(route.String())
+				}
 			}
 
 			port := 8100

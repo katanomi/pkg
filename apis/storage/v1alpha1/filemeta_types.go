@@ -52,14 +52,31 @@ type FileMeta struct {
 
 // FileMetaSpec spec for FileMeta
 type FileMetaSpec struct {
-	// Key for file key of file object
-	Key string `json:"key"`
+	// Entry shows the index file of a directory if the contentType is a site
+	// +optional
+	Entry string `json:"entry,omitempty"`
+
+	// Key for file key of file object, following format:  {storage-plugin-name}:{file-object-name}
+	// +optional
+	Key string `json:"key,omitempty"`
 
 	// ContentType for file content type
 	ContentType string `json:"contentType"`
 
+	// ContentLength for file content size
+	ContentLength int64 `json:"contentLength"`
+
 	// FileType for file type
+	// +optional
 	FileType FileType `json:"fileType"`
+}
+
+// FileMetaList list of FileMetas
+type FileMetaList struct {
+	metav1.TypeMeta `json:",inline"`
+	metav1.ListMeta `json:"metadata,omitempty"`
+
+	Items []FileMeta `json:"items"`
 }
 
 // FileMetaResourceAttributes returns a ResourceAttribute object to be used in a filter

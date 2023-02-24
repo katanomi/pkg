@@ -25,4 +25,7 @@ const (
 
 	// EnvWebhookAddress is the environment variable name for webhook address
 	EnvWebhookAddress = "WEBHOOK_ADDRESS"
+
+	// EnvServiceAddress is the environment variable name for service address
+	EnvServiceAddress = "SERVICE_ADDRESS"
 )

@@ -1,0 +1,7 @@
+apiVersion: v1
+data:
+  secret: b
+kind: ConfigMap
+metadata:
+  name: abc
+  namespace: default

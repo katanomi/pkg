@@ -1,0 +1,19 @@
+spec:
+  uid: 516f7695-3c3c-475f-bbaa-ee8db0d1f77d
+  group: ""
+  version: v1
+  kind: ConfigMap
+  namespace: default
+  name: abc
+  creationTimestamp: 1672285763
+  data:
+    apiVersion: v1
+    data:
+      secret: b
+    kind: ConfigMap
+    metadata:
+      creationTimestamp: "2022-12-29T03:49:23Z"
+      name: abc
+      namespace: default
+      resourceVersion: "87567012"
+      uid: 516f7695-3c3c-475f-bbaa-ee8db0d1f77d

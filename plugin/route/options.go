@@ -21,6 +21,7 @@ import (
 	"net/url"
 	"strconv"
 	"strings"
+	"time"
 
 	"knative.dev/pkg/logging"
 
@@ -38,17 +39,45 @@ const (
 	FetchAllQueryKey     = "all"
 )
 
-// GetListOptionsFromRequest returns ListOptions based on a request
-func GetListOptionsFromRequest(req *restful.Request) (opts metav1alpha1.ListOptions) {
+// ParseTimeCursorFormRequest parse cursor from request
+func ParseTimeCursorFormRequest(req *restful.Request) *metav1alpha1.TimeCursor {
+	cursorStr := req.QueryParameter("continue")
+	if cursorStr != "" {
+		cursor, err := metav1alpha1.ParseTimeCursor(cursorStr)
+		if err == nil {
+			return cursor
+		}
+	}
+
+	pager := ParsePagerFromRequest(req)
+	tc := &metav1alpha1.TimeCursor{
+		Pager:        pager,
+		QueryStartAt: time.Now().Unix(),
+	}
+	return tc
+}
+
+// ParsePagerFromRequest parse the paging params from request
+func ParsePagerFromRequest(req *restful.Request) metav1alpha1.Pager {
+	p := metav1alpha1.Pager{}
 	itemsPerPage := req.QueryParameter(ItemsPerPageQueryKey)
 	if v, err := strconv.Atoi(itemsPerPage); err == nil {
-		opts.ItemsPerPage = v
+		p.ItemsPerPage = v
 	}
 	page := req.QueryParameter(PageQueryKey)
 	if v, err := strconv.Atoi(page); err == nil {
-		opts.Page = v
+		p.Page = v
 	}
+	p.ItemsPerPage = p.GetPageLimit()
+	p.Page = p.GetPage()
+	return p
+}
 
+// GetListOptionsFromRequest returns ListOptions based on a request
+func GetListOptionsFromRequest(req *restful.Request) (opts metav1alpha1.ListOptions) {
+	pager := ParsePagerFromRequest(req)
+	opts.Page = pager.Page
+	opts.ItemsPerPage = pager.ItemsPerPage
 	opts.Search = req.Request.URL.Query()
 	if _, exist := opts.Search[FetchAllQueryKey]; exist {
 		opts.All = true

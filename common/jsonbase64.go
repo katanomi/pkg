@@ -23,6 +23,7 @@ import (
 )
 
 // ToJSONBase64 convert obj to json string, and then encode it with base64.
+// Deprecated: use encoding.Base64Encode instead
 func ToJSONBase64(obj interface{}) (string, error) {
 	objBytes, err := json.Marshal(obj)
 	if err != nil {
@@ -33,6 +34,7 @@ func ToJSONBase64(obj interface{}) (string, error) {
 }
 
 // FromJSONBase64 decode encodeStr using base64, and then use json to convert to obj.
+// Deprecated: use encoding.Base64Decode instead
 func FromJSONBase64(encodeStr string, obj interface{}) error {
 	decodeBytes, err := base64.StdEncoding.DecodeString(encodeStr)
 	if err != nil {

@@ -1,0 +1,34 @@
+apiVersion: tekton.dev/v1beta1
+kind: PipelineRun
+metadata:
+  annotations:
+    foo: bar
+    pod.katanomi.dev/meta.json: eyJydW5SZWZzIjpbeyJraW5kIjoiRGVsaXZlcnlSdW4iLCJuYW1lc3BhY2UiOiJkZXZvcHMiLCJuYW1lIjoibmV3LXJlbGVhc2UtcGlwZWxpbmUtZmQ2NTMwLTJjN3F4IiwidWlkIjoiYmI5M2M3YTItMGUzMS00MGFlLTgwYjgtMTU3MmY0OGQzMDg4IiwiYXBpVmVyc2lvbiI6ImRlbGl2ZXJpZXMua2F0YW5vbWkuZGV2L3YxYWxwaGExIn0seyJraW5kIjoiU3RhZ2VSdW4iLCJuYW1lIjoibmV3LXJlbGVhc2UtcGlwZWxpbmUtZmQ2NTMwLTJjN3F4LWMya3oyIiwidWlkIjoiODVkY2IwMzMtOGVjMC00OWEyLTgwOGUtNWE2MDU4NDY2MzJiIiwiYXBpVmVyc2lvbiI6ImRlbGl2ZXJpZXMua2F0YW5vbWkuZGV2L3YxYWxwaGExIn1dfQ==
+  creationTimestamp: null
+  name: new-release-pipeline-fd6530-2c7qx-c2kz2-t2gdv
+  namespace: devops-test
+spec:
+  pipelineSpec:
+    description: created by stage run devops-test/new-release-pipeline-fd6530-2c7qx-c2kz2
+    tasks:
+      - name: task-inline
+        params:
+          - name: message
+            value: hello world
+        taskSpec:
+          metadata: {}
+          params:
+            - name: message
+              type: string
+          spec: null
+          steps:
+            - image: registry.alauda.cn:60080/ops/alpine:3.15
+              imagePullPolicy: IfNotPresent
+              name: bash
+              resources: {}
+              script: |
+                #!/usr/bin/env sh
+                echo "$(params.message)"
+  serviceAccountName: default
+  timeout: 0s
+status: {}

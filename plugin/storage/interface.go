@@ -17,11 +17,17 @@ limitations under the License.
 package storage
 
 import (
-	"context"
-
-	"github.com/katanomi/pkg/apis/meta/v1alpha1"
 	"github.com/katanomi/pkg/plugin/client"
+	"github.com/katanomi/pkg/plugin/route"
+	corev1alpha1 "github.com/katanomi/pkg/plugin/storage/core/v1alpha1"
+	"k8s.io/apimachinery/pkg/runtime/schema"
 )
+
+// VersionedRouter defines route with group version method
+type VersionedRouter interface {
+	route.Route
+	GroupVersion() schema.GroupVersion
+}
 
 // PluginRegister provides storage plugin registration methods to update StoragePluginClass and StoragePlugin status
 type PluginRegister interface {
@@ -30,13 +36,10 @@ type PluginRegister interface {
 	client.Initializer
 	client.DependentResourceGetter
 	client.PluginAddressable
-	AuthChecker
+
+	// core interface must be implemented, will be served
+	corev1alpha1.CoreInterface
 
 	// GetStoragePluginClassName returns storage plugin class name
 	GetStoragePluginClassName() string
-}
-
-// AuthChecker checks auth according to params values
-type AuthChecker interface {
-	CheckAuth(ctx context.Context, params []v1alpha1.Param) error
 }

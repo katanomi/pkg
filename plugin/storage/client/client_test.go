@@ -19,16 +19,18 @@ package client
 import (
 	"context"
 	goerrors "errors"
+	"net/http"
 	"testing"
 
 	"github.com/go-resty/resty/v2"
 	"github.com/jarcoal/httpmock"
-	client2 "github.com/katanomi/pkg/plugin/client"
+	pclient "github.com/katanomi/pkg/plugin/client"
+	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"knative.dev/pkg/apis"
-	duckv1 "knative.dev/pkg/apis/duck/v1"
+	v1 "knative.dev/pkg/apis/duck/v1"
 )
 
 type Body struct {
@@ -36,57 +38,128 @@ type Body struct {
 	Code    int    `json:"code"`
 }
 
-func TestStoragePluginClientGet(t *testing.T) {
-	g := NewGomegaWithT(t)
-	httpmock.Reset()
-
-	responder, _ := httpmock.NewJsonResponder(200, Body{Message: "Your message", Code: 200})
-
-	fakeUrl := "https://example.com/api/v1/projects"
-	httpmock.RegisterResponder("GET", fakeUrl, responder)
-
-	RESTClient := resty.New()
-	httpmock.ActivateNonDefault(RESTClient.GetClient())
-	client := NewStoragePluginClient(client2.ClientOpts(RESTClient))
-
-	result := &Body{}
-
-	url, _ := apis.ParseURL("https://example.com/api/v1")
-	err := client.Get(context.Background(), &duckv1.Addressable{
-		URL: url,
-	}, "projects",
-		client.Dest(result),
+var _ = Describe("Test.StoragePluginClient", func() {
+	var (
+		restClient     *resty.Client
+		storageClient  *StoragePluginClient
+		opts           []BuildOptions
+		err            error
+		result         *Body
+		fakeUrl        string
+		baseUrl        string
+		responder      httpmock.Responder
+		mockHttpMethod string
 	)
 
-	g.Expect(err).To(BeNil())
-	g.Expect(result.Message).To(Equal("Your message"))
-	g.Expect(result.Code).To(Equal(200))
-}
+	BeforeEach(func() {
+		responder, _ = httpmock.NewJsonResponder(200, Body{Message: "Your message", Code: 200})
+		restClient = resty.New()
+		opts = make([]BuildOptions, 0)
+		mockHttpMethod = http.MethodGet
+		result = &Body{}
+	})
 
-func TestStoragePluginClientPut(t *testing.T) {
-	g := NewGomegaWithT(t)
-	httpmock.Reset()
+	JustBeforeEach(func() {
+		httpmock.Reset()
+		httpmock.RegisterResponder(mockHttpMethod, fakeUrl, responder)
+		httpmock.ActivateNonDefault(restClient.GetClient())
+		url, _ := apis.ParseURL(baseUrl)
 
-	responder, _ := httpmock.NewJsonResponder(200, Body{Message: "Changed", Code: 201})
+		opts = append(opts, WithRestClient(restClient))
+		storageClient = NewStoragePluginClient(&v1.Addressable{
+			URL: url,
+		}, opts...)
+	})
 
-	fakeUrl := "https://example.com/api/v1/projects"
-	httpmock.RegisterResponder("PUT", fakeUrl, responder)
+	Context("Client HTTP methods", func() {
+		BeforeEach(func() {
+			opts = []BuildOptions{WithGroupVersion(&schema.GroupVersion{
+				Group:   "core",
+				Version: "v1alpha1",
+			})}
+			baseUrl = "https://example.com/api"
+			fakeUrl = "https://example.com/api/core/v1alpha1/projects"
+		})
 
-	RESTClient := resty.New()
-	httpmock.ActivateNonDefault(RESTClient.GetClient())
-	client := NewStoragePluginClient(client2.ClientOpts(RESTClient))
+		JustAfterEach(func() {
+			Expect(err).To(BeNil())
+			Expect(result.Message).To(Equal("Your message"))
+			Expect(result.Code).To(Equal(200))
+		})
 
-	result := &Body{}
+		Context("get method", func() {
+			BeforeEach(func() {
+				mockHttpMethod = http.MethodGet
+			})
 
-	url, _ := apis.ParseURL("https://example.com/api/v1")
-	err := client.Put(context.Background(), &duckv1.Addressable{
-		URL: url,
-	}, "projects", client.Body(Body{Message: "Changed", Code: 200}), client.Dest(result))
+			It("get correct url and return expected result", func() {
+				err = storageClient.Get(context.Background(), "projects",
+					pclient.ResultOpts(result),
+				)
+			})
+		})
 
-	g.Expect(err).To(BeNil())
-	g.Expect(result.Message).To(Equal("Changed"))
-	g.Expect(result.Code).To(Equal(201))
-}
+		Context("post method", func() {
+			BeforeEach(func() {
+				mockHttpMethod = http.MethodPost
+			})
+
+			It("post correct url and return expected result", func() {
+				err = storageClient.Post(context.Background(), "projects",
+					pclient.ResultOpts(result),
+				)
+			})
+		})
+
+		Context("put method", func() {
+			BeforeEach(func() {
+				mockHttpMethod = http.MethodPut
+			})
+			It("put correct url and return expected result", func() {
+				err = storageClient.Put(context.Background(), "projects",
+					pclient.ResultOpts(result),
+				)
+			})
+		})
+
+		Context("delete method", func() {
+			BeforeEach(func() {
+				mockHttpMethod = http.MethodDelete
+			})
+			It("delete correct url and return expected result", func() {
+				err = storageClient.Delete(context.Background(), "projects",
+					pclient.ResultOpts(result),
+				)
+			})
+		})
+	})
+
+	Context("clone client with group version", func() {
+		beforeGV := &schema.GroupVersion{
+			Group:   "core",
+			Version: "v1alpha1",
+		}
+		BeforeEach(func() {
+			baseUrl = "https://example.com/api"
+			fakeUrl = "https://example.com/api/foo/v1/bar"
+			opts = []BuildOptions{WithGroupVersion(beforeGV)}
+		})
+		JustAfterEach(func() {
+			Expect(err).To(BeNil())
+			Expect(result.Message).To(Equal("Your message"))
+			Expect(result.Code).To(Equal(200))
+		})
+
+		It("return new client with group version", func() {
+			newClient := storageClient.ForGroupVersion(&schema.GroupVersion{
+				Group:   "foo",
+				Version: "v1",
+			})
+			err = newClient.Get(context.Background(), "bar", pclient.ResultOpts(result))
+			Expect(storageClient.groupVersion).To(Equal(beforeGV))
+		})
+	})
+})
 
 func TestStoragePluginClientError(t *testing.T) {
 	g := NewGomegaWithT(t)
@@ -99,12 +172,12 @@ func TestStoragePluginClientError(t *testing.T) {
 
 	RESTClient := resty.New()
 	httpmock.ActivateNonDefault(RESTClient.GetClient())
-	client := NewStoragePluginClient(client2.ClientOpts(RESTClient))
-
 	url, _ := apis.ParseURL("https://example.com/api/v1")
-	err := client.Get(context.Background(), &duckv1.Addressable{
+	client := NewStoragePluginClient(&v1.Addressable{
 		URL: url,
-	}, "projects")
+	}, WithRestClient(RESTClient))
+
+	err := client.Get(context.Background(), "projects")
 
 	g.Expect(err).NotTo(BeNil())
 
@@ -125,16 +198,20 @@ func TestStoragePluginClientErrorReason(t *testing.T) {
 
 	RESTClient := resty.New()
 	httpmock.ActivateNonDefault(RESTClient.GetClient())
-	client := NewStoragePluginClient(client2.ClientOpts(RESTClient))
-
 	url, _ := apis.ParseURL("https://example.com/api/v1")
-	err := client.Get(context.Background(), &duckv1.Addressable{
+	client := NewStoragePluginClient(&v1.Addressable{
 		URL: url,
-	}, "projects")
-
+	}, WithRestClient(RESTClient))
+	err := client.Get(context.Background(), "projects")
 	g.Expect(err).NotTo(BeNil())
-
 	statusError := &errors.StatusError{}
+	g.Expect(goerrors.As(err, &statusError)).To(BeTrue())
+	g.Expect(errors.IsNotFound(err)).To(BeTrue())
+
+	// get again to verify the full url
+	err = client.Get(context.Background(), "projects")
+	g.Expect(err).NotTo(BeNil())
+	statusError = &errors.StatusError{}
 	g.Expect(goerrors.As(err, &statusError)).To(BeTrue())
 	g.Expect(errors.IsNotFound(err)).To(BeTrue())
 }
