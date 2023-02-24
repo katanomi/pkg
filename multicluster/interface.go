@@ -42,4 +42,6 @@ type Interface interface {
 	ListClustersNamespaces(ctx context.Context, namespace string) (clusterNamespaces map[*corev1.ObjectReference][]corev1.Namespace, err error)
 	// StartWarmUpClientCache used to start warming the client cache, only needs to be called once.
 	StartWarmUpClientCache(ctx context.Context)
+	// GetNamespaceClusters returns a list of clusters related by special namespace
+	GetNamespaceClusters(ctx context.Context, namespace string) (clusters []corev1.ObjectReference, err error)
 }
