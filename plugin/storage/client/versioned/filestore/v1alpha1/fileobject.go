@@ -74,7 +74,13 @@ func (f *fileObjects) GET(ctx context.Context, key string) (*filestorev1alpha1.F
 	if err != nil {
 		return nil, err
 	}
+	fileMetaEncoded := resp.Header().Get(v1alpha1.HeaderFileMeta)
+	fileMeta, err := v1alpha1.DecodeAsFileMeta(fileMetaEncoded)
+	if err != nil {
+		return nil, fmt.Errorf("decode file meta err: %v", err)
+	}
 	fileObject.FileReadCloser = resp.RawBody()
+	fileObject.FileMeta = *fileMeta
 	return &fileObject, nil
 }
 
