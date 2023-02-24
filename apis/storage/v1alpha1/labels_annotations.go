@@ -25,8 +25,8 @@ const LastModifiedAnnotation = "storage.katanomi.dev/lastModified"
 // FileTypeAnnotation for recording business file type of file object
 const FileTypeAnnotation = "storage.katanomi.dev/fileType"
 
-// EntryAnnotation for recording file entry of directory
-const EntryAnnotation = "storage.katanomi.dev/entry"
+// StorageEntryAnnotation for recording file entry of directory
+const StorageEntryAnnotation = "storage.katanomi.dev/entry"
 
-// AnnotationPrefix is prefix of user-defined annotations
-const AnnotationPrefix = "storage.katanomi.dev/annotation"
+// StorageAnnotationPrefix is prefix of user-defined annotations
+const StorageAnnotationPrefix = "storage.katanomi.dev/annotation."

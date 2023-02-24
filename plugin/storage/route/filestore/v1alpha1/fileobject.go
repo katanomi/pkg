@@ -140,6 +140,7 @@ func (a *fileObject) GetFileObject(req *restful.Request, resp *restful.Response)
 		return
 	}
 
+	resp.AddHeader(v1alpha1.HeaderFileMeta, fileObject.FileMeta.Encode())
 	resp.AddHeader(restful.HEADER_ContentType, fileObject.Spec.ContentType)
 	resp.WriteHeader(http.StatusOK)
 }

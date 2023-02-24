@@ -19,7 +19,10 @@ package v1alpha1
 import (
 	"encoding/base64"
 	"encoding/json"
+	"fmt"
 	"strings"
+
+	"github.com/emicklei/go-restful/v3"
 )
 
 // ParseFileKey returns pluginName and fileObjectName
@@ -38,6 +41,17 @@ func (in *FileMeta) Encode() string {
 		return ""
 	}
 	return base64.StdEncoding.EncodeToString(marshaledMeta)
+}
+
+// AssignResponse write additional file meta info into response
+func (in *FileMeta) AssignResponse(resp *restful.Response) {
+	resp.AddHeader(restful.HEADER_ContentType, in.Spec.ContentType)
+	for k, v := range in.Annotations {
+		if strings.HasPrefix(StorageAnnotationPrefix, k) {
+			trimmedAnnotation := strings.TrimPrefix(k, StorageAnnotationPrefix)
+			resp.AddHeader(fmt.Sprintf("%s%s", HeaderFileAnnotationPrefix, trimmedAnnotation), v)
+		}
+	}
 }
 
 // DecodeAsFileMeta decodes encoded string to a pointer FileMeta
