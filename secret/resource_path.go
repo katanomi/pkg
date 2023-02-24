@@ -57,7 +57,7 @@ func (p *ResourcePathFormat) getSubPathFmt(scene metav1alpha1.ResourcePathScene)
 
 func (p *ResourcePathFormat) splitScope(scope string) []string {
 	_segments := strings.Split(scope, "/")
-	var segments []string
+	segments := make([]string, 0, len(_segments))
 	for _, item := range _segments {
 		if item == "" {
 			continue
@@ -102,7 +102,7 @@ func (p *ResourcePathFormat) FormatPathByScene(scene metav1alpha1.ResourcePathSc
 }
 
 func (p *ResourcePathFormat) getMapKeys(m map[metav1alpha1.ResourcePathScene]string) []metav1alpha1.ResourcePathScene {
-	var sceneList []metav1alpha1.ResourcePathScene
+	sceneList := make([]metav1alpha1.ResourcePathScene, 0, len(m))
 	for scene := range m {
 		sceneList = append(sceneList, scene)
 	}
