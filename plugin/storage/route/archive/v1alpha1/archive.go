@@ -18,7 +18,10 @@ limitations under the License.
 package v1alpha1
 
 import (
+	"context"
 	"net/http"
+
+	kclient "github.com/katanomi/pkg/client"
 
 	restfulspec "github.com/emicklei/go-restful-openapi/v2"
 	"github.com/emicklei/go-restful/v3"
@@ -49,10 +52,11 @@ func NewArchive(impl archivev1alpha1.ArchiveCapable) storage.VersionedRouter {
 	}
 }
 
-func (a *archive) Register(ws *restful.WebService) {
+func (a *archive) Register(ctx context.Context, ws *restful.WebService) error {
 	storagePluginParam := ws.PathParameter("storageplugin", "storage plugin to be used")
 	ws.Route(
 		ws.POST("storageplugin/{storageplugin}/records").To(a.ListRecords).
+			Filter(kclient.SubjectReviewFilterForResource(ctx, v1alpha1.RecordResourceAttributes("list"), "", "")).
 			Doc("List archive records").
 			Param(storagePluginParam).
 			Metadata(restfulspec.KeyOpenAPITags, a.tags).
@@ -61,6 +65,7 @@ func (a *archive) Register(ws *restful.WebService) {
 
 	ws.Route(
 		ws.POST("storageplugin/{storageplugin}/relatedRecords").To(a.ListRelatedRecords).
+			Filter(kclient.SubjectReviewFilterForResource(ctx, v1alpha1.RecordResourceAttributes("update"), "", "")).
 			Doc("List archive related records").
 			Param(storagePluginParam).
 			Metadata(restfulspec.KeyOpenAPITags, a.tags).
@@ -69,6 +74,7 @@ func (a *archive) Register(ws *restful.WebService) {
 
 	ws.Route(
 		ws.POST("storageplugin/{storageplugin}/record").To(a.UpsertRecord).
+			Filter(kclient.SubjectReviewFilterForResource(ctx, v1alpha1.RecordResourceAttributes("update"), "", "")).
 			Doc("Create or update archive record").
 			Param(storagePluginParam).
 			Metadata(restfulspec.KeyOpenAPITags, a.tags).
@@ -77,6 +83,7 @@ func (a *archive) Register(ws *restful.WebService) {
 
 	ws.Route(
 		ws.DELETE("storageplugin/{storageplugin}/clusters/{cluster}/uids/{uid}").To(a.DeleteRecord).
+			Filter(kclient.SubjectReviewFilterForResource(ctx, v1alpha1.RecordResourceAttributes("delete"), "", "")).
 			Doc("Delete archive record").
 			Param(storagePluginParam).
 			Param(ws.PathParameter("cluster", "cluster name")).
@@ -87,6 +94,7 @@ func (a *archive) Register(ws *restful.WebService) {
 
 	ws.Route(
 		ws.DELETE("storageplugin/{storageplugin}/records").To(a.BatchDeleteRecord).
+			Filter(kclient.SubjectReviewFilterForResource(ctx, v1alpha1.RecordResourceAttributes("delete"), "", "")).
 			Doc("Delete archive record batch").
 			Param(storagePluginParam).
 			Metadata(restfulspec.KeyOpenAPITags, a.tags).
@@ -95,11 +103,14 @@ func (a *archive) Register(ws *restful.WebService) {
 
 	ws.Route(
 		ws.POST("storageplugin/{storageplugin}/aggregate").To(a.Aggregate).
+			Filter(kclient.SubjectReviewFilterForResource(ctx, v1alpha1.RecordResourceAttributes("get"), "", "")).
 			Doc("Aggregate query").
 			Param(storagePluginParam).
 			Metadata(restfulspec.KeyOpenAPITags, a.tags).
 			Returns(http.StatusOK, "OK", &v1alpha1.AggregateResult{}),
 	)
+
+	return nil
 }
 
 // ListRecords to get archive record list

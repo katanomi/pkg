@@ -22,6 +22,7 @@ import (
 
 	"github.com/go-resty/resty/v2"
 	"github.com/katanomi/pkg/apis/storage/v1alpha1"
+	"github.com/katanomi/pkg/errors"
 	"github.com/katanomi/pkg/plugin/client"
 	pluginpath "github.com/katanomi/pkg/plugin/path"
 	filestorev1alpha1 "github.com/katanomi/pkg/plugin/storage/capabilities/filestore/v1alpha1"
@@ -74,6 +75,11 @@ func (f *fileObjects) GET(ctx context.Context, key string) (*filestorev1alpha1.F
 	if err != nil {
 		return nil, err
 	}
+
+	if resp.IsError() {
+		return nil, errors.AsStatusError(resp)
+	}
+
 	fileMetaEncoded := resp.Header().Get(v1alpha1.HeaderFileMeta)
 	fileMeta, err := v1alpha1.DecodeAsFileMeta(fileMetaEncoded)
 	if err != nil {

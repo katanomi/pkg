@@ -17,6 +17,7 @@ limitations under the License.
 package v1alpha1
 
 import (
+	"context"
 	"net/http"
 
 	restfulspec "github.com/emicklei/go-restful-openapi/v2"
@@ -45,7 +46,7 @@ func NewAuthCheck(impl corev1alpha1.AuthChecker) storage.VersionedRouter {
 	}
 }
 
-func (a *authCheck) Register(ws *restful.WebService) {
+func (a *authCheck) Register(ctx context.Context, ws *restful.WebService) error {
 	ws.Route(
 		ws.POST("/auth/check").To(a.AuthCheck).
 			Doc("Storage plugin auth check").
@@ -53,6 +54,7 @@ func (a *authCheck) Register(ws *restful.WebService) {
 			Reads(v1alpha1.StorageAuthCheckRequest{}, "request storage plugin for auth check").
 			Returns(http.StatusOK, "OK", v1alpha1.StorageAuthCheck{}),
 	)
+	return nil
 }
 
 // AuthCheck is handler of auth check route

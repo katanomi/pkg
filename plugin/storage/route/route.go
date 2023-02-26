@@ -17,6 +17,7 @@ limitations under the License.
 package route
 
 import (
+	"context"
 	"fmt"
 	"path"
 
@@ -36,8 +37,8 @@ func GetPluginAPIPath(c client.Interface) string {
 	return path.Join("/storage", c.Path())
 }
 
-// NewServices new service from storage plugin client
-func NewServices(c client.Interface, filters ...restful.FilterFunction) ([]*restful.WebService, error) {
+// NewServicesWithContext new service from storage plugin client
+func NewServicesWithContext(ctx context.Context, c client.Interface, filters ...restful.FilterFunction) ([]*restful.WebService, error) {
 	routes := match(c)
 	if len(routes) == 0 {
 		return nil, fmt.Errorf("no route for provider %s", c.Path())
@@ -66,7 +67,7 @@ func NewServices(c client.Interface, filters ...restful.FilterFunction) ([]*rest
 			groups = append(groups, group)
 			servicesMap[groupVersionedPath] = group
 		}
-		r.Register(group)
+		r.Register(ctx, group)
 	}
 
 	return groups, nil
