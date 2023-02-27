@@ -24,7 +24,6 @@ import (
 	"github.com/katanomi/pkg/apis/storage/v1alpha1"
 	"github.com/katanomi/pkg/errors"
 	"github.com/katanomi/pkg/plugin/client"
-	pluginpath "github.com/katanomi/pkg/plugin/path"
 	filestorev1alpha1 "github.com/katanomi/pkg/plugin/storage/capabilities/filestore/v1alpha1"
 	sclient "github.com/katanomi/pkg/plugin/storage/client"
 )
@@ -50,7 +49,7 @@ type fileObjects struct {
 func (f *fileObjects) PUT(ctx context.Context, fileObj filestorev1alpha1.FileObject,
 	options ...client.OptionFunc) (*v1alpha1.FileMeta, error) {
 	path := fmt.Sprintf("storageplugins/%s/fileobjects/%s",
-		f.pluginName, pluginpath.Escape(fileObj.Name))
+		f.pluginName, fileObj.Name)
 
 	retMeta := v1alpha1.FileMeta{}
 	err := f.client.Put(ctx, path, client.ResultOpts(&retMeta),
@@ -67,7 +66,7 @@ func (f *fileObjects) PUT(ctx context.Context, fileObj filestorev1alpha1.FileObj
 }
 
 func (f *fileObjects) GET(ctx context.Context, key string) (*filestorev1alpha1.FileObject, error) {
-	path := fmt.Sprintf("storageplugins/%s/fileobjects/%s", f.pluginName, pluginpath.Escape(key))
+	path := fmt.Sprintf("storageplugins/%s/fileobjects/%s", f.pluginName, key)
 	fileObject := filestorev1alpha1.FileObject{}
 	resp, err := f.client.GetResponse(ctx, path, func(request *resty.Request) {
 		request.SetDoNotParseResponse(true)
@@ -91,7 +90,7 @@ func (f *fileObjects) GET(ctx context.Context, key string) (*filestorev1alpha1.F
 }
 
 func (f *fileObjects) DELETE(ctx context.Context, key string) error {
-	path := fmt.Sprintf("storageplugins/%s/fileobjects/%s", f.pluginName, pluginpath.Escape(key))
+	path := fmt.Sprintf("storageplugins/%s/fileobjects/%s", f.pluginName, key)
 	err := f.client.Delete(ctx, path)
 	if err != nil {
 		return err
