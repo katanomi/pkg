@@ -81,7 +81,7 @@ func DynamicSubjectReviewFilter(ctx context.Context, resourceAttGetter ResourceA
 
 		err = postSubjectAccessReview(reqCtx, Client(reqCtx), review)
 		if err != nil {
-			log.Debugw("error veryfing user permissions", "err", err, "review", review.GetObject())
+			log.Debugw("error verifying user permissions", "err", err, "review", review.GetObject())
 			kerrors.HandleError(req, resp, err)
 			return
 		}

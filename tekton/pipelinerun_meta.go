@@ -18,6 +18,7 @@ package tekton
 
 import (
 	"encoding/base64"
+	"fmt"
 
 	"github.com/tektoncd/pipeline/pkg/apis/pipeline/v1beta1"
 	v1 "k8s.io/api/core/v1"
@@ -63,6 +64,10 @@ func InjectPipelineRunMeta(pr *v1beta1.PipelineRun, meta PipelineRunMeta) error 
 
 // UnmarshalMeta unmarshal pipelinerun meta
 func UnmarshalMeta(metaJsonString string) (*PipelineRunMeta, error) {
+	if metaJsonString == "" {
+		return nil, fmt.Errorf("empty meta json string")
+	}
+
 	decodeString, err := base64.StdEncoding.DecodeString(metaJsonString)
 	if err != nil {
 		return nil, err

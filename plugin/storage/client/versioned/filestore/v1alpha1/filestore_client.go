@@ -33,11 +33,6 @@ type FileStoreV1alpha1Client struct {
 	pluginName string
 }
 
-// New creates a new FileStoreV1alpha1Client for the given RESTClient.
-func New(c client.Interface) *FileStoreV1alpha1Client {
-	return &FileStoreV1alpha1Client{restClient: c}
-}
-
 // RESTClient returns a RESTClient that is used to communicate
 // with API server by this client implementation.
 func (c *FileStoreV1alpha1Client) RESTClient() client.Interface {
