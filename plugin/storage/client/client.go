@@ -29,6 +29,8 @@ import (
 	duckv1 "knative.dev/pkg/apis/duck/v1"
 )
 
+//go:generate ../../../bin/mockgen -source=client.go -destination=../../../testing/mock/github.com/katanomi/pkg/plugin/storage/client/client.go -package=v1alpha1 Interface
+
 // Interface captures the set of operations for generically interacting with Kubernetes REST apis.
 type Interface interface {
 	Get(ctx context.Context, path string,
@@ -42,6 +44,8 @@ type Interface interface {
 	Delete(ctx context.Context, path string,
 		options ...client.OptionFunc) error
 	APIVersion() *schema.GroupVersion
+
+	ForGroupVersion(gv *schema.GroupVersion) Interface
 }
 
 // StoragePluginClient is the client for storage client.
@@ -61,7 +65,6 @@ type StoragePluginClient struct {
 func NewStoragePluginClient(baseURL *duckv1.Addressable, opts ...BuildOptions) *StoragePluginClient {
 	restyClient := resty.NewWithClient(pkgClient.NewHTTPClient())
 	restyClient.SetDisableWarn(true)
-	restyClient.SetTimeout(0)
 
 	pluginClient := &StoragePluginClient{
 		client:       restyClient,
@@ -181,7 +184,7 @@ func (p *StoragePluginClient) Clone() *StoragePluginClient {
 	return &newP
 }
 
-func (p *StoragePluginClient) ForGroupVersion(gv *schema.GroupVersion) *StoragePluginClient {
+func (p *StoragePluginClient) ForGroupVersion(gv *schema.GroupVersion) Interface {
 	newClient := p.Clone()
 	newClient.groupVersion = gv
 	return newClient

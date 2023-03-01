@@ -32,7 +32,7 @@ type RecordGetter interface {
 	Record(pluginName string) RecordInterface
 }
 
-//go:generate ../../../../../../bin/mockgen -source=archive.go -destination=../../../../../../testing/mock/github.com/katanomi/pkg/storage/client/versioned/archive/v1alpha1/interface.go -package=v1alpha1 RecordInterface
+//go:generate ../../../../../../bin/mockgen -source=archive.go -destination=../../../../../../testing/mock/github.com/katanomi/pkg/plugin/storage/client/versioned/archive/v1alpha1/interface.go -package=v1alpha1 RecordInterface
 type RecordInterface interface {
 	archivev1alpha1.ArchiveCapable
 }

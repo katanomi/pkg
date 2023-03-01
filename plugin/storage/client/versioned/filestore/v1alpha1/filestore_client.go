@@ -21,10 +21,23 @@ import (
 	"github.com/katanomi/pkg/plugin/storage/client"
 )
 
+//go:generate ../../../../../../bin/mockgen -source=filestore_client.go -destination=../../../../../../testing/mock/github.com/katanomi/pkg/plugin/storage/client/versioned/filestore/v1alpha1/filestore_client.go -package=v1alpha1 FileStoreV1alpha1Interface
+
+// FileStoreV1alpha1Interface provides file store client methods
 type FileStoreV1alpha1Interface interface {
 	RESTClient() client.Interface
 	FileObjectGetter
 	FileMetaGetter
+}
+
+// FileObjectGetter returns FileObject getter object
+type FileObjectGetter interface {
+	FileObject(pluginName string) FileObjectInterface
+}
+
+// FileMetaGetter returns FileMeta getter object
+type FileMetaGetter interface {
+	FileMeta(pluginName string) FileMetaInterface
 }
 
 // FileStoreV1alpha1Client is client for core v1alpha1
@@ -50,6 +63,6 @@ func (c *FileStoreV1alpha1Client) FileMeta(pluginName string) FileMetaInterface 
 	return newFileMetas(c, pluginName)
 }
 
-func NewForClient(pClient *client.StoragePluginClient) *FileStoreV1alpha1Client {
+func NewForClient(pClient client.Interface) *FileStoreV1alpha1Client {
 	return &FileStoreV1alpha1Client{restClient: pClient.ForGroupVersion(&filestorev1alpha1.FileStoreV1alpha1GV)}
 }

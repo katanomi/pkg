@@ -28,10 +28,7 @@ import (
 	sclient "github.com/katanomi/pkg/plugin/storage/client"
 )
 
-// FileObjectGetter returns FileObject getter object
-type FileObjectGetter interface {
-	FileObject(pluginName string) FileObjectInterface
-}
+//go:generate ../../../../../../bin/mockgen -source=fileobject.go -destination=../../../../../../testing/mock/github.com/katanomi/pkg/plugin/storage/client/versioned/filestore/v1alpha1/interface.go -package=v1alpha1 FileObjectInterface
 
 // FileObjectInterface is interface for FileObject client
 type FileObjectInterface interface {

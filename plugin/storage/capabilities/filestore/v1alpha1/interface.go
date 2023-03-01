@@ -26,6 +26,8 @@ import (
 )
 
 // FileStoreCapable defines methods of file-store capability
+//
+//go:generate ../../../../../bin/mockgen -source=interface.go -destination=../../../../../testing/mock/github.com/katanomi/pkg/plugin/storage/capabilities/filestore/v1alpha1/interface.go -package=v1alpha1 FileStoreCapable
 type FileStoreCapable interface {
 	FileObjectInterface
 	FileMetaInterface

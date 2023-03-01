@@ -1,0 +1,5 @@
+metadata:
+  name: file
+spec:
+  key: foo/-/path/to/file
+  contentType: application/vnd.katanomi.junit+xml
