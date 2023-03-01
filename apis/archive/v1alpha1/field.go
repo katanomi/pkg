@@ -30,7 +30,7 @@ const (
 	// UIDField the name of uid field
 	UIDField = "uid"
 	// TopNamespaceField the name of top namespace field
-	TopNamespaceField = "topnamespace"
+	TopNamespaceField = "topNamespace"
 	// ParentNamespaceField the name of parent namespace field
 	ParentNamespaceField = "parentNamespace"
 	// NamespaceField the name of namespace field
