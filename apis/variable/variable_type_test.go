@@ -22,6 +22,7 @@ import (
 
 	"github.com/google/go-cmp/cmp"
 	. "github.com/onsi/gomega"
+	authv1 "k8s.io/api/authorization/v1"
 	"k8s.io/utils/field"
 )
 
@@ -138,4 +139,18 @@ func TestVariableList_Filter(t *testing.T) {
 			g.Expect(diff).To(BeEmpty())
 		})
 	}
+}
+
+func Test_VariableResourceAttributes(t *testing.T) {
+	g := NewGomegaWithT(t)
+
+	want := authv1.ResourceAttributes{
+		Group:    GroupVersion.Group,
+		Version:  GroupVersion.Version,
+		Resource: "variables",
+		Verb:     "test",
+	}
+
+	got := VariableResourceAttributes("test")
+	g.Expect(got).To(Equal(want), "the ResourceAttributes should contain test")
 }

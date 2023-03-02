@@ -20,7 +20,17 @@ import (
 	"reflect"
 	"strings"
 
+	authv1 "k8s.io/api/authorization/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/utils/field"
+)
+
+var (
+	// VariableGVK is the GVK for Variable
+	VariableGVK = GroupVersion.WithKind("Variable")
+
+	// VariableListGVK is the GVK for VariableList
+	VariableListGVK = GroupVersion.WithKind("VariableList")
 )
 
 // Variable description of custom environment variables.
@@ -37,8 +47,21 @@ type Variable struct {
 
 // VariableList variable list.
 type VariableList struct {
+	metav1.TypeMeta `json:",inline"`
+	metav1.ListMeta `json:"metadata,omitempty"`
+
 	// Items contains variable list.
 	Items []Variable `json:"items"`
+}
+
+// VariableResourceAttributes returns a ResourceAttribute object to be used in a filter
+func VariableResourceAttributes(verb string) authv1.ResourceAttributes {
+	return authv1.ResourceAttributes{
+		Group:    GroupVersion.Group,
+		Version:  GroupVersion.Version,
+		Resource: "variables",
+		Verb:     verb,
+	}
 }
 
 func (v *VariableList) Filter(filters ...FilterFunc) {

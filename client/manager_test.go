@@ -96,3 +96,14 @@ func TestUserFromBearerToken(t *testing.T) {
 		t.Error("username should be dev")
 	}
 }
+
+func TestWithCtxManagerFilters(t *testing.T) {
+	g := NewGomegaWithT(t)
+
+	ws := restful.WebService{}
+	ctx := context.TODO()
+	ctx = WithManager(ctx, &Manager{})
+
+	err := WithCtxManagerFilters(ctx, &ws)
+	g.Expect(err).To(Succeed(), "should return nil")
+}
