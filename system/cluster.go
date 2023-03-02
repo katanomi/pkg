@@ -21,5 +21,6 @@ var GetCurrentClusterName = defaultGetCurrentClusterName
 
 // defaultGetCurrentClusterName is a default implementation of GetCurrentClusterName
 func defaultGetCurrentClusterName() string {
-	return "default"
+	// we avoid use 'default' here, in case there is a cluster named default in production, which will confuse users.
+	return "-"
 }
