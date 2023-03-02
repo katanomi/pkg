@@ -90,8 +90,9 @@ var _ = Describe("cleanupPVC clean pvc which mounted by taskrun", func() {
 					}
 					return false
 				})
+			Expect(err).To(BeNil())
 			Expect(len(succeeded)).Should(Equal(1))
-			Expect(len(fails)).Should(Equal(1))
+			Expect(len(fails)).Should(Equal(0))
 
 			// pvc should be deleted
 			err = fakeClient.Get(ctx, pvcKey, object)

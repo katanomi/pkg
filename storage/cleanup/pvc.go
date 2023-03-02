@@ -110,10 +110,10 @@ func cleanTaskRunPVC(
 		var pvc corev1.PersistentVolumeClaim
 		if err := clt.Get(ctx, pvcKey, &pvc); err != nil {
 			if !errors.IsNotFound(err) {
-				log.Infow("getting taskRun related pvc failed", "error", err)
+				log.Errorw("getting taskRun related pvc failed", "error", err)
+				fails[pvcKey.String()] = err
+				errs = append(errs, err)
 			}
-			fails[pvcKey.String()] = err
-			errs = append(errs, err)
 			continue
 		}
 
