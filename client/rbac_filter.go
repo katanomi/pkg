@@ -38,21 +38,25 @@ import (
 )
 
 // GetResourceAttributesFunc helper function to warp a function to ResourceAttributeGetter
-type GetResourceAttributesFunc func(ctx context.Context, req *restful.Request) authv1.ResourceAttributes
+type GetResourceAttributesFunc func(ctx context.Context, req *restful.Request) (authv1.ResourceAttributes, error)
 
-func (p GetResourceAttributesFunc) GetResourceAttributes(ctx context.Context, req *restful.Request) authv1.ResourceAttributes {
+func (p GetResourceAttributesFunc) GetResourceAttributes(ctx context.Context, req *restful.Request) (authv1.ResourceAttributes, error) {
 	return p(ctx, req)
 }
 
 // ResourceAttributeGetter describe an interface to get resource attributes form request
 type ResourceAttributeGetter interface {
-	GetResourceAttributes(ctx context.Context, req *restful.Request) authv1.ResourceAttributes
+	GetResourceAttributes(ctx context.Context, req *restful.Request) (authv1.ResourceAttributes, error)
 }
 
 // DynamicSubjectReviewFilter makes a subject review and the ResourceAttribute can be dynamically obtained
 func DynamicSubjectReviewFilter(ctx context.Context, resourceAttGetter ResourceAttributeGetter) restful.FilterFunction {
 	return func(req *restful.Request, resp *restful.Response, chain *restful.FilterChain) {
-		resourceAtt := resourceAttGetter.GetResourceAttributes(ctx, req)
+		resourceAtt, err := resourceAttGetter.GetResourceAttributes(ctx, req)
+		if err != nil {
+			kerrors.HandleError(req, resp, err)
+			return
+		}
 		reqCtx := req.Request.Context()
 		log := logging.FromContext(reqCtx).With(
 			"resource", resourceAtt.Resource,
@@ -75,9 +79,9 @@ func DynamicSubjectReviewFilter(ctx context.Context, resourceAttGetter ResourceA
 			review = makeSubjectAccessReview(resourceAtt, u)
 		}
 
-		err := postSubjectAccessReview(reqCtx, Client(reqCtx), review)
+		err = postSubjectAccessReview(reqCtx, Client(reqCtx), review)
 		if err != nil {
-			log.Debugw("error veryfing user permissions", "err", err)
+			log.Debugw("error verifying user permissions", "err", err, "review", review.GetObject())
 			kerrors.HandleError(req, resp, err)
 			return
 		}
@@ -89,7 +93,7 @@ func DynamicSubjectReviewFilter(ctx context.Context, resourceAttGetter ResourceA
 // request context using the user's bearer token
 // also, it makes a subject review based on Impersonate User info in request header
 func SubjectReviewFilterForResource(ctx context.Context, resourceAtt authv1.ResourceAttributes, namespaceParameter, nameParameter string) restful.FilterFunction {
-	getter := GetResourceAttributesFunc(func(ctx context.Context, req *restful.Request) authv1.ResourceAttributes {
+	getter := GetResourceAttributesFunc(func(ctx context.Context, req *restful.Request) (authv1.ResourceAttributes, error) {
 		attr := resourceAtt.DeepCopy()
 		if ns := req.PathParameter(namespaceParameter); ns != "" {
 			attr.Namespace = ns
@@ -97,7 +101,7 @@ func SubjectReviewFilterForResource(ctx context.Context, resourceAtt authv1.Reso
 		if name := req.PathParameter(nameParameter); name != "" {
 			attr.Name = name
 		}
-		return *attr
+		return *attr, nil
 	})
 	return DynamicSubjectReviewFilter(ctx, getter)
 }

@@ -17,7 +17,10 @@ limitations under the License.
 package v1alpha1
 
 import (
+	"context"
 	"net/http"
+
+	kclient "github.com/katanomi/pkg/client"
 
 	restfulspec "github.com/emicklei/go-restful-openapi/v2"
 	"github.com/emicklei/go-restful/v3"
@@ -46,25 +49,40 @@ func NewFileMeta(impl filestorev1alpha1.FileMetaInterface) storage.VersionedRout
 	}
 }
 
-func (a *fileMeta) Register(ws *restful.WebService) {
+func (a *fileMeta) Register(ctx context.Context, ws *restful.WebService) error {
 	storagePluginParam := ws.PathParameter("storagePlugin", "storage plugin to be used")
 	objectNameParam := ws.PathParameter("objectName", "file object name in storage plugin")
+
+	if manager := kclient.ManagerCtx(ctx); manager != nil {
+		filters, err := manager.Filters(ctx)
+		if err != nil {
+			return err
+		}
+		for _, filter := range filters {
+			ws = ws.Filter(filter)
+		}
+	}
+
 	ws.Route(
-		ws.GET("/storageplugin/{storagePlugin}/filemetas/{objectName:*}").To(a.GetFileMeta).
+		ws.GET("/storageplugins/{storagePlugin}/filemetas/{objectName:*}").To(a.GetFileMeta).
+			Filter(kclient.SubjectReviewFilterForResource(ctx, v1alpha1.FileMetaResourceAttributes("get"), "", "")).
 			Doc("Storage plugin put raw file").
 			Param(objectNameParam).Param(storagePluginParam).
 			Metadata(restfulspec.KeyOpenAPITags, a.tags).
 			Returns(http.StatusOK, "OK", v1alpha1.FileMeta{}),
 	)
 	// TODO: add list filemetas route
+
+	return nil
 }
 
 // GetFileMeta is handler of auth check route
 func (a *fileMeta) GetFileMeta(req *restful.Request, resp *restful.Response) {
 	pluginName := path.Parameter(req, "storagePlugin")
-	objectNameParam := path.Parameter(req, "objectName")
+	objectName := path.Parameter(req, "objectName")
+
 	ctx := req.Request.Context()
-	meta, err := a.impl.GetFileMeta(storage.CtxWithPluginName(ctx, pluginName), objectNameParam)
+	meta, err := a.impl.GetFileMeta(storage.CtxWithPluginName(ctx, pluginName), objectName)
 	if err != nil {
 		kerrors.HandleError(req, resp, err)
 		return

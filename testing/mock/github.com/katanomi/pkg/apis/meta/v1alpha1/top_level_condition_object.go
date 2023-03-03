@@ -50,20 +50,6 @@ func (mr *MockTopLevelConditionObjectMockRecorder) GetAnnotations() *gomock.Call
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAnnotations", reflect.TypeOf((*MockTopLevelConditionObject)(nil).GetAnnotations))
 }
 
-// GetClusterName mocks base method.
-func (m *MockTopLevelConditionObject) GetClusterName() string {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetClusterName")
-	ret0, _ := ret[0].(string)
-	return ret0
-}
-
-// GetClusterName indicates an expected call of GetClusterName.
-func (mr *MockTopLevelConditionObjectMockRecorder) GetClusterName() *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetClusterName", reflect.TypeOf((*MockTopLevelConditionObject)(nil).GetClusterName))
-}
-
 // GetCreationTimestamp mocks base method.
 func (m *MockTopLevelConditionObject) GetCreationTimestamp() v1.Time {
 	m.ctrl.T.Helper()
@@ -284,18 +270,6 @@ func (m *MockTopLevelConditionObject) SetAnnotations(arg0 map[string]string) {
 func (mr *MockTopLevelConditionObjectMockRecorder) SetAnnotations(arg0 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetAnnotations", reflect.TypeOf((*MockTopLevelConditionObject)(nil).SetAnnotations), arg0)
-}
-
-// SetClusterName mocks base method.
-func (m *MockTopLevelConditionObject) SetClusterName(arg0 string) {
-	m.ctrl.T.Helper()
-	m.ctrl.Call(m, "SetClusterName", arg0)
-}
-
-// SetClusterName indicates an expected call of SetClusterName.
-func (mr *MockTopLevelConditionObjectMockRecorder) SetClusterName(arg0 interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetClusterName", reflect.TypeOf((*MockTopLevelConditionObject)(nil).SetClusterName), arg0)
 }
 
 // SetCreationTimestamp mocks base method.

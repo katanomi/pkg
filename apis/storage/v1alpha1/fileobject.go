@@ -16,14 +16,14 @@ limitations under the License.
 
 package v1alpha1
 
-// HeaderRunMeta is the header name of pipelinerun meta
-const HeaderRunMeta = "x-katanomi-run-meta"
+import authv1 "k8s.io/api/authorization/v1"
 
-// HeaderFileMeta is the header name of file meta
-const HeaderFileMeta = "x-katanomi-file-meta"
-
-// HeaderFileAnnotationPrefix is the annotation header prefix
-const HeaderFileAnnotationPrefix = "x-katanomi-annotation-"
-
-// HeaderFilePath is the file path to saved
-const HeaderFilePath = "x-katanomi-file-path"
+// FileObjectResourceAttributes returns a ResourceAttribute object to be used in a filter
+func FileObjectResourceAttributes(verb string) authv1.ResourceAttributes {
+	return authv1.ResourceAttributes{
+		Group:    GroupVersion.Group,
+		Version:  GroupVersion.Version,
+		Resource: "fileobjects",
+		Verb:     verb,
+	}
+}

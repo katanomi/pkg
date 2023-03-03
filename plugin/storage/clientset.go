@@ -35,9 +35,9 @@ type Interface interface {
 
 // Clientset contains the  core and capabilities plugin clients.
 type Clientset struct {
-	coreV1alpha1      *corev1alpha1.CoreV1alpha1Client
-	fileStoreV1alpha1 *v1alpha1.FileStoreV1alpha1Client
-	archiveV1alpha1   *archivev1alpha1.ArchiveClient
+	coreV1alpha1      corev1alpha1.CoreV1alpha1Interface
+	fileStoreV1alpha1 v1alpha1.FileStoreV1alpha1Interface
+	archiveV1alpha1   archivev1alpha1.ArchiveInterface
 }
 
 // CoreV1alpha1 return core v1alpha1 interface

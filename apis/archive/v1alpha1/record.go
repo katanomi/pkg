@@ -19,6 +19,8 @@ package v1alpha1
 import (
 	"fmt"
 
+	authv1 "k8s.io/api/authorization/v1"
+
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 )
@@ -98,4 +100,14 @@ func (p *RecordSpec) DeepCopy() *RecordSpec {
 		spec.Metadata[k] = v
 	}
 	return &spec
+}
+
+// RecordResourceAttributes returns a ResourceAttribute object to be used in a filter
+func RecordResourceAttributes(verb string) authv1.ResourceAttributes {
+	return authv1.ResourceAttributes{
+		Group:    GroupVersion.Group,
+		Version:  GroupVersion.Version,
+		Resource: "records",
+		Verb:     verb,
+	}
 }

@@ -25,10 +25,9 @@ import (
 	"github.com/katanomi/pkg/plugin/storage/client"
 )
 
-type FileMetaGetter interface {
-	FileMeta(pluginName string) FileMetaInterface
-}
+//go:generate ../../../../../../bin/mockgen -source=filemeta.go -destination=../../../../../../testing/mock/github.com/katanomi/pkg/plugin/storage/client/versioned/filestore/v1alpha1/filemeta.go -package=v1alpha1 FileMetaInterface
 
+// FileMetaInterface for file meta restful resource methods
 type FileMetaInterface interface {
 	GET(ctx context.Context, key string) (*v1alpha1.FileMeta, error)
 	// TODO: Add List methods
@@ -48,7 +47,7 @@ func newFileMetas(c *FileStoreV1alpha1Client, pluginName string) *fileMetas {
 }
 
 func (f *fileMetas) GET(ctx context.Context, key string) (*v1alpha1.FileMeta, error) {
-	path := fmt.Sprintf("storageplugin/%s/filemetas/%s", f.pluginName, key)
+	path := fmt.Sprintf("storageplugins/%s/filemetas/%s", f.pluginName, key)
 	fileMeta := v1alpha1.FileMeta{}
 	err := f.client.Get(ctx, path, client2.ResultOpts(&fileMeta))
 	if err != nil {

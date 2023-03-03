@@ -1,0 +1,33 @@
+apiVersion: tekton.dev/v1beta1
+kind: PipelineRun
+metadata:
+  annotations:
+    foo: bar
+    env.katanomi.dev/FOO: BAR
+    env.katanomi.dev/KATANOMI_SVC: https://katanomi.svc
+  name: new-release-pipeline-fd6530-2c7qx-c2kz2-t2gdv
+  namespace: devops-test
+spec:
+  pipelineSpec:
+    description: created by stage run devops-test/new-release-pipeline-fd6530-2c7qx-c2kz2
+    tasks:
+      - name: task-inline
+        params:
+          - name: message
+            value: hello world
+        taskSpec:
+          metadata: {}
+          params:
+            - name: message
+              type: string
+          spec: null
+          steps:
+            - image: registry.alauda.cn:60080/ops/alpine:3.15
+              imagePullPolicy: IfNotPresent
+              name: bash
+              resources: {}
+              script: |
+                #!/usr/bin/env sh
+                echo "$(params.message)"
+  serviceAccountName: default
+  timeout: 0s

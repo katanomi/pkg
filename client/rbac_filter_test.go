@@ -21,6 +21,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/http/httptest"
+	"testing"
 
 	apiserverrequest "k8s.io/apiserver/pkg/endpoints/request"
 
@@ -31,10 +32,8 @@ import (
 	"k8s.io/apiserver/pkg/authentication/user"
 	"k8s.io/client-go/rest"
 
-	"testing"
-
 	"github.com/emicklei/go-restful/v3"
-	gomock "github.com/golang/mock/gomock"
+	"github.com/golang/mock/gomock"
 	mockfakeclient "github.com/katanomi/pkg/testing/mock/sigs.k8s.io/controller-runtime/pkg/client"
 	. "github.com/onsi/gomega"
 	authv1 "k8s.io/api/authorization/v1"
@@ -147,9 +146,10 @@ func TestRBACFilter(t *testing.T) {
 
 func TestGetResourceAttributesFunc_GetResourceAttributes(t *testing.T) {
 	g := NewGomegaWithT(t)
-	getter := GetResourceAttributesFunc(func(ctx context.Context, req *restful.Request) authv1.ResourceAttributes {
-		return authv1.ResourceAttributes{Name: "test"}
+	getter := GetResourceAttributesFunc(func(ctx context.Context, req *restful.Request) (authv1.ResourceAttributes,
+		error) {
+		return authv1.ResourceAttributes{Name: "test"}, nil
 	})
-	got := getter.GetResourceAttributes(context.Background(), &restful.Request{})
+	got, _ := getter.GetResourceAttributes(context.Background(), &restful.Request{})
 	g.Expect(got.Name).Should(BeEquivalentTo("test"))
 }

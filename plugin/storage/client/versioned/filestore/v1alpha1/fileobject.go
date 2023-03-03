@@ -20,23 +20,22 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/go-resty/resty/v2"
 	"github.com/katanomi/pkg/apis/storage/v1alpha1"
+	"github.com/katanomi/pkg/errors"
 	"github.com/katanomi/pkg/plugin/client"
 	filestorev1alpha1 "github.com/katanomi/pkg/plugin/storage/capabilities/filestore/v1alpha1"
 	sclient "github.com/katanomi/pkg/plugin/storage/client"
 )
 
-// FileObjectGetter returns FileObject getter object
-type FileObjectGetter interface {
-	FileObject(pluginName string) FileObjectInterface
-}
+//go:generate ../../../../../../bin/mockgen -source=fileobject.go -destination=../../../../../../testing/mock/github.com/katanomi/pkg/plugin/storage/client/versioned/filestore/v1alpha1/interface.go -package=v1alpha1 FileObjectInterface
 
 // FileObjectInterface is interface for FileObject client
 type FileObjectInterface interface {
 	PUT(ctx context.Context, fileObj filestorev1alpha1.FileObject,
 		options ...client.OptionFunc) (*v1alpha1.FileMeta, error)
-	GET(ctx context.Context, key string) (*filestorev1alpha1.FileObject, error)
-	DELETE(ctx context.Context, key string) error
+	GET(ctx context.Context, fileObjectName string) (*filestorev1alpha1.FileObject, error)
+	DELETE(ctx context.Context, fileObjectName string) error
 }
 
 type fileObjects struct {
@@ -46,28 +45,49 @@ type fileObjects struct {
 
 func (f *fileObjects) PUT(ctx context.Context, fileObj filestorev1alpha1.FileObject,
 	options ...client.OptionFunc) (*v1alpha1.FileMeta, error) {
-	path := fmt.Sprintf("storageplugin/%s/fileobjects/%s", f.pluginName, fileObj.Spec.Key)
-	fileMeta := v1alpha1.FileMeta{}
-	err := f.client.Get(ctx, path, client.ResultOpts(&fileMeta))
+	path := fmt.Sprintf("storageplugins/%s/fileobjects/%s",
+		f.pluginName, fileObj.Name)
+
+	retMeta := v1alpha1.FileMeta{}
+	err := f.client.Put(ctx, path, client.ResultOpts(&retMeta),
+		client.HeaderOpts(v1alpha1.HeaderFileMeta, fileObj.FileMeta.Encode()),
+		client.HeaderOpts("Content-Type", "application/octet-stream"),
+		// this must be set or 406 status code will be returned
+		client.HeaderOpts("Accept", "application/json"),
+		client.BodyOpts(fileObj.FileReadCloser),
+	)
 	if err != nil {
 		return nil, err
 	}
-	return &fileMeta, nil
+	return &retMeta, nil
 }
 
 func (f *fileObjects) GET(ctx context.Context, key string) (*filestorev1alpha1.FileObject, error) {
-	path := fmt.Sprintf("storageplugin/%s/fileobjects/%s", f.pluginName, key)
+	path := fmt.Sprintf("storageplugins/%s/fileobjects/%s", f.pluginName, key)
 	fileObject := filestorev1alpha1.FileObject{}
-	err := f.client.Get(ctx, path, client.ResultOpts(&fileObject))
+	resp, err := f.client.GetResponse(ctx, path, func(request *resty.Request) {
+		request.SetDoNotParseResponse(true)
+	})
 	if err != nil {
 		return nil, err
 	}
+
+	if resp.IsError() {
+		return nil, errors.AsStatusError(resp)
+	}
+
+	fileMetaEncoded := resp.Header().Get(v1alpha1.HeaderFileMeta)
+	fileMeta, err := v1alpha1.DecodeAsFileMeta(fileMetaEncoded)
+	if err == nil {
+		fileObject.FileMeta = *fileMeta
+	}
+	fileObject.FileReadCloser = resp.RawBody()
 	return &fileObject, nil
 }
 
 func (f *fileObjects) DELETE(ctx context.Context, key string) error {
-	path := fmt.Sprintf("storageplugin/%s/fileobjects/%s", f.pluginName, key)
-	err := f.client.Get(ctx, path)
+	path := fmt.Sprintf("storageplugins/%s/fileobjects/%s", f.pluginName, key)
+	err := f.client.Delete(ctx, path)
 	if err != nil {
 		return err
 	}

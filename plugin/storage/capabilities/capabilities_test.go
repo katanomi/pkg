@@ -31,12 +31,12 @@ import (
 
 type fakeFileStoreImp struct{}
 
-func (f fakeFileStoreImp) GetFileObject(ctx context.Context, objectName string) (*filestorev1alpha1.FileObject, error) {
+func (f fakeFileStoreImp) PutFileObject(ctx context.Context, obj *filestorev1alpha1.FileObject) (*v1alpha1.FileMeta, error) {
 	// TODO implement me
 	panic("implement me")
 }
 
-func (f fakeFileStoreImp) PutFileObject(ctx context.Context, objectName string, obj *filestorev1alpha1.FileObject) (*v1alpha1.FileMeta, error) {
+func (f fakeFileStoreImp) GetFileObject(ctx context.Context, objectName string) (*filestorev1alpha1.FileObject, error) {
 	// TODO implement me
 	panic("implement me")
 }

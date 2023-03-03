@@ -19,5 +19,14 @@ package v1alpha1
 // StoragePluginClassLabelKey for labeling owner StoragePluginClass
 const StoragePluginClassLabelKey = "storage.katanomi.dev/storagePluginClass"
 
-// FileObjectLastModifiedAnnotation for recording last modified time
-const FileObjectLastModifiedAnnotation = "storage.katanomi.dev/fileObject.lastModified"
+// LastModifiedAnnotation for recording last modified time
+const LastModifiedAnnotation = "storage.katanomi.dev/lastModified"
+
+// FileTypeAnnotation for recording business file type of file object
+const FileTypeAnnotation = "storage.katanomi.dev/fileType"
+
+// StorageEntryAnnotation for recording file entry of directory
+const StorageEntryAnnotation = "storage.katanomi.dev/entry"
+
+// StorageAnnotationPrefix is prefix of user-defined annotations
+const StorageAnnotationPrefix = "storage.katanomi.dev/annotation."
