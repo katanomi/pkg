@@ -82,10 +82,7 @@ var _ = Describe("cleanupPVC clean pvc which mounted by taskrun", func() {
 			taskLables := client.MatchingLabels{"pipelineruns.tekton.dev/name": pipelineRun.Name}
 			succeeded, fails, err := CleanTaskRunsPVC(ctx, taskLables,
 				func(ctx context.Context, workspace tekton.WorkspaceBinding) bool {
-					if workspace.PersistentVolumeClaim == nil {
-						return true
-					}
-					if IsVolumeCreatedManaualy(pipelineRun.Spec.Workspaces, workspace) {
+					if IsVolumeShouldSkip(pipelineRun.Spec.Workspaces, workspace) {
 						return true
 					}
 					return false
@@ -112,6 +109,12 @@ var _ = Describe("cleanupPVC clean pvc which mounted by taskrun", func() {
 
 		})
 
+		It("volume should be skip to clean", func() {
+			workspace := tekton.WorkspaceBinding{
+				Name: "test",
+			}
+			shouldSkip := IsVolumeShouldSkip(pipelineRun.Spec.Workspaces, workspace)
+			Expect(shouldSkip).To(BeTrue())
+		})
 	})
-
 })

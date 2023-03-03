@@ -40,7 +40,12 @@ const (
 
 type ShouldSkipCleanup func(ctx context.Context, workspace tekton.WorkspaceBinding) bool
 
-func IsVolumeCreatedManaualy(workspaces []tekton.WorkspaceBinding, v tekton.WorkspaceBinding) bool {
+// IsVolumeShouldSkip indicates if the pvc is nil or created by manual should skip clean
+func IsVolumeShouldSkip(workspaces []tekton.WorkspaceBinding, v tekton.WorkspaceBinding) bool {
+	if v.PersistentVolumeClaim == nil {
+		return true
+	}
+
 	for _, ws := range workspaces {
 		if ws.PersistentVolumeClaim != nil && v.PersistentVolumeClaim != nil &&
 			ws.PersistentVolumeClaim.ClaimName == v.PersistentVolumeClaim.ClaimName {
