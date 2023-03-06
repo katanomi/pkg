@@ -26,10 +26,19 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	"go.uber.org/zap"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 type fakeFileStorePlugin struct{}
+
+func (f *fakeFileStorePlugin) ListFileMetas(ctx context.Context, opt metav1alpha1.ListOptions) ([]v1alpha1.FileMeta, error) {
+	// TODO implement me
+	panic("implement me")
+}
+
+func (f *fakeFileStorePlugin) GetFileMeta(ctx context.Context, objectName string) (*v1alpha1.FileMeta, error) {
+	// TODO implement me
+	panic("implement me")
+}
 
 func (f *fakeFileStorePlugin) PutFileObject(ctx context.Context, obj *filestorev1alpha1.FileObject) (*v1alpha1.FileMeta, error) {
 	// TODO implement me
@@ -51,16 +60,6 @@ func (f *fakeFileStorePlugin) GetFileObject(ctx context.Context, objectName stri
 }
 
 func (f *fakeFileStorePlugin) DeleteFileObject(ctx context.Context, objectName string) error {
-	// TODO implement me
-	panic("implement me")
-}
-
-func (f *fakeFileStorePlugin) ListFileMetas(ctx context.Context, opt *metav1.ListOptions) ([]v1alpha1.FileMeta, error) {
-	// TODO implement me
-	panic("implement me")
-}
-
-func (f *fakeFileStorePlugin) GetFileMeta(ctx context.Context, objectName string) (*v1alpha1.FileMeta, error) {
 	// TODO implement me
 	panic("implement me")
 }

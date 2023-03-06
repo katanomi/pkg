@@ -17,6 +17,7 @@ limitations under the License.
 package v1alpha1_test
 
 import (
+	"context"
 	"net/http"
 
 	"github.com/go-resty/resty/v2"
@@ -26,6 +27,7 @@ import (
 	v1alpha13 "github.com/katanomi/pkg/plugin/storage/capabilities/filestore/v1alpha1"
 	v1alpha12 "github.com/katanomi/pkg/plugin/storage/client/versioned/filestore/v1alpha1"
 	"github.com/katanomi/pkg/testing"
+	filestorev1alpha1 "github.com/katanomi/pkg/testing/mock/github.com/katanomi/pkg/plugin/storage/client/versioned/filestore/v1alpha1"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 )
@@ -92,6 +94,26 @@ var _ = Describe("Test.Fileobject", func() {
 				Return(nil)
 
 			Expect(fileObject.DELETE(ctx, "file")).To(Succeed())
+		})
+	})
+})
+
+var _ = Describe("Test.FileObject.Context", func() {
+	var (
+		ctx        context.Context
+		fileObjCli v1alpha12.FileObjectInterface
+	)
+
+	BeforeEach(func() {
+		ctx = context.Background()
+		fileObjCli = &filestorev1alpha1.MockFileObjectInterface{}
+	})
+
+	Context("ContextWithFileObjectClient", func() {
+		It("can extract FileObjectClient from context", func() {
+			ctx = v1alpha12.WithFileObjectClient(ctx, fileObjCli)
+			fileObjCliFromCtx := v1alpha12.FileObjectClientFrom(ctx)
+			Expect(fileObjCliFromCtx).To(Equal(fileObjCli))
 		})
 	})
 })

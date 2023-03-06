@@ -38,6 +38,9 @@ type FileObjectInterface interface {
 	DELETE(ctx context.Context, fileObjectName string) error
 }
 
+// fileObjectClientKey for key of fileObjectClient in context
+type fileObjectClientKey struct{}
+
 type fileObjects struct {
 	client     sclient.Interface
 	pluginName string
@@ -100,4 +103,15 @@ func newFileObjects(c *FileStoreV1alpha1Client, pluginName string) *fileObjects 
 		client:     c.RESTClient(),
 		pluginName: pluginName,
 	}
+}
+
+// WithFileObjectClient inject fileObjectClient to context
+func WithFileObjectClient(ctx context.Context, fileObjectClient FileObjectInterface) context.Context {
+	return context.WithValue(ctx, fileObjectClientKey{}, fileObjectClient)
+}
+
+// FileObjectClientFrom get fileObjectClient from context
+func FileObjectClientFrom(ctx context.Context) FileObjectInterface {
+	fileObjectClientVal, _ := ctx.Value(fileObjectClientKey{}).(FileObjectInterface)
+	return fileObjectClientVal
 }
