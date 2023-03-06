@@ -20,16 +20,26 @@ import (
 	"context"
 	"testing"
 
+	metav1alpha1 "github.com/katanomi/pkg/apis/meta/v1alpha1"
 	"github.com/katanomi/pkg/apis/storage/v1alpha1"
 
 	archivev1alpha1 "github.com/katanomi/pkg/apis/archive/v1alpha1"
 	archivecapv1alpha1 "github.com/katanomi/pkg/plugin/storage/capabilities/archive/v1alpha1"
 	filestorev1alpha1 "github.com/katanomi/pkg/plugin/storage/capabilities/filestore/v1alpha1"
 	. "github.com/onsi/gomega"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 type fakeFileStoreImp struct{}
+
+func (f fakeFileStoreImp) ListFileMetas(ctx context.Context, opt metav1alpha1.ListOptions) ([]v1alpha1.FileMeta, error) {
+	// TODO implement me
+	panic("implement me")
+}
+
+func (f fakeFileStoreImp) GetFileMeta(ctx context.Context, objectName string) (*v1alpha1.FileMeta, error) {
+	// TODO implement me
+	panic("implement me")
+}
 
 func (f fakeFileStoreImp) PutFileObject(ctx context.Context, obj *filestorev1alpha1.FileObject) (*v1alpha1.FileMeta, error) {
 	// TODO implement me
@@ -42,17 +52,6 @@ func (f fakeFileStoreImp) GetFileObject(ctx context.Context, objectName string) 
 }
 
 func (f fakeFileStoreImp) DeleteFileObject(ctx context.Context, objectName string) error {
-	// TODO implement me
-	panic("implement me")
-}
-
-func (f fakeFileStoreImp) ListFileMetas(ctx context.Context,
-	opt *metav1.ListOptions) ([]v1alpha1.FileMeta, error) {
-	// TODO implement me
-	panic("implement me")
-}
-
-func (f fakeFileStoreImp) GetFileMeta(ctx context.Context, key string) (*v1alpha1.FileMeta, error) {
 	// TODO implement me
 	panic("implement me")
 }
