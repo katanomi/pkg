@@ -27,7 +27,7 @@ import (
 	v1alpha13 "github.com/katanomi/pkg/plugin/storage/capabilities/filestore/v1alpha1"
 	v1alpha12 "github.com/katanomi/pkg/plugin/storage/client/versioned/filestore/v1alpha1"
 	"github.com/katanomi/pkg/testing"
-	v1alpha14 "github.com/katanomi/pkg/testing/mock/github.com/katanomi/pkg/plugin/storage/client/versioned/filestore/v1alpha1"
+	filestorev1alpha1 "github.com/katanomi/pkg/testing/mock/github.com/katanomi/pkg/plugin/storage/client/versioned/filestore/v1alpha1"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 )
@@ -106,7 +106,7 @@ var _ = Describe("Test.FileObject.Context", func() {
 
 	BeforeEach(func() {
 		ctx = context.Background()
-		fileObjCli = &v1alpha14.MockFileObjectInterface{}
+		fileObjCli = &filestorev1alpha1.MockFileObjectInterface{}
 	})
 
 	Context("ContextWithFileObjectClient", func() {

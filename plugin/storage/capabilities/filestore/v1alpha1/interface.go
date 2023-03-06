@@ -21,8 +21,8 @@ import (
 	"context"
 	"io"
 
+	kmetav1alpha1 "github.com/katanomi/pkg/apis/meta/v1alpha1"
 	"github.com/katanomi/pkg/apis/storage/v1alpha1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 // FileStoreCapable defines methods of file-store capability
@@ -47,7 +47,7 @@ type FileObjectInterface interface {
 // FileMetaInterface for file meta
 type FileMetaInterface interface {
 	// ListFileMetas for list file metas
-	ListFileMetas(ctx context.Context, opt *metav1.ListOptions) ([]v1alpha1.FileMeta, error)
+	ListFileMetas(ctx context.Context, opt kmetav1alpha1.ListOptions) ([]v1alpha1.FileMeta, error)
 	// GetFileMeta for get file meta
 	GetFileMeta(ctx context.Context, objectName string) (*v1alpha1.FileMeta, error)
 }
