@@ -23,15 +23,6 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	apiserverrequest "k8s.io/apiserver/pkg/endpoints/request"
-
-	"sigs.k8s.io/controller-runtime/pkg/client"
-
-	"knative.dev/pkg/injection"
-
-	"k8s.io/apiserver/pkg/authentication/user"
-	"k8s.io/client-go/rest"
-
 	"github.com/emicklei/go-restful/v3"
 	"github.com/golang/mock/gomock"
 	mockfakeclient "github.com/katanomi/pkg/testing/mock/sigs.k8s.io/controller-runtime/pkg/client"
@@ -39,6 +30,11 @@ import (
 	authv1 "k8s.io/api/authorization/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apiserver/pkg/authentication/user"
+	apiserverrequest "k8s.io/apiserver/pkg/endpoints/request"
+	"k8s.io/client-go/rest"
+	"knative.dev/pkg/injection"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
 )
 

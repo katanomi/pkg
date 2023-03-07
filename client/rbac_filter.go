@@ -46,7 +46,15 @@ func (p GetResourceAttributesFunc) GetResourceAttributes(ctx context.Context, re
 
 // ResourceAttributeGetter describe an interface to get resource attributes form request
 type ResourceAttributeGetter interface {
+	// GetResourceAttributes get resource attributes from request
 	GetResourceAttributes(ctx context.Context, req *restful.Request) (authv1.ResourceAttributes, error)
+}
+
+// SubjectAccessReviewClientGetter describe an interface to get client for subject access review
+// It is usually used for cross-cluster authentication.
+type SubjectAccessReviewClientGetter interface {
+	// GetClient get k8s client according to request
+	GetClient(ctx context.Context, req *restful.Request) (client.Client, error)
 }
 
 // DynamicSubjectReviewFilter makes a subject review and the ResourceAttribute can be dynamically obtained
@@ -79,7 +87,19 @@ func DynamicSubjectReviewFilter(ctx context.Context, resourceAttGetter ResourceA
 			review = makeSubjectAccessReview(resourceAtt, u)
 		}
 
-		err = postSubjectAccessReview(reqCtx, Client(reqCtx), review)
+		var clt client.Client
+		if clientGetter, ok := resourceAttGetter.(SubjectAccessReviewClientGetter); ok {
+			clt, err = clientGetter.GetClient(ctx, req)
+			if err != nil {
+				log.Debugw("get custom client for authentication failed", "err", err)
+				kerrors.HandleError(req, resp, err)
+				return
+			}
+		}
+		if clt == nil {
+			clt = Client(reqCtx)
+		}
+		err = postSubjectAccessReview(reqCtx, clt, review)
 		if err != nil {
 			log.Debugw("error verifying user permissions", "err", err, "review", review.GetObject())
 			kerrors.HandleError(req, resp, err)
