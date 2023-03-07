@@ -24,11 +24,6 @@
             "name": "branch.name",
             "example": "main",
             "label": "default"
-        },
-        {
-            "name": "target.name",
-            "example": "main",
-            "label": "default"
         }
     ]
 }

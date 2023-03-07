@@ -43,6 +43,9 @@ type Variable struct {
 
 	// Label variable labels, used to distinguish different types of variables, multiple labels are separated by commas.
 	Label string `json:"label,omitempty"`
+
+	// Group is used to mark display groups. Unlike labels, labels represent business groups.
+	Group string `json:"group,omitempty"`
 }
 
 // VariableList variable list.

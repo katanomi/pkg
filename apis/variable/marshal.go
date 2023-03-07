@@ -34,8 +34,8 @@ type ConvertFunc func(reflect.Type, *field.Path, MarshalFuncManager) ([]Variable
 
 // DefaultKindMarshalFuncs provides a default Kind conversion function.
 var DefaultKindMarshalFuncs = map[reflect.Kind]ConvertFunc{
-	reflect.Struct:  convertStruct,
-	reflect.Pointer: convertPointer,
+	reflect.Struct:  marshalStruct,
+	reflect.Pointer: marshalPointer,
 }
 
 // Marshal returns a list of variables based on v.
@@ -84,7 +84,7 @@ func (v *VariableMarshaller) Marshal() (VariableList, error) {
 	}
 
 	st := reflect.TypeOf(v.Object)
-	list, err := convertType(st, nil, v)
+	list, err := marshalType(st, nil, v)
 	if err != nil {
 		return VariableList{}, err
 	}
@@ -92,8 +92,8 @@ func (v *VariableMarshaller) Marshal() (VariableList, error) {
 	return VariableList{Items: list}, nil
 }
 
-// convertType convert type to variable list.
-func convertType(st reflect.Type, base *field.Path, convertFuncs MarshalFuncManager) ([]Variable, error) {
+// marshalType marshal type to variable list.
+func marshalType(st reflect.Type, base *field.Path, convertFuncs MarshalFuncManager) ([]Variable, error) {
 	// prioritize custom conversion based on the structure name.
 	if f, ok := convertFuncs.NameFuncs()[st.Name()]; ok {
 		return f(st, base, convertFuncs)
@@ -120,8 +120,8 @@ func isValidVariableKind(st reflect.Type) bool {
 	}
 }
 
-// ConvertStruct convert struct to variable list.
-func convertStruct(st reflect.Type, base *field.Path, convertFuncs MarshalFuncManager) (list []Variable, err error) {
+// marshalStruct marshal struct to variable list.
+func marshalStruct(st reflect.Type, base *field.Path, convertFuncs MarshalFuncManager) (list []Variable, err error) {
 	for i := 0; i < st.NumField(); i++ {
 		field := st.Field(i)
 		nextBase := base
@@ -133,7 +133,7 @@ func convertStruct(st reflect.Type, base *field.Path, convertFuncs MarshalFuncMa
 			nextBase = base.Child(getJsonTagName(field))
 		}
 
-		subList, err := convertType(field.Type, nextBase, convertFuncs)
+		subList, err := marshalType(field.Type, nextBase, convertFuncs)
 		if err != nil {
 			return list, err
 		}
@@ -143,7 +143,7 @@ func convertStruct(st reflect.Type, base *field.Path, convertFuncs MarshalFuncMa
 	return list, nil
 }
 
-// ConvertPointer convert pointer to variable list.
-func convertPointer(st reflect.Type, base *field.Path, convertFuncs MarshalFuncManager) ([]Variable, error) {
-	return convertType(st.Elem(), base, convertFuncs)
+// marshalPointer marshal pointer to variable list.
+func marshalPointer(st reflect.Type, base *field.Path, convertFuncs MarshalFuncManager) ([]Variable, error) {
+	return marshalType(st.Elem(), base, convertFuncs)
 }
