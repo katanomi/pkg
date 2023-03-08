@@ -115,7 +115,8 @@
         },
         {
             "name": "target.name",
-            "example": "main"
+            "example": "main",
+            "label": "default"
         },
         {
             "name": "target.protected",

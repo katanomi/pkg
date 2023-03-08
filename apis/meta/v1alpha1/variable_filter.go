@@ -14,5 +14,31 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-// Package variable generate a list of variables (jsonPath) based on the structure.
-package variable
+package v1alpha1
+
+import (
+	"strings"
+
+	"k8s.io/utils/strings/slices"
+)
+
+// LabelFilter label filter func
+func LabelFilter(label string) func(*Variable) bool {
+	return func(variable *Variable) bool {
+		if variable == nil {
+			return false
+		}
+
+		varLabels := strings.Split(variable.Label, ",")
+		return slices.Contains(varLabels, label)
+	}
+}
+
+func filtVariable(s *Variable, filters ...func(*Variable) bool) bool {
+	for _, f := range filters {
+		if f != nil && !f(s) {
+			return false
+		}
+	}
+	return true
+}

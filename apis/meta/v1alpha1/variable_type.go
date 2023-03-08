@@ -14,15 +14,11 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package variable
+package v1alpha1
 
 import (
-	"reflect"
-	"strings"
-
 	authv1 "k8s.io/api/authorization/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/utils/field"
 )
 
 var (
@@ -35,7 +31,7 @@ var (
 
 // Variable description of custom environment variables.
 type Variable struct {
-	// Variable name, usually a variable JsonPath.
+	// Name variable name, usually a variable JsonPath.
 	Name string `json:"name"`
 
 	// Example variable example. equal signs and semicolons cannot be included in the strength.
@@ -67,7 +63,7 @@ func VariableResourceAttributes(verb string) authv1.ResourceAttributes {
 	}
 }
 
-func (v *VariableList) Filter(filters ...FilterFunc) {
+func (v *VariableList) Filter(filters ...func(*Variable) bool) {
 	if v == nil {
 		return
 	}
@@ -79,52 +75,4 @@ func (v *VariableList) Filter(filters ...FilterFunc) {
 		}
 	}
 	v.Items = vars
-}
-
-// NewVariable return variable from StructField.
-func NewVariable(field reflect.StructField, base *field.Path) *Variable {
-	switch field.Type.Kind() {
-	// Ignoring the production of list types, usually the value of variables of list type is undefined.
-	case reflect.Map, reflect.Slice, reflect.Array:
-		return nil
-	default:
-		// nothing
-	}
-
-	jsonTag := getJsonTagName(field)
-	if jsonTag == "" {
-		return nil
-	}
-
-	variableTagStr := field.Tag.Get("variable")
-	if variableTagStr == "-" {
-		return nil
-	}
-
-	variableTagValues := parseVariableTag(variableTagStr)
-	return &Variable{
-		Name:    base.Child(jsonTag).String(),
-		Label:   variableTagValues["label"],
-		Example: variableTagValues["example"],
-	}
-}
-
-func parseVariableTag(variableTagStr string) map[string]string {
-	result := map[string]string{}
-	variableTags := strings.Split(variableTagStr, ";")
-	for _, tagStr := range variableTags {
-		tags := strings.Split(tagStr, "=")
-		if len(tags) == 2 {
-			result[tags[0]] = tags[1]
-		}
-	}
-	return result
-}
-
-func getJsonTagName(field reflect.StructField) string {
-	jsonTag := field.Tag.Get("json")
-	if jsonTag == "-" || jsonTag == "" {
-		return ""
-	}
-	return strings.Split(jsonTag, ",")[0]
 }

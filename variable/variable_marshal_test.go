@@ -17,21 +17,89 @@ limitations under the License.
 package variable
 
 import (
+	"fmt"
 	"reflect"
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
+	"github.com/katanomi/pkg/apis/meta/v1alpha1"
+	. "github.com/katanomi/pkg/testing"
 	. "github.com/onsi/gomega"
-	authv1 "k8s.io/api/authorization/v1"
 	"k8s.io/utils/field"
 )
+
+func TestConvertToVariableList(t *testing.T) {
+	t.Run("test BuildRunGitStatus", func(t *testing.T) {
+		g := NewGomegaWithT(t)
+
+		expected := v1alpha1.VariableList{}
+		g.Expect(LoadYAML("testdata/converttovariablelist.buildrungitstatus.golden.json", &expected)).To(Succeed())
+		marshaller := VariableMarshaller{Object: v1alpha1.BuildRunGitStatus{}}
+		got, err := marshaller.Marshal()
+		g.Expect(err).To(Succeed())
+		diff := cmp.Diff(got, expected)
+		g.Expect(diff).To(BeEmpty())
+	})
+
+	t.Run("test TriggeredBy", func(t *testing.T) {
+		g := NewGomegaWithT(t)
+
+		expected := v1alpha1.VariableList{}
+		g.Expect(LoadYAML("testdata/converttovariablelist.triggeredby.golden.json", &expected)).To(Succeed())
+		marshaller := VariableMarshaller{Object: v1alpha1.TriggeredBy{}}
+		got, err := marshaller.Marshal()
+		g.Expect(err).To(Succeed())
+		diff := cmp.Diff(got, expected)
+		g.Expect(diff).To(BeEmpty())
+	})
+
+	t.Run("test object is nil", func(t *testing.T) {
+		g := NewGomegaWithT(t)
+
+		expected := v1alpha1.VariableList{}
+		marshaller := VariableMarshaller{}
+		got, err := marshaller.Marshal()
+		g.Expect(err).To(Succeed())
+		g.Expect(expected).To(Equal(got))
+	})
+
+	t.Run("test BuildRunGitStatus with label filter", func(t *testing.T) {
+		g := NewGomegaWithT(t)
+
+		expected := v1alpha1.VariableList{}
+		g.Expect(LoadYAML("testdata/converttovariablelist.buildrungitstatus.build.golden.json", &expected)).To(Succeed())
+		marshaller := VariableMarshaller{Object: v1alpha1.BuildRunGitStatus{}}
+		got, err := marshaller.Marshal()
+		g.Expect(err).To(Succeed())
+
+		got.Filter(v1alpha1.LabelFilter("default"))
+		diff := cmp.Diff(got, expected)
+		g.Expect(diff).To(BeEmpty())
+	})
+
+	t.Run("has unsupported type", func(t *testing.T) {
+		g := NewGomegaWithT(t)
+
+		obj := struct {
+			Number int    `json:"number"`
+			Func   func() `json:"channel"`
+		}{
+			Number: 1,
+			Func:   func() {},
+		}
+
+		marshaller := VariableMarshaller{Object: obj}
+		_, err := marshaller.Marshal()
+		g.Expect(err).To(Equal(fmt.Errorf("unsupported type [%s]", reflect.Func.String())))
+	})
+}
 
 func TestNewVariable(t *testing.T) {
 	base := field.NewPath("test")
 	tests := map[string]struct {
 		field reflect.StructField
 		base  *field.Path
-		want  *Variable
+		want  *v1alpha1.Variable
 	}{
 		"input map": {
 			field: reflect.StructField{Type: reflect.TypeOf(map[string]string{})},
@@ -48,7 +116,7 @@ func TestNewVariable(t *testing.T) {
 		"parse tag success": {
 			base:  base,
 			field: reflect.StructField{Tag: reflect.StructTag(`json:"test" variable:"label=test;other=;example=12"`), Type: reflect.TypeOf("test")},
-			want: &Variable{
+			want: &v1alpha1.Variable{
 				Name:    base.Child("test").String(),
 				Example: "12",
 				Label:   "test",
@@ -57,7 +125,7 @@ func TestNewVariable(t *testing.T) {
 		"parse tag without tag value": {
 			base:  base,
 			field: reflect.StructField{Tag: reflect.StructTag(`json:"test" variable:"example=12;label;"`), Type: reflect.TypeOf("test")},
-			want: &Variable{
+			want: &v1alpha1.Variable{
 				Name:    base.Child("test").String(),
 				Example: "12",
 			},
@@ -65,14 +133,14 @@ func TestNewVariable(t *testing.T) {
 		"parse tag without value": {
 			base:  base,
 			field: reflect.StructField{Tag: reflect.StructTag(`json:"test"`), Type: reflect.TypeOf("test")},
-			want: &Variable{
+			want: &v1alpha1.Variable{
 				Name: base.Child("test").String(),
 			},
 		},
 		"parse tag with perfix key": {
 			base:  base,
 			field: reflect.StructField{Tag: reflect.StructTag(`json:"test" variable:"label2=test;example=12"`), Type: reflect.TypeOf("test")},
-			want: &Variable{
+			want: &v1alpha1.Variable{
 				Name:    base.Child("test").String(),
 				Example: "12",
 			},
@@ -85,72 +153,4 @@ func TestNewVariable(t *testing.T) {
 			}
 		})
 	}
-}
-
-func TestVariableList_Filter(t *testing.T) {
-	variableList := VariableList{
-		Items: []Variable{
-			{Name: "var1", Example: "1", Label: "label"},
-			{Name: "var2", Example: "1", Label: "label2"},
-			{Name: "var3", Example: "2", Label: "label3,label2"},
-			{Name: "var4", Example: "3", Label: "label2"},
-		},
-	}
-	tests := map[string]struct {
-		filters      []FilterFunc
-		variableList VariableList
-		want         VariableList
-	}{
-		"filter not set": {
-			variableList: variableList,
-			want:         variableList,
-		},
-		"set label filter": {
-			variableList: variableList,
-			filters:      []FilterFunc{LabelFilter("label2")},
-			want: VariableList{
-				Items: []Variable{
-					{Name: "var2", Example: "1", Label: "label2"},
-					{Name: "var3", Example: "2", Label: "label3,label2"},
-					{Name: "var4", Example: "3", Label: "label2"}},
-			},
-		},
-		"set label filter with empty label": {
-			variableList: variableList,
-			filters:      []FilterFunc{LabelFilter("")},
-			want:         VariableList{Items: []Variable{}},
-		},
-		"set mulit filter": {
-			variableList: variableList,
-			filters:      []FilterFunc{LabelFilter("label2"), LabelFilter("label3")},
-			want: VariableList{
-				Items: []Variable{
-					{Name: "var3", Example: "2", Label: "label3,label2"},
-				},
-			},
-		},
-	}
-	for name, tt := range tests {
-		t.Run(name, func(t *testing.T) {
-			g := NewGomegaWithT(t)
-
-			tt.variableList.Filter(tt.filters...)
-			diff := cmp.Diff(tt.variableList, tt.want)
-			g.Expect(diff).To(BeEmpty())
-		})
-	}
-}
-
-func Test_VariableResourceAttributes(t *testing.T) {
-	g := NewGomegaWithT(t)
-
-	want := authv1.ResourceAttributes{
-		Group:    GroupVersion.Group,
-		Version:  GroupVersion.Version,
-		Resource: "variables",
-		Verb:     "test",
-	}
-
-	got := VariableResourceAttributes("test")
-	g.Expect(got).To(Equal(want), "the ResourceAttributes should contain test")
 }
