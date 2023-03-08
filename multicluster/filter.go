@@ -29,6 +29,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
+// NewCrossClusterSubjectReview constructs a new CrossClusterSubjectReview
 func NewCrossClusterSubjectReview(mClient Interface, scheme *runtime.Scheme, restMapper meta.RESTMapper) *CrossClusterSubjectReview {
 	return &CrossClusterSubjectReview{
 		multiClusterClient: mClient,
@@ -39,6 +40,7 @@ func NewCrossClusterSubjectReview(mClient Interface, scheme *runtime.Scheme, res
 	}
 }
 
+// CrossClusterSubjectReview describe a struct to get the client of special cluster and simulate the requesting user
 type CrossClusterSubjectReview struct {
 	multiClusterClient Interface
 	scheme             *runtime.Scheme
@@ -48,10 +50,12 @@ type CrossClusterSubjectReview struct {
 	ClusterNamespace string
 }
 
+// SetClusterParameter sets the cluster parameter name
 func (c *CrossClusterSubjectReview) SetClusterParameter(parameter string) {
 	c.ClusterParameter = parameter
 }
 
+// SetClusterNamespace set the namespace which the cluster resource is stored in
 func (c *CrossClusterSubjectReview) SetClusterNamespace(ns string) {
 	c.ClusterNamespace = ns
 }
@@ -63,6 +67,7 @@ func (c *CrossClusterSubjectReview) getClusterParameterName(req *restful.Request
 	return req.QueryParameter(c.ClusterParameter)
 }
 
+// GetClient get k8s client of the specified cluster and simulate the requesting user
 func (c *CrossClusterSubjectReview) GetClient(ctx context.Context, req *restful.Request) (client.Client, error) {
 	clusterName := c.getClusterParameterName(req)
 	if clusterName == "" {
