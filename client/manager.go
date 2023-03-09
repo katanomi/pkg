@@ -95,6 +95,7 @@ func ManagerFilter(ctx context.Context, mgr *Manager) restful.FilterFunction {
 	log := logging.FromContext(ctx).Named("manager-filter")
 	scheme := kscheme.Scheme(ctx)
 	serviceAccountClient := Client(ctx)
+	configInApp := GetAppConfig(ctx)
 
 	return func(req *restful.Request, resp *restful.Response, chain *restful.FilterChain) {
 		start := time.Now()
@@ -115,6 +116,7 @@ func ManagerFilter(ctx context.Context, mgr *Manager) restful.FilterFunction {
 		config.Timeout = DefaultTimeout
 
 		reqCtx = injection.WithConfig(reqCtx, config)
+		reqCtx = WithAppConfig(reqCtx, configInApp)
 
 		user, err := userFromBearerToken(strings.TrimPrefix(req.Request.Header.Get("Authorization"), "Bearer "))
 		if err != nil {

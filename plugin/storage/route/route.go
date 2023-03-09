@@ -67,6 +67,7 @@ func NewServicesWithContext(ctx context.Context, c client.Interface, filters ...
 			groups = append(groups, group)
 			servicesMap[groupVersionedPath] = group
 		}
+
 		r.Register(ctx, group)
 	}
 

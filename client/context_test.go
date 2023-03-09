@@ -20,6 +20,8 @@ import (
 	"context"
 	"testing"
 
+	"k8s.io/client-go/rest"
+
 	dynamicFake "k8s.io/client-go/dynamic/fake"
 
 	. "github.com/onsi/gomega"
@@ -78,4 +80,17 @@ func TestDynamicContext(t *testing.T) {
 	client := &dynamicFake.FakeDynamicClient{}
 	ctx = WithDynamicClient(ctx, client)
 	g.Expect(DynamicClient(ctx)).To(Equal(client))
+}
+
+func TestAppConfigContext(t *testing.T) {
+	g := NewGomegaWithT(t)
+
+	ctx := context.TODO()
+
+	cfg := GetAppConfig(ctx)
+	g.Expect(cfg).To(BeNil())
+
+	cfg = &rest.Config{}
+	ctx = WithAppConfig(ctx, cfg)
+	g.Expect(GetAppConfig(ctx)).To(Equal(cfg))
 }
