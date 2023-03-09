@@ -22,6 +22,8 @@ limitations under the License.
 package v1alpha1
 
 import (
+	"net/url"
+
 	"github.com/tektoncd/pipeline/pkg/apis/pipeline/v1beta1"
 	corev1 "k8s.io/api/core/v1"
 	v1 "k8s.io/api/rbac/v1"
@@ -2947,7 +2949,7 @@ func (in *ListOptions) DeepCopyInto(out *ListOptions) {
 	*out = *in
 	if in.Search != nil {
 		in, out := &in.Search, &out.Search
-		*out = make(map[string][]string, len(*in))
+		*out = make(url.Values, len(*in))
 		for key, val := range *in {
 			var outVal []string
 			if val == nil {

@@ -28,8 +28,8 @@ import (
 	filestorev1alpha1 "github.com/katanomi/pkg/plugin/storage/capabilities/filestore/v1alpha1"
 	"github.com/katanomi/pkg/plugin/storage/core/v1alpha1"
 	archiveroute "github.com/katanomi/pkg/plugin/storage/route/archive/v1alpha1"
-	v1alpha12 "github.com/katanomi/pkg/plugin/storage/route/core/v1alpha1"
-	v1alpha13 "github.com/katanomi/pkg/plugin/storage/route/filestore/v1alpha1"
+	corev1alpha1 "github.com/katanomi/pkg/plugin/storage/route/core/v1alpha1"
+	filestoreroute "github.com/katanomi/pkg/plugin/storage/route/filestore/v1alpha1"
 )
 
 // GetPluginAPIPath returns storage plugin web service path
@@ -79,12 +79,12 @@ func match(c client.Interface) []storage.VersionedRouter {
 	routes := make([]storage.VersionedRouter, 0)
 
 	if core, ok := c.(v1alpha1.CoreInterface); ok {
-		routes = append(routes, v1alpha12.NewAuthCheck(core))
+		routes = append(routes, corev1alpha1.NewAuthCheck(core))
 	}
 
 	if filestore, ok := c.(filestorev1alpha1.FileStoreCapable); ok {
-		routes = append(routes, v1alpha13.NewFileObject(filestore))
-		routes = append(routes, v1alpha13.NewFileMeta(filestore))
+		routes = append(routes, filestoreroute.NewFileObject(filestore))
+		routes = append(routes, filestoreroute.NewFileMeta(filestore))
 	}
 
 	if archive, ok := c.(archivev1alpha1.ArchiveCapable); ok {

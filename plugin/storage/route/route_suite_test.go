@@ -30,7 +30,7 @@ import (
 
 type fakeFileStorePlugin struct{}
 
-func (f *fakeFileStorePlugin) ListFileMetas(ctx context.Context, opt metav1alpha1.ListOptions) ([]v1alpha1.FileMeta, error) {
+func (f *fakeFileStorePlugin) ListFileMetas(ctx context.Context, opt v1alpha1.FileMetaListOptions) ([]v1alpha1.FileMeta, error) {
 	// TODO implement me
 	panic("implement me")
 }

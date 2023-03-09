@@ -20,7 +20,6 @@ import (
 	"context"
 	"testing"
 
-	metav1alpha1 "github.com/katanomi/pkg/apis/meta/v1alpha1"
 	"github.com/katanomi/pkg/apis/storage/v1alpha1"
 
 	archivev1alpha1 "github.com/katanomi/pkg/apis/archive/v1alpha1"
@@ -31,7 +30,7 @@ import (
 
 type fakeFileStoreImp struct{}
 
-func (f fakeFileStoreImp) ListFileMetas(ctx context.Context, opt metav1alpha1.ListOptions) ([]v1alpha1.FileMeta, error) {
+func (f fakeFileStoreImp) ListFileMetas(ctx context.Context, opt v1alpha1.FileMetaListOptions) ([]v1alpha1.FileMeta, error) {
 	// TODO implement me
 	panic("implement me")
 }

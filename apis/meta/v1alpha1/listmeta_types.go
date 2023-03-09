@@ -17,6 +17,7 @@ limitations under the License.
 package v1alpha1
 
 import (
+	"net/url"
 	"regexp"
 
 	"github.com/katanomi/pkg/common"
@@ -74,7 +75,7 @@ type ListOptions struct {
 
 	// Custom search options
 	// +optional
-	Search map[string][]string `json:",inline"`
+	Search url.Values `json:",inline"`
 
 	// Subresoures for listing
 	// will only work for lists that support this feature
@@ -84,6 +85,13 @@ type ListOptions struct {
 
 	// Sort for listing
 	Sort []SortOptions `json:"sort"`
+}
+
+func (opt *ListOptions) SearchSet(key, value string) {
+	if opt.Search == nil {
+		opt.Search = make(url.Values)
+	}
+	opt.Search.Set(key, value)
 }
 
 // GetSearchFirstElement get first element by key that in search map
@@ -195,14 +203,9 @@ type UserOptions struct {
 // GetSearchValue get search value from option
 // use `searchValue` instead of `name`
 func GetSearchValue(option ListOptions) string {
-	if value := option.GetSearchFirstElement(SearchValueKey); value != "" {
-		return value
+	if option.Search.Has(SearchValueKey) {
+		return option.Search.Get(SearchValueKey)
 	}
 
-	// Deprecated
-	if value := option.GetSearchFirstElement("name"); value != "" {
-		return value
-	}
-
-	return ""
+	return option.Search.Get("name")
 }

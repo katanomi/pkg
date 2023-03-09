@@ -84,7 +84,7 @@ func (a *fileObject) Register(ctx context.Context, ws *restful.WebService) error
 			Doc("Storage plugin delete file by key").
 			Param(storagePluginParam).Param(objectNameParam).
 			Metadata(restfulspec.KeyOpenAPITags, a.tags).
-			Returns(http.StatusOK, "OK", v1alpha1.FileMeta{}),
+			Returns(http.StatusOK, "OK", nil),
 	)
 
 	return nil

@@ -20,6 +20,7 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"strings"
+	"time"
 )
 
 // ParseFileKey returns pluginName and fileObjectName
@@ -38,6 +39,20 @@ func (in *FileMeta) Encode() string {
 		return ""
 	}
 	return base64.StdEncoding.EncodeToString(marshaledMeta)
+}
+
+// LastModified return lastModifiedTime from storage server or zero time if no creation info
+func (in *FileMeta) LastModified() time.Time {
+	if lastModifiedAnno, ok := in.Annotations[LastModifiedAnnotation]; ok {
+		parsedTime, _ := time.Parse(time.RFC3339, lastModifiedAnno)
+		return parsedTime
+	}
+	return time.Time{}
+}
+
+// Key returns file key
+func (in *FileMeta) Key() string {
+	return in.Spec.Key
 }
 
 // DecodeAsFileMeta decodes encoded string to a pointer FileMeta

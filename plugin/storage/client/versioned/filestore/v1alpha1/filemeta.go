@@ -19,10 +19,13 @@ package v1alpha1
 import (
 	"context"
 	"fmt"
+	"strconv"
 
+	v1alpha12 "github.com/katanomi/pkg/apis/meta/v1alpha1"
 	"github.com/katanomi/pkg/apis/storage/v1alpha1"
-	client2 "github.com/katanomi/pkg/plugin/client"
+	pclient "github.com/katanomi/pkg/plugin/client"
 	"github.com/katanomi/pkg/plugin/storage/client"
+	"knative.dev/pkg/logging"
 )
 
 //go:generate ../../../../../../bin/mockgen -source=filemeta.go -destination=../../../../../../testing/mock/github.com/katanomi/pkg/plugin/storage/client/versioned/filestore/v1alpha1/filemeta.go -package=v1alpha1 FileMetaInterface
@@ -30,7 +33,7 @@ import (
 // FileMetaInterface for file meta restful resource methods
 type FileMetaInterface interface {
 	GET(ctx context.Context, key string) (*v1alpha1.FileMeta, error)
-	// TODO: Add List methods
+	List(ctx context.Context, opts v1alpha1.FileMetaListOptions) ([]v1alpha1.FileMeta, error)
 }
 
 type fileMetas struct {
@@ -49,9 +52,37 @@ func newFileMetas(c *FileStoreV1alpha1Client, pluginName string) *fileMetas {
 func (f *fileMetas) GET(ctx context.Context, key string) (*v1alpha1.FileMeta, error) {
 	path := fmt.Sprintf("storageplugins/%s/filemetas/%s", f.pluginName, key)
 	fileMeta := v1alpha1.FileMeta{}
-	err := f.client.Get(ctx, path, client2.ResultOpts(&fileMeta))
+	err := f.client.Get(ctx, path, pclient.ResultOpts(&fileMeta))
 	if err != nil {
 		return nil, err
 	}
 	return &fileMeta, nil
+}
+
+func (f *fileMetas) List(ctx context.Context, opts v1alpha1.FileMetaListOptions) ([]v1alpha1.FileMeta, error) {
+	logger := logging.FromContext(ctx)
+	path := fmt.Sprintf("storageplugins/%s/filemetas", f.pluginName)
+	listOpt := v1alpha12.ListOptions{}
+	// default recursive is true
+	if opts.Recursive == false {
+		listOpt.SearchSet("recursive", "false")
+	}
+	if opts.Prefix != "" {
+		listOpt.SearchSet("prefix", opts.Prefix)
+	}
+	if opts.StartAfter != "" {
+		listOpt.SearchSet("startAfter", opts.StartAfter)
+	}
+	if opts.Limit > 0 {
+		listOpt.SearchSet("limit", strconv.Itoa(opts.Limit))
+	}
+
+	logger.Debugw("set list meta options for client", "opts", listOpt)
+	fileMetas := make([]v1alpha1.FileMeta, 0)
+
+	err := f.client.Get(ctx, path, pclient.ResultOpts(&fileMetas), pclient.ListOpts(listOpt))
+	if err != nil {
+		return nil, err
+	}
+	return fileMetas, nil
 }
