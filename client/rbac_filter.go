@@ -128,6 +128,9 @@ func SubjectReviewFilterForResource(ctx context.Context, resourceAtt authv1.Reso
 
 func isImpersonateRequest(reqCtx context.Context) bool {
 	var config = injection.GetConfig(reqCtx)
+	if config == nil {
+		return false
+	}
 	return config.Impersonate.UserName != "" || len(config.Impersonate.Groups) != 0 || len(config.Impersonate.Extra) != 0
 }
 

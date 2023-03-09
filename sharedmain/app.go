@@ -173,6 +173,7 @@ func (a *AppBuilder) init() {
 			a.Config.Burst = Burst
 		}
 		a.Context, a.startInformers = injection.EnableInjectionOrDie(a.Context, a.Config)
+		a.Context = kclient.WithAppConfig(a.Context, a.Config)
 
 		restyClient := resty.NewWithClient(kclient.NewHTTPClient())
 		restyClient.SetDisableWarn(true)
@@ -343,6 +344,10 @@ func (a *AppBuilder) Controllers(ctors ...controllers.SetupChecker) *AppBuilder 
 		a.Logger.Infow("inject resource lock")
 	}
 
+	// BaseContext provides Context values to Runnables
+	options.BaseContext = func() context.Context {
+		return a.Context
+	}
 	a.Manager, err = ctrl.NewManager(a.Config, options)
 	if err != nil {
 		a.Logger.Fatalw("unable to start manager", "err", err)
@@ -483,7 +488,8 @@ func (a *AppBuilder) StoragePlugins(plugins ...client.Interface) *AppBuilder {
 		if err := plugin.Setup(a.Context, a.Logger); err != nil {
 			a.Logger.Fatalw("plugin could not be setup correctly", "err", err, "plugin", plugin.Path())
 		}
-		wss, err := storageroute.NewServicesWithContext(a.Context, plugin)
+		filters, _ := a.ClientManager.Filters(a.Context)
+		wss, err := storageroute.NewServicesWithContext(a.Context, plugin, filters...)
 		if err != nil {
 			a.Logger.Fatalw("plugin could not start correctly", "err", err, "plugin", plugin.Path())
 		}

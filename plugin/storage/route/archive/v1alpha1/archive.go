@@ -53,6 +53,7 @@ func NewArchive(impl archivev1alpha1.ArchiveCapable) storage.VersionedRouter {
 }
 
 func (a *archive) Register(ctx context.Context, ws *restful.WebService) error {
+
 	storagePluginParam := ws.PathParameter("storageplugin", "storage plugin to be used")
 	ws.Route(
 		ws.POST("storageplugin/{storageplugin}/records").To(a.ListRecords).

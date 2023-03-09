@@ -25,6 +25,7 @@ import (
 
 	"k8s.io/apiserver/pkg/authentication/user"
 	"k8s.io/client-go/dynamic"
+	"k8s.io/client-go/rest"
 
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/cluster"
@@ -115,4 +116,21 @@ func Cluster(ctx context.Context) cluster.Cluster {
 func User(ctx context.Context) user.Info {
 	u, _ := request.UserFrom(ctx)
 	return u
+}
+
+// cfgKeyOfApp is the key that the config make is associated with.
+type cfgKeyOfApp struct{}
+
+// WithAppConfig associates a given config with the app context.
+func WithAppConfig(ctx context.Context, cfg *rest.Config) context.Context {
+	return context.WithValue(ctx, cfgKeyOfApp{}, cfg)
+}
+
+// GetAppConfig gets the current config of app (pod) from the context.
+func GetAppConfig(ctx context.Context) *rest.Config {
+	value := ctx.Value(cfgKeyOfApp{})
+	if value == nil {
+		return nil
+	}
+	return value.(*rest.Config)
 }

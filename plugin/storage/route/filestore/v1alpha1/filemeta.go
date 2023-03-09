@@ -53,16 +53,6 @@ func (a *fileMeta) Register(ctx context.Context, ws *restful.WebService) error {
 	storagePluginParam := ws.PathParameter("storagePlugin", "storage plugin to be used")
 	objectNameParam := ws.PathParameter("objectName", "file object name in storage plugin")
 
-	if manager := kclient.ManagerCtx(ctx); manager != nil {
-		filters, err := manager.Filters(ctx)
-		if err != nil {
-			return err
-		}
-		for _, filter := range filters {
-			ws = ws.Filter(filter)
-		}
-	}
-
 	ws.Route(
 		ws.GET("/storageplugins/{storagePlugin}/filemetas/{objectName:*}").To(a.GetFileMeta).
 			Filter(kclient.SubjectReviewFilterForResource(ctx, v1alpha1.FileMetaResourceAttributes("get"), "", "")).
