@@ -115,13 +115,20 @@ func (c *checkApproval) Check() (err error) {
 		}
 	}
 
-	// If allow to represent others, no need to check whether the approval behavior is legal.
-	if c.allowRepresentOthers {
+	if c.approvalSpec == nil {
+		err = fmt.Errorf("approval spec is nil")
 		return
 	}
 
-	if c.approvalSpec == nil {
-		err = fmt.Errorf("approval spec is nil")
+	// If RequiresDifferentApprover is set to true, the user who initiated the check cannot approve it, unless an administrator intervenes.
+	if c.approvalSpec.RequiresDifferentApprover {
+		if err = c.validateRequiresDifferentApprover(); err != nil {
+			return err
+		}
+	}
+
+	// If allow to represent others, no need to check other the approval behavior is legal.
+	if c.allowRepresentOthers {
 		return
 	}
 
@@ -171,12 +178,6 @@ func (c *checkApproval) Check() (err error) {
 				err = fmt.Errorf("%q can not approve for user %q", c.reqUser.Username, newUser.Subject.Name)
 				return
 			}
-			// RequiresDifferentApprover if set to true, the user who triggered the StageRun cannot approve, unless an admin
-			if c.approvalSpec.RequiresDifferentApprover &&
-				c.triggeredBy != nil && c.triggeredBy.User != nil && *c.triggeredBy.User == newUser.Subject {
-				err = fmt.Errorf("requiresDifferentApprover is enabled, %q can not approve.", newUser.Subject.Name)
-				return
-			}
 		}
 	}
 
@@ -196,4 +197,21 @@ func orderChanged(oldUsers, newUsers metav1alpha1.UserApprovals) bool {
 		}
 	}
 	return oLen != 0 && i < oLen
+}
+
+// validateRequiresDifferentApprover validates that a different person approves.
+// If the approver is the trigger, an error will be returned.
+func (c *checkApproval) validateRequiresDifferentApprover() (err error) {
+	for _, newUser := range c.newUsers {
+		oldUser := c.oldUsers.GetBySubject(newUser.Subject)
+		if (oldUser == nil || oldUser.Input == nil) && newUser.Input != nil {
+			// RequiresDifferentApprover if set to true, the user who triggered the StageRun cannot approve, unless an admin
+			if c.triggeredBy != nil && c.triggeredBy.User != nil && *c.triggeredBy.User == newUser.Subject &&
+				matching.IsRightUser(c.reqUser, newUser.Subject) {
+				err = fmt.Errorf("requiresDifferentApprover is enabled, %q can not approve.", newUser.Subject.Name)
+				return
+			}
+		}
+	}
+	return nil
 }
