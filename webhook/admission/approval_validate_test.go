@@ -207,6 +207,19 @@ var _ = Describe("Test.ValidateApproval", func() {
 							Expect(err.Error()).To(BeEquivalentTo(`requiresDifferentApprover is enabled, "admin" can not approve.`))
 						})
 					})
+					When("requester is approver but changed approver", func() {
+						BeforeEach(func() {
+							username = "admin"
+							new = []metav1alpha1.UserApproval{
+								{Subject: adminSubject},
+								{Subject: userSubject, Input: rejectedInput},
+							}
+						})
+						It("should be rejected", func() {
+							Expect(err).NotTo(BeNil())
+							Expect(err.Error()).To(BeEquivalentTo(`requiresDifferentApprover is enabled, "admin" can not approve.`))
+						})
+					})
 					When("requester is other", func() {
 						BeforeEach(func() {
 							username = "other-admin"

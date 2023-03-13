@@ -205,10 +205,12 @@ func (c *checkApproval) validateRequiresDifferentApprover() (err error) {
 	for _, newUser := range c.newUsers {
 		oldUser := c.oldUsers.GetBySubject(newUser.Subject)
 		if (oldUser == nil || oldUser.Input == nil) && newUser.Input != nil {
-			// RequiresDifferentApprover if set to true, the user who triggered the StageRun cannot approve, unless an admin
-			if c.triggeredBy != nil && c.triggeredBy.User != nil && *c.triggeredBy.User == newUser.Subject &&
-				matching.IsRightUser(c.reqUser, newUser.Subject) {
-				err = fmt.Errorf("requiresDifferentApprover is enabled, %q can not approve.", newUser.Subject.Name)
+			// If RequiresDifferentApprover is set to true, the user who initiated the check cannot approve it,
+			// unless an administrator intervenes.
+			// Verify if the operator is the trigger whenever there is a change in the approval results.
+			if c.triggeredBy != nil && c.triggeredBy.User != nil &&
+				matching.IsRightUser(c.reqUser, *c.triggeredBy.User) {
+				err = fmt.Errorf("requiresDifferentApprover is enabled, %q can not approve.", c.reqUser.Username)
 				return
 			}
 		}
