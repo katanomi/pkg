@@ -65,7 +65,7 @@ var _ = Describe("Test.ValidateApproval", func() {
 	)
 
 	BeforeEach(func() {
-		triggeredBy = nil
+		triggeredBy = &metav1alpha1.TriggeredBy{}
 		approvalPolicy = metav1alpha1.ApprovalPolicyAny
 		requiresDifferentApprover = false
 		username = "admin"
@@ -124,11 +124,12 @@ var _ = Describe("Test.ValidateApproval", func() {
 			})
 		})
 		When("user is admin", func() {
-			It("should not return an error", func() {
+			It("should return an error", func() {
 				By("approval spec is nil")
 				allowRepresentOthers = true
 				err = ValidateApproval(context.TODO(), reqUser, allowRepresentOthers, isCreateOperation, []*metav1alpha1.ApprovalSpec{nil}, checkList, triggeredBy)
-				Expect(err).To(BeNil())
+				Expect(err).ToNot(BeNil())
+				Expect(err.Error()).To(BeEquivalentTo(`approval spec is nil`))
 			})
 		})
 	})
@@ -189,8 +190,42 @@ var _ = Describe("Test.ValidateApproval", func() {
 					{Subject: adminSubject, Input: rejectedInput},
 				}
 			})
-			It("should pass", func() {
-				Expect(err).To(BeNil())
+			When("requiresDifferentApprover is true", func() {
+				BeforeEach(func() {
+					requiresDifferentApprover = true
+				})
+				When("the approver is the trigger", func() {
+					BeforeEach(func() {
+						triggeredBy.User = &adminSubject
+					})
+					When("requester is approver", func() {
+						BeforeEach(func() {
+							username = "admin"
+						})
+						It("should be rejected", func() {
+							Expect(err).NotTo(BeNil())
+							Expect(err.Error()).To(BeEquivalentTo(`requiresDifferentApprover is enabled, "admin" can not approve.`))
+						})
+					})
+					When("requester is other", func() {
+						BeforeEach(func() {
+							username = "other-admin"
+						})
+						It("should pass", func() {
+							Expect(err).To(BeNil())
+						})
+					})
+				})
+				When("the approver is not the trigger", func() {
+					It("should pass", func() {
+						Expect(err).To(BeNil())
+					})
+				})
+			})
+			When("requiresDifferentApprover is false", func() {
+				It("should pass", func() {
+					Expect(err).To(BeNil())
+				})
 			})
 		})
 
@@ -478,16 +513,6 @@ var _ = Describe("Test.ValidateApproval", func() {
 			new = []metav1alpha1.UserApproval{
 				{Subject: userSubject, Input: rejectedInput},
 			}
-		})
-
-		When("allow to represent others", func() {
-			BeforeEach(func() {
-				allowRepresentOthers = true
-			})
-
-			It("should Not return an error", func() {
-				Expect(err).To(BeNil())
-			})
 		})
 
 		When("cannot to represent others", func() {
