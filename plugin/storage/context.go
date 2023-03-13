@@ -20,15 +20,32 @@ import "context"
 
 type storagePluginNameKey struct{}
 
+type clientSetKey struct{}
+
 // CtxWithPluginName return context.Context with plugin name
 func CtxWithPluginName(ctx context.Context, pluginName string) context.Context {
 	return context.WithValue(ctx, storagePluginNameKey{}, pluginName)
 }
 
+// PluginNameFromCtx returns plugin name from context
 func PluginNameFromCtx(ctx context.Context) string {
 	val := ctx.Value(storagePluginNameKey{})
 	if val == nil {
 		return ""
 	}
 	return val.(string)
+}
+
+// WithClientSet return context with client set
+func WithClientSet(ctx context.Context, clientSet Interface) context.Context {
+	return context.WithValue(ctx, clientSetKey{}, clientSet)
+}
+
+// ClientSetFromCtx return clientset from context
+func ClientSetFromCtx(ctx context.Context) Interface {
+	val := ctx.Value(clientSetKey{})
+	if val == nil {
+		return nil
+	}
+	return val.(Interface)
 }

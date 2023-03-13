@@ -1,0 +1,16 @@
+[
+  {
+    "metadata": {
+      "creationTimestamp": null,
+      "annotations": {
+        "storage.katanomi.dev/fileObject.lastModified": "2023-02-08 10:03:32 +0000 UTC"
+      }
+    },
+    "spec": {
+      "key": "minio.default/-/kubernetes/-/apis/builds.katanomi.dev/v1alpha1/namespaces/default/buildrun/core.k-1/x.xml",
+      "contentType": "application/vnd.katanomi.junit+xml",
+      "contentLength": 11957884,
+      "fileType": "unitTest"
+    }
+  }
+]

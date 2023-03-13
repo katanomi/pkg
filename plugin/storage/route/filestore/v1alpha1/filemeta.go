@@ -71,7 +71,7 @@ func (a *fileMeta) Register(ctx context.Context, ws *restful.WebService) error {
 
 	ws.Route(
 		ws.GET("/storageplugins/{storagePlugin}/filemetas").To(a.ListFileMetas).
-			Filter(kclient.SubjectReviewFilterForResource(ctx, v1alpha1.FileMetaResourceAttributes("get"), "", "")).
+			Filter(kclient.SubjectReviewFilterForResource(ctx, v1alpha1.FileMetaResourceAttributes("list"), "", "")).
 			Doc("Storage plugin list file metas").
 			Param(storagePluginParam).
 			Metadata(restfulspec.KeyOpenAPITags, a.tags).

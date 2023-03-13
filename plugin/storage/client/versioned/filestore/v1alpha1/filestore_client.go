@@ -63,6 +63,6 @@ func (c *FileStoreV1alpha1Client) FileMeta(pluginName string) FileMetaInterface 
 	return newFileMetas(c, pluginName)
 }
 
-func NewForClient(pClient client.Interface) *FileStoreV1alpha1Client {
+func NewForClient(pClient client.Interface) FileStoreV1alpha1Interface {
 	return &FileStoreV1alpha1Client{restClient: pClient.ForGroupVersion(&filestorev1alpha1.FileStoreV1alpha1GV)}
 }

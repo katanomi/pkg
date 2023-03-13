@@ -33,7 +33,7 @@ var (
 	mockSuiteCtrl *gomock.Controller
 
 	mockStoragePluginClient *v1alpha1.MockInterface
-	mockFileStoreClient     *v1alpha13.FileStoreV1alpha1Client
+	mockFileStoreClient     v1alpha13.FileStoreV1alpha1Interface
 )
 
 var _ = BeforeSuite(func() {
@@ -48,10 +48,6 @@ var _ = BeforeSuite(func() {
 	mockFileStoreClient = v1alpha13.NewForClient(mockStoragePluginClient)
 	Expect(mockFileStoreClient.RESTClient()).To(Equal(mockStoragePluginClient))
 	Expect(mockFileStoreClient.RESTClient().APIVersion()).To(Equal(&filestorev1alpha1.FileStoreV1alpha1GV))
-})
-
-var _ = AfterSuite(func() {
-	mockSuiteCtrl.Finish()
 })
 
 func TestV1alpha1(t *testing.T) {
