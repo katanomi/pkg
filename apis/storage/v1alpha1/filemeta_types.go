@@ -41,7 +41,7 @@ type FileMetaSpec struct {
 	// +optional
 	Entry string `json:"entry,omitempty"`
 
-	// Key for file key of file object, following format:  {storage-plugin-name}:{file-object-name}
+	// Key for file key of file object, following format:  {storage-plugin-name}/-/{file-object-name}
 	// +optional
 	Key string `json:"key,omitempty"`
 
@@ -54,6 +54,14 @@ type FileMetaSpec struct {
 	// FileType for file type
 	// +optional
 	FileType string `json:"fileType,omitempty"`
+}
+
+// FileMetaListOptions for list option of FileMeta
+type FileMetaListOptions struct {
+	Prefix     string `json:"prefix,omitempty"`
+	Recursive  bool   `json:"recursive,omitempty"`
+	StartAfter string `json:"startAfter,omitempty"`
+	Limit      int    `json:"limit,omitempty"`
 }
 
 // FileMetaList list of FileMetas

@@ -11,7 +11,6 @@ import (
 	gomock "github.com/golang/mock/gomock"
 	v1alpha1 "github.com/katanomi/pkg/apis/storage/v1alpha1"
 	v1alpha10 "github.com/katanomi/pkg/plugin/storage/capabilities/filestore/v1alpha1"
-	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 // MockFileStoreCapable is a mock of FileStoreCapable interface.
@@ -82,7 +81,7 @@ func (mr *MockFileStoreCapableMockRecorder) GetFileObject(ctx, objectName interf
 }
 
 // ListFileMetas mocks base method.
-func (m *MockFileStoreCapable) ListFileMetas(ctx context.Context, opt *v1.ListOptions) ([]v1alpha1.FileMeta, error) {
+func (m *MockFileStoreCapable) ListFileMetas(ctx context.Context, opt v1alpha1.FileMetaListOptions) ([]v1alpha1.FileMeta, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "ListFileMetas", ctx, opt)
 	ret0, _ := ret[0].([]v1alpha1.FileMeta)
@@ -217,7 +216,7 @@ func (mr *MockFileMetaInterfaceMockRecorder) GetFileMeta(ctx, objectName interfa
 }
 
 // ListFileMetas mocks base method.
-func (m *MockFileMetaInterface) ListFileMetas(ctx context.Context, opt *v1.ListOptions) ([]v1alpha1.FileMeta, error) {
+func (m *MockFileMetaInterface) ListFileMetas(ctx context.Context, opt v1alpha1.FileMetaListOptions) ([]v1alpha1.FileMeta, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "ListFileMetas", ctx, opt)
 	ret0, _ := ret[0].([]v1alpha1.FileMeta)

@@ -49,3 +49,18 @@ func (mr *MockFileMetaInterfaceMockRecorder) GET(ctx, key interface{}) *gomock.C
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GET", reflect.TypeOf((*MockFileMetaInterface)(nil).GET), ctx, key)
 }
+
+// List mocks base method.
+func (m *MockFileMetaInterface) List(ctx context.Context, opts v1alpha1.FileMetaListOptions) ([]v1alpha1.FileMeta, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "List", ctx, opts)
+	ret0, _ := ret[0].([]v1alpha1.FileMeta)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// List indicates an expected call of List.
+func (mr *MockFileMetaInterfaceMockRecorder) List(ctx, opts interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "List", reflect.TypeOf((*MockFileMetaInterface)(nil).List), ctx, opts)
+}

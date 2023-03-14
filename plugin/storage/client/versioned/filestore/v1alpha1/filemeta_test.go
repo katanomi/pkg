@@ -57,4 +57,19 @@ var _ = Describe("Test.Fileobject", func() {
 		})
 	})
 
+	Context("Test.FileMeta.List", func() {
+		It("returns filemetas", func() {
+
+			expectedFileMetas := []v1alpha1.FileMeta{}
+			testing.MustLoadJSON("testdata/filemetas.normal.golden.json", &expectedFileMetas)
+
+			mockStoragePluginClient.EXPECT().
+				Get(ctx, "storageplugins/foo/filemetas", gomock.Any()).
+				Return(nil)
+
+			_, err := fileMeta.List(ctx, v1alpha1.FileMetaListOptions{})
+			Expect(err).ShouldNot(HaveOccurred())
+		})
+	})
+
 })
