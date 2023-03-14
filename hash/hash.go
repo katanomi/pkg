@@ -77,13 +77,19 @@ func hashString(hashFunc func() hash.Hash, secretKey string, value []byte) (stri
 	return hashValue, nil
 }
 
+type HashFolderFilter func(path string, d fs.DirEntry) bool
+
 // HashFolder generates a hash for the folder
-func HashFolder(ctx context.Context, folder string) (hash string, err error) {
+func HashFolder(ctx context.Context, folder string, filters ...HashFolderFilter) (hash string, err error) {
 	digests := make([]digest.Digest, 0, 100)
 	log := logging.FromContext(ctx)
 	err = filepath.WalkDir(folder, func(path string, d fs.DirEntry, err error) (walkErr error) {
+		for _, filter := range filters {
+			if filter != nil && !filter(path, d) {
+				return
+			}
+		}
 		if !d.IsDir() {
-
 			if data, readErr := ioutil.ReadFile(path); readErr == nil {
 				digestHash := digest.FromBytes(data)
 				log.Debugf("hash for path: %s hash: %q", path, digestHash)

@@ -136,6 +136,15 @@ func (u URI) WithDigestString() string {
 	return ref
 }
 
+func (u URI) Repository() string {
+	ref := u.Host
+	if u.Path != "" {
+		ref = fmt.Sprintf("%s/%s", strings.Trim(ref, "/"), strings.Trim(u.Path, "/"))
+	}
+
+	return ref
+}
+
 // ParseURI parse uri to URI struct
 func ParseURI(uri string, t ArtifactType) (URI, error) {
 	var u = URI{Raw: uri}

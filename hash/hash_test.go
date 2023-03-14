@@ -20,8 +20,11 @@ import (
 	"context"
 	"fmt"
 	"hash/adler32"
+	"io/fs"
+	"k8s.io/apimachinery/pkg/util/rand"
 	"os"
 	"os/exec"
+	"strings"
 	"testing"
 
 	"github.com/katanomi/pkg/command/io"
@@ -260,6 +263,7 @@ func TestHashFolder(t *testing.T) {
 		Action      func(folder string, t *testing.T) error
 		Expected    string
 		Error       error
+		filter      HashFolderFilter
 		AfterAction func()
 	}{
 		"chart folder": {
@@ -317,6 +321,31 @@ func TestHashFolder(t *testing.T) {
 				os.RemoveAll("testdata/copy")
 			},
 		},
+		"filter rand files": {
+			Folder: "testdata/copy",
+			Action: func(folder string, t *testing.T) error {
+				os.RemoveAll("testdata/copy")
+				if err := io.Copy("testdata/chart", "testdata/copy"); err != nil {
+					return err
+				}
+
+				for i := 0; i < 10; i++ {
+					randFile := fmt.Sprintf("testdata/copy/rand.%s.yaml", rand.String(10))
+					io.Copy("testdata/copy/values.yaml", randFile)
+				}
+
+				return nil
+			},
+			// new hash
+			Expected: "sha256:75c80677202215d8788b7a271e3eab03c143ecfe17a782bdd3c82f4720fc25da",
+			Error:    nil,
+			AfterAction: func() {
+				os.RemoveAll("testdata/copy")
+			},
+			filter: func(path string, d fs.DirEntry) bool {
+				return !strings.HasPrefix(path, "testdata/copy/rand")
+			},
+		},
 	}
 
 	for k, test := range table {
@@ -328,7 +357,7 @@ func TestHashFolder(t *testing.T) {
 				g.Expect(test.Action(test.Folder, t)).To(gomega.Succeed())
 			}
 
-			hashResult, err := HashFolder(context.TODO(), test.Folder)
+			hashResult, err := HashFolder(context.TODO(), test.Folder, test.filter)
 			if test.AfterAction != nil {
 				test.AfterAction()
 			}
