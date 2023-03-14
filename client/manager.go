@@ -52,6 +52,20 @@ type Manager struct {
 	*zap.SugaredLogger
 }
 
+// WithCtxManagerFilters put the manager in the context into the webservice.
+func WithCtxManagerFilters(ctx context.Context, ws *restful.WebService) error {
+	if manager := ManagerCtx(ctx); manager != nil {
+		filters, err := manager.Filters(ctx)
+		if err != nil {
+			return err
+		}
+		for _, filter := range filters {
+			ws = ws.Filter(filter)
+		}
+	}
+	return nil
+}
+
 // NewManager initializes a new manager based on func
 func NewManager(ctx context.Context, get GetConfigFunc, baseConfig GetBaseConfigFunc) *Manager {
 
@@ -82,12 +96,10 @@ func (m *Manager) Filter(ctx context.Context) restful.FilterFunction {
 
 // Filters returns manager.Filter with ImpersonateFilter
 func (m *Manager) Filters(ctx context.Context) (filters []restful.FilterFunction, err error) {
-
 	return []restful.FilterFunction{
 		ManagerFilter(ctx, m),
 		ImpersonateFilter(ctx),
 	}, nil
-
 }
 
 // ManagerFilter generates filter based on a manager to create a config based in a request and injects into context

@@ -14,34 +14,5 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+// Package variable package is generate variable by object.
 package variable
-
-import (
-	"strings"
-
-	"k8s.io/utils/strings/slices"
-)
-
-// FilterFunc define a filter function for a variable
-type FilterFunc func(*Variable) bool
-
-// LabelFilter label filter func
-func LabelFilter(label string) FilterFunc {
-	return func(variable *Variable) bool {
-		if variable == nil {
-			return false
-		}
-
-		varLabels := strings.Split(variable.Label, ",")
-		return slices.Contains(varLabels, label)
-	}
-}
-
-func filtVariable(s *Variable, filters ...FilterFunc) bool {
-	for _, f := range filters {
-		if f != nil && !f(s) {
-			return false
-		}
-	}
-	return true
-}

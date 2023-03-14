@@ -20,6 +20,7 @@ import (
 	"fmt"
 	"reflect"
 
+	"github.com/katanomi/pkg/apis/meta/v1alpha1"
 	corev1 "k8s.io/api/core/v1"
 	rbacv1 "k8s.io/api/rbac/v1"
 	"k8s.io/utils/field"
@@ -34,20 +35,18 @@ var (
 )
 
 // DefaultNameMarshalFuncs define a default custom type conversion function
-var DefaultNameMarshalFuncs = map[string]ConvertFunc{
+var DefaultNameMarshalFuncs = map[string]VariableMarshalFunc{
 	rbacv1SubjectName:         MarshalSubject,
 	corev1ObjectReferenceName: MarshalObjectReference,
 }
 
 // MarshalSubject marshal the Subject of k8s.io/api/rbac/v1 to variables.
-func MarshalSubject(st reflect.Type, base *field.Path, _ MarshalFuncManager) ([]Variable, error) {
-	if rbacv1SubjectName != st.Name() || st.PkgPath() != rbacv1SubjectPkgPath {
-		return []Variable{}, fmt.Errorf(
-			"get marshal type[%s/%s] don't match %s/%s",
-			st.PkgPath(), st.Name(), rbacv1SubjectPkgPath, rbacv1SubjectName)
+func MarshalSubject(st reflect.Type, base *field.Path, _ MarshalFuncManager) ([]v1alpha1.Variable, error) {
+	if err := matchObjectPath(st, rbacv1SubjectName, rbacv1SubjectPkgPath); err != nil {
+		return []v1alpha1.Variable{}, err
 	}
 
-	return []Variable{
+	return []v1alpha1.Variable{
 		{Name: base.Child("kind").String(), Example: "User"},
 		{Name: base.Child("apiGroup").String()},
 		{Name: base.Child("name").String(), Example: "joedoe@example.com"},
@@ -56,18 +55,25 @@ func MarshalSubject(st reflect.Type, base *field.Path, _ MarshalFuncManager) ([]
 }
 
 // MarshalObjectReference marshal the ObjectReference of k8s.io/api/core/v1 to variables.
-func MarshalObjectReference(st reflect.Type, base *field.Path, _ MarshalFuncManager) ([]Variable, error) {
-	if corev1ObjectReferenceName != st.Name() || st.PkgPath() != corev1ObjectReferencePkgPath {
-		return []Variable{}, fmt.Errorf(
-			"get marshal type[%s/%s] don't match %s/%s",
-			st.PkgPath(), st.Name(), corev1ObjectReferencePkgPath, corev1ObjectReferenceName)
+func MarshalObjectReference(st reflect.Type, base *field.Path, _ MarshalFuncManager) ([]v1alpha1.Variable, error) {
+	if err := matchObjectPath(st, corev1ObjectReferenceName, corev1ObjectReferencePkgPath); err != nil {
+		return []v1alpha1.Variable{}, err
 	}
 
-	return []Variable{
+	return []v1alpha1.Variable{
 		{Name: base.Child("kind").String(), Example: "DeliveryRun"},
 		{Name: base.Child("namespace").String(), Example: "default"},
 		{Name: base.Child("name").String(), Example: "delivery-run-abdexy"},
 		{Name: base.Child("uid").String(), Example: "b2fab970-f672-4af0-a9cd-5ad9a8dbcc29"},
 		{Name: base.Child("apiVersion").String(), Example: "deliveries.katanomi.dev/v1alpha1"},
 	}, nil
+}
+
+func matchObjectPath(st reflect.Type, name, pkgPath string) error {
+	if name != st.Name() || st.PkgPath() != pkgPath {
+		return fmt.Errorf(
+			"get marshal type[%s/%s] don't match %s/%s",
+			st.PkgPath(), st.Name(), pkgPath, name)
+	}
+	return nil
 }

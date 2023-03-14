@@ -22,6 +22,7 @@ import (
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
+	"github.com/katanomi/pkg/apis/meta/v1alpha1"
 	. "github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
 	rbacv1 "k8s.io/api/rbac/v1"
@@ -35,7 +36,7 @@ func TestMarshalSubject(t *testing.T) {
 		got, err := MarshalSubject(reflect.TypeOf(rbacv1.Subject{}), nil, nil)
 		g.Expect(err).To(BeNil())
 
-		want := []Variable{
+		want := []v1alpha1.Variable{
 			{Name: field.NewPath("kind").String(), Example: "User"},
 			{Name: field.NewPath("apiGroup").String()},
 			{Name: field.NewPath("name").String(), Example: "joedoe@example.com"},
@@ -51,7 +52,7 @@ func TestMarshalSubject(t *testing.T) {
 		base := field.NewPath("base")
 		got, err := MarshalSubject(reflect.TypeOf(rbacv1.Subject{}), base, nil)
 		g.Expect(err).To(BeNil())
-		want := []Variable{
+		want := []v1alpha1.Variable{
 			{Name: base.Child("kind").String(), Example: "User"},
 			{Name: base.Child("apiGroup").String()},
 			{Name: base.Child("name").String(), Example: "joedoe@example.com"},
@@ -66,7 +67,7 @@ func TestMarshalSubject(t *testing.T) {
 
 		type Subject struct{}
 		base := field.NewPath("base")
-		want := []Variable{}
+		want := []v1alpha1.Variable{}
 
 		st := reflect.TypeOf(Subject{})
 		got, err := MarshalSubject(st, base, nil)
@@ -86,7 +87,7 @@ func TestMarshalObjectReference(t *testing.T) {
 		got, err := MarshalObjectReference(reflect.TypeOf(corev1.ObjectReference{}), nil, nil)
 		g.Expect(err).To(BeNil())
 
-		want := []Variable{
+		want := []v1alpha1.Variable{
 			{Name: field.NewPath("kind").String(), Example: "DeliveryRun"},
 			{Name: field.NewPath("namespace").String(), Example: "default"},
 			{Name: field.NewPath("name").String(), Example: "delivery-run-abdexy"},
@@ -103,7 +104,7 @@ func TestMarshalObjectReference(t *testing.T) {
 		base := field.NewPath("base")
 		got, err := MarshalObjectReference(reflect.TypeOf(corev1.ObjectReference{}), base, nil)
 		g.Expect(err).To(BeNil())
-		want := []Variable{
+		want := []v1alpha1.Variable{
 			{Name: base.Child("kind").String(), Example: "DeliveryRun"},
 			{Name: base.Child("namespace").String(), Example: "default"},
 			{Name: base.Child("name").String(), Example: "delivery-run-abdexy"},
@@ -119,7 +120,7 @@ func TestMarshalObjectReference(t *testing.T) {
 
 		type ObjectReference struct{}
 		base := field.NewPath("base")
-		want := []Variable{}
+		want := []v1alpha1.Variable{}
 
 		st := reflect.TypeOf(ObjectReference{})
 		got, err := MarshalObjectReference(st, base, nil)
