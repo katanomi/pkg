@@ -30,6 +30,9 @@ const (
 
 	// PrunerKeepFeatureKey represent taskRun keep configuration key
 	PrunerKeepFeatureKey = "taskRunPruner.keep"
+
+	// BuildMRCheckTimeoutKey represent build merge request status check timeout key
+	BuildMRCheckTimeoutKey = "build.mergerequest.checkTimeout"
 )
 
 const (
@@ -48,6 +51,9 @@ const (
 	// DefaultPrunerKeep represent default keep number for taskRun
 	// If the corresponding key does not exist, the default value is returned.
 	DefaultPrunerKeep FeatureValue = "10000"
+
+	// DefaultMRCheckTimeout represent default timeout for merge request status check
+	DefaultMRCheckTimeout FeatureValue = "10m"
 )
 
 // defaultFeatureValue defines the default value for the feature switch.
@@ -56,6 +62,7 @@ var defaultFeatureValue = map[string]FeatureValue{
 	InitializeAllowLocalRequestsFeatureKey: DefaultInitializeAllowLocalRequests,
 	PrunerDelayAfterCompletedFeatureKey:    DefaultPrunerDelayAfterCompleted,
 	PrunerKeepFeatureKey:                   DefaultPrunerKeep,
+	BuildMRCheckTimeoutKey:                 DefaultMRCheckTimeout,
 }
 
 // FeatureFlags holds the features configurations
