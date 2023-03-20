@@ -55,6 +55,7 @@ require (
 	github.com/k1LoW/duration v1.2.0
 	github.com/minio/minio-go/v7 v7.0.47
 	github.com/mitchellh/mapstructure v1.5.0
+	github.com/moby/patternmatcher v0.5.0
 	github.com/opencontainers/go-digest v1.0.0
 	github.com/pkg/errors v0.9.1
 	github.com/regclient/regclient v0.0.0-20230312202530-e07b6ce43595
