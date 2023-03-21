@@ -172,6 +172,12 @@ type ProjectSpec struct {
 	// +optional
 	Access *duckv1.Addressable `json:"access,omitempty"`
 
+	// DependencyAddress stores the tool depends on the url the repository.
+	// If the tool has an independent dependency repository address,
+	// use this field to indicate, if not, take the same value as address
+	// +optional
+	DependencyAddress *duckv1.Addressable `json:"dependencyAddress,omitempty"`
+
 	// project subtype
 	// +kubebuilder:default="Project"
 	SubType ProjectSubType `json:"subType"`
