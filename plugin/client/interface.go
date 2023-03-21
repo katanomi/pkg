@@ -80,6 +80,10 @@ type ResourcePathFormatter interface {
 	GetResourcePathFmt() map[metav1alpha1.ResourcePathScene]string
 	// GetSubResourcePathFmt resource path format
 	GetSubResourcePathFmt() map[metav1alpha1.ResourcePathScene]string
+
+	// GetPYPIResourcePathFmt return a list of pypi resource fmt that can be used in get projects list api.
+	// TODO: we need remove this func after find better way to add suffix to pypi dependency url.
+	GetPYPIResourcePathFmt() map[metav1alpha1.ProjectSubType]string
 }
 
 // AuthChecker implements an authorization check method for plugins
