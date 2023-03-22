@@ -135,6 +135,11 @@ const (
 	// GitPRRevisionPrefixes allows git related integrations
 	// define custom PR revision prefixes
 	GitPRRevisionPrefixes = "gitPRRevisionPrefixes"
+
+	//  PYPISubResourceExtendedAddressSuffixKey Add the corresponding suffix to the specified subResource which for pypi.
+	// TODO: In the future, we need to adopt a better way to add
+	// an extended dependency repository address to the plug-in
+	PYPISubResourceExtendedAddressSuffixKey = "pypiSubResourceExtendedAddressSuffix"
 )
 
 // Attribute values for label source or manager
