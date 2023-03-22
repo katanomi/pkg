@@ -147,15 +147,15 @@ const (
 	// TODO: add more subtypes
 )
 
-// ExtendAddressKey The name of the plugin extension url, only dependencyAddress is supported for now.
+// ExtendedAddress The name of the plugin extension url, only dependencyAddress is supported for now.
 // TODO: add more key for the plugin extension url.
-type ExtendAddressKey string
+type ExtendedAddress string
 
 const (
-	// DependencyAddressExtendKey describes the dependency repository address provided by the plugin
+	// DependencyExtendedAddressKey describes the dependency repository address provided by the plugin
 	// If the tool has an independent dependency repository address,
 	// use this field to indicate, if not, take the same value as address
-	DependencyAddressExtendKey ExtendAddressKey = "dependencyAddress"
+	DependencyExtendedAddressKey ExtendedAddress = "dependency"
 )
 
 var ProjectGVK = GroupVersion.WithKind("Project")
@@ -183,9 +183,9 @@ type ProjectSpec struct {
 	// +optional
 	Access *duckv1.Addressable `json:"access,omitempty"`
 
-	// ExtendAddress stores the tool extend url which has different repository than address.
+	// ExtendedAddresses stores the tool extend url which has different repository than address.
 	// +optional
-	ExtendAddress map[ExtendAddressKey]*duckv1.Addressable `json:"extendAddress,omitempty"`
+	ExtendedAddresses map[ExtendedAddress]*duckv1.Addressable `json:"extendedAddresses,omitempty"`
 
 	// project subtype
 	// +kubebuilder:default="Project"
