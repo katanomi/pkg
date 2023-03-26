@@ -59,12 +59,12 @@ type ignoreForbiddenKey struct{}
 
 // WithIgnoreForbidden adds ignore forbidden flag to the context
 func WithIgnoreForbidden(ctx context.Context, ignoreForbidden bool) context.Context {
-	return context.WithValue(ctx, clusterNamesKey{}, ignoreForbidden)
+	return context.WithValue(ctx, ignoreForbiddenKey{}, ignoreForbidden)
 }
 
 // IgnoreForbidden return a ignore forbidden flag in context
 func IgnoreForbidden(ctx context.Context) bool {
-	val := ctx.Value(clusterNamesKey{})
+	val := ctx.Value(ignoreForbiddenKey{})
 	if val == nil {
 		return false
 	}
