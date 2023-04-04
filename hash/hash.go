@@ -35,6 +35,7 @@ import (
 	"path/filepath"
 
 	"github.com/davecgh/go-spew/spew"
+	"github.com/moby/patternmatcher"
 	"github.com/opencontainers/go-digest"
 	"k8s.io/apimachinery/pkg/util/rand"
 	"knative.dev/pkg/logging"
@@ -77,7 +78,26 @@ func hashString(hashFunc func() hash.Hash, secretKey string, value []byte) (stri
 	return hashValue, nil
 }
 
-type HashFolderFilter func(path string, d fs.DirEntry) bool
+type HashFolderFilter func(context context.Context, path string, d fs.DirEntry) bool
+
+func IgnoreFilesFilter(patterns ...string) HashFolderFilter {
+	return func(ctx context.Context, path string, d fs.DirEntry) bool {
+		log := logging.FromContext(ctx)
+
+		for _, pattern := range patterns {
+			matched, err := patternmatcher.MatchesOrParentMatches(path, patterns)
+			if err != nil {
+				log.Errorf("file path match %s: %q", pattern, err)
+			}
+
+			if matched {
+				return false
+			}
+		}
+
+		return true
+	}
+}
 
 // HashFolder generates a hash for the folder
 func HashFolder(ctx context.Context, folder string, filters ...HashFolderFilter) (hash string, err error) {
@@ -85,7 +105,7 @@ func HashFolder(ctx context.Context, folder string, filters ...HashFolderFilter)
 	log := logging.FromContext(ctx)
 	err = filepath.WalkDir(folder, func(path string, d fs.DirEntry, err error) (walkErr error) {
 		for _, filter := range filters {
-			if filter != nil && !filter(path, d) {
+			if filter != nil && !filter(ctx, path, d) {
 				return
 			}
 		}

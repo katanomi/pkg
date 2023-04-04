@@ -342,7 +342,7 @@ func TestHashFolder(t *testing.T) {
 			AfterAction: func() {
 				os.RemoveAll("testdata/copy")
 			},
-			filter: func(path string, d fs.DirEntry) bool {
+			filter: func(ctx context.Context, path string, d fs.DirEntry) bool {
 				return !strings.HasPrefix(path, "testdata/copy/rand")
 			},
 		},
@@ -368,6 +368,109 @@ func TestHashFolder(t *testing.T) {
 			} else {
 				g.Expect(err).ToNot(gomega.BeNil())
 			}
+		})
+	}
+}
+
+func TestIgnoreFilesFilter(t *testing.T) {
+	tests := []struct {
+		ignorePaths []string
+		path        string
+		result      bool
+	}{
+		{
+			ignorePaths: []string{"*"},
+			path:        "abc",
+			result:      false,
+		},
+		{
+			ignorePaths: []string{"*"},
+			path:        "a/b/c",
+			result:      false,
+		},
+		{
+			ignorePaths: []string{"abc"},
+			path:        "abc",
+			result:      false,
+		},
+		{
+			ignorePaths: []string{"ab*"},
+			path:        "abc",
+			result:      false,
+		},
+		{
+			ignorePaths: []string{"abc/*"},
+			path:        "abc/d",
+			result:      false,
+		},
+		{
+			ignorePaths: []string{"a*/c"},
+			path:        "ab/c",
+			result:      false,
+		},
+		{
+			ignorePaths: []string{"a*/c"},
+			path:        "a/b/c",
+			result:      true,
+		},
+		{
+			ignorePaths: []string{"a/b/c/*"},
+			path:        "a/b/c/d",
+			result:      false,
+		},
+		{
+			ignorePaths: []string{"a/*/c/*"},
+			path:        "a/b/c/d",
+			result:      false,
+		},
+		{
+			ignorePaths: []string{"a/*/c/*"},
+			path:        "a/b/c",
+			result:      true,
+		},
+		{
+			ignorePaths: []string{"a/*/c/*"},
+			path:        "a/b/c/d",
+			result:      false,
+		},
+		{
+			ignorePaths: []string{"a/*"},
+			path:        "a/b/c/d",
+			result:      false,
+		},
+		{
+			ignorePaths: []string{"a*b*c*d*e*/f"},
+			path:        "axbxcxdxe/f",
+			result:      false,
+		},
+		{
+			ignorePaths: []string{"a*b*c*d*e*/f"},
+			path:        "axbxcxdxexxx/f",
+			result:      false,
+		},
+		{
+			ignorePaths: []string{"a*b*c*d*e*/f"},
+			path:        "axbxcxdxe/x/f",
+			result:      true,
+		},
+		{
+			ignorePaths: []string{"a*b*c*d*e*/f"},
+			path:        "axbxcxdxexxx/f",
+			result:      false,
+		},
+		{
+			ignorePaths: []string{"a*b*c*d*e*/f"},
+			path:        "axbxcxdxexxx/fff",
+			result:      true,
+		},
+	}
+
+	for i, test := range tests {
+		t.Run(fmt.Sprintf("%d", i+1), func(t *testing.T) {
+			g := gomega.NewGomegaWithT(t)
+
+			filter := IgnoreFilesFilter(test.ignorePaths...)
+			g.Expect(filter(context.Background(), test.path, nil)).To(gomega.Equal(test.result))
 		})
 	}
 }
