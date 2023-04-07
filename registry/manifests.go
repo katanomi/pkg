@@ -20,7 +20,9 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/go-resty/resty/v2"
 	"github.com/regclient/regclient"
+	"github.com/regclient/regclient/config"
 	"github.com/regclient/regclient/mod"
 	"github.com/regclient/regclient/types/docker/schema2"
 	"github.com/regclient/regclient/types/manifest"
@@ -29,12 +31,29 @@ import (
 
 type ManifestClient struct {
 	*regclient.RegClient
+
+	schemeDetection RegistrySchemeDetection
+	insecure        bool
 }
 
 func NewManifestClient(options ...regclient.Opt) *ManifestClient {
 	regClient := newRegClient(options)
 
-	return &ManifestClient{RegClient: regClient}
+	return &ManifestClient{
+		RegClient:       regClient,
+		insecure:        true,
+		schemeDetection: NewDefaultRegistrySchemeDetection(resty.New(), true, true),
+	}
+}
+
+// Insecure access registry without verifying the TLS certificate
+func (c *ManifestClient) Insecure(value bool) *ManifestClient {
+	if c.insecure != value {
+		c.insecure = value
+		c.schemeDetection = NewDefaultRegistrySchemeDetection(resty.New(), value, true)
+	}
+
+	return c
 }
 
 func (c *ManifestClient) Close(ctx context.Context, ref ref.Ref) error {
@@ -45,6 +64,10 @@ func (c *ManifestClient) Close(ctx context.Context, ref ref.Ref) error {
 func (c *ManifestClient) GetAnnotations(ctx context.Context, reference string) (map[string]string, error) {
 	r, err := ref.New(reference)
 	if err != nil {
+		return nil, err
+	}
+
+	if err := c.overrideHostTLS(ctx, reference); err != nil {
 		return nil, err
 	}
 
@@ -64,6 +87,10 @@ func (c *ManifestClient) GetAnnotations(ctx context.Context, reference string) (
 func (c *ManifestClient) PutEmptyIndex(ctx context.Context, reference string, annotations map[string]string) error {
 	r, err := ref.New(reference)
 	if err != nil {
+		return err
+	}
+
+	if err := c.overrideHostTLS(ctx, reference); err != nil {
 		return err
 	}
 
@@ -90,6 +117,10 @@ func (c *ManifestClient) SetAnnotation(ctx context.Context, reference string, an
 		return err
 	}
 
+	if err := c.overrideHostTLS(ctx, reference); err != nil {
+		return err
+	}
+
 	if r.Tag == "" {
 		return fmt.Errorf("cannot replace an image digest, must include a tag")
 	}
@@ -108,6 +139,26 @@ func (c *ManifestClient) SetAnnotation(ctx context.Context, reference string, an
 	if err != nil {
 		return fmt.Errorf("failed copying image to new name: %w", err)
 	}
+
+	return nil
+}
+
+// overrideHostTLS tls can only be overridden by options as RegClient does not provide a set host method
+func (c *ManifestClient) overrideHostTLS(ctx context.Context, reference string) error {
+	host := config.HostNewName(reference)
+
+	scheme, _ := c.schemeDetection.DetectScheme(ctx, host.Name)
+
+	if scheme == HTTP {
+		host.TLS = config.TLSDisabled
+	} else if c.insecure {
+		host.TLS = config.TLSInsecure
+	} else {
+		host.TLS = config.TLSEnabled
+	}
+
+	withHost := regclient.WithConfigHost(*host)
+	withHost(c.RegClient)
 
 	return nil
 }
