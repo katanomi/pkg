@@ -30,14 +30,6 @@ import (
 	duckv1 "knative.dev/pkg/apis/duck/v1"
 )
 
-var (
-	// DefaultOptions for default plugin client options
-	DefaultOptions = []OptionFunc{
-		ErrorOpts(&ResponseStatusErr{}),
-		HeaderOpts("Content-Type", "application/json"),
-	}
-)
-
 // PluginClient client for plugins
 type PluginClient struct {
 	client *resty.Client
@@ -124,7 +116,7 @@ func (p *PluginClient) WithIntegrationClassName(integrationClassName string) *Pl
 
 // Get performs a GET request using defined options
 func (p *PluginClient) Get(ctx context.Context, baseURL *duckv1.Addressable, path string, options ...OptionFunc) error {
-	clientOptions := append(DefaultOptions, MetaOpts(p.meta), SecretOpts(p.secret))
+	clientOptions := append(DefaultOptions(), MetaOpts(p.meta), SecretOpts(p.secret))
 	options = append(clientOptions, options...)
 
 	request := p.R(ctx, baseURL, options...)
@@ -135,7 +127,7 @@ func (p *PluginClient) Get(ctx context.Context, baseURL *duckv1.Addressable, pat
 
 // Post performs a POST request with the given parameters
 func (p *PluginClient) Post(ctx context.Context, baseURL *duckv1.Addressable, path string, options ...OptionFunc) error {
-	clientOptions := append(DefaultOptions, MetaOpts(p.meta), SecretOpts(p.secret))
+	clientOptions := append(DefaultOptions(), MetaOpts(p.meta), SecretOpts(p.secret))
 	options = append(clientOptions, options...)
 
 	request := p.R(ctx, baseURL, options...)
@@ -146,7 +138,7 @@ func (p *PluginClient) Post(ctx context.Context, baseURL *duckv1.Addressable, pa
 
 // Put performs a PUT request with the given parameters
 func (p *PluginClient) Put(ctx context.Context, baseURL *duckv1.Addressable, path string, options ...OptionFunc) error {
-	clientOptions := append(DefaultOptions, MetaOpts(p.meta), SecretOpts(p.secret))
+	clientOptions := append(DefaultOptions(), MetaOpts(p.meta), SecretOpts(p.secret))
 	options = append(clientOptions, options...)
 
 	request := p.R(ctx, baseURL, options...)
@@ -157,7 +149,7 @@ func (p *PluginClient) Put(ctx context.Context, baseURL *duckv1.Addressable, pat
 
 // Delete performs a DELETE request with the given parameters
 func (p *PluginClient) Delete(ctx context.Context, baseURL *duckv1.Addressable, path string, options ...OptionFunc) error {
-	clientOptions := append(DefaultOptions, MetaOpts(p.meta), SecretOpts(p.secret))
+	clientOptions := append(DefaultOptions(), MetaOpts(p.meta), SecretOpts(p.secret))
 	options = append(clientOptions, options...)
 
 	request := p.R(ctx, baseURL, options...)
@@ -466,4 +458,12 @@ func (p *PluginClient) TestCaseExecution(meta Meta, secret corev1.Secret) Client
 // NewToolService get tool service execution client
 func (p *PluginClient) NewToolService() ClientToolService {
 	return newToolService(p, p.ClassAddress)
+}
+
+// DefaultOptions for default plugin client options
+func DefaultOptions() []OptionFunc {
+	return []OptionFunc{
+		ErrorOpts(&ResponseStatusErr{}),
+		HeaderOpts("Content-Type", "application/json"),
+	}
 }
