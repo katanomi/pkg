@@ -82,15 +82,16 @@ func NewStoragePluginClient(baseURL *duckv1.Addressable, opts ...BuildOptions) *
 // GetResponse performs a GET request using defined options and return raw resty.Response
 func (p *StoragePluginClient) GetResponse(ctx context.Context, path string,
 	options ...client.OptionFunc) (*resty.Response, error) {
-	options = append(client.DefaultOptions, options...)
+	options = append(client.DefaultOptions(), options...)
 	request := p.R(ctx, options...)
+
 	return request.Get(p.FullUrl(path))
 }
 
 // Get performs a GET request using defined options
 func (p *StoragePluginClient) Get(ctx context.Context, path string,
 	options ...client.OptionFunc) error {
-	options = append(client.DefaultOptions, options...)
+	options = append(client.DefaultOptions(), options...)
 	request := p.R(ctx, options...)
 	response, err := request.Get(p.FullUrl(path))
 
@@ -100,9 +101,7 @@ func (p *StoragePluginClient) Get(ctx context.Context, path string,
 // Post performs a POST request with the given parameters
 func (p *StoragePluginClient) Post(ctx context.Context, path string,
 	options ...client.OptionFunc) error {
-	clientOptions := append(client.DefaultOptions)
-	options = append(clientOptions, options...)
-
+	options = append(client.DefaultOptions(), options...)
 	request := p.R(ctx, options...)
 	response, err := request.Post(p.FullUrl(path))
 
@@ -112,10 +111,8 @@ func (p *StoragePluginClient) Post(ctx context.Context, path string,
 // Put performs a PUT request with the given parameters
 func (p *StoragePluginClient) Put(ctx context.Context, path string,
 	options ...client.OptionFunc) error {
-	clientOptions := client.DefaultOptions
-	clientOptions = append(clientOptions, options...)
-
-	request := p.R(ctx, clientOptions...)
+	options = append(client.DefaultOptions(), options...)
+	request := p.R(ctx, options...)
 	request.SetContentLength(true)
 	response, err := request.Put(p.FullUrl(path))
 
@@ -125,9 +122,7 @@ func (p *StoragePluginClient) Put(ctx context.Context, path string,
 // Delete performs a DELETE request with the given parameters
 func (p *StoragePluginClient) Delete(ctx context.Context, path string,
 	options ...client.OptionFunc) error {
-	clientOptions := append(client.DefaultOptions)
-	options = append(clientOptions, options...)
-
+	options = append(client.DefaultOptions(), options...)
 	request := p.R(ctx, options...)
 	response, err := request.Delete(p.FullUrl(path))
 
