@@ -18,6 +18,8 @@ package registry
 
 import (
 	"context"
+	"crypto/x509"
+	"errors"
 	"fmt"
 	"net/http"
 	"net/url"
@@ -138,6 +140,14 @@ func TryProtocolsWithRegistryURL(ctx context.Context, registry string, allowInse
 			// we got a response back from the registry, so return it
 			return url, err
 		}
+
+		caErr := errors.Unwrap(err)
+		_, ok := caErr.(x509.CertificateInvalidError)
+		if ok && allowInsecure {
+			log.Debugw("Ignored invalid certificate", "protocol", proto, "registry", registry, "error", err)
+			return url, nil
+		}
+
 		errs = append(errs, err)
 		if proto == HTTPS && strings.Contains(err.Error(), "server gave HTTP response to HTTPS client") && !allowInsecure {
 			errs = append(errs, fmt.Errorf("\n* Append --force-insecure if you really want to prune the registry using insecure connection"))

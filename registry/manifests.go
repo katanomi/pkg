@@ -30,17 +30,14 @@ import (
 )
 
 type ManifestClient struct {
-	*regclient.RegClient
-
+	options         []regclient.Opt
 	schemeDetection RegistrySchemeDetection
 	insecure        bool
 }
 
 func NewManifestClient(options ...regclient.Opt) *ManifestClient {
-	regClient := newRegClient(options)
-
 	return &ManifestClient{
-		RegClient:       regClient,
+		options:         options,
 		insecure:        true,
 		schemeDetection: NewDefaultRegistrySchemeDetection(resty.New(), true, true),
 	}
@@ -56,10 +53,6 @@ func (c *ManifestClient) Insecure(value bool) *ManifestClient {
 	return c
 }
 
-func (c *ManifestClient) Close(ctx context.Context, ref ref.Ref) error {
-	return c.RegClient.Close(ctx, ref)
-}
-
 // GetAnnotations get annotations from a reference image
 func (c *ManifestClient) GetAnnotations(ctx context.Context, reference string) (map[string]string, error) {
 	r, err := ref.New(reference)
@@ -67,11 +60,10 @@ func (c *ManifestClient) GetAnnotations(ctx context.Context, reference string) (
 		return nil, err
 	}
 
-	if err := c.overrideHostTLS(ctx, reference); err != nil {
-		return nil, err
-	}
+	regClient := c.newRegClient(ctx, r)
+	defer regClient.Close(ctx, r)
 
-	m, err := c.ManifestGet(ctx, r)
+	m, err := regClient.ManifestGet(ctx, r)
 	if err != nil {
 		return nil, fmt.Errorf("get manifest error: %s", err.Error())
 	}
@@ -90,9 +82,8 @@ func (c *ManifestClient) PutEmptyIndex(ctx context.Context, reference string, an
 		return err
 	}
 
-	if err := c.overrideHostTLS(ctx, reference); err != nil {
-		return err
-	}
+	regClient := c.newRegClient(ctx, r)
+	defer regClient.Close(ctx, r)
 
 	options := []manifest.Opts{
 		manifest.WithOrig(schema2.ManifestList{
@@ -106,7 +97,7 @@ func (c *ManifestClient) PutEmptyIndex(ctx context.Context, reference string, an
 		return err
 	}
 
-	return c.ManifestPut(ctx, r, m)
+	return regClient.ManifestPut(ctx, r, m)
 }
 
 // SetAnnotation append annotation to  a reference image
@@ -117,9 +108,8 @@ func (c *ManifestClient) SetAnnotation(ctx context.Context, reference string, an
 		return err
 	}
 
-	if err := c.overrideHostTLS(ctx, reference); err != nil {
-		return err
-	}
+	regClient := c.newRegClient(ctx, r)
+	defer regClient.Close(ctx, r)
 
 	if r.Tag == "" {
 		return fmt.Errorf("cannot replace an image digest, must include a tag")
@@ -130,12 +120,12 @@ func (c *ManifestClient) SetAnnotation(ctx context.Context, reference string, an
 		modOptions = append(modOptions, mod.WithAnnotation(key, value))
 	}
 
-	output, err := mod.Apply(ctx, c.RegClient, r, modOptions...)
+	output, err := mod.Apply(ctx, regClient, r, modOptions...)
 	if err != nil {
 		return fmt.Errorf("apply annotation error: %s", err.Error())
 	}
 
-	err = c.RegClient.ImageCopy(ctx, output, r)
+	err = regClient.ImageCopy(ctx, output, r)
 	if err != nil {
 		return fmt.Errorf("failed copying image to new name: %w", err)
 	}
@@ -144,7 +134,7 @@ func (c *ManifestClient) SetAnnotation(ctx context.Context, reference string, an
 }
 
 // overrideHostTLS tls can only be overridden by options as RegClient does not provide a set host method
-func (c *ManifestClient) overrideHostTLS(ctx context.Context, reference string) error {
+func (c *ManifestClient) overrideHostTLS(ctx context.Context, reference string) regclient.Opt {
 	host := config.HostNewName(reference)
 
 	scheme, _ := c.schemeDetection.DetectScheme(ctx, host.Name)
@@ -157,14 +147,14 @@ func (c *ManifestClient) overrideHostTLS(ctx context.Context, reference string) 
 		host.TLS = config.TLSEnabled
 	}
 
-	withHost := regclient.WithConfigHost(*host)
-	withHost(c.RegClient)
-
-	return nil
+	return regclient.WithConfigHost(*host)
 }
 
-func newRegClient(options []regclient.Opt) *regclient.RegClient {
-	options = append(options, regclient.WithDockerCreds())
+func (c *ManifestClient) newRegClient(ctx context.Context, ref ref.Ref) *regclient.RegClient {
+	options := append([]regclient.Opt{
+		regclient.WithDockerCreds(),
+		c.overrideHostTLS(ctx, ref.Reference),
+	}, c.options...)
 
 	return regclient.New(options...)
 }

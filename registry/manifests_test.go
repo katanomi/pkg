@@ -146,7 +146,7 @@ func TestManifestClient_Insecure(t *testing.T) {
 			defer server.Close()
 
 			host := config.HostNewName(server.URL)
-			client := NewManifestClient(regclient.WithConfigHost(*host), regclient.WithRetryLimit(1))
+			client := NewManifestClient(regclient.WithRetryLimit(1))
 			client.Insecure(item.insecure)
 
 			image := fmt.Sprintf("%s/%s:%s", host.Name, item.repo, item.tag)
