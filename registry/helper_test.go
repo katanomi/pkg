@@ -188,7 +188,7 @@ func TestDefaultImagePinger(t *testing.T) {
 				server = httptest.NewServer(http.HandlerFunc(handler))
 			}
 			defer server.Close()
-			serverHost := strings.TrimLeft(strings.TrimLeft(server.URL, "http://"), "https://")
+			serverHost := strings.TrimPrefix(strings.TrimPrefix(server.URL, "http://"), "https://")
 
 			client := &secureClient
 			if tc.insecure {
