@@ -31,7 +31,7 @@ import (
 	"hash"
 	"hash/fnv"
 	"io/fs"
-	"io/ioutil"
+	"os"
 	"path/filepath"
 
 	"github.com/davecgh/go-spew/spew"
@@ -110,7 +110,19 @@ func HashFolder(ctx context.Context, folder string, filters ...HashFolderFilter)
 			}
 		}
 		if !d.IsDir() {
-			if data, readErr := ioutil.ReadFile(path); readErr == nil {
+			var (
+				link    string
+				data    []byte
+				readErr error
+			)
+			if d.Type() == os.ModeSymlink {
+				link, readErr = os.Readlink(path)
+				data = []byte(link)
+			} else {
+				data, readErr = os.ReadFile(path)
+			}
+
+			if readErr == nil {
 				digestHash := digest.FromBytes(data)
 				log.Debugf("hash for path: %s hash: %q", path, digestHash)
 				digests = append(digests, digestHash)
