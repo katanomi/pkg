@@ -21,16 +21,15 @@ import (
 	"fmt"
 	"hash/adler32"
 	"io/fs"
-	"k8s.io/apimachinery/pkg/util/rand"
 	"os"
 	"os/exec"
 	"strings"
 	"testing"
 
+	"github.com/davecgh/go-spew/spew"
 	"github.com/katanomi/pkg/command/io"
 	"github.com/onsi/gomega"
-
-	"github.com/davecgh/go-spew/spew"
+	"k8s.io/apimachinery/pkg/util/rand"
 )
 
 type A struct {
@@ -346,6 +345,26 @@ func TestHashFolder(t *testing.T) {
 				return !strings.HasPrefix(path, "testdata/copy/rand")
 			},
 		},
+		"with symlink": {
+			Folder: "testdata/copy",
+			Action: func(folder string, t *testing.T) error {
+				os.RemoveAll("testdata/copy")
+				if err := io.Copy("testdata/chart", "testdata/copy"); err != nil {
+					return err
+				}
+				if err := os.Symlink("../chart", "testdata/copy/symlink"); err != nil {
+					return err
+				}
+
+				return nil
+			},
+			// new hash
+			Expected: "sha256:81cbbdb10d09c20294eea4347b594d6c13c8c9d8ea1e4a3e0cb28e2052482c97",
+			Error:    nil,
+			AfterAction: func() {
+				os.RemoveAll("testdata/copy")
+			},
+		},
 	}
 
 	for k, test := range table {
@@ -361,13 +380,13 @@ func TestHashFolder(t *testing.T) {
 			if test.AfterAction != nil {
 				test.AfterAction()
 			}
-			g.Expect(hashResult).To(gomega.ContainSubstring(test.Expected))
-			t.Logf("expected: %q == %q", hashResult, test.Expected)
 			if test.Error == nil {
 				g.Expect(err).To(gomega.BeNil())
 			} else {
 				g.Expect(err).ToNot(gomega.BeNil())
 			}
+			g.Expect(hashResult).To(gomega.ContainSubstring(test.Expected))
+			t.Logf("expected: %q == %q", hashResult, test.Expected)
 		})
 	}
 }
