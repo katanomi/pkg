@@ -75,8 +75,7 @@
         },
         {
             "name": "triggeredTimestamp",
-            "example": "2022-08-05T05:34:39Z",
-            "label": "default"
+            "example": "2022-08-05T05:34:39Z"
         },
         {
             "name": "triggeredType",

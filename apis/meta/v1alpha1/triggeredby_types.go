@@ -65,7 +65,7 @@ type TriggeredBy struct {
 	// Date time of creation of triggered event. Will match a resource's metadata.creationTimestamp
 	// it is added here for convinience only
 	// +optional
-	TriggeredTimestamp *metav1.Time `json:"triggeredTimestamp,omitempty" variable:"label=default;example=2022-08-05T05:34:39Z"`
+	TriggeredTimestamp *metav1.Time `json:"triggeredTimestamp,omitempty" variable:"example=2022-08-05T05:34:39Z"`
 
 	// Indicates trigger type, such as Manual Automated.
 	// +optional
@@ -142,13 +142,16 @@ func (by *TriggeredBy) GetValWithKey(ctx context.Context, path *field.Path) (val
 
 	// triggered by
 	triggeredTimestamp := ""
+	triggeredTimestampYyyyMMddmmss := ""
 	if by.TriggeredTimestamp != nil {
 		// by.TriggeredTimestamp.UTC().Format(layout string)
 		triggeredTimestamp = by.TriggeredTimestamp.UTC().Format(time.RFC3339)
+		triggeredTimestampYyyyMMddmmss = by.TriggeredTimestamp.UTC().Format("20060102150405")
 	}
 	values = substitution.MergeMap(values, map[string]string{
-		path.Child("triggeredTimestamp").String(): triggeredTimestamp,
-		path.Child("triggeredType").String():      string(by.TriggeredType),
+		path.Child("triggeredTimestamp").String():                       triggeredTimestamp,
+		path.Child("triggeredType").String():                            string(by.TriggeredType),
+		path.Child("triggeredTimestamp").Child("yyyyMMddmmss").String(): triggeredTimestampYyyyMMddmmss,
 	})
 	return
 }
