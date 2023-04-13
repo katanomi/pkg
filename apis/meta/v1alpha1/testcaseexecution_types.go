@@ -104,14 +104,20 @@ func UserSpecFromNote(note string) (*UserSpec, string) {
 	}
 
 	reg, _ := regexp.Compile("\\[createdBy: ([\\w@.\\-_ ]*\\|[\\w@.\\-_]*)]")
-	matches := reg.FindStringSubmatch(note)
-	if len(matches) > 1 {
-		splits := strings.Split(matches[1], "|")
-		if len(splits) == 2 {
-			return &UserSpec{
-				Name:  splits[0],
-				Email: splits[1],
-			}, matches[0]
+	indexes := reg.FindAllStringSubmatchIndex(note, -1)
+	// matches := reg.FindAllStringSubmatch(note, -1)
+	if len(indexes) > 0 {
+		lastMatch := indexes[len(indexes)-1]
+		if len(lastMatch) > 3 {
+			matchedString := note[lastMatch[0]:lastMatch[1]]
+			toSplitString := note[lastMatch[2]:lastMatch[3]]
+			splits := strings.Split(toSplitString, "|")
+			if len(splits) == 2 {
+				return &UserSpec{
+					Name:  splits[0],
+					Email: splits[1],
+				}, matchedString
+			}
 		}
 	}
 	return nil, ""

@@ -62,7 +62,7 @@ func Test_executorFromNote(t *testing.T) {
 		},
 		{
 			name: "valid user string",
-			note: "xxxx[createdBy: xxx|xxx@xx.x]",
+			note: "[createdBy: yyy|yy@yy.y]xxxx[createdBy: xxx|xxx@xx.x]",
 			want: &UserSpec{
 				Name:  "xxx",
 				Email: "xxx@xx.x",
