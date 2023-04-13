@@ -63,6 +63,21 @@ type TestCaseExecutionSpec struct {
 
 	// CreatedBy is the user who created the TestCaseExecution
 	CreatedBy UserSpec `json:"createdBy,omitempty"`
+
+	// Steps are details of each step in the test case
+	// +optional
+	Steps []TestCaseExecutionStep `json:"steps,omitempty"`
+}
+
+// TestCaseExecutionStep is the detail of each step in the test case
+type TestCaseExecutionStep struct {
+	// ID is the step number
+	ID string `json:"id"`
+	// Status is the execution status of the step
+	Status TestCaseExecutionStatus `json:"status"`
+	// Notes is the execution note of the step
+	// +optional
+	Notes string `json:"notes"`
 }
 
 // TestCaseExecutionList list of TestCaseExecutions
@@ -83,9 +98,9 @@ func TestCaseExecutionResourceAttributes(verb string) authv1.ResourceAttributes 
 	}
 }
 
-func UserSpecFromNote(note string) *UserSpec {
+func UserSpecFromNote(note string) (*UserSpec, string) {
 	if note == "" {
-		return nil
+		return nil, ""
 	}
 
 	reg, _ := regexp.Compile("\\[createdBy: ([\\w@.\\-_ ]*\\|[\\w@.\\-_]*)]")
@@ -96,8 +111,8 @@ func UserSpecFromNote(note string) *UserSpec {
 			return &UserSpec{
 				Name:  splits[0],
 				Email: splits[1],
-			}
+			}, matches[0]
 		}
 	}
-	return nil
+	return nil, ""
 }

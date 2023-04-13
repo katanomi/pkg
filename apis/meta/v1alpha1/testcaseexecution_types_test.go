@@ -40,9 +40,10 @@ var _ = Describe("TestCaseExecution", func() {
 
 func Test_executorFromNote(t *testing.T) {
 	tests := []struct {
-		name string
-		note string
-		want *UserSpec
+		name    string
+		note    string
+		want    *UserSpec
+		matched string
 	}{
 		{
 			name: "empty string",
@@ -61,11 +62,12 @@ func Test_executorFromNote(t *testing.T) {
 		},
 		{
 			name: "valid user string",
-			note: "[createdBy: xxx|xxx@xx.x]",
+			note: "xxxx[createdBy: xxx|xxx@xx.x]",
 			want: &UserSpec{
 				Name:  "xxx",
 				Email: "xxx@xx.x",
 			},
+			matched: "[createdBy: xxx|xxx@xx.x]",
 		},
 		{
 			name: "allow email is not valid",
@@ -74,6 +76,7 @@ func Test_executorFromNote(t *testing.T) {
 				Name:  "xxx",
 				Email: "xxxxx",
 			},
+			matched: "[createdBy: xxx|xxxxx]",
 		},
 		{
 			name: "allow email is empty",
@@ -82,6 +85,7 @@ func Test_executorFromNote(t *testing.T) {
 				Name:  "xxx",
 				Email: "",
 			},
+			matched: "[createdBy: xxx|]",
 		},
 		{
 			name: "allow both is empty",
@@ -90,6 +94,7 @@ func Test_executorFromNote(t *testing.T) {
 				Name:  "",
 				Email: "",
 			},
+			matched: "[createdBy: |]",
 		},
 		{
 			name: "allow special chars",
@@ -98,6 +103,7 @@ func Test_executorFromNote(t *testing.T) {
 				Name:  "xiangmu@._-",
 				Email: "xiangmu@-._",
 			},
+			matched: "[createdBy: xiangmu@._-|xiangmu@-._]",
 		},
 		{
 			name: "allow space in name",
@@ -106,12 +112,13 @@ func Test_executorFromNote(t *testing.T) {
 				Name:  "xiang mu ._-",
 				Email: "xiangmu@-._",
 			},
+			matched: "[createdBy: xiang mu ._-|xiangmu@-._]",
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := UserSpecFromNote(tt.note); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("UserSpecFromNote() = %v, want %v", got, tt.want)
+			if got, matched := UserSpecFromNote(tt.note); !reflect.DeepEqual(got, tt.want) || !reflect.DeepEqual(matched, tt.matched) {
+				t.Errorf("UserSpecFromNote() = %v, %v, want %v, %v", got, matched, tt.want, tt.matched)
 			}
 		})
 	}
