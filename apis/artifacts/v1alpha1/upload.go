@@ -33,6 +33,7 @@ type FileUploadParams struct {
 	// Checksum generate unique path value
 	Checksum string `json:"checksum"`
 
-	// Properties extended properties for Project
+	// Properties Upload file expandable fields
+	// if type is ContainerImage,The supported fields under properties is `tags`
 	Properties *runtime.RawExtension `json:"properties,omitempty"`
 }
