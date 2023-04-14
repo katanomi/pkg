@@ -1,7 +1,7 @@
 run:
   timeout: 10m
 
-  build-tags: []
+  build-tags: [containers_image_openpgp]
 
   skip-dirs:
     - config

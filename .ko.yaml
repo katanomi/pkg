@@ -1,2 +1,3 @@
 # Use :nonroot base image for all containers
 defaultBaseImage: katanomi/distroless-static:nonroot
+
