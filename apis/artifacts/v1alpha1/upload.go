@@ -17,6 +17,7 @@ limitations under the License.
 package v1alpha1
 
 import (
+	authv1 "k8s.io/api/authorization/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	duckv1 "knative.dev/pkg/apis/duck/v1"
 )
@@ -36,4 +37,14 @@ type FileUploadParams struct {
 	// Properties Upload file expandable fields
 	// if type is ContainerImage,The supported fields under properties is `tags`
 	Properties *runtime.RawExtension `json:"properties,omitempty"`
+}
+
+// FileUploadResourceAttributes returns a ResourceAttribute object to be used in a filter
+func FileUploadResourceAttributes(verb string) authv1.ResourceAttributes {
+	return authv1.ResourceAttributes{
+		Group:    GroupVersion.Group,
+		Version:  GroupVersion.Version,
+		Resource: "artifactuploads",
+		Verb:     verb,
+	}
 }
