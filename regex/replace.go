@@ -18,6 +18,7 @@ package regex
 
 import (
 	"regexp"
+	"strings"
 
 	"k8s.io/apimachinery/pkg/util/validation/field"
 )
@@ -31,6 +32,12 @@ type Replace struct {
 	// Replacement is the value after replacement
 	// +optional
 	Replacement string `json:"replacement,omitempty"`
+
+	// ToLower is a flag to convert the string to lowercase
+	ToLower bool `json:"toLower,omitempty"`
+
+	// ToUpper is a flag to convert the string to uppercase
+	ToUpper bool `json:"toUpper,omitempty"`
 }
 
 // Replaces is a list of Replace
@@ -42,7 +49,14 @@ func (r *Replace) ReplaceAllString(s string) string {
 		return s
 	}
 	re := regexp.MustCompile(r.Regex)
-	return re.ReplaceAllString(s, r.Replacement)
+	s = re.ReplaceAllString(s, r.Replacement)
+	if r.ToLower {
+		s = strings.ToLower(s)
+	}
+	if r.ToUpper {
+		s = strings.ToUpper(s)
+	}
+	return s
 }
 
 // ReplaceAllString replace all string
@@ -64,6 +78,10 @@ func (r *Replace) Validate(fld *field.Path) (errs field.ErrorList) {
 	_, err := regexp.Compile(r.Regex)
 	if err != nil {
 		errs = append(errs, field.Invalid(fld.Child("regex"), r.Regex, err.Error()))
+	}
+
+	if r.ToLower && r.ToUpper {
+		errs = append(errs, field.Invalid(fld, r.ToLower, "toLower and toUpper cannot be set at the same time"))
 	}
 
 	return

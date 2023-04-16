@@ -43,7 +43,7 @@ var _ = Describe("Test.Replaces.ReplaceAllString", func() {
 		// (?U) indicates that the regex is non-greedy regex.
 		{Regex: `^(?U)(.*)(.{0,30})$`, Replacement: "${2}"},
 		// remove the starting non [0-9a-zA-Z] characters
-		{Regex: `^[^0-9a-zA-Z]*`, Replacement: ""},
+		{Regex: `^[^0-9a-zA-Z]*`, Replacement: "", ToLower: true},
 	}
 
 	DescribeTable("ReplaceAllString",
@@ -56,8 +56,8 @@ var _ = Describe("Test.Replaces.ReplaceAllString", func() {
 		Entry("ending contains / and _", nameAsTagReplaces, "original_/-", "original"),
 		Entry("starting contains / and _", nameAsTagReplaces, "_/-original", "original"),
 		Entry("length is 1", nameAsTagReplaces, "a", "a"),
-		Entry("length greater than 30", nameAsTagReplaces, "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ", "wxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"),
-		Entry("length greater than 30", nameAsTagReplaces, "0123456789abcdefghijklmnopqrstuvwxyz/-_+ABCDEFGHIJKLMNOPQRSTUVWXYZ", "ABCDEFGHIJKLMNOPQRSTUVWXYZ"),
+		Entry("length greater than 30", nameAsTagReplaces, "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ", "wxyzabcdefghijklmnopqrstuvwxyz"),
+		Entry("length greater than 30", nameAsTagReplaces, "0123456789abcdefghijklmnopqrstuvwxyz/-_+ABCDEFGHIJKLMNOPQRSTUVWXYZ", "abcdefghijklmnopqrstuvwxyz"),
 	)
 })
 
@@ -107,8 +107,13 @@ var _ = Describe("Test.Replaces.Validate", func() {
 					Message: "Invalid value: \"^.0,128[.*{$\": error parsing regexp: missing closing ]: `[.*{$`",
 					Field:   "prefix[1].regex",
 				},
+				metav1.StatusCause{
+					Type:    "FieldValueInvalid",
+					Message: "Invalid value: true: toLower and toUpper cannot be set at the same time",
+					Field:   "prefix[2]",
+				},
 			))
-			Expect(statusErr.ErrStatus.Details.Causes).To(HaveLen(2))
+			Expect(statusErr.ErrStatus.Details.Causes).To(HaveLen(3))
 		})
 	})
 
