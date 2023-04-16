@@ -27,4 +27,5 @@ triggeredBy.ref.name: "some-object"
 triggeredBy.ref.uid: "41ce460c-cd91-493f-a59c-8f2ccdea9034"
 triggeredBy.ref.apiVersion: somegroup/v1alpha1
 triggeredBy.triggeredTimestamp: "2022-08-09T13:58:36Z"
+triggeredBy.triggeredTimestamp.yyyyMMddmmss: "20220809135836"
 triggeredBy.triggeredType: Automated
