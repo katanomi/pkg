@@ -36,10 +36,10 @@ const genericResourceNameErrMsg string = "a resource name must consist of lower 
 
 var genericResourceNameRegexp = regexp.MustCompile("^" + genericResourceNameFmt + "$")
 
-const resourceNameWithChineseFmt = "[-./\\sA-Za-z0-9_\\p{Han}]+"
+const resourceNameWithChineseFmt = "[-./A-Za-z0-9_\\p{Han}]+"
 const resourceNameWithChineseErrMsg string = "a resource name must consist of lower case alphanumeric characters, Chinese, '_' or '-' or '/' or '.' "
 
-var resourceNameWithChineseRegexp = regexp.MustCompile("^[^\\s]" + resourceNameWithChineseFmt + "$")
+var resourceNameWithChineseRegexp = regexp.MustCompile("^" + resourceNameWithChineseFmt + "$")
 
 // IsDNS1123UnderscoreLabel tests for a string that conforms to the definition of a label in
 // DNS (RFC 1123) but accepting underscores in the middle.

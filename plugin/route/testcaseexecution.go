@@ -127,13 +127,6 @@ func (r *testCaseExecutionCreator) CreateTestCaseExecution(request *restful.Requ
 		return
 	}
 
-	// assign case status if step status is omitted
-	for idx, step := range payload.Spec.Steps {
-		if step.Status == "" {
-			payload.Spec.Steps[idx].Status = payload.Spec.Status
-		}
-	}
-
 	testCaseExecution, err := r.impl.CreateTestCaseExecution(request.Request.Context(), params, payload)
 	if err != nil {
 		kerrors.HandleError(request, response, err)
