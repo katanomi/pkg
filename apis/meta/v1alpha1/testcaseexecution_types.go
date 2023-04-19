@@ -63,21 +63,6 @@ type TestCaseExecutionSpec struct {
 
 	// CreatedBy is the user who created the TestCaseExecution
 	CreatedBy UserSpec `json:"createdBy,omitempty"`
-
-	// Steps are details of each step in the test case
-	// +optional
-	Steps []TestCaseExecutionStep `json:"steps,omitempty"`
-}
-
-// TestCaseExecutionStep is the detail of each step in the test case
-type TestCaseExecutionStep struct {
-	// ID is the step number
-	ID string `json:"id"`
-	// Status is the execution status of the step
-	Status TestCaseExecutionStatus `json:"status"`
-	// Notes is the execution note of the step
-	// +optional
-	Notes string `json:"notes"`
 }
 
 // TestCaseExecutionList list of TestCaseExecutions
@@ -98,27 +83,21 @@ func TestCaseExecutionResourceAttributes(verb string) authv1.ResourceAttributes 
 	}
 }
 
-func UserSpecFromNote(note string) (*UserSpec, string) {
+func UserSpecFromNote(note string) *UserSpec {
 	if note == "" {
-		return nil, ""
+		return nil
 	}
 
 	reg, _ := regexp.Compile("\\[createdBy: ([\\w@.\\-_ ]*\\|[\\w@.\\-_]*)]")
-	indexes := reg.FindAllStringSubmatchIndex(note, -1)
-	// matches := reg.FindAllStringSubmatch(note, -1)
-	if len(indexes) > 0 {
-		lastMatch := indexes[len(indexes)-1]
-		if len(lastMatch) > 3 {
-			matchedString := note[lastMatch[0]:lastMatch[1]]
-			toSplitString := note[lastMatch[2]:lastMatch[3]]
-			splits := strings.Split(toSplitString, "|")
-			if len(splits) == 2 {
-				return &UserSpec{
-					Name:  splits[0],
-					Email: splits[1],
-				}, matchedString
+	matches := reg.FindStringSubmatch(note)
+	if len(matches) > 1 {
+		splits := strings.Split(matches[1], "|")
+		if len(splits) == 2 {
+			return &UserSpec{
+				Name:  splits[0],
+				Email: splits[1],
 			}
 		}
 	}
-	return nil, ""
+	return nil
 }

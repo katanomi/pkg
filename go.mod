@@ -20,7 +20,7 @@ require (
 	github.com/onsi/ginkgo/v2 v2.6.0
 	github.com/onsi/gomega v1.24.1
 	github.com/opencontainers/image-spec v1.1.0-rc2
-	github.com/opentracing/opentracing-go v1.2.0
+	github.com/opentracing/opentracing-go v1.1.0
 	github.com/prometheus/client_golang v1.14.0
 	github.com/uber/jaeger-client-go v2.29.1+incompatible
 	github.com/uber/jaeger-lib v2.4.1+incompatible
@@ -40,11 +40,11 @@ require (
 
 require (
 	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.35.0
-	go.opentelemetry.io/otel v1.14.0
+	go.opentelemetry.io/otel v1.10.0
 	go.opentelemetry.io/otel/exporters/jaeger v1.2.0
 	go.opentelemetry.io/otel/exporters/zipkin v1.2.0
 	go.opentelemetry.io/otel/sdk v1.10.0
-	go.opentelemetry.io/otel/trace v1.14.0
+	go.opentelemetry.io/otel/trace v1.10.0
 )
 
 require (
