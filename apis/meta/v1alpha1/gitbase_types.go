@@ -1,5 +1,5 @@
 /*
-Copyright 2021 The Katanomi Authors.
+Copyright 2023 The Katanomi Authors.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@ limitations under the License.
 package v1alpha1
 
 import (
+	"errors"
 	"fmt"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -35,6 +36,17 @@ type GitRepo struct {
 	Project string `json:"project,omitempty" yaml:"project,omitempty"`
 	// Repository is different between platforms. gitlab is number;github,gogs,gitea is repo name
 	Repository string `json:"repository,omitempty" yaml:"repository,omitempty"`
+}
+
+// Validate validate the git repo
+func (r *GitRepo) Validate() error {
+	if r.Project == "" {
+		return errors.New("project is empty")
+	}
+	if r.Repository == "" {
+		return errors.New("repository is empty")
+	}
+	return nil
 }
 
 // ProjectID return the project id of the repo

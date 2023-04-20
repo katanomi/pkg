@@ -1,0 +1,22 @@
+apiVersion: "coderepository.pkg.katanomi.dev/v1alpha1"
+kind: "GitCreateCommit"
+metadata: {}
+spec:
+  branch: "branch"
+  startTag: "v1.1"
+  message: "some commit message"
+  createPullRequest: true
+  removeSourceBranch: true
+  author:
+    name: "name"
+    email: "name@email.com"
+  actions:
+    - action: "update"
+      filePath: "foo/bard/10001"
+      content: "some content 2"
+    - filePath: "foo/bard/20001"
+      content: "some content 2"
+    - filePath: "foo/bard/30001"
+      content: "some content 2"
+    - filePath: "foo/bard/40001"
+      content: "some content 2"
