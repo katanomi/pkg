@@ -85,11 +85,11 @@ controller-gen: ##@Setup Download controller-gen locally if necessary.
 
 KUSTOMIZE = $(TOOLBIN)/kustomize
 kustomize: ##@Setup Download kustomize locally if necessary.
-	$(call go-get-tool,$(KUSTOMIZE),sigs.k8s.io/kustomize/kustomize/v3@v3.8.7)
+	$(call go-get-tool,$(KUSTOMIZE),sigs.k8s.io/kustomize/kustomize/v3@v4.5.7)
 
 KO = $(TOOLBIN)/ko
 ko: ##@Setup Download ko locally if necessary.
-	$(call go-get-tool,$(KO),github.com/google/ko@v0.8.3)
+	$(call go-get-tool,$(KO),github.com/google/ko@v0.12.0)
 
 GOIMPORTS = $(TOOLBIN)/goimports
 goimports: ##@Setup Download goimports locally if necessary.
