@@ -17,6 +17,7 @@ limitations under the License.
 package errors
 
 import (
+	"encoding/json"
 	goerrors "errors"
 	"net/http"
 
@@ -47,6 +48,17 @@ func AsStatusCode(err error) int {
 	return http.StatusInternalServerError
 }
 
+// HandleError handles error in requests
+func HandleError(req *restful.Request, resp *restful.Response, err error) {
+	err = AsAPIError(err)
+	status := AsStatusCode(err)
+	if statusErr, ok := err.(errors.APIStatus); ok {
+		resp.WriteHeaderAndEntity(status, statusErr.Status())
+	} else {
+		resp.WriteHeaderAndEntity(status, err)
+	}
+}
+
 // AsStatusError transform resty response to status error
 func AsStatusError(response *resty.Response, grs ...schema.GroupResource) error {
 
@@ -66,6 +78,11 @@ func AsStatusError(response *resty.Response, grs ...schema.GroupResource) error 
 		false,
 	)
 
+	var status metav1.Status
+	if json.Unmarshal([]byte(response.String()), &status) == nil && status.Reason != "" {
+		statusError.ErrStatus.Reason = status.Reason
+	}
+
 	if err, ok := response.Error().(error); ok {
 		if originalErr := err.Error(); originalErr != "" {
 			statusError.ErrStatus.Message = originalErr
@@ -73,16 +90,4 @@ func AsStatusError(response *resty.Response, grs ...schema.GroupResource) error 
 	}
 
 	return statusError
-}
-
-// HandleError handles error in requests
-func HandleError(req *restful.Request, resp *restful.Response, err error) {
-	err = AsAPIError(err)
-	status := AsStatusCode(err)
-
-	if statusErr, ok := err.(errors.APIStatus); ok {
-		resp.WriteHeaderAndEntity(status, statusErr.Status())
-	} else {
-		resp.WriteHeaderAndEntity(status, err)
-	}
 }

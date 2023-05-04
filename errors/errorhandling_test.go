@@ -17,8 +17,10 @@ limitations under the License.
 package errors
 
 import (
+	"encoding/json"
 	goerrors "errors"
 	"fmt"
+	"log"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -42,6 +44,20 @@ func TestAsAPIError(t *testing.T) {
 	status = errors.APIStatus(nil)
 	g.Expect(goerrors.As(err, &status)).To(BeTrue())
 	g.Expect(errors.ReasonForError(err)).To(Equal(metav1.StatusReasonBadRequest))
+}
+
+func TestTheUmarsh(t *testing.T) {
+	body := `{
+		"metadata": {},
+		"status": "Failure",
+		"message": "enen zpyu/Capslugcap/dvdvds not found",
+		"reason": "GitRevisionNotFound",
+		"code": 404
+	   }`
+	var statusErr metav1.Status
+	err := json.Unmarshal([]byte(body), &statusErr)
+	log.Printf("get the err is %#v and get th statusErr is %v the reason is %s", err, statusErr, statusErr.Reason)
+
 }
 
 func TestAsStatusCode(t *testing.T) {
