@@ -1,0 +1,19 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: katanomi-pkg
+  title: Katanomi Pkg
+  annotations:
+    # github plugin
+    github.com/project-slug: katanomi/pkg
+    # acp cicd plugin
+    acp.cpaas.io/ci-pipeline: devops/business-build/katanomi/katanomi-pkg
+    acp.cpaas.io/instance: edge.alauda.cn
+    # sonarqube plugin
+    sonarqube.org/project-key: github.com-katanomi-pkg
+
+spec:
+  type: service
+  system: system:katanomi-system
+  lifecycle: production
+  owner: group:g-5cstm
