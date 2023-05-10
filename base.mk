@@ -112,6 +112,9 @@ GOMOCK = $(TOOLBIN)/mockgen
 gomock: ## Download gomock locally if necessary.
 	$(call go-get-tool,$(GOMOCK),github.com/golang/mock/mockgen@v1.6.0)
 
+apiserver-runtime-gen:
+	$(call go-get-tool,$(GOMOCK),sigs.k8s.io/apiserver-runtime/tools/apiserver-runtime-gen@v1.1.1)
+
 # go-get-tool will 'go get' any package $2 and install it to $1.
 PROJECT_DIR := $(shell dirname $(abspath $(lastword $(MAKEFILE_LIST))))
 define go-get-tool
