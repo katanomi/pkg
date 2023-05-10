@@ -20,16 +20,18 @@ import (
 	"context"
 	"time"
 
-	"github.com/katanomi/pkg/plugin/path"
-
-	metav1alpha1 "github.com/katanomi/pkg/apis/meta/v1alpha1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	duckv1 "knative.dev/pkg/apis/duck/v1"
+
+	coderepositoryv1alpha1 "github.com/katanomi/pkg/apis/coderepository/v1alpha1"
+	metav1alpha1 "github.com/katanomi/pkg/apis/meta/v1alpha1"
+	"github.com/katanomi/pkg/plugin/path"
 )
 
 // ClientGitCommit client for commit
 type ClientGitCommit interface {
 	Get(ctx context.Context, baseURL *duckv1.Addressable, option metav1alpha1.GitCommitOption, options ...OptionFunc) (*metav1alpha1.GitCommit, error)
+	Create(ctx context.Context, baseURL *duckv1.Addressable, option coderepositoryv1alpha1.CreateGitCommitOption, options ...OptionFunc) (*metav1alpha1.GitCommit, error)
 	List(ctx context.Context, baseURL *duckv1.Addressable, option metav1alpha1.GitCommitListOption, options ...OptionFunc) (*metav1alpha1.GitCommitList, error)
 }
 
@@ -57,6 +59,24 @@ func (g *gitCommit) Get(ctx context.Context, baseURL *duckv1.Addressable, option
 	sha := *option.SHA
 	uri := path.Format("projects/%s/coderepositories/%s/commit/%s", option.Project, option.Repository, sha)
 	if err := g.client.Get(ctx, baseURL, uri, options...); err != nil {
+		return nil, err
+	}
+	return commitObj, nil
+}
+
+// Create create commit
+func (g *gitCommit) Create(ctx context.Context, baseURL *duckv1.Addressable, option coderepositoryv1alpha1.CreateGitCommitOption, options ...OptionFunc) (*metav1alpha1.GitCommit, error) {
+	commitObj := &metav1alpha1.GitCommit{}
+	options = append(options, ResultOpts(commitObj))
+	options = append(options, BodyOpts(option))
+	if err := option.GitRepo.Validate(); err != nil {
+		return nil, errors.NewBadRequest(err.Error())
+	}
+	if errs := option.GitCreateCommit.Validate(ctx); len(errs) != 0 {
+		return nil, errors.NewBadRequest(errs.ToAggregate().Error())
+	}
+	uri := path.Format("projects/%s/coderepositories/%s/commits", option.Project, option.Repository)
+	if err := g.client.Post(ctx, baseURL, uri, options...); err != nil {
 		return nil, err
 	}
 	return commitObj, nil

@@ -19,14 +19,15 @@ package client
 import (
 	"context"
 
+	cloudevent "github.com/cloudevents/sdk-go/v2"
 	"github.com/emicklei/go-restful/v3"
-	metav1alpha1 "github.com/katanomi/pkg/apis/meta/v1alpha1"
+	"go.uber.org/zap"
 	corev1 "k8s.io/api/core/v1"
 	"knative.dev/pkg/apis"
 	duckv1 "knative.dev/pkg/apis/duck/v1"
 
-	cloudevent "github.com/cloudevents/sdk-go/v2"
-	"go.uber.org/zap"
+	coderepositoryv1alpha1 "github.com/katanomi/pkg/apis/coderepository/v1alpha1"
+	metav1alpha1 "github.com/katanomi/pkg/apis/meta/v1alpha1"
 )
 
 // Interface base interface for plugins
@@ -245,6 +246,12 @@ type GitPullRequestHandler interface {
 type GitCommitGetter interface {
 	Interface
 	GetGitCommit(ctx context.Context, option metav1alpha1.GitCommitOption) (metav1alpha1.GitCommit, error)
+}
+
+// GitCommitCreator create git commit
+type GitCommitCreator interface {
+	Interface
+	CreateGitCommit(ctx context.Context, option coderepositoryv1alpha1.CreateGitCommitOption) (metav1alpha1.GitCommit, error)
 }
 
 // GitCommitLister List git commit

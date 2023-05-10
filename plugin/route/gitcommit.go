@@ -1,5 +1,5 @@
 /*
-Copyright 2021 The Katanomi Authors.
+Copyright 2023 The Katanomi Authors.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -17,21 +17,21 @@ limitations under the License.
 package route
 
 import (
+	"context"
 	"net/http"
 	"time"
 
-	"github.com/katanomi/pkg/plugin/path"
-
-	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-
-	"k8s.io/apimachinery/pkg/api/errors"
-
-	kerrors "github.com/katanomi/pkg/errors"
-
 	restfulspec "github.com/emicklei/go-restful-openapi/v2"
 	"github.com/emicklei/go-restful/v3"
+	"k8s.io/apimachinery/pkg/api/errors"
+	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"knative.dev/pkg/logging"
+
+	coderepositoryv1alpha1 "github.com/katanomi/pkg/apis/coderepository/v1alpha1"
 	metav1alpha1 "github.com/katanomi/pkg/apis/meta/v1alpha1"
+	kerrors "github.com/katanomi/pkg/errors"
 	"github.com/katanomi/pkg/plugin/client"
+	"github.com/katanomi/pkg/plugin/path"
 )
 
 type gitCommitGetter struct {
@@ -54,7 +54,7 @@ func (a *gitCommitGetter) Register(ws *restful.WebService) {
 	projectParam := ws.PathParameter("project", "repository belong to project").DataType("string")
 	ws.Route(
 		ws.GET("/projects/{project:*}/coderepositories/{repository}/commit/{sha}").To(a.GetCommit).
-			Doc("GetGitRepoFile").Param(projectParam).Param(repositoryParam).Param(shaParam).
+			Doc("GetCommit").Param(projectParam).Param(repositoryParam).Param(shaParam).
 			Metadata(restfulspec.KeyOpenAPITags, a.tags).
 			Returns(http.StatusOK, "OK", metav1alpha1.GitCommit{}),
 	)
@@ -89,6 +89,61 @@ func HandleTimeParamInQuery(param string) (res *v1.Time, err error) {
 	}
 	res = &v1.Time{Time: timeObj}
 	return
+}
+
+type gitCommitCreator struct {
+	impl client.GitCommitCreator
+	tags []string
+}
+
+// NewGitCommitCreator get a git Commit route with plugin client
+func NewGitCommitCreator(impl client.GitCommitCreator) Route {
+	return &gitCommitCreator{
+		tags: []string{"put", "repositories", "commit"},
+		impl: impl,
+	}
+}
+
+// Register route
+func (a *gitCommitCreator) Register(ws *restful.WebService) {
+	logging.FromContext(context.Background()).Infow("LQTEST gitCommitCreator Register")
+	repositoryParam := ws.PathParameter("repository", "commit belong to repository")
+	projectParam := ws.PathParameter("project", "repository belong to project").DataType("string")
+	ws.Route(
+		ws.POST("/projects/{project:*}/coderepositories/{repository}/commits").To(a.CreateCommit).
+			Doc("CreateCommit").Param(projectParam).Param(repositoryParam).
+			Metadata(restfulspec.KeyOpenAPITags, a.tags).
+			Returns(http.StatusOK, "OK", metav1alpha1.GitCommit{}),
+	)
+}
+
+// GitCommit create commit
+func (a *gitCommitCreator) CreateCommit(request *restful.Request, response *restful.Response) {
+	log := logging.FromContext(context.TODO())
+	repo := path.Parameter(request, "repository")
+	project := path.Parameter(request, "project")
+
+	commitReq := &coderepositoryv1alpha1.GitCreateCommit{}
+	err := request.ReadEntity(commitReq)
+	if err != nil {
+		kerrors.HandleError(request, response, err)
+		return
+	}
+	log.Debugw("CreateCommit", "repo", repo, "project", project, "commitReq", commitReq)
+	createOption := coderepositoryv1alpha1.CreateGitCommitOption{
+		GitRepo: metav1alpha1.GitRepo{
+			Repository: repo,
+			Project:    project,
+		},
+		GitCreateCommit: *commitReq,
+	}
+
+	commitObject, err := a.impl.CreateGitCommit(request.Request.Context(), createOption)
+	if err != nil {
+		kerrors.HandleError(request, response, err)
+		return
+	}
+	response.WriteHeaderAndEntity(http.StatusOK, commitObject)
 }
 
 type gitCommitLister struct {
