@@ -49,7 +49,7 @@ require (
 
 require (
 	github.com/alessio/shellescape v1.4.1
-	github.com/docker/distribution v2.8.1+incompatible
+	github.com/docker/distribution v2.8.2+incompatible
 	github.com/joho/godotenv v1.4.0
 	github.com/joshdk/go-junit v1.0.0
 	github.com/k1LoW/duration v1.2.0
