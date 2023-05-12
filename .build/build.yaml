@@ -74,6 +74,8 @@ spec:
               ls -la $TOOLBIN
             fi
 
+            go mod download
+
             make test
         - name: test-report-path
           value: ./test.json

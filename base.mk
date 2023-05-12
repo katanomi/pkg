@@ -38,9 +38,9 @@ check: fmt vet lint test ##@Development Run check against code
 fmt: ##@Development Run go fmt against code.
 	go fmt ./...
 
+GO_VET_TAGS ?= e2e,containers_image_openpgp
 vet: ##@Development Run go vet against code.
-	go vet ./...
-	go vet -tags e2e ./...
+	go vet -tags $(GO_VET_TAGS) ./...
 
 lint: golangcilint ##@Development Run golangci-lint against code.
 	$(GOLANGCILINT) run
@@ -49,10 +49,11 @@ ENVTEST_ASSETS_DIR=$(TOOLBIN)/testbin
 COVER_PROFILE ?= cover.out
 TEST_FILE ?= test.json
 GO_TEST_FLAGS ?= -v -json
+GO_TEST_TAGS ?= containers_image_openpgp
 test: manifests generate fmt vet goimports ##@Development Run tests.
 	mkdir -p ${ENVTEST_ASSETS_DIR}
 	test -f ${ENVTEST_ASSETS_DIR}/setup-envtest.sh || curl -sSLo ${ENVTEST_ASSETS_DIR}/setup-envtest.sh https://raw.githubusercontent.com/kubernetes-sigs/controller-runtime/v0.8.3/hack/setup-envtest.sh
-	source ${ENVTEST_ASSETS_DIR}/setup-envtest.sh; fetch_envtest_tools $(ENVTEST_ASSETS_DIR); setup_envtest_env $(ENVTEST_ASSETS_DIR); go test $(GO_TEST_FLAGS) -coverpkg=./... -coverprofile $(COVER_PROFILE) ./... | tee ${TEST_FILE}
+	source ${ENVTEST_ASSETS_DIR}/setup-envtest.sh; fetch_envtest_tools $(ENVTEST_ASSETS_DIR); setup_envtest_env $(ENVTEST_ASSETS_DIR); go test $(GO_TEST_FLAGS) -tags=$(GO_TEST_TAGS) -coverpkg=./... -coverprofile $(COVER_PROFILE) ./... | tee ${TEST_FILE}
 
 install: manifests kustomize ##@Deployment Install CRDs into the K8s cluster specified in ~/.kube/config.
 	$(KUSTOMIZE) build config/crd | kubectl apply -f -
@@ -75,7 +76,7 @@ certmanager: ##@Deployment Install certmanager v1.4.0 from github manifest to th
 	$(call installyaml,cert-manager,https://github.com/jetstack/cert-manager/releases/download/v1.4.0/cert-manager.yaml,cert-manager)
 
 e2e: ginkgo ##@Testing Executes e2e tests inside test/e2e folder
-	$(GINKGO) -progress -v -tags e2e ./test/e2e
+	$(GINKGO) -progress -v -tags $(GO_VET_TAGS) ./test/e2e
 
 CONTROLLER_GEN = $(TOOLBIN)/controller-gen
 controller-gen: ##@Setup Download controller-gen locally if necessary.

@@ -1,2 +1,3 @@
-# Use :nonroot base image for all containers
-defaultBaseImage: katanomi/distroless-static:nonroot
+# file synced using katanomi/hack
+# DO NOT CHANGE THIS FILE DIRECTLY
+defaultBaseImage: cgr.dev/chainguard/static
