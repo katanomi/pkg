@@ -151,7 +151,7 @@ func makeSubjectAccessReview(resourceAtt authv1.ResourceAttributes, user user.In
 	return subjectAccessReviewObject{review}
 }
 
-func impersonateUser(req *http.Request) user.Info {
+func ImpersonateUser(req *http.Request) user.Info {
 
 	u := user.DefaultInfo{}
 	u.Name = req.Header.Get(authnv1.ImpersonateUserHeader)

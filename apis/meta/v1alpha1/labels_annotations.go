@@ -158,3 +158,9 @@ const (
 	// ImageRegistryEndpoint for artifact endpoint
 	ImageRegistryEndpoint = "imageRegistryEndpoint"
 )
+
+const (
+
+	// UserOwnedAnnotationKey annotated the resource's owner is one user
+	UserOwnedAnnotationKey = "katanomi.dev/owned.username"
+)

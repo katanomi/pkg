@@ -25,6 +25,7 @@ import (
 	"github.com/golang-jwt/jwt"
 	metav1alpha1 "github.com/katanomi/pkg/apis/meta/v1alpha1"
 	"github.com/katanomi/pkg/client"
+	authenticationv1 "k8s.io/api/authentication/v1"
 	"k8s.io/apimachinery/pkg/util/errors"
 )
 
@@ -64,6 +65,16 @@ func parseReqjwtToClaims(req *restful.Request) (claims jwt.MapClaims, err error)
 // Get the userinfo from the request object
 func getUserInfoFromReq(req *restful.Request) (userinfo metav1alpha1.UserInfo, err error) {
 	errorList := make([]error, 0)
+	user := client.ImpersonateUser(req.Request)
+	if user != nil {
+		return metav1alpha1.UserInfo{
+			UserInfo: authenticationv1.UserInfo{
+				Username: user.GetName(),
+				Groups:   user.GetGroups(),
+				UID:      user.GetUID(),
+			},
+		}, nil
+	}
 	claims, err := parseReqjwtToClaims(req)
 	if err != nil {
 		return userinfo, err

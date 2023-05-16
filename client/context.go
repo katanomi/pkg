@@ -120,6 +120,11 @@ func User(ctx context.Context) user.Info {
 	return u
 }
 
+// WithUser set User into context
+// up to now, we only support impersonate user
+// but TODO: we should set user when it is not impersonate user
+var WithUser = request.WithUser
+
 // cfgKeyOfApp is the key that the config make is associated with.
 type cfgKeyOfApp struct{}
 
