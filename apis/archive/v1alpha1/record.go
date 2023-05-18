@@ -51,6 +51,8 @@ func (p *Record) NamespaceName() string {
 
 // RecordSpec describe the spec of an archive record
 type RecordSpec struct {
+	// ID the unique id of the resource in the archive storage
+	ID uint `json:"id,omitempty"`
 	// TopCluster the cluster name of the top level resource
 	TopCluster string `json:"topCluster,omitempty"`
 	// TopNamespace the namespace name of the top level resource
