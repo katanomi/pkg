@@ -24,6 +24,8 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"go.etcd.io/etcd/client/v2"
+
 	"k8s.io/apiserver/pkg/authentication/user"
 
 	"github.com/onsi/gomega"
@@ -40,7 +42,6 @@ import (
 
 	mockfakeclient "github.com/katanomi/pkg/testing/mock/sigs.k8s.io/controller-runtime/pkg/client"
 	authv1 "k8s.io/api/authorization/v1"
-	"sigs.k8s.io/controller-runtime/pkg/client"
 	ctrlclient "sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/golang/mock/gomock"
@@ -79,7 +80,7 @@ func TestUserOwnedResourcePermissionFilter(t *testing.T) {
 
 	mockClient := mockfakeclient.NewMockClient(mockCtl)
 	mockClient.EXPECT().Create(gomock.Any(), gomock.Any(), gomock.Any()).DoAndReturn(
-		func(ctx context.Context, obj client.Object, opts ...client.CreateOption) error {
+		func(ctx context.Context, obj ctrlclient.Object, opts ...ctrlclient.CreateOption) error {
 
 			sub, ok := obj.(*authv1.SubjectAccessReview)
 			if ok {
@@ -99,7 +100,7 @@ func TestUserOwnedResourcePermissionFilter(t *testing.T) {
 		}).AnyTimes()
 
 	mockClient.EXPECT().Get(gomock.Any(), gomock.Eq(ctrlclient.ObjectKey{Name: "job1", Namespace: "default"}), gomock.Any()).DoAndReturn(
-		func(ctx context.Context, objectKey ctrlclient.ObjectKey, obj client.Object, opts ...client.GetOptions) error {
+		func(ctx context.Context, objectKey ctrlclient.ObjectKey, obj ctrlclient.Object, opts ...client.GetOptions) error {
 			job := obj.(*unstructured.Unstructured)
 			job.SetAnnotations(map[string]string{
 				metav1alpha1.UserOwnedAnnotationKey: "jackson",
