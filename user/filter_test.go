@@ -71,6 +71,14 @@ func TestUserInfoFilter(t *testing.T) {
 	if userinfo.GetEmail() != "john@test.com" {
 		t.Errorf("should email is john@test.com, but got %s", userinfo.GetEmail())
 	}
+
+	req.Request.Header["Impersonate-User"] = []string{"jackson"}
+	UserInfoFilter(req, res, chain)
+	userinfo = UserInfoValue(req.Request.Context())
+	if userinfo.GetName() != "jackson" {
+		t.Errorf("should name is jackson, but got %s", userinfo.GetName())
+	}
+
 }
 
 func TestUserOwnedResourcePermissionFilter(t *testing.T) {
