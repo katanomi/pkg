@@ -18,10 +18,37 @@ limitations under the License.
 package user
 
 import (
+	"context"
+	"fmt"
 	"net/http"
+	"net/http/httptest"
 	"testing"
 
+	"k8s.io/apiserver/pkg/authentication/user"
+
+	"github.com/onsi/gomega"
+
+	"knative.dev/pkg/logging"
+
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
+
+	"k8s.io/apimachinery/pkg/api/meta"
+
+	kclient "github.com/katanomi/pkg/client"
+
+	metav1alpha1 "github.com/katanomi/pkg/apis/meta/v1alpha1"
+
+	mockfakeclient "github.com/katanomi/pkg/testing/mock/sigs.k8s.io/controller-runtime/pkg/client"
+	authv1 "k8s.io/api/authorization/v1"
+	"sigs.k8s.io/controller-runtime/pkg/client"
+	ctrlclient "sigs.k8s.io/controller-runtime/pkg/client"
+
+	"github.com/golang/mock/gomock"
+
+	"k8s.io/apimachinery/pkg/runtime/schema"
+
 	restful "github.com/emicklei/go-restful/v3"
+	batchv1 "k8s.io/api/batch/v1"
 )
 
 func TestUserInfoFilter(t *testing.T) {
@@ -43,4 +70,134 @@ func TestUserInfoFilter(t *testing.T) {
 	if userinfo.GetEmail() != "john@test.com" {
 		t.Errorf("should email is john@test.com, but got %s", userinfo.GetEmail())
 	}
+}
+
+func TestUserOwnedResourcePermissionFilter(t *testing.T) {
+	ctx := context.TODO()
+	ctx = logging.WithLogger(ctx, logger)
+	mockCtl := gomock.NewController(t)
+
+	mockClient := mockfakeclient.NewMockClient(mockCtl)
+	mockClient.EXPECT().Create(gomock.Any(), gomock.Any(), gomock.Any()).DoAndReturn(
+		func(ctx context.Context, obj client.Object, opts ...client.CreateOption) error {
+
+			if sub, ok := obj.(*authv1.SubjectAccessReview); ok {
+				sub.Status.Denied = true
+				sub.Status.Allowed = false
+				return nil
+			}
+			switch subject := obj.(type) {
+
+			case *authv1.SelfSubjectAccessReview:
+				subject.Status.Denied = false
+				subject.Status.Allowed = true
+			case *authv1.SubjectAccessReview:
+				subject.Status.Denied = true
+				subject.Status.Allowed = false
+			}
+
+			return nil
+		}).AnyTimes()
+
+	mockClient.EXPECT().Get(gomock.Any(), gomock.Eq(ctrlclient.ObjectKey{Name: "job1", Namespace: "default"}), gomock.Any()).DoAndReturn(
+		func(ctx context.Context, objectKey ctrlclient.ObjectKey, obj client.Object, opts ...client.GetOptions) error {
+			job := obj.(*unstructured.Unstructured)
+			job.SetAnnotations(map[string]string{
+				metav1alpha1.UserOwnedAnnotationKey: "jackson",
+			})
+			job.SetName("job1")
+			job.SetNamespace("default")
+
+			return nil
+		}).AnyTimes()
+	mockClient.EXPECT().RESTMapper().DoAndReturn(func() meta.RESTMapper {
+		fmt.Println("in restmapper mock")
+		mapper := meta.NewDefaultRESTMapper([]schema.GroupVersion{batchv1.SchemeGroupVersion})
+		mapper.AddSpecific(schema.GroupVersionKind{
+			Group:   "batch",
+			Version: "v1",
+			Kind:    "Job",
+		}, schema.GroupVersionResource{
+			Group:    "batch",
+			Version:  "v1",
+			Resource: "jobs",
+		}, schema.GroupVersionResource{
+			Group:    "batch",
+			Version:  "v1",
+			Resource: "job",
+		}, meta.RESTScopeNamespace)
+		return mapper
+	}).AnyTimes()
+
+	ctx = kclient.WithClient(ctx, mockClient)
+
+	filter := UserOwnedResourcePermissionFilter(ctx, &schema.GroupVersionResource{
+		Group:    "batch",
+		Version:  "v1",
+		Resource: "jobs",
+	})
+
+	target := func(req *restful.Request, resp *restful.Response) {
+		resp.Write([]byte("OK"))
+	}
+	chain := &restful.FilterChain{Target: target}
+
+	var data = []struct {
+		desc          string
+		permissionOK  bool
+		userNameInReq string
+
+		respBody string
+		respCode int32
+	}{
+		{
+			desc:          "user should only request his resource",
+			permissionOK:  false,
+			userNameInReq: "jackson",
+			respBody:      "OK",
+		},
+		{
+			desc:          "user cannot request resource not owned by him",
+			permissionOK:  false,
+			userNameInReq: "user",
+			respCode:      http.StatusForbidden,
+		},
+		{
+			desc:          "user could request any resource when he has permission to get resource",
+			permissionOK:  true,
+			userNameInReq: "admin",
+			respCode:      http.StatusForbidden,
+		},
+	}
+
+	for _, item := range data {
+
+		t.Run(item.desc, func(t *testing.T) {
+			g := gomega.NewWithT(t)
+
+			if !item.permissionOK {
+				ctx = kclient.WithUser(ctx, &user.DefaultInfo{Name: "jackson"})
+			}
+
+			_req := httptest.NewRequest("GET", "http://localhost", nil)
+			request := restful.NewRequest(_req)
+
+			request.PathParameters()["name"] = "job1"
+			request.PathParameters()["namespace"] = "default"
+
+			request.Request = request.Request.WithContext(ctx)
+			recorder := httptest.NewRecorder()
+			response := restful.NewResponse(recorder)
+
+			filter(request, response, chain)
+
+			if item.respBody != "" {
+				g.Expect(recorder.Body.String()).ShouldNot(gomega.Equal(200))
+			}
+			if item.respCode != 0 {
+				g.Expect(recorder.Code).ShouldNot(gomega.Equal(200))
+			}
+		})
+	}
+
 }

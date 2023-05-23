@@ -19,9 +19,20 @@ package user
 import (
 	"testing"
 
+	"sigs.k8s.io/controller-runtime/pkg/log/zap"
+
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	uberzap "go.uber.org/zap"
 )
+
+var (
+	logger *uberzap.SugaredLogger
+)
+
+func init() {
+	logger = zap.NewRaw(zap.WriteTo(GinkgoWriter), zap.UseDevMode(true)).Sugar()
+}
 
 func TestBuilds(t *testing.T) {
 	RegisterFailHandler(Fail)

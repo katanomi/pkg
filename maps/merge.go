@@ -28,6 +28,25 @@ func MergeMap(left, right map[string]string) map[string]string {
 	return left
 }
 
+// MergeMapIfNotExists merges the right map into left map if right key is not exists in left
+func MergeMapIfNotExists(left, right map[string]string) map[string]string {
+
+	if right == nil {
+		return left
+	}
+
+	for k, v := range right {
+		if left == nil {
+			left = map[string]string{}
+		}
+		
+		if _, ok := left[k]; !ok {
+			left[k] = v
+		}
+	}
+	return left
+}
+
 // MergeMapSlice merges the right map into left map overwritting any matching keys
 func MergeMapSlice(left, right map[string][]string) map[string][]string {
 	if left == nil {
