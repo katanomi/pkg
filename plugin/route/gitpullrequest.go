@@ -75,10 +75,12 @@ func (a *gitPullRequestHandler) ListGitPullRequest(request *restful.Request, res
 	project := path.Parameter(request, "project")
 	_state := request.QueryParameter("state")
 	state := metav1alpha1.String2PullRequestState(_state)
+	commit := request.QueryParameter("commit")
 
 	option := metav1alpha1.GitPullRequestListOption{
 		GitRepo: metav1alpha1.GitRepo{Repository: repo, Project: project},
 		State:   state,
+		Commit:  commit,
 	}
 	listOption := GetListOptionsFromRequest(request)
 	prList, err := a.impl.ListGitPullRequest(request.Request.Context(), option, listOption)

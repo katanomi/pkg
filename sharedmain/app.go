@@ -29,6 +29,9 @@ import (
 	"sync"
 	"time"
 
+	cloudevents "github.com/cloudevents/sdk-go/v2"
+	cloudeventsv2client "github.com/cloudevents/sdk-go/v2/client"
+
 	"github.com/katanomi/pkg/config"
 	storageroute "github.com/katanomi/pkg/plugin/storage/route"
 
@@ -235,7 +238,27 @@ func (a *AppBuilder) initClient(clientVar ctrlclient.Client) {
 			a.Logger.Fatalw("dynamic client setup error", "err", err)
 		}
 		a.Context = kclient.WithDynamicClient(a.Context, dynamicClient)
+
+		ceClient, err := newCloudEventsClient(kclient.GetDefaultTransport())
+		if err != nil {
+			a.Logger.Fatalw("cloudevents client setup error", "err", err)
+		}
+		a.Context = kclient.WithCEClient(a.Context, ceClient)
 	})
+}
+
+func newCloudEventsClient(roundTripper http.RoundTripper) (cloudevents.Client, error) {
+	p, err := cloudevents.NewHTTP(cloudevents.WithRoundTripper(roundTripper))
+	if err != nil {
+		return nil, err
+	}
+
+	cloudEventClient, err := cloudevents.NewClient(p, cloudevents.WithUUIDs(), cloudevents.WithTimeNow(), cloudeventsv2client.WithForceStructured())
+	if err != nil {
+		return nil, err
+	}
+
+	return cloudEventClient, nil
 }
 
 // Tracing adds tracing and tracer to the app

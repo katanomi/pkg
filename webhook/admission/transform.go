@@ -113,3 +113,96 @@ func WithCreatedBy() TransformFunc {
 		}
 	}
 }
+
+// WithUpdatedBy adds a updatedBy annotation to the object using the request information
+// when an object already has the updatedBy annotation it will cover old data
+func WithUpdatedBy() TransformFunc {
+	return func(ctx context.Context, obj runtime.Object, req admission.Request) {
+		if req.Operation != admissionv1.Update {
+			return
+		}
+		log := logging.FromContext(ctx)
+		// TODO: 需要验证系统更新是不是也会被更改
+		newObj, ok := req.Object.Object.(metav1.Object)
+		if !ok {
+			return
+		}
+		oldObj, ok := req.OldObject.Object.(metav1.Object)
+		if !ok {
+			return
+		}
+		if newObj.GetGeneration() == oldObj.GetGeneration() {
+			log.Infow("WithUpdatedBy request object generation is equal", "new object", req.Object, "old object", req.OldObject)
+			return
+		}
+
+		metaobj, ok := obj.(metav1.Object)
+		if !ok {
+			return
+		}
+		annotations := metaobj.GetAnnotations()
+		if annotations == nil {
+			annotations = map[string]string{}
+		}
+
+		var err error
+		updatedBy := &mv1alpha1.UpdatedBy{}
+		updatedBy, err = updatedBy.FromAnnotation(annotations)
+		if err != nil {
+			log.Warnw("cannot unmarshal annotation value into updatedBy struct", "err", err)
+		}
+		if updatedBy == nil {
+			updatedBy = &mv1alpha1.UpdatedBy{}
+		}
+
+		if updatedBy.User == nil || updatedBy.User.Name == "" {
+			updatedBy.User = SubjectFromRequest(req)
+		}
+		annotations, err = updatedBy.SetIntoAnnotation(annotations)
+		if err != nil {
+			log.Warnw("cannot marshal createdBy struct to json ", "err", err, "struct", updatedBy)
+		} else {
+			metaobj.SetAnnotations(annotations)
+		}
+	}
+}
+
+// WithDeletedBy adds a deletedBy annotation to the object using the request information
+// when an object already has the deletedBy annotation it will cover old data
+func WithDeletedBy() TransformFunc {
+	return func(ctx context.Context, obj runtime.Object, req admission.Request) {
+		if req.Operation != admissionv1.Delete {
+			return
+		}
+		metaobj, ok := obj.(metav1.Object)
+		if !ok {
+			return
+		}
+
+		log := logging.FromContext(ctx)
+		annotations := metaobj.GetAnnotations()
+		if annotations == nil {
+			annotations = map[string]string{}
+		}
+
+		var err error
+		deletedBy := &mv1alpha1.DeletedBy{}
+		deletedBy, err = deletedBy.FromAnnotation(annotations)
+		if err != nil {
+			log.Warnw("cannot unmarshal annotation value into updatedBy struct", "err", err)
+		}
+		if deletedBy == nil {
+			deletedBy = &mv1alpha1.DeletedBy{}
+		}
+
+		if deletedBy.User == nil || deletedBy.User.Name == "" {
+			deletedBy.User = SubjectFromRequest(req)
+		}
+		annotations, err = deletedBy.SetIntoAnnotation(annotations)
+		if err != nil {
+			log.Warnw("cannot marshal createdBy struct to json ", "err", err, "struct", deletedBy)
+		} else {
+			metaobj.SetAnnotations(annotations)
+		}
+	}
+}

@@ -21,6 +21,8 @@ import (
 	"context"
 	"fmt"
 
+	cloudevents "github.com/cloudevents/sdk-go/v2"
+
 	"k8s.io/apiserver/pkg/endpoints/request"
 
 	"k8s.io/apiserver/pkg/authentication/user"
@@ -118,6 +120,9 @@ func User(ctx context.Context) user.Info {
 	return u
 }
 
+// WithUser set User into context
+var WithUser = request.WithUser
+
 // cfgKeyOfApp is the key that the config make is associated with.
 type cfgKeyOfApp struct{}
 
@@ -133,4 +138,20 @@ func GetAppConfig(ctx context.Context) *rest.Config {
 		return nil
 	}
 	return value.(*rest.Config)
+}
+
+type ceClientKey struct{}
+
+// WithCEClient associates a given cloudevents client with the cloudevent client
+func WithCEClient(ctx context.Context, ceClient cloudevents.Client) context.Context {
+	return context.WithValue(ctx, ceClientKey{}, ceClient)
+}
+
+// GetCEClient gets cloudevents client from the context.
+func GetCEClient(ctx context.Context) cloudevents.Client {
+	value := ctx.Value(ceClientKey{})
+	if value == nil {
+		return nil
+	}
+	return value.(cloudevents.Client)
 }

@@ -80,7 +80,8 @@ const (
 
 type GitPullRequestListOption struct {
 	GitRepo
-	State *PullRequestState `json:"state,omitempty"`
+	State  *PullRequestState `json:"state,omitempty"`
+	Commit string            `json:"commit,omitempty"`
 }
 
 func String2PullRequestState(state string) *PullRequestState {
