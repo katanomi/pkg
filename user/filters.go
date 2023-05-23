@@ -135,28 +135,6 @@ func resourcePermissionCheck(ctx context.Context, clientInApp ctrlclient.Client,
 	log := logging.FromContext(ctx)
 	user := kclient.User(ctx)
 
-	//if user == nil {
-	//	review := &authv1.SelfSubjectAccessReview{
-	//		Spec: authv1.SelfSubjectAccessReviewSpec{
-	//			ResourceAttributes: &authv1.ResourceAttributes{
-	//				Verb:      verb,
-	//				Group:     gvr.Group,
-	//				Version:   gvr.Version,
-	//				Resource:  gvr.Resource,
-	//				Namespace: namespace,
-	//				Name:      name,
-	//			},
-	//		},
-	//	}
-	//
-	//	err := clientInReq.Create(ctx, review)
-	//	if err != nil {
-	//		log.Errorw("error evaluating SelfSubjectAccessReview", "err", err, "review", review)
-	//		return nil, err
-	//	}
-	//	return &review.Status, nil
-	//}
-
 	review := &authv1.SubjectAccessReview{
 		Spec: authv1.SubjectAccessReviewSpec{
 			ResourceAttributes: &authv1.ResourceAttributes{
@@ -173,14 +151,12 @@ func resourcePermissionCheck(ctx context.Context, clientInApp ctrlclient.Client,
 			Extra:  map[string]authv1.ExtraValue{},
 		},
 	}
-	//restConfig := injection.GetConfig(ctx)
 
 	err := clientInApp.Create(ctx, review)
 	if err != nil {
 		log.Errorw("error evaluating SubjectAccessReview", "err", err, "review", review)
 		return nil, err
 	}
-	//log.Infow("review result", "review", review, "client", fmt.Sprintf("%#v", client), "config", restConfig)
 	return &review.Status, nil
 
 }
