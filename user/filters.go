@@ -157,7 +157,6 @@ func resourcePermissionCheck(ctx context.Context, clientInApp ctrlclient.Client,
 	//	return &review.Status, nil
 	//}
 
-	log.Infow("user is --->", "user", user)
 	review := &authv1.SubjectAccessReview{
 		Spec: authv1.SubjectAccessReviewSpec{
 			ResourceAttributes: &authv1.ResourceAttributes{
