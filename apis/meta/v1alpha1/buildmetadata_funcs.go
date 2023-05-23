@@ -112,6 +112,7 @@ func (b *BuildGitPullRequestStatus) AssignByGitPullRequest(gitPullRequest *GitPu
 		json.Unmarshal(gitPullRequest.Spec.Properties.Raw, &content)
 		b.WebURL = content["webURL"]
 	}
+	b.MergedBy = gitPullRequest.Spec.MergedBy
 	return b
 }
 

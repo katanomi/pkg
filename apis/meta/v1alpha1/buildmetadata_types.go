@@ -126,9 +126,9 @@ type BuildGitCommitStatus struct {
 	// webURL access link of the commit
 	// +optional
 	WebURL string `json:"webURL,omitempty" variable:"example=https://github.com/repository/commit/3cb8901fb325228ea27b751fcf0d6c0658a57f01"`
-	// MergedBy means the pr was merged by in last commit
-	// +optional
-	MergedBy string `json:"mergedBy,omitempty" variable:"example=joedoe@example.com"` 
+	// // PullRequests means the pr list of last commit
+	// // +optional
+	PullRequests []BuildGitPullRequestStatus `json:"pullRequests,omitempty"`
 }
 
 type BuildGitPullRequestStatus struct {
@@ -153,4 +153,6 @@ type BuildGitPullRequestStatus struct {
 	// HasConflicts represent if has conflicts in pull request
 	// +optional
 	HasConflicts bool `json:"hasConflicts" variable:"example=false"`
+	// MergedBy indicates pr was merged by user use email
+	MergedBy GitUserBaseInfo `json:"mergedBy,omitempty" variable:"example=joedoe@example.com"`
 }

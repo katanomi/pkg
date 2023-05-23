@@ -22,7 +22,7 @@ import (
 	rbacv1 "k8s.io/api/rbac/v1"
 )
 
-// DeletedBy stores a list of created information.
+// DeletedBy stores deleted user information.
 type DeletedBy struct {
 	// Reference to the user that created the object. Any Kubernetes `Subject` is accepted.
 	// +optional

@@ -26,8 +26,8 @@ import (
 // GitUserBaseInfo user base info
 type GitUserBaseInfo struct {
 	// Name is the login Name
-	Name  string `json:"name"`
-	Email string `json:"email"`
+	Name  string `json:"name" variable:"example=joedoe"`
+	Email string `json:"email"  variable:"example=joedoe@example.com"`
 }
 
 // GitRepo Repo base info
