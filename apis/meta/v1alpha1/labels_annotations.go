@@ -166,5 +166,5 @@ const (
 const (
 
 	// UserOwnedAnnotationKey annotated the resource's owner is one user
-	UserOwnedAnnotationKey = "katanomi.dev/owned.username"
+	UserOwnedAnnotationKey = "katanomi.dev/owned.username" // NOSONAR // ignore: "Key" detected here, make sure this is not a hard-coded credential
 )

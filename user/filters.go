@@ -27,7 +27,6 @@ import (
 	kclient "github.com/katanomi/pkg/client"
 	kerror "github.com/katanomi/pkg/errors"
 	authv1 "k8s.io/api/authorization/v1"
-	"k8s.io/apimachinery/pkg/api/errors"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime/schema"
@@ -173,7 +172,7 @@ func getResourceUsername(req *restful.Request, res *restful.Response, gvk schema
 		err := req.ReadEntity(obj)
 		if err != nil {
 			log.Errorw("error read entity from body", "err", err)
-			kerror.HandleError(req, res, errors.NewBadRequest(err.Error()))
+			kerror.HandleError(req, res, k8serrors.NewBadRequest(err.Error()))
 			return "", nil
 		}
 	}
@@ -192,7 +191,7 @@ func getResourceUsername(req *restful.Request, res *restful.Response, gvk schema
 
 	annotations := obj.GetAnnotations()
 	if len(annotations) == 0 || annotations[metav1alpha1.UserOwnedAnnotationKey] == "" {
-		kerror.HandleError(req, res, errors.NewBadRequest("request object does not contains anotation key: "+metav1alpha1.UserOwnedAnnotationKey))
+		kerror.HandleError(req, res, k8serrors.NewBadRequest("request object does not contains anotation key: "+metav1alpha1.UserOwnedAnnotationKey))
 		return "", nil
 	}
 
