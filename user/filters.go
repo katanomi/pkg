@@ -31,7 +31,6 @@ import (
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime/schema"
-	"knative.dev/pkg/injection"
 	"knative.dev/pkg/logging"
 	ctrlclient "sigs.k8s.io/controller-runtime/pkg/client"
 )
@@ -91,8 +90,8 @@ func UserOwnedResourcePermissionFilter(appCtx context.Context, gvr *schema.Group
 			verb = "update"
 		}
 
-		clientInReq := kclient.Client(ctxInReq)
-		status, err := resourcePermissionCheck(ctxInReq, clientInReq, verb, *gvr, obj.GetNamespace(), obj.GetName())
+		clientInApp := kclient.Client(appCtx)
+		status, err := resourcePermissionCheck(ctxInReq, clientInApp, verb, *gvr, obj.GetNamespace(), obj.GetName())
 		if err != nil {
 			log.Errorw("resource permission check error", "namespace", obj.GetNamespace(), "name", obj.GetName(), "err", err)
 			kerror.HandleError(req, res, err)
@@ -109,19 +108,19 @@ func UserOwnedResourcePermissionFilter(appCtx context.Context, gvr *schema.Group
 
 		// if self has no permission
 		// user should only could request resource of current user
-		userInReq, ok := UserInfoFrom(ctxInReq)
-		if !ok {
+		userInReq := kclient.User(ctxInReq)
+		if userInReq == nil {
 			log.Errorw("not found userinfo in context")
 			kerror.HandleError(req, res, k8serrors.NewBadRequest("not found userinfo in request"))
 			return
 		}
 
-		if userInReq.Username != usernameOfResource {
+		if userInReq.GetName() != usernameOfResource {
 			log.Warnw(fmt.Sprintf("no permissions to %s %s %s, username is not equal", verb, gvr.Resource, obj.GetNamespace()+"/"+obj.GetName()),
 				"usernameInReq", userInReq, "usernameOfResource", usernameOfResource)
 			kerror.HandleError(req, res, k8serrors.NewForbidden(
 				gvr.GroupResource(),
-				obj.GetName(), fmt.Errorf("no permissions to %s %s %s", verb, gvr.Resource, obj.GetNamespace()+"/"+obj.GetName()),
+				obj.GetName(), fmt.Errorf("no permissions to %s %s %s for user '%s'", verb, gvr.Resource, obj.GetNamespace()+"/"+obj.GetName(), usernameOfResource),
 			))
 			return
 		}
@@ -132,32 +131,33 @@ func UserOwnedResourcePermissionFilter(appCtx context.Context, gvr *schema.Group
 	}
 }
 
-func resourcePermissionCheck(ctx context.Context, client ctrlclient.Client, verb string, gvr schema.GroupVersionResource, namespace string, name string) (*authv1.SubjectAccessReviewStatus, error) {
+func resourcePermissionCheck(ctx context.Context, clientInApp ctrlclient.Client, verb string, gvr schema.GroupVersionResource, namespace string, name string) (*authv1.SubjectAccessReviewStatus, error) {
 	log := logging.FromContext(ctx)
 	user := kclient.User(ctx)
 
-	if user == nil {
-		review := &authv1.SelfSubjectAccessReview{
-			Spec: authv1.SelfSubjectAccessReviewSpec{
-				ResourceAttributes: &authv1.ResourceAttributes{
-					Verb:      verb,
-					Group:     gvr.Group,
-					Version:   gvr.Version,
-					Resource:  gvr.Resource,
-					Namespace: namespace,
-					Name:      name,
-				},
-			},
-		}
+	//if user == nil {
+	//	review := &authv1.SelfSubjectAccessReview{
+	//		Spec: authv1.SelfSubjectAccessReviewSpec{
+	//			ResourceAttributes: &authv1.ResourceAttributes{
+	//				Verb:      verb,
+	//				Group:     gvr.Group,
+	//				Version:   gvr.Version,
+	//				Resource:  gvr.Resource,
+	//				Namespace: namespace,
+	//				Name:      name,
+	//			},
+	//		},
+	//	}
+	//
+	//	err := clientInReq.Create(ctx, review)
+	//	if err != nil {
+	//		log.Errorw("error evaluating SelfSubjectAccessReview", "err", err, "review", review)
+	//		return nil, err
+	//	}
+	//	return &review.Status, nil
+	//}
 
-		err := client.Create(ctx, review)
-		if err != nil {
-			log.Errorw("error evaluating SelfSubjectAccessReview", "err", err, "review", review)
-			return nil, err
-		}
-		return &review.Status, nil
-	}
-
+	log.Infow("user is --->", "user", user)
 	review := &authv1.SubjectAccessReview{
 		Spec: authv1.SubjectAccessReviewSpec{
 			ResourceAttributes: &authv1.ResourceAttributes{
@@ -174,14 +174,14 @@ func resourcePermissionCheck(ctx context.Context, client ctrlclient.Client, verb
 			Extra:  map[string]authv1.ExtraValue{},
 		},
 	}
-	restConfig := injection.GetConfig(ctx)
+	//restConfig := injection.GetConfig(ctx)
 
-	err := client.Create(ctx, review)
+	err := clientInApp.Create(ctx, review)
 	if err != nil {
 		log.Errorw("error evaluating SubjectAccessReview", "err", err, "review", review)
 		return nil, err
 	}
-	log.Infow("review result", "review", review, "client", fmt.Sprintf("%#v", client), "config", restConfig)
+	//log.Infow("review result", "review", review, "client", fmt.Sprintf("%#v", client), "config", restConfig)
 	return &review.Status, nil
 
 }
