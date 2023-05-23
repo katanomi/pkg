@@ -42,6 +42,10 @@ type TimeCursor struct {
 
 	// QueryStartAt is the time of the first query
 	QueryStartAt int64 `json:"queryStartAt"`
+
+	// ExtData Extend field for carrying more query information
+	// +optional
+	ExtData map[string]string `json:"extData,omitempty"`
 }
 
 // Encode encode cursor to string
