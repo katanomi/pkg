@@ -81,21 +81,20 @@ func TestUserOwnedResourcePermissionFilter(t *testing.T) {
 	mockClient.EXPECT().Create(gomock.Any(), gomock.Any(), gomock.Any()).DoAndReturn(
 		func(ctx context.Context, obj client.Object, opts ...client.CreateOption) error {
 
-			if sub, ok := obj.(*authv1.SubjectAccessReview); ok {
+			sub, ok := obj.(*authv1.SubjectAccessReview)
+			if ok {
+				if sub.Spec.User == "admin" {
+					sub.Status.Denied = false
+					sub.Status.Allowed = true
+					return nil
+				}
 				sub.Status.Denied = true
 				sub.Status.Allowed = false
 				return nil
 			}
-			switch subject := obj.(type) {
 
-			case *authv1.SelfSubjectAccessReview:
-				subject.Status.Denied = false
-				subject.Status.Allowed = true
-			case *authv1.SubjectAccessReview:
-				subject.Status.Denied = true
-				subject.Status.Allowed = false
-			}
-
+			sub.Status.Denied = true
+			sub.Status.Allowed = false
 			return nil
 		}).AnyTimes()
 
@@ -152,21 +151,18 @@ func TestUserOwnedResourcePermissionFilter(t *testing.T) {
 	}{
 		{
 			desc:          "user should only request his resource",
-			permissionOK:  false,
 			userNameInReq: "jackson",
 			respBody:      "OK",
 		},
 		{
 			desc:          "user cannot request resource not owned by him",
-			permissionOK:  false,
 			userNameInReq: "user",
 			respCode:      http.StatusForbidden,
 		},
 		{
 			desc:          "user could request any resource when he has permission to get resource",
-			permissionOK:  true,
 			userNameInReq: "admin",
-			respCode:      http.StatusForbidden,
+			respBody:      "OK",
 		},
 	}
 
@@ -175,9 +171,7 @@ func TestUserOwnedResourcePermissionFilter(t *testing.T) {
 		t.Run(item.desc, func(t *testing.T) {
 			g := gomega.NewWithT(t)
 
-			if !item.permissionOK {
-				ctx = kclient.WithUser(ctx, &user.DefaultInfo{Name: "jackson"})
-			}
+			ctx = kclient.WithUser(ctx, &user.DefaultInfo{Name: item.userNameInReq})
 
 			_req := httptest.NewRequest("GET", "http://localhost", nil)
 			request := restful.NewRequest(_req)

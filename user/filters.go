@@ -115,9 +115,9 @@ func UserOwnedResourcePermissionFilter(appCtx context.Context, gvr *schema.Group
 			return
 		}
 
+		log = log.With("usernameInReq", userInReq.GetName(), "usernameOfResource", usernameOfResource)
 		if userInReq.GetName() != usernameOfResource {
-			log.Warnw(fmt.Sprintf("no permissions to %s %s %s, username is not equal", verb, gvr.Resource, obj.GetNamespace()+"/"+obj.GetName()),
-				"usernameInReq", userInReq, "usernameOfResource", usernameOfResource)
+			log.Warnw(fmt.Sprintf("no permissions to %s %s %s, username is not equal", verb, gvr.Resource, obj.GetNamespace()+"/"+obj.GetName()))
 			kerror.HandleError(req, res, k8serrors.NewForbidden(
 				gvr.GroupResource(),
 				obj.GetName(), fmt.Errorf("no permissions to %s %s %s for user '%s'", verb, gvr.Resource, obj.GetNamespace()+"/"+obj.GetName(), usernameOfResource),
