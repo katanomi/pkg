@@ -20,6 +20,8 @@ import (
 	"context"
 	"testing"
 
+	cloudevents "github.com/cloudevents/sdk-go/v2"
+
 	"k8s.io/client-go/rest"
 
 	dynamicFake "k8s.io/client-go/dynamic/fake"
@@ -93,4 +95,17 @@ func TestAppConfigContext(t *testing.T) {
 	cfg = &rest.Config{}
 	ctx = WithAppConfig(ctx, cfg)
 	g.Expect(GetAppConfig(ctx)).To(Equal(cfg))
+}
+
+func TestCEClientContext(t *testing.T) {
+	g := NewGomegaWithT(t)
+
+	ctx := context.TODO()
+
+	clt := GetCEClient(ctx)
+	g.Expect(clt).To(BeNil())
+
+	clt, _ = cloudevents.NewClientHTTP()
+	ctx = WithCEClient(ctx, clt)
+	g.Expect(GetCEClient(ctx)).To(Equal(clt))
 }
