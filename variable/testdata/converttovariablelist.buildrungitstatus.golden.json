@@ -21,6 +21,9 @@
             "example": "1"
         },
         {
+            "name": "revision.revisionPusher"
+        },
+        {
             "name": "lastCommit",
             "example": "3cb8901f"
         },
@@ -52,6 +55,10 @@
         {
             "name": "lastCommit.webURL",
             "example": "https://github.com/repository/commit/3cb8901fb325228ea27b751fcf0d6c0658a57f01"
+        },
+        {
+            "name": "lastCommit.mergedBy",
+            "example": "joedoe@example.com"
         },
         {
             "name": "pullRequest",

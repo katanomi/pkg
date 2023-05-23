@@ -128,7 +128,7 @@ func TestMergeMapIfNotExists(t *testing.T) {
 		"both nil": {
 			Left:   nil,
 			Right:  nil,
-			Result: map[string]string{},
+			Result: nil,
 		},
 	}
 
