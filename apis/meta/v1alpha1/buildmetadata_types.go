@@ -126,6 +126,9 @@ type BuildGitCommitStatus struct {
 	// webURL access link of the commit
 	// +optional
 	WebURL string `json:"webURL,omitempty" variable:"example=https://github.com/repository/commit/3cb8901fb325228ea27b751fcf0d6c0658a57f01"`
+	// MergedBy means the pr was merged by in last commit
+	// +optional
+	MergedBy string `json:"mergedBy,omitempty" variable:"example=joedoe@example.com"` 
 }
 
 type BuildGitPullRequestStatus struct {

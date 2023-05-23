@@ -76,6 +76,8 @@ const (
 const (
 	// CreatedTimeAnnotationKey creation time for objects
 	CreatedTimeAnnotationKey = "katanomi.dev/creationTime"
+	// DeletedTimeAnnotationKey deletion time for objects
+	DeletedTimeAnnotationKey = "katanomi.dev/deletionTime"
 	// CrossClusterAnnotationKey annotates a cross cluster resource/action
 	CrossClusterAnnotationKey = "katanomi.dev/crossCluster"
 	// ReconcileTriggeredAnnotationKey annotation key to trigger reconcile of objects
@@ -88,6 +90,8 @@ const (
 	CreatedByAnnotationKey = "katanomi.dev/createdBy"
 	// UpdatedByAnnotationKey annotation key to store resource update username
 	UpdatedByAnnotationKey = "katanomi.dev/updatedBy"
+	// DeletedByAnnotationKey annotation key to store resource update username
+	DeletedByAnnotationKey = "katanomi.dev/deletedBy"
 	// SecretTypeAnnotationKey annotation key for an existed secret with a different type
 	SecretTypeAnnotationKey = "katanomi.dev/secretType" //nolint:gosec
 	// ClusterNameAnnotationKey annotation key to store resource cluster name

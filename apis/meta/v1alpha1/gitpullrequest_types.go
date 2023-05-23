@@ -83,6 +83,8 @@ type GitPullRequestSpec struct {
 	MergeStatus MergeStatus `json:"mergeStatus,omitempty"`
 	// OriginMergeStatus used to store origin merge status
 	OriginMergeStatus string `json:"originMergeStatus,omitempty"`
+	// MergedBy indicates pr was merged by user use email
+	MergedBy GitUserBaseInfo `json:"mergedBy,omitempty"`
 }
 
 // GitPullRequestList list of pr
