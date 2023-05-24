@@ -39,7 +39,7 @@ func MergeMapIfNotExists(left, right map[string]string) map[string]string {
 		if left == nil {
 			left = map[string]string{}
 		}
-		
+
 		if _, ok := left[k]; !ok {
 			left[k] = v
 		}
