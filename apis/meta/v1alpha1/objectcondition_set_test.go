@@ -148,5 +148,32 @@ func TestObjectConditionsSet(t *testing.T) {
 		mgr.SetObjectConditions(objcs)
 		g.Expect(mgr.GetObjectConditions()).To(HaveLen(2))
 	})
+}
 
+func TestReplaceConditions(t *testing.T) {
+	g := NewGomegaWithT(t)
+	objs := []ObjectCondition{}
+	ktesting.MustLoadYaml("testdata/objectconditions_will_replace.yaml", &objs)
+
+	replaced := []ObjectCondition{}
+	ktesting.MustLoadYaml("testdata/objectconditions_replace.yaml", &replaced)
+
+	expected := []ObjectCondition{}
+	ktesting.MustLoadYaml("testdata/objectconditions_replace_golden.yaml", &expected)
+
+	actual := ReplaceObjectConditions(objs, replaced)
+	g.Expect(actual).Should(BeEquivalentTo(expected))
+}
+
+func TestAggregateCondition(t *testing.T) {
+	g := NewGomegaWithT(t)
+	objs := []ObjectCondition{}
+	ktesting.MustLoadYaml("testdata/objectconditions_aggregate.yaml", &objs)
+
+	expected := apis.Condition{}
+	ktesting.MustLoadYaml("testdata/objectconditions_aggregate_golden.yaml", &expected)
+
+	actual := AggregateCondition(objs, "Ready")
+	//bts, _ := yaml.Marshal(actual)
+	g.Expect(*actual).Should(BeEquivalentTo(expected))
 }

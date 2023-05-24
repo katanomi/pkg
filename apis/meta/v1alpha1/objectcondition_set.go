@@ -18,6 +18,7 @@ package v1alpha1
 
 import (
 	"fmt"
+	"strings"
 	"time"
 
 	corev1 "k8s.io/api/core/v1"
@@ -157,4 +158,80 @@ func (o *ObjectConditionSet) markStatus(objref corev1.ObjectReference, cond core
 		objCondition.LastTransitionTime = apis.VolatileTime{Inner: metav1.NewTime(time.Now())}
 	}
 	o.SetObjectCondition(*objCondition)
+}
+
+// ReplaceConditions will replace all conditions in source used by replaced, and remove all conditions that not exists in replaced
+func ReplaceObjectConditions(source []ObjectCondition, replaced []ObjectCondition) (res []ObjectCondition) {
+	shouldRemoved := []ObjectCondition{}
+	if len(source) == 0 {
+		return replaced
+	}
+
+	for _, item := range source {
+		contains := false
+		for _, cond := range replaced {
+			if IsTheSameObject(item.ObjectReference, cond.ObjectReference) {
+				contains = true
+			}
+		}
+
+		if !contains {
+			shouldRemoved = append(shouldRemoved, item)
+		}
+	}
+
+	for _, cond := range replaced {
+		source = ObjectConditions(source).SetObjectCondition(cond)
+	}
+
+	for _, cond := range shouldRemoved {
+		source = ObjectConditions(source).RemoveObjectConditionByObjRef(cond.ObjectReference)
+	}
+	return source
+}
+
+// AggregateCondition aggregated object conditions to apis.Conditioion
+func AggregateCondition(conds []ObjectCondition, condType apis.ConditionType) *apis.Condition {
+	cond := apis.Condition{
+		Type:     condType,
+		Status:   corev1.ConditionTrue,
+		Severity: apis.ConditionSeverityInfo,
+	}
+
+	if len(conds) == 0 {
+		cond.Message = "No targets need be synced"
+		return &cond
+	}
+
+	falseContains := false
+	unknownContains := false
+	messagesIndex := map[string]struct{}{}
+	messages := []string{}
+
+	for _, item := range conds {
+		key := item.ObjectReference.Namespace + "/" + item.ObjectReference.Name
+		if item.Status == corev1.ConditionFalse {
+			falseContains = true
+		}
+		if item.Status == corev1.ConditionUnknown {
+			unknownContains = true
+		}
+		if item.Status != corev1.ConditionTrue {
+			if _, ok := messagesIndex[key]; !ok {
+				messagesIndex[key] = struct{}{}
+				messages = append(messages, fmt.Sprintf("%s: %s", key, item.Message))
+			}
+		}
+	}
+
+	if falseContains {
+		cond.Status = corev1.ConditionFalse
+	}
+	if unknownContains {
+		cond.Status = corev1.ConditionUnknown
+	}
+
+	cond.Message = strings.Join(messages, ";  ")
+
+	return &cond
 }

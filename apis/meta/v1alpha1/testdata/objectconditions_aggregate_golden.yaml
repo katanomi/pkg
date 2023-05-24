@@ -1,0 +1,4 @@
+message: "/a-1: unknown;  /a-2: not ready;  /a-3: unknown"
+severity: Info
+status: Unknown
+type: Ready
