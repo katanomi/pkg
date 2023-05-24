@@ -165,7 +165,7 @@ func TestReplaceConditions(t *testing.T) {
 	g.Expect(actual).Should(BeEquivalentTo(expected))
 }
 
-func TestAggregateCondition(t *testing.T) {
+func TestAggregateObjectCondition(t *testing.T) {
 	g := NewGomegaWithT(t)
 	objs := []ObjectCondition{}
 	ktesting.MustLoadYaml("testdata/objectconditions_aggregate.yaml", &objs)
@@ -173,7 +173,7 @@ func TestAggregateCondition(t *testing.T) {
 	expected := apis.Condition{}
 	ktesting.MustLoadYaml("testdata/objectconditions_aggregate_golden.yaml", &expected)
 
-	actual := AggregateCondition(objs, "Ready")
+	actual := AggregateObjectCondition(objs, "Ready")
 	//bts, _ := yaml.Marshal(actual)
 	g.Expect(*actual).Should(BeEquivalentTo(expected))
 }

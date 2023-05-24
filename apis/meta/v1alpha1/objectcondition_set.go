@@ -190,8 +190,8 @@ func ReplaceObjectConditions(source []ObjectCondition, replaced []ObjectConditio
 	return source
 }
 
-// AggregateCondition aggregated object conditions to apis.Conditioion
-func AggregateCondition(conds []ObjectCondition, condType apis.ConditionType) *apis.Condition {
+// AggregateObjectCondition aggregated object conditions to apis.Conditioion
+func AggregateObjectCondition(conds []ObjectCondition, condType apis.ConditionType) *apis.Condition {
 	cond := apis.Condition{
 		Type:     condType,
 		Status:   corev1.ConditionTrue,
