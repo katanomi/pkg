@@ -17,6 +17,8 @@ limitations under the License.
 package v1alpha1
 
 const (
+	// IDField the name of id field, usually the primary key id of the storage table
+	IDField = "id"
 	// TopClusterField the name of top cluster field
 	TopClusterField = "topCluster"
 	// ParentClusterField the name of parent cluster field
