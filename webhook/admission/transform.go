@@ -21,6 +21,7 @@ import (
 
 	mv1alpha1 "github.com/katanomi/pkg/apis/meta/v1alpha1"
 	admissionv1 "k8s.io/api/admission/v1"
+	rbacv1 "k8s.io/api/rbac/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"knative.dev/pkg/logging"
@@ -121,88 +122,68 @@ func WithUpdatedBy() TransformFunc {
 		if req.Operation != admissionv1.Update {
 			return
 		}
-		log := logging.FromContext(ctx)
-		// TODO: 需要验证系统更新是不是也会被更改
-		newObj, ok := req.Object.Object.(metav1.Object)
-		if !ok {
-			return
-		}
-		oldObj, ok := req.OldObject.Object.(metav1.Object)
-		if !ok {
-			return
-		}
-		if newObj.GetGeneration() == oldObj.GetGeneration() {
-			log.Infow("WithUpdatedBy request object generation is equal", "new object", req.Object, "old object", req.OldObject)
+		subject := SubjectFromRequest(req)
+		if subject.Kind != rbacv1.UserKind {
 			return
 		}
 
-		metaobj, ok := obj.(metav1.Object)
-		if !ok {
-			return
-		}
-		annotations := metaobj.GetAnnotations()
+		log := logging.FromContext(ctx)
+
+		newObj := obj.(metav1.Object)
+		annotations := newObj.GetAnnotations()
 		if annotations == nil {
 			annotations = map[string]string{}
 		}
 
-		var err error
-		updatedBy := &mv1alpha1.UpdatedBy{}
-		updatedBy, err = updatedBy.FromAnnotation(annotations)
-		if err != nil {
-			log.Warnw("cannot unmarshal annotation value into updatedBy struct", "err", err)
+		updatedBy := &mv1alpha1.UpdatedBy{
+			User: subject,
 		}
-		if updatedBy == nil {
-			updatedBy = &mv1alpha1.UpdatedBy{}
-		}
+		annotations, err := updatedBy.SetIntoAnnotation(annotations)
 
-		if updatedBy.User == nil || updatedBy.User.Name == "" {
-			updatedBy.User = SubjectFromRequest(req)
-		}
-		annotations, err = updatedBy.SetIntoAnnotation(annotations)
 		if err != nil {
-			log.Warnw("cannot marshal createdBy struct to json ", "err", err, "struct", updatedBy)
+			log.Warnw("cannot marshal updateBy struct to json ", "err", err, "struct", updatedBy)
 		} else {
-			metaobj.SetAnnotations(annotations)
+			newObj.SetAnnotations(annotations)
 		}
 	}
 }
 
 // WithDeletedBy adds a deletedBy annotation to the object using the request information
 // when an object already has the deletedBy annotation it will cover old data
+// TODO: DeletedBy is not work now , https://book.kubebuilder.io/reference/admission-webhook.html just support create or update
 func WithDeletedBy() TransformFunc {
 	return func(ctx context.Context, obj runtime.Object, req admission.Request) {
+		log := logging.FromContext(ctx)
+		log.Infow("in deleted by .......", "obj", obj, "req", req)
+
 		if req.Operation != admissionv1.Delete {
-			return
-		}
-		metaobj, ok := obj.(metav1.Object)
-		if !ok {
+			log.Infof("operator: %#v", req.Operation)
 			return
 		}
 
-		log := logging.FromContext(ctx)
+		metaobj, ok := obj.(metav1.Object)
+		if !ok {
+			log.Infof("obj type: %#v", obj)
+			return
+		}
+
 		annotations := metaobj.GetAnnotations()
 		if annotations == nil {
 			annotations = map[string]string{}
 		}
 
 		var err error
-		deletedBy := &mv1alpha1.DeletedBy{}
-		deletedBy, err = deletedBy.FromAnnotation(annotations)
-		if err != nil {
-			log.Warnw("cannot unmarshal annotation value into updatedBy struct", "err", err)
-		}
-		if deletedBy == nil {
-			deletedBy = &mv1alpha1.DeletedBy{}
+		deletedBy := &mv1alpha1.DeletedBy{
+			User: SubjectFromRequest(req),
 		}
 
-		if deletedBy.User == nil || deletedBy.User.Name == "" {
-			deletedBy.User = SubjectFromRequest(req)
-		}
 		annotations, err = deletedBy.SetIntoAnnotation(annotations)
 		if err != nil {
-			log.Warnw("cannot marshal createdBy struct to json ", "err", err, "struct", deletedBy)
+			log.Warnw("cannot marshal deletedBy struct to json ", "err", err, "struct", deletedBy)
 		} else {
 			metaobj.SetAnnotations(annotations)
 		}
+
+		log.Infow("after deleted by", "annotations", obj.(metav1.Object).GetAnnotations())
 	}
 }
