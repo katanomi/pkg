@@ -110,11 +110,16 @@ func (g *gitPullRequest) List(
 ) (*metav1alpha1.GitPullRequestList, error) {
 	prList := &metav1alpha1.GitPullRequestList{}
 	options = append(options, ResultOpts(prList))
+
+	query := make(map[string]string)
 	if option.State != nil {
-		stateFilter := make(map[string]string)
-		stateFilter["state"] = (string)(*option.State)
-		options = append(options, QueryOpts(stateFilter))
+		query["state"] = (string)(*option.State)
 	}
+	if len(option.Commit) > 0 {
+		query["commit"] = option.Commit
+	}
+	options = append(options, QueryOpts(query))
+	
 	if option.Repository == "" {
 		return nil, errors.NewBadRequest("repo is empty string")
 	}
