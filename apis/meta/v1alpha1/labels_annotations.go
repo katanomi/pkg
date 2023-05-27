@@ -86,6 +86,10 @@ const (
 	TriggeredByAnnotationKey = "katanomi.dev/triggeredBy"
 	// CreatedByAnnotationKey annotation key to store resource creation username
 	CreatedByAnnotationKey = "katanomi.dev/createdBy"
+	// CancellerAnnotationKey annotation key to store resource creation username
+	CancellerAnnotationKey = "katanomi.dev/canceller"
+	// CancelledByAnnotationKey annotation key to store resource creation username
+	CancelledByAnnotationKey = "katanomi.dev/cancelledBy"
 	// UpdatedByAnnotationKey annotation key to store resource update username
 	UpdatedByAnnotationKey = "katanomi.dev/updatedBy"
 	// SecretTypeAnnotationKey annotation key for an existed secret with a different type
