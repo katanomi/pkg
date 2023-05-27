@@ -160,7 +160,7 @@ func (o *ObjectConditionSet) markStatus(objref corev1.ObjectReference, cond core
 	o.SetObjectCondition(*objCondition)
 }
 
-// ReplaceConditions will replace all conditions in source used by replaced, and remove all conditions that not exists in replaced
+// ReplaceObjectConditions will replace all conditions in source used by replaced, and remove all conditions that not exists in replaced
 func ReplaceObjectConditions(source []ObjectCondition, replaced []ObjectCondition) (res []ObjectCondition) {
 	shouldRemoved := []ObjectCondition{}
 	if len(source) == 0 {

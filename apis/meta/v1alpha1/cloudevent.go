@@ -113,7 +113,8 @@ const (
 	CloudEventExtPullRequestNumber = "number"
 	CloudEventExtCodeRepository    = "repository"
 	CloudEventExtWebhookType       = "webhooktype"
-	CloudEventExtRevisionPusher    = "revisionpusher"
+	// CloudEventExtRevisionSubmitter indicates email of revision submitter
+	CloudEventExtRevisionSubmitter = "revisionsubmitter"
 
 	// Triggered when a pull request's head branch is updated.
 	// For example, when the head branch is updated from the base branch, when new commits are pushed to the head branch, or when the base branch is changed.

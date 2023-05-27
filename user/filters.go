@@ -19,8 +19,10 @@ package user
 
 import (
 	"context"
-	"fmt"
+	"errors"
 	"net/http"
+
+	"k8s.io/apimachinery/pkg/api/meta"
 
 	restful "github.com/emicklei/go-restful/v3"
 	metav1alpha1 "github.com/katanomi/pkg/apis/meta/v1alpha1"
@@ -48,15 +50,19 @@ func UserInfoFilter(req *restful.Request, res *restful.Response, chain *restful.
 	chain.ProcessFilter(req, res)
 }
 
+// UserOwnedResourcePermissionFilter provides a mechanism to check permissions for user owned resource
+// the user owned resource could use annotation to annotated owner name
+// and the filter will check if current user could execcute the `verb` for the resource
+// more doc about it please see Spec: user owned resource permission check
 func UserOwnedResourcePermissionFilter(appCtx context.Context, gvr *schema.GroupVersionResource) restful.FilterFunction {
 	appClient := kclient.Client(appCtx)
-	fmt.Printf("appclient: %#v", appCtx)
 	restMapper := appClient.RESTMapper()
 
 	return func(req *restful.Request, res *restful.Response, chain *restful.FilterChain) {
 		ctxInReq := req.Request.Context()
 		log := logging.FromContext(ctxInReq).Named("user-owned-resource")
 		logging.WithLogger(ctxInReq, log)
+
 		if gvr == nil {
 			gvr = &schema.GroupVersionResource{
 				Group:    req.PathParameter("group"),
@@ -64,73 +70,107 @@ func UserOwnedResourcePermissionFilter(appCtx context.Context, gvr *schema.Group
 				Resource: req.PathParameter("resource"),
 			}
 		}
+		log = log.With("gvr", gvr)
 
-		log = log.With("gvr", *gvr)
-
-		gvk, err := restMapper.KindFor(*gvr)
+		// check rbac for current user
+		rbacReviewStatus, resourcecOwner, resource, err := resourecRBACAllowed(appCtx, req, gvr, restMapper)
 		if err != nil {
-			log.Errorw("get kind from groupversionresource error", "err", err)
+			log.Errorw("resource rbac allowed error", "err", err)
 			kerror.HandleError(req, res, err)
 			return
 		}
 
-		usernameOfResource, obj := getResourceUsername(req, res, gvk, appCtx)
-		if usernameOfResource == "" {
-			return
-		}
-
-		req.Request = req.Request.WithContext(WithEntity(ctxInReq, obj))
-
-		verb := "get"
-		if req.Request.Method == http.MethodPost {
-			verb = "create"
-		}
-		if req.Request.Method == http.MethodPut {
-			verb = "update"
-		}
-
-		clientInApp := kclient.Client(appCtx)
-		status, err := resourcePermissionCheck(ctxInReq, clientInApp, verb, *gvr, obj.GetNamespace(), obj.GetName())
-		if err != nil {
-			log.Errorw("resource permission check error", "namespace", obj.GetNamespace(), "name", obj.GetName(), "err", err)
-			kerror.HandleError(req, res, err)
-			return
-		}
-
-		if status.Allowed {
-			log.Debugf("allow to %s resource %s, check pass", verb, gvr.String())
+		if rbacReviewStatus.Allowed {
+			log.Debugf("rbac permission allowed")
 			chain.ProcessFilter(req, res)
 			return
-		} else {
-			log.Debugw("self permission check error", "message", status.String())
 		}
 
-		// if self has no permission
+		log.Debugw("rbac permission not allowed", "message", rbacReviewStatus.String())
+
+		// if current user has no permission
 		// user should only could request resource of current user
-		userInReq := kclient.User(ctxInReq)
-		if userInReq == nil {
-			log.Errorw("not found userinfo in context")
-			kerror.HandleError(req, res, k8serrors.NewBadRequest("not found userinfo in request"))
+		equal, err := resourceOwnerEqualToUserInReq(ctxInReq, resourcecOwner)
+
+		if err != nil {
+			kerror.HandleError(req, res, err)
 			return
 		}
 
-		log = log.With("usernameInReq", userInReq.GetName(), "usernameOfResource", usernameOfResource)
-		if userInReq.GetName() != usernameOfResource {
-			log.Warnw(fmt.Sprintf("no permissions to %s %s %s, username is not equal", verb, gvr.Resource, obj.GetNamespace()+"/"+obj.GetName()))
-			kerror.HandleError(req, res, k8serrors.NewForbidden(
-				gvr.GroupResource(),
-				obj.GetName(), fmt.Errorf("no permissions to %s %s %s for user '%s'", verb, gvr.Resource, obj.GetNamespace()+"/"+obj.GetName(), usernameOfResource),
-			))
+		if !equal {
+			log.Warnw("no permissions, username is not equal to resource owner", "resource-owner", resourcecOwner)
+			kerror.HandleError(req, res, k8serrors.NewForbidden(gvr.GroupResource(), resource.GetName(), errors.New("no permissions")))
 			return
 		}
 
-		log.Debugf("allow to %s resource %s, user only request user owned resource", verb, gvr.String())
+		log.Debugf("allow to %s resource %s, user only request user owned resource", req.Request.Method, gvr.String())
 		chain.ProcessFilter(req, res)
 		return
 	}
 }
 
-func resourcePermissionCheck(ctx context.Context, clientInApp ctrlclient.Client, verb string, gvr schema.GroupVersionResource, namespace string, name string) (*authv1.SubjectAccessReviewStatus, error) {
+func verbFromReq(req *restful.Request) string {
+	verb := "get"
+	if req.Request.Method == http.MethodPost {
+		verb = "create"
+	}
+	if req.Request.Method == http.MethodPut {
+		verb = "update"
+	}
+	return verb
+}
+
+func resourecRBACAllowed(appCtx context.Context, req *restful.Request,
+	gvr *schema.GroupVersionResource, restMapper meta.RESTMapper) (*authv1.SubjectAccessReviewStatus, string, *unstructured.Unstructured, error) {
+	log := logging.FromContext(req.Request.Context())
+	ctxInReq := req.Request.Context()
+
+	verb := verbFromReq(req)
+	log = log.With("gvr", *gvr).With("verb", verb)
+
+	gvk, err := restMapper.KindFor(*gvr)
+	if err != nil {
+		log.Errorw("get kind from groupversionresource error", "err", err)
+		return nil, "", nil, err
+	}
+
+	resourceOwner, obj, err := getResourceFromRequest(req, gvk, appCtx)
+	if err != nil {
+		return nil, "", nil, err
+	}
+	log = log.With("resource", obj.GetNamespace()+"/"+obj.GetName())
+	req.Request = req.Request.WithContext(WithEntity(ctxInReq, obj))
+
+	clientInApp := kclient.Client(appCtx)
+	status, err := resourceRBACCheck(ctxInReq, clientInApp, verb, *gvr, obj.GetNamespace(), obj.GetName())
+	if err != nil {
+		log.Errorw("resource permission check error", "namespace", obj.GetNamespace(), "name", obj.GetName(), "err", err)
+		return nil, "", nil, err
+	}
+
+	return status, resourceOwner, obj, nil
+}
+
+func resourceOwnerEqualToUserInReq(ctxInReq context.Context, resourceOwner string) (bool, error) {
+	log := logging.FromContext(ctxInReq)
+
+	userInReq := kclient.User(ctxInReq)
+	if userInReq == nil {
+		log.Errorw("not found userinfo in context")
+		return false, k8serrors.NewBadRequest("not found userinfo in request")
+	}
+
+	log = log.With("usernameInReq", userInReq.GetName(), "resourceOwner", resourceOwner)
+
+	if userInReq.GetName() != resourceOwner {
+		log.Infow("usename is not equal")
+		return false, nil
+	}
+
+	return true, nil
+}
+
+func resourceRBACCheck(ctx context.Context, clientInApp ctrlclient.Client, verb string, gvr schema.GroupVersionResource, namespace string, name string) (*authv1.SubjectAccessReviewStatus, error) {
 	log := logging.FromContext(ctx)
 	user := kclient.User(ctx)
 
@@ -160,8 +200,8 @@ func resourcePermissionCheck(ctx context.Context, clientInApp ctrlclient.Client,
 
 }
 
-func getResourceUsername(req *restful.Request, res *restful.Response, gvk schema.GroupVersionKind, appCtx context.Context) (
-	username string, obj *unstructured.Unstructured) {
+func getResourceFromRequest(req *restful.Request, gvk schema.GroupVersionKind, appCtx context.Context) (
+	owner string, obj *unstructured.Unstructured, err error) {
 	ctx := req.Request.Context()
 	log := logging.FromContext(ctx)
 
@@ -172,28 +212,26 @@ func getResourceUsername(req *restful.Request, res *restful.Response, gvk schema
 		err := req.ReadEntity(obj)
 		if err != nil {
 			log.Errorw("error read entity from body", "err", err)
-			kerror.HandleError(req, res, k8serrors.NewBadRequest(err.Error()))
-			return "", nil
+			return "", nil, k8serrors.NewBadRequest(err.Error())
 		}
 	}
+
 	if req.Request.Method == http.MethodGet {
 		resourceName := req.PathParameter("name")
 		resourceNamespace := req.PathParameter("namespace")
 
 		clientInApp := kclient.Client(appCtx)
-		err := clientInApp.Get(ctx, ctrlclient.ObjectKey{Name: resourceName, Namespace: resourceNamespace}, obj)
+		err = clientInApp.Get(ctx, ctrlclient.ObjectKey{Name: resourceName, Namespace: resourceNamespace}, obj)
 		if err != nil {
 			log.Errorw("get resource error", "err", err, "gvk", gvk.String(), "name", resourceNamespace+"/"+resourceName)
-			kerror.HandleError(req, res, err)
-			return "", nil
+			return "", nil, err
 		}
 	}
 
 	annotations := obj.GetAnnotations()
 	if len(annotations) == 0 || annotations[metav1alpha1.UserOwnedAnnotationKey] == "" {
-		kerror.HandleError(req, res, k8serrors.NewBadRequest("request object does not contains anotation key: "+metav1alpha1.UserOwnedAnnotationKey))
-		return "", nil
+		return "", nil, k8serrors.NewBadRequest("request object does not contains annotation key: " + metav1alpha1.UserOwnedAnnotationKey)
 	}
 
-	return annotations[metav1alpha1.UserOwnedAnnotationKey], obj
+	return annotations[metav1alpha1.UserOwnedAnnotationKey], obj, nil
 }

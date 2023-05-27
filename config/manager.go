@@ -212,16 +212,3 @@ type ManagerInterface interface {
 	GetConfig() *Config
 	GetFeatureFlag(flag string) FeatureValue
 }
-
-type FakeManager struct {
-	Data         map[string]string
-	FeatureFlags map[string]FeatureValue
-}
-
-func (m *FakeManager) GetConfig() *Config {
-	return &Config{Data: m.Data}
-}
-
-func (m *FakeManager) GetFeatureFlag(flag string) FeatureValue {
-	return m.FeatureFlags[flag]
-}

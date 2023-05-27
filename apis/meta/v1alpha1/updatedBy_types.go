@@ -22,7 +22,7 @@ import (
 	rbacv1 "k8s.io/api/rbac/v1"
 )
 
-// updatedBy stores updated user information.
+// UpdatedBy stores updated user information.
 type UpdatedBy struct {
 	// Reference to the user that created the object. Any Kubernetes `Subject` is accepted.
 	// +optional

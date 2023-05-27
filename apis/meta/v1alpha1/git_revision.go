@@ -89,9 +89,9 @@ type GitRevision struct {
 	// +optional
 	ID string `json:"id,omitempty" variable:"example=1"`
 
-	// RevisionPusher for record user email of revision push
+	// RevisionSubmitter for record user email of revision submitter
 	// +optional
-	RevisionPusher string `json:"revisionPusher,omitempty"`
+	RevisionSubmitter string `json:"submitter,omitempty"  variable:"example=jack@example.com"`
 }
 
 // GetValWithKey returns the list of keys and values to support variable substitution

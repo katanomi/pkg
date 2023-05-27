@@ -23,6 +23,8 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	authnv1 "k8s.io/api/authentication/v1"
+
 	"github.com/emicklei/go-restful/v3"
 	"github.com/golang/mock/gomock"
 	mockfakeclient "github.com/katanomi/pkg/testing/mock/sigs.k8s.io/controller-runtime/pkg/client"
@@ -148,4 +150,33 @@ func TestGetResourceAttributesFunc_GetResourceAttributes(t *testing.T) {
 	})
 	got, _ := getter.GetResourceAttributes(context.Background(), &restful.Request{})
 	g.Expect(got.Name).Should(BeEquivalentTo("test"))
+}
+
+func TestImpersonateUser(t *testing.T) {
+	g := NewGomegaWithT(t)
+
+	req := httptest.NewRequest(http.MethodGet, "http://localhost", nil)
+	user := ImpersonateUser(req)
+	g.Expect(user).Should(BeNil())
+
+	req.Header[authnv1.ImpersonateUserHeader] = []string{"user-1"}
+	req.Header[authnv1.ImpersonateUIDHeader] = []string{"user-id-1"}
+	req.Header["Impersonate-Extra-Key1"] = []string{"value-1"}
+
+	user = ImpersonateUser(req)
+	g.Expect(user.GetName()).Should(BeEquivalentTo("user-1"))
+	g.Expect(user.GetUID()).Should(BeEquivalentTo("user-id-1"))
+	g.Expect(len(user.GetExtra())).Should(BeEquivalentTo(1))
+	g.Expect(user.GetExtra()["Impersonate-Extra-Key1"][0]).Should(BeEquivalentTo("value-1"))
+
+	req.Header.Del(authnv1.ImpersonateUserHeader)
+	req.Header[authnv1.ImpersonateGroupHeader] = []string{"group-1"}
+	req.Header[authnv1.ImpersonateUIDHeader] = []string{"group-id-1"}
+	user = ImpersonateUser(req)
+	g.Expect(user.GetName()).Should(BeEmpty())
+	g.Expect(user.GetGroups()[0]).Should(BeEquivalentTo("group-1"))
+	g.Expect(user.GetUID()).Should(BeEquivalentTo("group-id-1"))
+	g.Expect(len(user.GetExtra())).Should(BeEquivalentTo(1))
+	g.Expect(user.GetExtra()["Impersonate-Extra-Key1"][0]).Should(BeEquivalentTo("value-1"))
+
 }

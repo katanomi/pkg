@@ -21,7 +21,8 @@
             "example": "1"
         },
         {
-            "name": "revision.revisionPusher"
+            "name": "revision.submitter",
+            "example": "jack@example.com"
         },
         {
             "name": "lastCommit",
