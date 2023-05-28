@@ -558,7 +558,7 @@ func (a *AppBuilder) NewResourceLock(newResourceLock kmanager.ResourceLockFunc) 
 }
 
 // Run starts all
-func (a *AppBuilder) Run() error {
+func (a *AppBuilder) Run(startFuncs ...func(context.Context) error) error {
 	defer func() {
 		if a.Logger != nil {
 			a.Logger.Sync()
@@ -591,7 +591,8 @@ func (a *AppBuilder) Run() error {
 	a.startInformers()
 
 	eg, egCtx := errgroup.WithContext(a.Context)
-	for i, st := range a.startFunc {
+	startFuncs = append(startFuncs, a.startFunc...)
+	for i, st := range startFuncs {
 		var index = i
 		startFunc := st
 		eg.Go(func() error {
