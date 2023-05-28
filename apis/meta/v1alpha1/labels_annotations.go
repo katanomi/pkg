@@ -92,6 +92,8 @@ const (
 	UpdatedByAnnotationKey = "katanomi.dev/updatedBy"
 	// DeletedByAnnotationKey annotation key to store resource update username
 	DeletedByAnnotationKey = "katanomi.dev/deletedBy"
+	// CancelledByAnnotationKey annotation key to store a CancelledBy struct json with ref info
+	CancelledByAnnotationKey = "katanomi.dev/cancelledBy"
 	// SecretTypeAnnotationKey annotation key for an existed secret with a different type
 	SecretTypeAnnotationKey = "katanomi.dev/secretType" //nolint:gosec
 	// ClusterNameAnnotationKey annotation key to store resource cluster name

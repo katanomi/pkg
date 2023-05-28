@@ -119,7 +119,7 @@ func (g *gitPullRequest) List(
 		query["commit"] = option.Commit
 	}
 	options = append(options, QueryOpts(query))
-	
+
 	if option.Repository == "" {
 		return nil, errors.NewBadRequest("repo is empty string")
 	}
