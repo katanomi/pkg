@@ -1,0 +1,4 @@
+message: "/a-2: not ready"
+severity: Info
+status: "False"
+type: Ready

@@ -151,29 +151,96 @@ func TestObjectConditionsSet(t *testing.T) {
 }
 
 func TestReplaceConditions(t *testing.T) {
-	g := NewGomegaWithT(t)
-	objs := []ObjectCondition{}
-	ktesting.MustLoadYaml("testdata/objectconditions_will_replace.yaml", &objs)
+	t.Run("existed data would be updated, new data would be added, not exists data would be deleted", func(t *testing.T) {
+		g := NewGomegaWithT(t)
+		objs := []ObjectCondition{}
+		ktesting.MustLoadYaml("testdata/objectconditions_will_replace.yaml", &objs)
 
-	replaced := []ObjectCondition{}
-	ktesting.MustLoadYaml("testdata/objectconditions_replace.yaml", &replaced)
+		replaced := []ObjectCondition{}
+		ktesting.MustLoadYaml("testdata/objectconditions_replace.yaml", &replaced)
 
-	expected := []ObjectCondition{}
-	ktesting.MustLoadYaml("testdata/objectconditions_replace_golden.yaml", &expected)
+		expected := []ObjectCondition{}
+		ktesting.MustLoadYaml("testdata/objectconditions_replace_golden.yaml", &expected)
 
-	actual := ReplaceObjectConditions(objs, replaced)
-	g.Expect(actual).Should(BeEquivalentTo(expected))
+		actual := ReplaceObjectConditions(objs, replaced)
+		g.Expect(actual).Should(BeEquivalentTo(expected))
+	})
+
+	t.Run("replace target is nil", func(t *testing.T) {
+		g := NewGomegaWithT(t)
+		objs := []ObjectCondition{}
+		ktesting.MustLoadYaml("testdata/objectconditions_will_replace.yaml", &objs)
+
+		var replaced []ObjectCondition = nil
+
+		var expected []ObjectCondition = make([]ObjectCondition, 0, 4)
+
+		actual := ReplaceObjectConditions(objs, replaced)
+		g.Expect(actual).Should(BeEquivalentTo(expected))
+	})
+
+	t.Run("original is nil", func(t *testing.T) {
+		g := NewGomegaWithT(t)
+		var objs []ObjectCondition = nil
+
+		replaced := []ObjectCondition{}
+		ktesting.MustLoadYaml("testdata/objectconditions_replace.yaml", &replaced)
+
+		expected := replaced
+
+		actual := ReplaceObjectConditions(objs, replaced)
+		g.Expect(actual).Should(BeEquivalentTo(expected))
+	})
 }
 
 func TestAggregateObjectCondition(t *testing.T) {
-	g := NewGomegaWithT(t)
-	objs := []ObjectCondition{}
-	ktesting.MustLoadYaml("testdata/objectconditions_aggregate.yaml", &objs)
+	t.Run("aggregate object contiions with unknown status", func(t *testing.T) {
+		g := NewGomegaWithT(t)
+		objs := []ObjectCondition{}
+		ktesting.MustLoadYaml("testdata/objectconditions_aggregate.yaml", &objs)
 
-	expected := apis.Condition{}
-	ktesting.MustLoadYaml("testdata/objectconditions_aggregate_golden.yaml", &expected)
+		expected := apis.Condition{}
+		ktesting.MustLoadYaml("testdata/objectconditions_aggregate_golden.yaml", &expected)
 
-	actual := AggregateObjectCondition(objs, "Ready")
-	//bts, _ := yaml.Marshal(actual)
-	g.Expect(*actual).Should(BeEquivalentTo(expected))
+		actual := AggregateObjectCondition(objs, "Ready")
+		g.Expect(*actual).Should(BeEquivalentTo(expected))
+	})
+
+	t.Run("aggregate object contiions only with True status", func(t *testing.T) {
+		g := NewGomegaWithT(t)
+		objs := []ObjectCondition{}
+		ktesting.MustLoadYaml("testdata/objectconditions_aggregate_true.yaml", &objs)
+
+		expected := apis.Condition{}
+		ktesting.MustLoadYaml("testdata/objectconditions_aggregate_true_golden.yaml", &expected)
+
+		actual := AggregateObjectCondition(objs, "Ready")
+		g.Expect(*actual).Should(BeEquivalentTo(expected))
+	})
+
+	t.Run("aggregate object contiions only with True and False status", func(t *testing.T) {
+		g := NewGomegaWithT(t)
+		objs := []ObjectCondition{}
+		ktesting.MustLoadYaml("testdata/objectconditions_aggregate_true_false.yaml", &objs)
+
+		expected := apis.Condition{}
+		ktesting.MustLoadYaml("testdata/objectconditions_aggregate_true_false_golden.yaml", &expected)
+
+		actual := AggregateObjectCondition(objs, "Ready")
+		g.Expect(*actual).Should(BeEquivalentTo(expected))
+	})
+
+	t.Run("aggregate empyt object contiions", func(t *testing.T) {
+		g := NewGomegaWithT(t)
+		objs := []ObjectCondition{}
+
+		actual := AggregateObjectCondition(objs, "Ready")
+		g.Expect(*actual).Should(BeEquivalentTo(apis.Condition{
+			Type:     "Ready",
+			Status:   "True",
+			Severity: "Info",
+			Message:  "No targets need be synced",
+		}))
+	})
+
 }

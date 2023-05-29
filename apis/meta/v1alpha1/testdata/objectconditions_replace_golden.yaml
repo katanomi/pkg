@@ -2,9 +2,9 @@
   status: "False"
   kind: Pod
   apiVersion: v1
-  name: abc
+  name: will-update
 - type: Ready
   status: "False"
   kind: Pod
   apiVersion: v1
-  name: add
+  name: will-add
