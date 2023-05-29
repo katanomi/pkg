@@ -174,6 +174,10 @@ type Project struct {
 type ProjectSpec struct {
 	// Public defines if a project is public or not
 	Public bool `json:"public"`
+	// ReadOnly defines if a project is readOnly or not
+	ReadOnly bool `json:"readOnly"`
+	// Limited  defines if a project is limited or not
+	Limited bool `json:"limited"`
 
 	// Address API related access URL
 	// +optional
