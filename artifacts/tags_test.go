@@ -18,8 +18,9 @@ package artifacts
 
 import (
 	"context"
-	. "github.com/onsi/gomega"
 	"testing"
+
+	. "github.com/onsi/gomega"
 )
 
 func TestFindMatchedTagByPrefix(t *testing.T) {

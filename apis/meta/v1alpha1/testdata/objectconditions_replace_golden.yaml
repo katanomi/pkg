@@ -1,0 +1,10 @@
+- type: Ready
+  status: "False"
+  kind: Pod
+  apiVersion: v1
+  name: will-update
+- type: Ready
+  status: "False"
+  kind: Pod
+  apiVersion: v1
+  name: will-add

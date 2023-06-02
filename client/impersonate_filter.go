@@ -46,7 +46,7 @@ func ImpersonateFilter(_ context.Context) restful.FilterFunction {
 		reqCtx := request.Request.Context()
 		log := logging.FromContext(reqCtx)
 
-		user := impersonateUser(request.Request)
+		user := ImpersonateUser(request.Request)
 		if user == nil {
 			chain.ProcessFilter(request, response)
 			return

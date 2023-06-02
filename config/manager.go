@@ -22,6 +22,8 @@ import (
 	"os"
 	"sync"
 
+	"github.com/katanomi/pkg/maps"
+
 	kclient "github.com/katanomi/pkg/client"
 	"github.com/katanomi/pkg/storage/configmap"
 	"github.com/katanomi/pkg/watcher"
@@ -40,6 +42,19 @@ const (
 // Config store katanomi configuration
 type Config struct {
 	Data map[string]string
+}
+
+// GetBool will parse value in Config.Data["key"] to bool
+// if the key not exist, it will return nil
+// if the value is not a valid bool string, it will return error
+func (c Config) GetBool(key string) (*bool, error) {
+	return maps.AsBool(c.Data, key)
+}
+
+// GetObject will parse value in Config.Data["key"] to object
+// it expects the value should be yaml content
+func (c Config) GetObject(key string, object interface{}) error {
+	return maps.AsObject(c.Data, key, object)
 }
 
 // Manager will manage katanomi configuration and store in Config
@@ -206,4 +221,9 @@ func KatanomiConfigManager(ctx context.Context) *Manager {
 		return nil
 	}
 	return val.(*Manager)
+}
+
+type ManagerInterface interface {
+	GetConfig() *Config
+	GetFeatureFlag(flag string) FeatureValue
 }

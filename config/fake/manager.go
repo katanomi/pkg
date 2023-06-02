@@ -1,5 +1,5 @@
 /*
-Copyright 2022 The Katanomi Authors.
+Copyright 2023 The Katanomi Authors.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -14,27 +14,22 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package user
+// Package fake provide fake manager for config
+package fake
 
-import (
-	"testing"
+import "github.com/katanomi/pkg/config"
 
-	"sigs.k8s.io/controller-runtime/pkg/log/zap"
+var fake config.ManagerInterface = &FakeManager{}
 
-	. "github.com/onsi/ginkgo/v2"
-	. "github.com/onsi/gomega"
-	uberzap "go.uber.org/zap"
-)
-
-var (
-	logger *uberzap.SugaredLogger
-)
-
-func init() {
-	logger = zap.NewRaw(zap.WriteTo(GinkgoWriter), zap.UseDevMode(true)).Sugar()
+type FakeManager struct {
+	Data         map[string]string
+	FeatureFlags map[string]config.FeatureValue
 }
 
-func TestBuilds(t *testing.T) {
-	RegisterFailHandler(Fail)
-	RunSpecs(t, "User Suite")
+func (m *FakeManager) GetConfig() *config.Config {
+	return &config.Config{Data: m.Data}
+}
+
+func (m *FakeManager) GetFeatureFlag(flag string) config.FeatureValue {
+	return m.FeatureFlags[flag]
 }

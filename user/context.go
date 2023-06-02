@@ -20,6 +20,8 @@ package user
 import (
 	"context"
 
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
+
 	metav1alpha1 "github.com/katanomi/pkg/apis/meta/v1alpha1"
 )
 
@@ -40,4 +42,22 @@ func UserInfoFrom(ctx context.Context) (metav1alpha1.UserInfo, bool) {
 func UserInfoValue(ctx context.Context) (result metav1alpha1.UserInfo) {
 	userinfo, _ := UserInfoFrom(ctx)
 	return userinfo
+}
+
+var entityInCxtKey = struct{}{}
+
+// WithEntity will save entity into context
+// up to now, we will use it to save operation target object in UserOwnedResouorceFilter
+// and you could use EntityFromContext to avoid reading and unmarshall data from request again
+func WithEntity(ctx context.Context, entity *unstructured.Unstructured) context.Context {
+	ctx = context.WithValue(ctx, entityInCxtKey, entity)
+	return ctx
+}
+
+// EntityFromContext will read entity from context
+// up to now, we will use it to save operation target object in UserOwnedResouorceFilter
+// and you could use EntityFromContext to avoid reading and unmarshall data from request again
+func EntityFromContext(ctx context.Context) *unstructured.Unstructured {
+	entity := ctx.Value(entityInCxtKey)
+	return entity.(*unstructured.Unstructured)
 }

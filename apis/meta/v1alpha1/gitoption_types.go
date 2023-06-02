@@ -80,7 +80,10 @@ const (
 
 type GitPullRequestListOption struct {
 	GitRepo
+	// State indicattes pullrequest state
 	State *PullRequestState `json:"state,omitempty"`
+	// Commit will filter pullrequest that just associate to this commit
+	Commit string `json:"commit,omitempty"`
 }
 
 func String2PullRequestState(state string) *PullRequestState {

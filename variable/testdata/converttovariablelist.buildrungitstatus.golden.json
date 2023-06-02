@@ -21,6 +21,10 @@
             "example": "1"
         },
         {
+            "name": "revision.submitter",
+            "example": "jack@example.com"
+        },
+        {
             "name": "lastCommit",
             "example": "3cb8901f"
         },
@@ -87,6 +91,18 @@
         {
             "name": "pullRequest.hasConflicts",
             "example": "false"
+        },
+        {
+            "name": "pullRequest.mergedBy",
+            "example": "joedoe@example.com"
+        },
+        {
+            "name": "pullRequest.mergedBy.name",
+            "example": "joedoe"
+        },
+        {
+            "name": "pullRequest.mergedBy.email",
+            "example": "joedoe@example.com"
         },
         {
             "name": "branch",

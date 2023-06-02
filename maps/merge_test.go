@@ -80,6 +80,68 @@ func TestMergeMap(t *testing.T) {
 	}
 }
 
+func TestMergeMapIfNotExists(t *testing.T) {
+
+	table := map[string]struct {
+		Left   map[string]string
+		Right  map[string]string
+		Result map[string]string
+	}{
+		"multiple keys and values": {
+			Left: map[string]string{
+				"a": "b",
+				"d": "",
+			},
+			Right: map[string]string{
+				"a": "d",
+				"b": "c",
+				"c": "c1",
+				"d": "d1",
+			},
+			Result: map[string]string{
+				"a": "b",
+				"b": "c",
+				"c": "c1",
+				"d": "",
+			},
+		},
+		"nil left": {
+			Left: nil,
+			Right: map[string]string{
+				"b": "c",
+				"a": "d",
+			},
+			Result: map[string]string{
+				"b": "c",
+				"a": "d",
+			},
+		},
+		"nil right": {
+			Left: map[string]string{
+				"a": "b",
+			},
+			Right: nil,
+			Result: map[string]string{
+				"a": "b",
+			},
+		},
+		"both nil": {
+			Left:   nil,
+			Right:  nil,
+			Result: nil,
+		},
+	}
+
+	for name, test := range table {
+		t.Run(name, func(t *testing.T) {
+			g := NewGomegaWithT(t)
+
+			result := MergeMapIfNotExists(test.Left, test.Right)
+			g.Expect(result).To(Equal(test.Result))
+		})
+	}
+}
+
 func TestMergeMapSlice(t *testing.T) {
 
 	table := map[string]struct {

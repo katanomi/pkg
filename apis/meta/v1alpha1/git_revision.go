@@ -88,6 +88,10 @@ type GitRevision struct {
 	// Commit: commit short ID
 	// +optional
 	ID string `json:"id,omitempty" variable:"example=1"`
+
+	// RevisionSubmitter for record user email of revision submitter
+	// +optional
+	RevisionSubmitter string `json:"submitter,omitempty"  variable:"example=jack@example.com"`
 }
 
 // GetValWithKey returns the list of keys and values to support variable substitution

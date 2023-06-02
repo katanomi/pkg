@@ -21,6 +21,7 @@ import (
 
 	mv1alpha1 "github.com/katanomi/pkg/apis/meta/v1alpha1"
 	admissionv1 "k8s.io/api/admission/v1"
+	rbacv1 "k8s.io/api/rbac/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"knative.dev/pkg/logging"
@@ -110,6 +111,39 @@ func WithCreatedBy() TransformFunc {
 			log.Warnw("cannot marshal createdBy struct to json ", "err", err, "struct", createdBy)
 		} else {
 			metaobj.SetAnnotations(annotations)
+		}
+	}
+}
+
+// WithUpdatedBy adds a updatedBy annotation to the object using the request information
+// when an object already has the updatedBy annotation it will cover old data
+func WithUpdatedBy() TransformFunc {
+	return func(ctx context.Context, obj runtime.Object, req admission.Request) {
+		if req.Operation != admissionv1.Update {
+			return
+		}
+		subject := SubjectFromRequest(req)
+		if subject.Kind != rbacv1.UserKind {
+			return
+		}
+
+		log := logging.FromContext(ctx)
+
+		newObj := obj.(metav1.Object)
+		annotations := newObj.GetAnnotations()
+		if annotations == nil {
+			annotations = map[string]string{}
+		}
+
+		updatedBy := &mv1alpha1.UpdatedBy{
+			User: subject,
+		}
+		annotations, err := updatedBy.SetIntoAnnotation(annotations)
+
+		if err != nil {
+			log.Warnw("cannot marshal updateBy struct to json ", "err", err, "struct", updatedBy)
+		} else {
+			newObj.SetAnnotations(annotations)
 		}
 	}
 }
