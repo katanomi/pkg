@@ -155,7 +155,7 @@ const (
 	// DependencyExtendedAddressKey describes the dependency repository address provided by the plugin
 	// If the tool has an independent dependency repository address,
 	// use this field to indicate, if not, take the same value as address
-	DependencyExtendedAddressKey ExtendedAddress = "dependency"
+	DependencyExtendedAddressKey ExtendedAddress = "dependency" // NOSONAR // ignore: "Key" detected here, make sure this is not a hard-coded credential
 )
 
 var ProjectGVK = GroupVersion.WithKind("Project")

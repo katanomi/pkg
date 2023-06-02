@@ -17,7 +17,7 @@ limitations under the License.
 package v1alpha1
 
 // StoragePluginClassLabelKey for labeling owner StoragePluginClass
-const StoragePluginClassLabelKey = "storage.katanomi.dev/storagePluginClass"
+const StoragePluginClassLabelKey = "storage.katanomi.dev/storagePluginClass" // NOSONAR // ignore: "Key" detected here, make sure this is not a hard-coded credential
 
 // LastModifiedAnnotation for recording last modified time
 const LastModifiedAnnotation = "storage.katanomi.dev/lastModified"
