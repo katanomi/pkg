@@ -215,6 +215,7 @@ func selectToolSecret(logger *zap.SugaredLogger, secretList []corev1.Secret, glo
 	return &usableSecrets[0], nil
 }
 
+// SelectToolSecretFrom selects the secret that matches the resource url from the secret list
 func SelectToolSecretFrom(logger *zap.SugaredLogger, secretList []corev1.Secret, isGlobal bool, resourceURL *neturl.URL, option SelectSecretOption) []corev1.Secret {
 	usableSecrets := make([]corev1.Secret, 0)
 
