@@ -19,7 +19,9 @@ package client
 import (
 	"context"
 	"net/http/httptest"
-	"testing"
+
+	ctrlclient "sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/client/fake"
 
 	authnv1 "k8s.io/api/authentication/v1"
 
@@ -28,41 +30,79 @@ import (
 	"k8s.io/client-go/rest"
 
 	"github.com/emicklei/go-restful/v3"
+	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	"k8s.io/apiserver/pkg/authentication/user"
-	apiserverrequest "k8s.io/apiserver/pkg/endpoints/request"
 )
 
-func TestImpersonateFilter(t *testing.T) {
+var _ = Describe("ImpersonateFilter", func() {
 
-	t.Run("with impersonate in rest.Config", func(t *testing.T) {
-		g := NewGomegaWithT(t)
+	var (
+		ctx                    context.Context
+		config                 *rest.Config
+		fakeClientBeforeFilter ctrlclient.Client
+		fakeClientAfterFilter  ctrlclient.Client
 
-		ctx := context.TODO()
+		req  *restful.Request
+		resp *restful.Response
 
-		config := &rest.Config{}
+		chain *restful.FilterChain
+	)
+
+	BeforeEach(func() {
+		ctx = context.TODO()
+		config = &rest.Config{}
+		fakeClientBeforeFilter = fake.NewClientBuilder().Build()
+
 		ctx = injection.WithConfig(ctx, config)
-		ctx = apiserverrequest.WithUser(ctx, &user.DefaultInfo{Name: "dev"})
+		ctx = WithClient(ctx, fakeClientBeforeFilter)
+		//ctx = apiserverrequest.WithUser(ctx, &user.DefaultInfo{Name: "dev"})
 
 		request := httptest.NewRequest("GET", "http://localhost", nil)
-		request.Header.Set(authnv1.ImpersonateUserHeader, "dev")
-		req := restful.NewRequest(request)
+		req = restful.NewRequest(request)
 		req.Request = req.Request.WithContext(ctx)
 
-		chain := &restful.FilterChain{
-			Target: func(request *restful.Request, response *restful.Response) {
-				return
-			},
-		}
-
 		response := httptest.NewRecorder()
-		resp := restful.NewResponse(response)
-
-		filter := ImpersonateFilter(ctx)
-
-		filter(req, resp, chain)
-
-		u := User(req.Request.Context())
-		g.Expect(u.GetName()).Should(BeEquivalentTo("dev"))
+		resp = restful.NewResponse(response)
 	})
-}
+
+	JustBeforeEach(func() {
+		filter := ImpersonateFilter(ctx)
+		filter(req, resp, chain)
+	})
+
+	When("without impersonate in request header", func() {
+		BeforeEach(func() {
+
+			chain = &restful.FilterChain{
+				Target: func(request *restful.Request, response *restful.Response) {
+					response.WriteHeader(204)
+					return
+				},
+			}
+		})
+		It("should do nothing in filter", func() {
+			Expect(resp.StatusCode()).Should(BeEquivalentTo(204))
+			Expect(fakeClientBeforeFilter).Should(BeEquivalentTo(fakeClientBeforeFilter))
+		})
+	})
+
+	When("with impersonate in request header", func() {
+		BeforeEach(func() {
+			req.Request.Header.Set(authnv1.ImpersonateUserHeader, "dev")
+			chain = &restful.FilterChain{
+				Target: func(request *restful.Request, response *restful.Response) {
+					fakeClientAfterFilter = Client(request.Request.Context())
+					response.WriteHeader(200)
+					return
+				},
+			}
+		})
+		It("should inject impersonate user and overwrite client", func() {
+			Expect(resp.StatusCode()).Should(BeEquivalentTo(200))
+			u := User(req.Request.Context())
+			Expect(u.GetName()).Should(BeEquivalentTo("dev"))
+			Expect(fakeClientAfterFilter).ShouldNot(BeEquivalentTo(fakeClientBeforeFilter))
+		})
+	})
+
+})
