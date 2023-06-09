@@ -116,6 +116,12 @@ gomock: ## Download gomock locally if necessary.
 apiserver-runtime-gen:
 	$(call go-get-tool,$(GOMOCK),sigs.k8s.io/apiserver-runtime/tools/apiserver-runtime-gen@v1.1.1)
 
+githook: precommit ##@Development Install git pre-commit hook
+	pre-commit install
+
+precommit: ##@Setup Download pre-commit locally if necessary.
+	pip install pre-commit
+
 # go-get-tool will 'go get' any package $2 and install it to $1.
 PROJECT_DIR := $(shell dirname $(abspath $(lastword $(MAKEFILE_LIST))))
 define go-get-tool
