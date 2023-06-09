@@ -16,7 +16,7 @@ limitations under the License.
 
 package maps
 
-// IsSameStringMap return true if provided two map[string]string are same or false 
+// IsSameStringMap return true if provided two map[string]string are same or false
 // if they are different
 func IsSameStringMap(first map[string]string, second map[string]string) bool {
 	if len(first) != len(second) {
