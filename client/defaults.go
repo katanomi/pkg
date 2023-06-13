@@ -17,6 +17,7 @@ limitations under the License.
 package client
 
 import (
+	"crypto/tls"
 	"net"
 	"net/http"
 	"os"
@@ -30,9 +31,16 @@ var (
 	DefaultBurst           = 60
 )
 
-type HttpClientOptionFunc func(*http.Client)
+type HttpClientOption func(*http.Client)
 
-func NewHTTPClient(options ...HttpClientOptionFunc) *http.Client {
+func InsecureSkipVerifyOption(c *http.Client) {
+	tr := c.Transport.(*http.Transport)
+	tr.TLSClientConfig = &tls.Config{
+		InsecureSkipVerify: true,
+	}
+}
+
+func NewHTTPClient(options ...HttpClientOption) *http.Client {
 	var timeout int64
 	timeoutStr := os.Getenv("HTTP_CLIENT_TIMEOUT")
 	timeout, err := strconv.ParseInt(timeoutStr, 10, 64)

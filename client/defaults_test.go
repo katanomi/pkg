@@ -17,7 +17,6 @@ limitations under the License.
 package client
 
 import (
-	"crypto/tls"
 	"net/http"
 	"os"
 	"testing"
@@ -46,12 +45,7 @@ func TestNewDefaultClientWithDefaultTimeOut(t *testing.T) {
 
 func TestHttpClientOptionFunc(t *testing.T) {
 	g := NewGomegaWithT(t)
-	option := func(c *http.Client) {
-		tr := c.Transport.(*http.Transport)
-		tr.TLSClientConfig = &tls.Config{
-			InsecureSkipVerify: true,
-		}
-	}
+	option := InsecureSkipVerifyOption
 
 	client := NewHTTPClient(option)
 
