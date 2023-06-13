@@ -17,6 +17,7 @@ limitations under the License.
 package client
 
 import (
+	"crypto/tls"
 	"net"
 	"net/http"
 	"os"
@@ -30,7 +31,18 @@ var (
 	DefaultBurst           = 60
 )
 
-func NewHTTPClient() *http.Client {
+// HttpClientOption is a function that configures a http.Client.
+type HttpClientOption func(*http.Client)
+
+// InsecureSkipVerifyOption is a HttpClientOption that disables SSL certificate verification.
+func InsecureSkipVerifyOption(c *http.Client) {
+	tr := c.Transport.(*http.Transport)
+	tr.TLSClientConfig = &tls.Config{
+		InsecureSkipVerify: true,
+	}
+}
+
+func NewHTTPClient(options ...HttpClientOption) *http.Client {
 	var timeout int64
 	timeoutStr := os.Getenv("HTTP_CLIENT_TIMEOUT")
 	timeout, err := strconv.ParseInt(timeoutStr, 10, 64)
@@ -42,7 +54,9 @@ func NewHTTPClient() *http.Client {
 		Transport: GetDefaultTransport(),
 		Timeout:   time.Duration(timeout) * time.Second,
 	}
-
+	for _, option := range options {
+		option(client)
+	}
 	return client
 }
 
@@ -51,7 +65,6 @@ func GetDefaultTransport() http.RoundTripper {
 		Timeout:   10 * time.Second,
 		KeepAlive: 30 * time.Second,
 	}
-
 	return &http.Transport{
 		Proxy:                 http.ProxyFromEnvironment,
 		DialContext:           dialer.DialContext,
