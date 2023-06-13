@@ -1,3 +1,7 @@
+###################################################
+### WARNING: This file is synced from katanomi/hack
+### DO NOT CHANGE IT MANUALLY
+###################################################
 # https://docs.getwoke.tech/rules/
 ignore_files:
   - .golangci.yaml

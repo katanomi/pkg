@@ -1,3 +1,7 @@
+###################################################
+### WARNING: This file is synced from katanomi/hack
+### DO NOT CHANGE IT MANUALLY
+###################################################
 # Produce CRDs that work back to Kubernetes 1.11 (no version conversion)
 CRD_OPTIONS ?= "crd"
 

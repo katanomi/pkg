@@ -1,3 +1,7 @@
+###################################################
+### WARNING: This file is synced from katanomi/hack
+### DO NOT CHANGE IT MANUALLY
+###################################################
 apiVersion: builds.katanomi.dev/v1alpha1
 kind: Build
 spec:
@@ -85,7 +89,8 @@ spec:
           value:
             - passed-tests-rate=100
         - name: tool-image
-          value: registry.alauda.cn:60080/devops/builder-go:1.19-ubuntu-5a018f69
+        # WARNING: Temporary fix for core using PR built image. SHOULD CHANGE THIS TO A STABLE VERSION
+          value: registry.alauda.cn:60080/devops/builder-go:1.19-bullseye-75424cc5
     - name: golangci-lint
       timeout: 30m
       retries: 0
@@ -99,7 +104,8 @@ spec:
           workspace: cache
       params:
         - name: tool-image
-          value: registry.alauda.cn:60080/devops/builder-go:1.19-ubuntu-5a018f69
+          # WARNING: Temporary fix for core using PR built image. SHOULD CHANGE THIS TO A STABLE VERSION
+          value: registry.alauda.cn:60080/devops/builder-go:1.19-bullseye-75424cc5
         - name: command
           value: >
             export GOPROXY=https://build-nexus.alauda.cn/repository/golang/,direct
