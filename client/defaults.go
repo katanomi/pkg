@@ -30,7 +30,9 @@ var (
 	DefaultBurst           = 60
 )
 
-func NewHTTPClient() *http.Client {
+type HttpClientOptionFunc func(*http.Client)
+
+func NewHTTPClient(options ...HttpClientOptionFunc) *http.Client {
 	var timeout int64
 	timeoutStr := os.Getenv("HTTP_CLIENT_TIMEOUT")
 	timeout, err := strconv.ParseInt(timeoutStr, 10, 64)
@@ -42,7 +44,9 @@ func NewHTTPClient() *http.Client {
 		Transport: GetDefaultTransport(),
 		Timeout:   time.Duration(timeout) * time.Second,
 	}
-
+	for _, option := range options {
+		option(client)
+	}
 	return client
 }
 
@@ -51,7 +55,6 @@ func GetDefaultTransport() http.RoundTripper {
 		Timeout:   10 * time.Second,
 		KeepAlive: 30 * time.Second,
 	}
-
 	return &http.Transport{
 		Proxy:                 http.ProxyFromEnvironment,
 		DialContext:           dialer.DialContext,
