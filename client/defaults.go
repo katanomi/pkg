@@ -31,8 +31,10 @@ var (
 	DefaultBurst           = 60
 )
 
+// HttpClientOption is a function that configures a http.Client.
 type HttpClientOption func(*http.Client)
 
+// InsecureSkipVerifyOption is a HttpClientOption that disables SSL certificate verification.
 func InsecureSkipVerifyOption(c *http.Client) {
 	tr := c.Transport.(*http.Transport)
 	tr.TLSClientConfig = &tls.Config{
