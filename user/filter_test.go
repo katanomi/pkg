@@ -87,10 +87,10 @@ func TestUserOwnedResourcePermissionFilter(t *testing.T) {
 	mockClient := mockfakeclient.NewMockClient(mockCtl)
 	mockClient.EXPECT().Create(gomock.Any(), gomock.Any(), gomock.Any()).DoAndReturn(
 		func(ctx context.Context, obj ctrlclient.Object, opts ...ctrlclient.CreateOption) error {
-
-			sub, ok := obj.(*authv1.SubjectAccessReview)
+			user := kclient.User(ctx)
+			sub, ok := obj.(*authv1.SelfSubjectAccessReview)
 			if ok {
-				if sub.Spec.User == "admin" {
+				if user.GetName() == "admin" {
 					sub.Status.Denied = false
 					sub.Status.Allowed = true
 					return nil

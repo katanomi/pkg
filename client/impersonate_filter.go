@@ -20,6 +20,9 @@ import (
 	"context"
 	"time"
 
+	kscheme "github.com/katanomi/pkg/scheme"
+	"sigs.k8s.io/controller-runtime/pkg/client"
+
 	kerrors "github.com/katanomi/pkg/errors"
 
 	"k8s.io/client-go/dynamic"
@@ -39,7 +42,10 @@ var (
 )
 
 // ImpersonateFilter will inject current user into context and inject impersonate information into rest.Config in request
-func ImpersonateFilter(_ context.Context) restful.FilterFunction {
+func ImpersonateFilter(ctx context.Context) restful.FilterFunction {
+
+	scheme := kscheme.Scheme(ctx)
+	serviceAccountClient := Client(ctx)
 
 	return func(request *restful.Request, response *restful.Response, chain *restful.FilterChain) {
 
@@ -64,7 +70,16 @@ func ImpersonateFilter(_ context.Context) restful.FilterFunction {
 		reqCtx = injection.WithConfig(reqCtx, configInRequest)
 		reqCtx = apiserverrequest.WithUser(reqCtx, user)
 
-		// overrite dynamic client
+		// overwrite direct client
+		directClient, err := client.New(configInRequest, client.Options{Scheme: scheme, Mapper: serviceAccountClient.RESTMapper()})
+		if err != nil {
+			log.Debugw("impersonate filter direct client create error", "err", err)
+			kerrors.HandleError(request, response, err)
+			return
+		}
+		reqCtx = WithClient(reqCtx, directClient)
+
+		// overwrite dynamic client
 		dynamicClient, err := dynamic.NewForConfig(configInRequest)
 		if err != nil {
 			log.Errorw("error to create dynamic client", "err", err)

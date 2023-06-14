@@ -103,7 +103,8 @@ func UserOwnedResourcePermissionFilter(appCtx context.Context, gvr *schema.Group
 			return
 		}
 
-		log.Debugf("allow to %s resource %s, user only request user owned resource", req.Request.Method, gvr.String())
+		log.Debugf("allow to %s resource %s, user only request user owned resource",
+			req.Request.Method, gvr.String(), "resource-owner", resourcecOwner)
 		chain.ProcessFilter(req, res)
 		return
 	}
@@ -141,8 +142,8 @@ func resourecRBACAllowed(appCtx context.Context, req *restful.Request,
 	log = log.With("resource", obj.GetNamespace()+"/"+obj.GetName())
 	req.Request = req.Request.WithContext(WithEntity(ctxInReq, obj))
 
-	clientInApp := kclient.Client(appCtx)
-	status, err := resourceRBACCheck(ctxInReq, clientInApp, verb, *gvr, obj.GetNamespace(), obj.GetName())
+	clientInReq := kclient.Client(ctxInReq)
+	status, err := resourceRBACCheck(ctxInReq, clientInReq, verb, *gvr, obj.GetNamespace(), obj.GetName())
 	if err != nil {
 		log.Errorw("resource permission check error", "namespace", obj.GetNamespace(), "name", obj.GetName(), "err", err)
 		return nil, "", nil, err
@@ -170,12 +171,12 @@ func resourceOwnerEqualToUserInReq(ctxInReq context.Context, resourceOwner strin
 	return true, nil
 }
 
-func resourceRBACCheck(ctx context.Context, clientInApp ctrlclient.Client, verb string, gvr schema.GroupVersionResource, namespace string, name string) (*authv1.SubjectAccessReviewStatus, error) {
-	log := logging.FromContext(ctx)
+func resourceRBACCheck(ctx context.Context, clientInReq ctrlclient.Client, verb string, gvr schema.GroupVersionResource, namespace string, name string) (*authv1.SubjectAccessReviewStatus, error) {
 	user := kclient.User(ctx)
+	log := logging.FromContext(ctx).With("username", user.GetName(), "uid", user.GetUID(), "groups", user.GetGroups())
 
-	review := &authv1.SubjectAccessReview{
-		Spec: authv1.SubjectAccessReviewSpec{
+	selfReview := &authv1.SelfSubjectAccessReview{
+		Spec: authv1.SelfSubjectAccessReviewSpec{
 			ResourceAttributes: &authv1.ResourceAttributes{
 				Verb:      verb,
 				Group:     gvr.Group,
@@ -184,20 +185,17 @@ func resourceRBACCheck(ctx context.Context, clientInApp ctrlclient.Client, verb 
 				Namespace: namespace,
 				Name:      name,
 			},
-			User:   user.GetName(),
-			Groups: user.GetGroups(),
-			UID:    user.GetUID(),
-			Extra:  map[string]authv1.ExtraValue{},
 		},
 	}
 
-	err := clientInApp.Create(ctx, review)
+	// ensure current user in request is authorized
+	err := clientInReq.Create(ctx, selfReview)
 	if err != nil {
-		log.Errorw("error evaluating SubjectAccessReview", "err", err, "review", review)
+		log.Errorw("error evaluating SelfSubjectAccessReview", "err", err)
 		return nil, err
 	}
-	return &review.Status, nil
 
+	return &selfReview.Status, nil
 }
 
 func getResourceFromRequest(req *restful.Request, gvk schema.GroupVersionKind, appCtx context.Context) (
