@@ -22,8 +22,6 @@ import (
 	"net/http"
 	"strings"
 
-	"knative.dev/pkg/injection"
-
 	"github.com/emicklei/go-restful/v3"
 	authnv1 "k8s.io/api/authentication/v1"
 	authv1 "k8s.io/api/authorization/v1"
@@ -72,20 +70,7 @@ func DynamicSubjectReviewFilter(ctx context.Context, resourceAttGetter ResourceA
 			"verb", resourceAtt.Verb,
 		)
 		reqCtx = logging.WithLogger(reqCtx, log)
-
-		var review subjectAccessReviewObjInterface
-		if !isImpersonateRequest(reqCtx) {
-			review = makeSelfSubjectAccessReview(resourceAtt)
-		} else {
-			u := User(reqCtx)
-			if u == nil {
-				err := fmt.Errorf("not found impersonate info in config")
-				log.Error(err.Error())
-				kerrors.HandleError(req, resp, err)
-				return
-			}
-			review = makeSubjectAccessReview(resourceAtt, u)
-		}
+		review := makeSelfSubjectAccessReview(resourceAtt)
 
 		var clt client.Client
 		if clientGetter, ok := resourceAttGetter.(SubjectAccessReviewClientGetter); ok {
@@ -124,14 +109,6 @@ func SubjectReviewFilterForResource(ctx context.Context, resourceAtt authv1.Reso
 		return *attr, nil
 	})
 	return DynamicSubjectReviewFilter(ctx, getter)
-}
-
-func isImpersonateRequest(reqCtx context.Context) bool {
-	var config = injection.GetConfig(reqCtx)
-	if config == nil {
-		return false
-	}
-	return config.Impersonate.UserName != "" || len(config.Impersonate.Groups) != 0 || len(config.Impersonate.Extra) != 0
 }
 
 func makeSubjectAccessReview(resourceAtt authv1.ResourceAttributes, user user.Info) subjectAccessReviewObjInterface {
