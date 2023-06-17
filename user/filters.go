@@ -54,7 +54,7 @@ func UserInfoFilter(req *restful.Request, res *restful.Response, chain *restful.
 // the user owned resource could use annotation to annotated owner name
 // and the filter will check if current user could execcute the `verb` for the resource
 // more doc about it please see Spec: user owned resource permission check
-func UserOwnedResourcePermissionFilter(appCtx context.Context, gvr *schema.GroupVersionResource) restful.FilterFunction {
+func UserOwnedResourcePermissionFilter(appCtx context.Context, groupVersionResource *schema.GroupVersionResource) restful.FilterFunction {
 	appClient := kclient.Client(appCtx)
 	restMapper := appClient.RESTMapper()
 
@@ -63,13 +63,17 @@ func UserOwnedResourcePermissionFilter(appCtx context.Context, gvr *schema.Group
 		log := logging.FromContext(ctxInReq).Named("user-owned-resource")
 		logging.WithLogger(ctxInReq, log)
 
-		if gvr == nil {
-			gvr = &schema.GroupVersionResource{
+		gvr := schema.GroupVersionResource{}
+		if groupVersionResource == nil {
+			gvr = schema.GroupVersionResource{
 				Group:    req.PathParameter("group"),
 				Version:  req.PathParameter("version"),
 				Resource: req.PathParameter("resource"),
 			}
+		} else {
+			gvr = *groupVersionResource
 		}
+
 		log = log.With("gvr", gvr)
 
 		// check rbac for current user
@@ -122,14 +126,14 @@ func verbFromReq(req *restful.Request) string {
 }
 
 func resourecRBACAllowed(appCtx context.Context, req *restful.Request,
-	gvr *schema.GroupVersionResource, restMapper meta.RESTMapper) (*authv1.SubjectAccessReviewStatus, string, *unstructured.Unstructured, error) {
+	gvr schema.GroupVersionResource, restMapper meta.RESTMapper) (*authv1.SubjectAccessReviewStatus, string, *unstructured.Unstructured, error) {
 	log := logging.FromContext(req.Request.Context())
 	ctxInReq := req.Request.Context()
 
 	verb := verbFromReq(req)
-	log = log.With("gvr", *gvr).With("verb", verb)
+	log = log.With("gvr", gvr).With("verb", verb)
 
-	gvk, err := restMapper.KindFor(*gvr)
+	gvk, err := restMapper.KindFor(gvr)
 	if err != nil {
 		log.Errorw("get kind from groupversionresource error", "err", err)
 		return nil, "", nil, err
@@ -143,7 +147,7 @@ func resourecRBACAllowed(appCtx context.Context, req *restful.Request,
 	req.Request = req.Request.WithContext(WithEntity(ctxInReq, obj))
 
 	clientInReq := kclient.Client(ctxInReq)
-	status, err := resourceRBACCheck(ctxInReq, clientInReq, verb, *gvr, obj.GetNamespace(), obj.GetName())
+	status, err := resourceRBACCheck(ctxInReq, clientInReq, verb, gvr, obj.GetNamespace(), obj.GetName())
 	if err != nil {
 		log.Errorw("resource permission check error", "namespace", obj.GetNamespace(), "name", obj.GetName(), "err", err)
 		return nil, "", nil, err
