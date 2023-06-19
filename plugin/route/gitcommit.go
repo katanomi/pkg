@@ -106,7 +106,6 @@ func NewGitCommitCreator(impl client.GitCommitCreator) Route {
 
 // Register route
 func (a *gitCommitCreator) Register(ws *restful.WebService) {
-	logging.FromContext(context.Background()).Infow("LQTEST gitCommitCreator Register")
 	repositoryParam := ws.PathParameter("repository", "commit belong to repository")
 	projectParam := ws.PathParameter("project", "repository belong to project").DataType("string")
 	ws.Route(
