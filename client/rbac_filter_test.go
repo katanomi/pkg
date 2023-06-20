@@ -116,7 +116,7 @@ func TestRBACFilter(t *testing.T) {
 		mockClient := mockfakeclient.NewMockClient(mockCtl)
 		mockClient.EXPECT().Create(gomock.Any(), gomock.Any(), gomock.Any()).DoAndReturn(
 			func(ctx interface{}, obj client.Object, opts ...client.CreateOption) error {
-				subject := obj.(*authv1.SubjectAccessReview)
+				subject := obj.(*authv1.SelfSubjectAccessReview)
 				subject.Status.Denied = true
 				subject.Status.Allowed = false
 				return nil
