@@ -1,0 +1,53 @@
+apiVersion: builds.katanomi.dev/v1alpha1
+kind: Build
+spec:
+  workspaces:
+    - description: |
+        This workspace is shared among all the pipeline tasks to read/write common resources
+      name: source
+    - description: |
+        Cache for go modules
+      name: cache
+      optional: true
+  tasks:
+    - name: downstream-test
+      timeout: 30m
+      retries: 0
+      taskRef:
+        kind: ClusterTask
+        name: katanomi-downstream-test
+      workspaces:
+        - name: source
+          workspace: source
+        - name: cache
+          workspace: cache
+      when: []
+      params:
+        - name: tools-image
+          value: registry.alauda.cn:60080/devops/builder-go:1.19-bullseye-75424cc5
+        - name: test-command
+          value: |
+            export GOPROXY=https://build-nexus.alauda.cn/repository/golang/,direct
+            export GOMAXPROCS=4
+            export GO_TEST_FLAGS=-v
+            if [ "$GOCACHE" != "" ]; then
+              export TOOLBIN=$GOCACHE/../toolbin
+              mkdir -p $TOOLBIN
+            fi
+
+            go mod download
+            make manifests
+            make generate
+            make gotest
+        - name: repos
+          value: |
+            https://github.com/katanomi/builds.git
+            https://github.com/katanomi/deliveries.git
+            https://github.com/katanomi/integrations.git
+            https://github.com/katanomi/core.git
+            https://github.com/katanomi/integrations-gitlab.git
+  git:
+    options:
+      depth: 1
+      timeout: 10m
+      retries: 0
