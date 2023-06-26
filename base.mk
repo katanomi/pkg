@@ -54,10 +54,12 @@ COVER_PROFILE ?= cover.out
 TEST_FILE ?= test.json
 GO_TEST_FLAGS ?= -v -json
 GO_TEST_TAGS ?= containers_image_openpgp
-test: manifests generate fmt vet goimports ##@Development Run tests.
+gotest: ##@Development Run go tests.
 	mkdir -p ${ENVTEST_ASSETS_DIR}
 	test -f ${ENVTEST_ASSETS_DIR}/setup-envtest.sh || curl -sSLo ${ENVTEST_ASSETS_DIR}/setup-envtest.sh https://raw.githubusercontent.com/kubernetes-sigs/controller-runtime/v0.8.3/hack/setup-envtest.sh
 	source ${ENVTEST_ASSETS_DIR}/setup-envtest.sh; fetch_envtest_tools $(ENVTEST_ASSETS_DIR); setup_envtest_env $(ENVTEST_ASSETS_DIR); go test $(GO_TEST_FLAGS) -tags=$(GO_TEST_TAGS) -coverpkg=./... -coverprofile $(COVER_PROFILE) ./... | tee ${TEST_FILE}
+
+test: manifests generate fmt vet goimports gotest ##@Development Run source code tests.
 
 install: manifests kustomize ##@Deployment Install CRDs into the K8s cluster specified in ~/.kube/config.
 	$(KUSTOMIZE) build config/crd | kubectl apply -f -
