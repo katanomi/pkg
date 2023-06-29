@@ -197,8 +197,8 @@ func selectToolSecret(logger *zap.SugaredLogger, secretList []corev1.Secret, glo
 	}
 
 	usableSecrets := []corev1.Secret{}
-	usableSecrets = append(usableSecrets, selectToolSecretFrom(logger, secretList, false, resourceU, option)...)
-	usableSecrets = append(usableSecrets, selectToolSecretFrom(logger, globalSecretList, true, resourceU, option)...)
+	usableSecrets = append(usableSecrets, SelectToolSecretFrom(logger, secretList, false, resourceU, option)...)
+	usableSecrets = append(usableSecrets, SelectToolSecretFrom(logger, globalSecretList, true, resourceU, option)...)
 	if len(usableSecrets) == 0 {
 		return nil, nil
 	}
@@ -215,7 +215,8 @@ func selectToolSecret(logger *zap.SugaredLogger, secretList []corev1.Secret, glo
 	return &usableSecrets[0], nil
 }
 
-func selectToolSecretFrom(logger *zap.SugaredLogger, secretList []corev1.Secret, isGlobal bool, resourceURL *neturl.URL, option SelectSecretOption) []corev1.Secret {
+// SelectToolSecretFrom selects the secret that matches the resource url from the secret list
+func SelectToolSecretFrom(logger *zap.SugaredLogger, secretList []corev1.Secret, isGlobal bool, resourceURL *neturl.URL, option SelectSecretOption) []corev1.Secret {
 	usableSecrets := make([]corev1.Secret, 0)
 
 	for _, _secret := range secretList {
