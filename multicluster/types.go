@@ -17,6 +17,7 @@ limitations under the License.
 package multicluster
 
 import (
+	authv1 "k8s.io/api/authorization/v1"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -171,4 +172,14 @@ type ClusterCondition struct {
 	// Message is a human-readable message indicating details about the last status change.
 	// +optional
 	Message string `json:"message,omitempty" protobuf:"bytes,6,opt,name=message"`
+}
+
+// ClusterResourceAttributes returns a ResourceAttribute object to be used in a filter
+func ClusterResourceAttributes(verb string) authv1.ResourceAttributes {
+	return authv1.ResourceAttributes{
+		Group:    ClusterRegistryGroupVersion.Group,
+		Version:  ClusterRegistryGroupVersion.Version,
+		Resource: ClusterGVR.Resource,
+		Verb:     verb,
+	}
 }

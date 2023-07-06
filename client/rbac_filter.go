@@ -23,6 +23,7 @@ import (
 	"strings"
 
 	"github.com/emicklei/go-restful/v3"
+	kerrors "github.com/katanomi/pkg/errors"
 	authnv1 "k8s.io/api/authentication/v1"
 	authv1 "k8s.io/api/authorization/v1"
 	"k8s.io/apiserver/pkg/authentication/user"
@@ -30,7 +31,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	// metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	kerrors "github.com/katanomi/pkg/errors"
+
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 )
@@ -58,40 +59,47 @@ type SubjectAccessReviewClientGetter interface {
 // DynamicSubjectReviewFilter makes a subject review and the ResourceAttribute can be dynamically obtained
 func DynamicSubjectReviewFilter(ctx context.Context, resourceAttGetter ResourceAttributeGetter) restful.FilterFunction {
 	return func(req *restful.Request, resp *restful.Response, chain *restful.FilterChain) {
-		resourceAtt, err := resourceAttGetter.GetResourceAttributes(ctx, req)
+		err := RequestSubjectAccessReview(ctx, req, resourceAttGetter)
 		if err != nil {
-			kerrors.HandleError(req, resp, err)
-			return
-		}
-		reqCtx := req.Request.Context()
-		log := logging.FromContext(reqCtx).With(
-			"resource", resourceAtt.Resource,
-			"group", resourceAtt.Group,
-			"verb", resourceAtt.Verb,
-		)
-		reqCtx = logging.WithLogger(reqCtx, log)
-		review := makeSelfSubjectAccessReview(resourceAtt)
-
-		var clt client.Client
-		if clientGetter, ok := resourceAttGetter.(SubjectAccessReviewClientGetter); ok {
-			clt, err = clientGetter.GetClient(ctx, req)
-			if err != nil {
-				log.Debugw("get custom client for authentication failed", "err", err)
-				kerrors.HandleError(req, resp, err)
-				return
-			}
-		}
-		if clt == nil {
-			clt = Client(reqCtx)
-		}
-		err = postSubjectAccessReview(reqCtx, clt, review)
-		if err != nil {
-			log.Debugw("error verifying user permissions", "err", err, "review", review.GetObject())
 			kerrors.HandleError(req, resp, err)
 			return
 		}
 		chain.ProcessFilter(req, resp)
 	}
+}
+
+// RequestSubjectAccessReview request the SubjectAccessReview resource to check whether it has permission.
+func RequestSubjectAccessReview(ctx context.Context, req *restful.Request, resourceAttGetter ResourceAttributeGetter) error {
+	resourceAtt, err := resourceAttGetter.GetResourceAttributes(ctx, req)
+	if err != nil {
+		return err
+	}
+	reqCtx := req.Request.Context()
+	log := logging.FromContext(reqCtx).With(
+		"resource", resourceAtt.Resource,
+		"group", resourceAtt.Group,
+		"verb", resourceAtt.Verb,
+	)
+	reqCtx = logging.WithLogger(reqCtx, log)
+	review := makeSelfSubjectAccessReview(resourceAtt)
+
+	var clt client.Client
+	if clientGetter, ok := resourceAttGetter.(SubjectAccessReviewClientGetter); ok {
+		clt, err = clientGetter.GetClient(ctx, req)
+		if err != nil {
+			log.Debugw("get custom client for authentication failed", "err", err)
+			return err
+		}
+	}
+	if clt == nil {
+		clt = Client(reqCtx)
+	}
+	err = postSubjectAccessReview(reqCtx, clt, review)
+	if err != nil {
+		log.Debugw("error verifying user permissions", "err", err, "review", review.GetObject())
+		return err
+	}
+	return nil
 }
 
 // SubjectReviewFilterForResource makes a self subject review based a configuration already present inside the
@@ -109,6 +117,14 @@ func SubjectReviewFilterForResource(ctx context.Context, resourceAtt authv1.Reso
 		return *attr, nil
 	})
 	return DynamicSubjectReviewFilter(ctx, getter)
+}
+
+// CheckSubjectAccessReview check if relevant permissions are included
+func CheckSubjectAccessReview(ctx context.Context, req *restful.Request, resourceAtt authv1.ResourceAttributes) error {
+	getter := GetResourceAttributesFunc(func(ctx context.Context, req *restful.Request) (authv1.ResourceAttributes, error) {
+		return resourceAtt, nil
+	})
+	return RequestSubjectAccessReview(ctx, req, getter)
 }
 
 func makeSubjectAccessReview(resourceAtt authv1.ResourceAttributes, user user.Info) subjectAccessReviewObjInterface {

@@ -140,6 +140,46 @@ func TestRBACFilter(t *testing.T) {
 
 		g.Expect(recorder.Code).Should(Not(BeEquivalentTo(http.StatusOK)))
 	})
+
+	t.Run("Check resource permissions", func(t *testing.T) {
+		g := NewGomegaWithT(t)
+		mockCtl := gomock.NewController(t)
+
+		ctx := context.TODO()
+
+		mockClient := mockfakeclient.NewMockClient(mockCtl)
+		mockClient.EXPECT().Create(gomock.Any(), gomock.Any(), gomock.Any()).DoAndReturn(
+			func(ctx interface{}, obj client.Object, opts ...client.CreateOption) error {
+				subject := obj.(*authv1.SelfSubjectAccessReview)
+				if subject.Spec.ResourceAttributes.Name == "allowed" {
+					subject.Status.Denied = false
+					subject.Status.Allowed = true
+				} else {
+					subject.Status.Denied = true
+					subject.Status.Allowed = false
+				}
+				return nil
+			}).Times(2)
+
+		ctx = WithClient(ctx, mockClient)
+		config := &rest.Config{Impersonate: rest.ImpersonationConfig{UserName: "dev"}}
+		ctx = injection.WithConfig(ctx, config)
+		ctx = apiserverrequest.WithUser(ctx, &user.DefaultInfo{Name: "dev"})
+
+		req := httptest.NewRequest("GET", "http://localhost", nil)
+		request := restful.NewRequest(req)
+		request.Request = request.Request.WithContext(ctx)
+
+		err := CheckSubjectAccessReview(ctx, request, authv1.ResourceAttributes{
+			Name: "allowed",
+		})
+
+		g.Expect(err).Should(Succeed())
+		err = CheckSubjectAccessReview(ctx, request, authv1.ResourceAttributes{
+			Name: "not_allowed",
+		})
+		g.Expect(err.Error()).To(Equal("forbidden: access not allowed"))
+	})
 }
 
 func TestGetResourceAttributesFunc_GetResourceAttributes(t *testing.T) {
