@@ -174,6 +174,14 @@ type ClusterCondition struct {
 	Message string `json:"message,omitempty" protobuf:"bytes,6,opt,name=message"`
 }
 
+// ClusterList represents a list of clusters
+type ClusterList struct {
+	metav1.TypeMeta `json:",inline"`
+	metav1.ListMeta `json:"metadata,omitempty"`
+
+	Items []Cluster `json:"items"`
+}
+
 // ClusterResourceAttributes returns a ResourceAttribute object to be used in a filter
 func ClusterResourceAttributes(verb string) authv1.ResourceAttributes {
 	return authv1.ResourceAttributes{
