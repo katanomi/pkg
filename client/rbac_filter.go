@@ -23,6 +23,7 @@ import (
 	"strings"
 
 	"github.com/emicklei/go-restful/v3"
+	kerrors "github.com/katanomi/pkg/errors"
 	authnv1 "k8s.io/api/authentication/v1"
 	authv1 "k8s.io/api/authorization/v1"
 	"k8s.io/apiserver/pkg/authentication/user"
@@ -30,7 +31,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	// metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	kerrors "github.com/katanomi/pkg/errors"
+
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 )
@@ -63,6 +64,7 @@ func DynamicSubjectReviewFilter(ctx context.Context, resourceAttGetter ResourceA
 			kerrors.HandleError(req, resp, err)
 			return
 		}
+
 		reqCtx := req.Request.Context()
 		log := logging.FromContext(reqCtx).With(
 			"resource", resourceAtt.Resource,
@@ -70,7 +72,6 @@ func DynamicSubjectReviewFilter(ctx context.Context, resourceAttGetter ResourceA
 			"verb", resourceAtt.Verb,
 		)
 		reqCtx = logging.WithLogger(reqCtx, log)
-		review := makeSelfSubjectAccessReview(resourceAtt)
 
 		var clt client.Client
 		if clientGetter, ok := resourceAttGetter.(SubjectAccessReviewClientGetter); ok {
@@ -81,17 +82,25 @@ func DynamicSubjectReviewFilter(ctx context.Context, resourceAttGetter ResourceA
 				return
 			}
 		}
+
 		if clt == nil {
 			clt = Client(reqCtx)
 		}
-		err = postSubjectAccessReview(reqCtx, clt, review)
+
+		err = RequestSubjectAccessReview(reqCtx, clt, resourceAtt)
 		if err != nil {
-			log.Debugw("error verifying user permissions", "err", err, "review", review.GetObject())
+			log.Debugw("error verifying user permissions", "err", err)
 			kerrors.HandleError(req, resp, err)
 			return
 		}
 		chain.ProcessFilter(req, resp)
 	}
+}
+
+// RequestSubjectAccessReview request the SubjectAccessReview resource to check whether it has permission.
+func RequestSubjectAccessReview(ctx context.Context, clt client.Client, resourceAtt authv1.ResourceAttributes) error {
+	review := makeSelfSubjectAccessReview(resourceAtt)
+	return postSubjectAccessReview(ctx, clt, review)
 }
 
 // SubjectReviewFilterForResource makes a self subject review based a configuration already present inside the
