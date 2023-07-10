@@ -20,10 +20,18 @@ import corev1 "k8s.io/api/core/v1"
 
 // SumResources sums two ResourceRequirements resources.
 // Note: No operations are performed on Claims. only the sum of Limits and Requests is completed.
-func SumResources(param1, param2 corev1.ResourceRequirements) corev1.ResourceRequirements {
+func SumResources(resource corev1.ResourceRequirements, others ...corev1.ResourceRequirements) corev1.ResourceRequirements {
+	sumLimit := resource.Limits
+	sumRequest := resource.Requests
+
+	for _, item := range others {
+		sumLimit = SumResourceList(sumLimit, item.Limits)
+		sumRequest = SumResourceList(sumRequest, item.Requests)
+	}
+
 	return corev1.ResourceRequirements{
-		Limits:   SumResourceList(param1.Limits, param2.Limits),
-		Requests: SumResourceList(param1.Requests, param2.Requests),
+		Limits:   sumLimit,
+		Requests: sumRequest,
 	}
 }
 
