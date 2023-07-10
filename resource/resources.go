@@ -16,42 +16,43 @@ limitations under the License.
 
 package resource
 
-import corev1 "k8s.io/api/core/v1"
+import (
+	corev1 "k8s.io/api/core/v1"
+)
 
 // SumResources sums two ResourceRequirements resources.
 // Note: No operations are performed on Claims. only the sum of Limits and Requests is completed.
-func SumResources(resource corev1.ResourceRequirements, others ...corev1.ResourceRequirements) corev1.ResourceRequirements {
-	sumLimit := resource.Limits
-	sumRequest := resource.Requests
+func SumResources(resources ...corev1.ResourceRequirements) corev1.ResourceRequirements {
+	if len(resources) == 0 {
+		return corev1.ResourceRequirements{}
+	}
 
-	for _, item := range others {
-		sumLimit = SumResourceList(sumLimit, item.Limits)
-		sumRequest = SumResourceList(sumRequest, item.Requests)
+	var sumLimits, sumRequests []corev1.ResourceList
+	for _, item := range resources {
+		sumLimits = append(sumLimits, item.Limits)
+		sumRequests = append(sumRequests, item.Requests)
 	}
 
 	return corev1.ResourceRequirements{
-		Limits:   sumLimit,
-		Requests: sumRequest,
+		Limits:   SumResourceList(sumLimits...),
+		Requests: SumResourceList(sumRequests...),
 	}
 }
 
-// SumResourceList sums two ResourceList resources.
-func SumResourceList(param1, param2 corev1.ResourceList) corev1.ResourceList {
+// SumResourceList sums many ResourceList resources.
+func SumResourceList(list ...corev1.ResourceList) corev1.ResourceList {
 	result := corev1.ResourceList{}
-	for key, itemQuantity := range param1 {
-		tmpQuantity := itemQuantity
-		if quantity, ok := param2[key]; ok {
-			tmpQuantity.Add(quantity)
-			result[key] = tmpQuantity
-			delete(param2, key)
-		} else {
-			result[key] = tmpQuantity
+	for _, item := range list {
+		for key, itemQuantity := range item {
+			tmpQuantity := itemQuantity
+			if v, ok := result[key]; ok {
+				v.Add(itemQuantity)
+				result[key] = v
+			} else {
+				result[key] = tmpQuantity
+			}
 		}
 	}
 
-	for key, itemQuantity := range param2 {
-		tmpQuantity := itemQuantity
-		result[key] = tmpQuantity
-	}
 	return result
 }
