@@ -27,7 +27,8 @@ func SumResources(resources ...corev1.ResourceRequirements) corev1.ResourceRequi
 		return corev1.ResourceRequirements{}
 	}
 
-	var sumLimits, sumRequests []corev1.ResourceList
+	sumLimits := make([]corev1.ResourceList, 0, len(resources))
+	sumRequests := make([]corev1.ResourceList, 0, len(resources))
 	for _, item := range resources {
 		sumLimits = append(sumLimits, item.Limits)
 		sumRequests = append(sumRequests, item.Requests)
