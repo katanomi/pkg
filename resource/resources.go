@@ -20,7 +20,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 )
 
-// SumResources sums two ResourceRequirements resources.
+// SumResources sums many ResourceRequirements resources.
 // Note: No operations are performed on Claims. only the sum of Limits and Requests is completed.
 func SumResources(resources ...corev1.ResourceRequirements) corev1.ResourceRequirements {
 	if len(resources) == 0 {
