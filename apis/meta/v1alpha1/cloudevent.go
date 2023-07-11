@@ -100,19 +100,20 @@ func (evt *CloudEvent) GetValWithKey(ctx context.Context, path *field.Path) (val
 }
 
 const (
-	CloudEventPrefix               = "dev.katanomi.cloudevents"
-	CloudEventExtGitReference      = "reference"
-	CloudEventExtGitBranch         = "branch"
-	CloudEventExtGitCommitMessage  = "commitmessage"
-	CloudEventExtGitCommitID       = "commit"
-	CloudEventExtGitSourceBranch   = "sourcebranch"
-	CloudEventExtGitTargetBranch   = "targetbranch"
-	CloudEventExtGitTag            = "tag"
-	CloudEventExtAction            = "action"
-	CloudEventExtSender            = "sender"
-	CloudEventExtPullRequestNumber = "number"
-	CloudEventExtCodeRepository    = "repository"
-	CloudEventExtWebhookType       = "webhooktype"
+	CloudEventPrefix                 = "dev.katanomi.cloudevents"
+	CloudEventExtGitReference        = "reference"
+	CloudEventExtGitBranch           = "branch"
+	CloudEventExtGitCommitMessage    = "commitmessage"
+	CloudEventExtGitPullRequestTitle = "pullrequesttitle"
+	CloudEventExtGitCommitID         = "commit"
+	CloudEventExtGitSourceBranch     = "sourcebranch"
+	CloudEventExtGitTargetBranch     = "targetbranch"
+	CloudEventExtGitTag              = "tag"
+	CloudEventExtAction              = "action"
+	CloudEventExtSender              = "sender"
+	CloudEventExtPullRequestNumber   = "number"
+	CloudEventExtCodeRepository      = "repository"
+	CloudEventExtWebhookType         = "webhooktype"
 	// CloudEventExtRevisionSubmitter indicates email of revision submitter
 	CloudEventExtRevisionSubmitter = "revisionsubmitter"
 
