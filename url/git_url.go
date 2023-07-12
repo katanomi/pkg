@@ -17,12 +17,8 @@ limitations under the License.
 package url
 
 import (
-	"fmt"
-	"net/netip"
-	"net/url"
 	"strings"
 
-	"github.com/asaskevich/govalidator"
 	"knative.dev/pkg/apis"
 )
 
@@ -65,22 +61,4 @@ func MatchGitURLPrefix(gitURL, target *apis.URL) bool {
 	}
 	// determine if the prefix matches
 	return strings.HasPrefix(sPath, tPath)
-}
-
-// ExpandURLIPv6 if the url contains an IPv6 address, expand the IPv6 address.
-func ExpandURLIPv6(rawURL string) (string, error) {
-	originURL, err := url.Parse(rawURL)
-	if err != nil {
-		return "", err
-	}
-
-	if govalidator.IsIPv6(originURL.Hostname()) {
-		expandIPv6, _ := netip.ParseAddr(originURL.Hostname())
-		if originURL.Port() != "" {
-			originURL.Host = fmt.Sprintf("[%s]:%s", expandIPv6.StringExpanded(), originURL.Port())
-		} else {
-			originURL.Host = fmt.Sprintf("[%s]", expandIPv6.StringExpanded())
-		}
-	}
-	return originURL.String(), nil
 }
