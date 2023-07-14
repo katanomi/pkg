@@ -88,7 +88,7 @@ func TestManagerFilter(t *testing.T) {
 
 func TestUserFromBearerToken(t *testing.T) {
 	token := "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyLCJlbWFpbCI6ImRldiJ9.v5leOJQ8mxkOzWW-dWWFfPGPn__0eYUGtDCdwx1LWkM"
-	info, err := userFromBearerToken(token)
+	info, err := UserFromBearerToken(token)
 	if err != nil {
 		t.Errorf("error: %s", err)
 	}
