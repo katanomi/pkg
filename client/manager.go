@@ -130,7 +130,7 @@ func ManagerFilter(ctx context.Context, mgr *Manager) restful.FilterFunction {
 		reqCtx = injection.WithConfig(reqCtx, config)
 		reqCtx = WithAppConfig(reqCtx, configInApp)
 
-		user, err := userFromBearerToken(strings.TrimPrefix(req.Request.Header.Get("Authorization"), "Bearer "))
+		user, err := UserFromBearerToken(strings.TrimPrefix(req.Request.Header.Get("Authorization"), "Bearer "))
 		if err != nil {
 			log.Errorw("cannot get user info from token", "err", err)
 			kerrors.HandleError(req, resp, err)
@@ -164,7 +164,7 @@ func ManagerFilter(ctx context.Context, mgr *Manager) restful.FilterFunction {
 	}
 }
 
-func userFromBearerToken(rawToken string) (user.Info, error) {
+func UserFromBearerToken(rawToken string) (user.Info, error) {
 	mapClaims := jwt.MapClaims{}
 
 	_, _, err := new(jwt.Parser).ParseUnverified(rawToken, mapClaims)
