@@ -107,7 +107,7 @@ func (b *BuildGitPullRequestStatus) AssignByGitPullRequest(gitPullRequest *GitPu
 	b.Target = gitPullRequest.Spec.Target.Name
 	b.Source = gitPullRequest.Spec.Source.Name
 	b.AuthorEmail = gitPullRequest.Spec.Author.Email
-	if gitPullRequest.Spec.Properties.Raw != nil {
+	if gitPullRequest.Spec.Properties != nil && gitPullRequest.Spec.Properties.Raw != nil {
 		var content map[string]string
 		json.Unmarshal(gitPullRequest.Spec.Properties.Raw, &content)
 		b.WebURL = content["webURL"]
