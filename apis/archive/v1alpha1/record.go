@@ -69,6 +69,14 @@ type RecordSpec struct {
 	ParentName string `json:"parentName,omitempty"`
 	// ParentUID the uid of the parent resource
 	ParentUID string `json:"parentUid,omitempty"`
+	// TopOwnerCluster the cluster name of the top owner resource
+	TopOwnerCluster string `json:"topOwnerCluster,omitempty"`
+	// TopOwnerNamespace the namespace name of the top owner resource
+	TopOwnerNamespace string `json:"topOwnerNamespace,omitempty"`
+	// TopOwnerName the name of the top owner resource
+	TopOwnerName string `json:"topOwnerName,omitempty"`
+	// TopOwnerUID the uid of the top owner resource
+	TopOwnerUID string `json:"topOwnerUid,omitempty"`
 	// Cluster the cluster name of the resource
 	Cluster string `json:"cluster,omitempty"`
 	// Namespace the namespace name of the resource
