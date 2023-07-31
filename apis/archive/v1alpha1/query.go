@@ -108,7 +108,6 @@ func (p *Condition) UnmarshalJSON(data []byte) error {
 
 // DeleteOption describe the delete option
 type DeleteOption struct {
-	*metav1alpha1.Pager
 	// Direct delete directly, not soft delete
 	Direct bool
 }
