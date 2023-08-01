@@ -201,4 +201,47 @@ func TestUserOwnedResourcePermissionFilter(t *testing.T) {
 		})
 	}
 
+	t.Run("gvr is nil, and gvr should set by request path in multi request with same filter", func(t *testing.T) {
+		g := gomega.NewWithT(t)
+
+		ctx = kclient.WithUser(ctx, &user.DefaultInfo{Name: "jackson"})
+		filter := UserOwnedResourcePermissionFilter(ctx, nil)
+
+		request, response, recorder := mockRequestAndResponse(ctx, map[string]string{
+			"group":     "batch-fake",
+			"version":   "v1",
+			"resource":  "jobs",
+			"name":      "job1",
+			"namespace": "default",
+		})
+		filter(request, response, chain)
+		g.Expect(recorder.Code).ShouldNot(gomega.Equal(200))
+
+		// refresh path params for assert groupVersionResource should not be fixed in closure
+		request, response, recorder = mockRequestAndResponse(ctx, map[string]string{
+			"group":     "batch",
+			"version":   "v1",
+			"resource":  "jobs",
+			"name":      "job1",
+			"namespace": "default",
+		})
+		filter(request, response, chain)
+		g.Expect(recorder.Code).Should(gomega.Equal(200))
+	})
+}
+
+func mockRequestAndResponse(ctx context.Context, pathParams map[string]string) (
+	*restful.Request, *restful.Response, *httptest.ResponseRecorder) {
+	_req := httptest.NewRequest("GET", "http://localhost", nil)
+	request := restful.NewRequest(_req)
+
+	for key, value := range pathParams {
+		request.PathParameters()[key] = value
+	}
+
+	request.Request = request.Request.WithContext(ctx)
+	recorder := httptest.NewRecorder()
+	response := restful.NewResponse(recorder)
+
+	return request, response, recorder
 }
