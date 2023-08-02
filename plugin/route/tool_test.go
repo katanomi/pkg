@@ -23,6 +23,7 @@ import (
 	"testing"
 
 	"github.com/emicklei/go-restful/v3"
+	metav1alpha1 "github.com/katanomi/pkg/apis/meta/v1alpha1"
 	"github.com/katanomi/pkg/plugin/client"
 	. "github.com/onsi/gomega"
 	"go.uber.org/zap"
@@ -88,5 +89,36 @@ func (t *TestToolServiceCheckAlive) Path() string {
 }
 
 func (t *TestToolServiceCheckAlive) Setup(_ context.Context, _ *zap.SugaredLogger) error {
+	return nil
+}
+
+func TestGetToolMetadata(t *testing.T) {
+	g := NewGomegaWithT(t)
+
+	ws, err := NewService(&TestToolMetadata{}, client.MetaFilter)
+	g.Expect(err).To(BeNil())
+
+	container := restful.NewContainer()
+	container.Add(ws)
+
+	httpRequest, _ := http.NewRequest("GET",
+		"/plugins/v1alpha1/test-toolMetadata/tools/metadata", nil)
+
+	httpWriter := httptest.NewRecorder()
+	container.Dispatch(httpWriter, httpRequest)
+	g.Expect(httpWriter.Code).To(Equal(http.StatusOK))
+}
+
+type TestToolMetadata struct {
+}
+
+func (t *TestToolMetadata) GetToolMetadata(_ context.Context) (*metav1alpha1.ToolMeta, error) {
+	return nil, nil
+}
+func (t *TestToolMetadata) Path() string {
+	return "test-toolMetadata"
+}
+
+func (t *TestToolMetadata) Setup(_ context.Context, _ *zap.SugaredLogger) error {
 	return nil
 }
