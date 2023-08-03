@@ -29,6 +29,8 @@ const (
 	NamespaceLabelKey = "core.kubernetes.io/namespace"
 	// IntegrationClassLabelKey for integrationclass resource
 	IntegrationClassLabelKey = "core.katanomi.dev/integrationClass"
+	// ProxyEnabledLabelKey
+	ProxyEnabledLabelKey = "core.katanomi.dev/proxyEnabled"
 
 	// ClusterIntegrationLabelKey for cluster integration resources
 	ClusterIntegrationLabelKey = "integrations.katanomi.dev/clusterIntegration"

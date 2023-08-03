@@ -21,6 +21,10 @@ const (
 	// If the value is true, the feature is enabled cluster-wide.
 	VersionEnabledFeatureKey = "version.enabled"
 
+	// ProxyEnabledFeatureKey indicates the configuration key of the proxy feature gate.
+	// If the value is true, the feature is enabled cluster-wide.
+	ProxyEnabledFeatureKey = "proxy.enabled"
+
 	// InitializeAllowLocalRequestsFeatureKey indicates the configuration key of.
 	// If the value is true, the feature is enabled cluster-wide.
 	InitializeAllowLocalRequestsFeatureKey = "plugin.gitlab.allow-local-requests"
@@ -39,6 +43,10 @@ const (
 	// DefaultVersionEnabled indicates the default value of the version feature gate.
 	// If the corresponding key does not exist, the default value is returned.
 	DefaultVersionEnabled FeatureValue = "false"
+
+	// DefaultProxyEnabled indicates the default value of the proxy feature gate.
+	// If the corresponding key does not exist, the default value is returned.
+	DefaultProxyEnabled FeatureValue = "false"
 
 	// DefaultInitializeAllowLocalRequests indicates the configuration key of.
 	// If the corresponding key does not exist, the default value is returned.
@@ -59,6 +67,7 @@ const (
 // defaultFeatureValue defines the default value for the feature switch.
 var defaultFeatureValue = map[string]FeatureValue{
 	VersionEnabledFeatureKey:               DefaultVersionEnabled,
+	ProxyEnabledFeatureKey:                 DefaultProxyEnabled,
 	InitializeAllowLocalRequestsFeatureKey: DefaultInitializeAllowLocalRequests,
 	PrunerDelayAfterCompletedFeatureKey:    DefaultPrunerDelayAfterCompleted,
 	PrunerKeepFeatureKey:                   DefaultPrunerKeep,
