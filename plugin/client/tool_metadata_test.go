@@ -47,7 +47,7 @@ var _ = Describe("ToolMetadata", func() {
 		responder := httpmock.NewJsonResponderOrPanic(200, httpmock.File(
 			"testdata/metadata/get_metadata.json"))
 
-		fakeUrl := fmt.Sprintf("%s/tool/metadata", meta.BaseURL)
+		fakeUrl := fmt.Sprintf("%s/tools/metadata", meta.BaseURL)
 		url, _ := apis.ParseURL(meta.BaseURL)
 		httpmock.RegisterResponder("GET", fakeUrl, responder)
 
@@ -67,7 +67,7 @@ var _ = Describe("ToolMetadata", func() {
 	It("response failed", func() {
 		responder := httpmock.NewJsonResponderOrPanic(500, nil)
 
-		fakeUrl := fmt.Sprintf("%s/tool/metadata", meta.BaseURL)
+		fakeUrl := fmt.Sprintf("%s/tools/metadata", meta.BaseURL)
 		url, _ := apis.ParseURL(meta.BaseURL)
 		httpmock.RegisterResponder("GET", fakeUrl, responder)
 

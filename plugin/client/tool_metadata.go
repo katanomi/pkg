@@ -40,7 +40,7 @@ func newToolMetadata(client Client) ClientToolMetadata {
 // GetVersion get the version metadata corresponding to the address.
 func (p *toolMetadata) GetToolMetadata(ctx context.Context, baseURL *duckv1.Addressable) (*metav1alpha1.ToolMeta, error) {
 	toolMate := &metav1alpha1.ToolMeta{}
-	if err := p.client.Get(ctx, baseURL, "tools/metadata"); err != nil {
+	if err := p.client.Get(ctx, baseURL, "tools/metadata", ResultOpts(toolMate)); err != nil {
 		return nil, err
 	}
 	return toolMate, nil

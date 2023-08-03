@@ -105,6 +105,12 @@ type PluginAttributes interface {
 	Attributes() map[string][]string
 }
 
+// PluginVersionAttributes get diff configurations for different versions.
+type PluginVersionAttributes interface {
+	// GetVersionAttributes get the differential configuration of the specified version
+	GetVersionAttributes(version string) map[string][]string
+}
+
 // ProjectGetter list project api
 type ProjectGetter interface {
 	Interface
