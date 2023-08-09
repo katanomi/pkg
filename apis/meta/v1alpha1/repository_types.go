@@ -42,7 +42,8 @@ const (
 	// CodeRepositorySubType Code repository subtype
 	CodeRepositorySubType RepositorySubType = "CodeRepository"
 
-	// TODO: add more subtypes
+	// FileDirectorySubType Raw repository subtype
+	FileDirectorySubType RepositorySubType = "FileDirectory"
 )
 
 var RepositoryGVK = GroupVersion.WithKind("Repository")
