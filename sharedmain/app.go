@@ -346,7 +346,7 @@ func (a *AppBuilder) MultiClusterClient(client multicluster.Interface) *AppBuild
 }
 
 // Controllers adds controllers to the app, will start a manager under the hood
-func (a *AppBuilder) Controllers(ctors ...controllers.SetupChecker) *AppBuilder {
+func (a *AppBuilder) Controllers(ctors ...controllers.ControllerChecker) *AppBuilder {
 	a.init()
 
 	var err error

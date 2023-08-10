@@ -26,7 +26,7 @@ import (
 
 // LazyLoader loads whenever dependencies are ready
 type LazyLoader interface {
-	LazyLoad(context.Context, manager.Manager, *zap.SugaredLogger, SetupChecker) error
+	LazyLoad(context.Context, manager.Manager, *zap.SugaredLogger, ControllerChecker) error
 	Start(context.Context) error
 }
 
