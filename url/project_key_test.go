@@ -55,7 +55,7 @@ func TestUrlToProjectID(t *testing.T) {
 			wantErr: false,
 		},
 		{
-			gitURL:  "git@github.com:katanomi/catalog.git",
+			gitURL:  "git@github.com/katanomi/catalog.git",
 			want:    "github.com-katanomi-catalog",
 			wantErr: false,
 		},
@@ -71,12 +71,22 @@ func TestUrlToProjectID(t *testing.T) {
 		},
 		{
 			gitURL:  "ssh://git@[2004::192:168:139:4]:32078/root/image",
-			want:    "2004::192:168:139:4:32078-root-image",
+			want:    "2004::192:168:139:4-:32078-root-image",
 			wantErr: false,
 		},
 		{
 			gitURL:  "git@[2004::192:168:139:4]:32078/root/image",
-			want:    "2004::192:168:139:4:32078-root-image",
+			want:    "2004::192:168:139:4-:32078-root-image",
+			wantErr: false,
+		},
+		{
+			gitURL:  "[2004::4]:80/root/image",
+			want:    "2004::4-:80-root-image",
+			wantErr: false,
+		},
+		{
+			gitURL:  "[2004::4:80]/root/image",
+			want:    "2004::4:80-root-image",
 			wantErr: false,
 		},
 		{
