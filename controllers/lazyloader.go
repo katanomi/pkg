@@ -75,7 +75,7 @@ func (c *controllerLazyLoader) LazyLoad(ctx context.Context, mgr manager.Manager
 
 func (c *controllerLazyLoader) checkPending(item lazyItem) (ok bool, err error) {
 
-	checkCrdInstalled, err := item.checker.CheckCrdInstalled(c.ctx, item.logger)
+	checkCrdInstalled, err := item.checker.CheckCrdInstalled(c.ctx, c.SugaredLogger)
 	if err != nil {
 		c.Errorw("failed to check crds", "ctrl", item.checker.Name(), "err", err)
 		return false, err
