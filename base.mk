@@ -153,9 +153,7 @@ endef
 
 # installyaml will check if a given namespace is present, if not will apply a yaml file and wait for a deployment to rollout
 define installyaml
-kubectl get ns $(1) > /dev/null ;\
-EXIT_CODE=$$?;\
-[ "$$EXIT_CODE" == "0" ] || { \
+kubectl get ns $(1) > /dev/null || { \
 set -e ;\
 kubectl apply -f $(2) ;\
 kubectl -n $(1) rollout status deploy/$(3) --timeout=10m ;\
