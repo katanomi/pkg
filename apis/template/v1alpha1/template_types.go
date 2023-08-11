@@ -17,6 +17,7 @@ limitations under the License.
 package v1alpha1
 
 import (
+	"github.com/katanomi/pkg/apis/meta/v1alpha1"
 	pipev1beta1 "github.com/tektoncd/pipeline/pkg/apis/pipeline/v1beta1"
 )
 
@@ -35,9 +36,9 @@ type Template struct {
 	// +optional
 	Params []pipev1beta1.Param `json:"params,omitempty"`
 
-	// Metadata contains the labels and annotations for template
+	// Metadata contains the name labels and annotations for template
 	// This information will be automatically populated when obtaining it
 	// without the need for the user to configure it actively.
 	// +optional
-	Metadata pipev1beta1.PipelineTaskMetadata `json:"metadata,omitempty"`
+	Metadata v1alpha1.Metadata `json:"metadata,omitempty"`
 }
