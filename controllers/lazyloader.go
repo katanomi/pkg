@@ -84,6 +84,7 @@ func (c *controllerLazyLoader) checkPending(item lazyItem) (ok bool, err error) 
 		c.Debugw("controller setup is pending by crds", "ctrl", item.checker.Name(), "err", err)
 		return false, nil
 	}
+	c.Infow("controller setup is not pending by crds", "ctrl", item.checker.Name())
 
 	if err = item.checker.CheckSetup(c.ctx, c.mgr, item.logger); err != nil {
 		c.Debugw("controller setup is pending", "ctrl", item.checker.Name(), "err", err)
