@@ -25,6 +25,16 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 )
 
+// infomerHasAlreadyStartedError is returned when the informer has already started
+type infomerHasAlreadyStartedError struct {
+	err error
+}
+
+// InfomerHasAlreadyStartedError is returned when the informer has already started
+func (i infomerHasAlreadyStartedError) Error() string {
+	return "informer has already started"
+}
+
 // controllerLazyLoader implementation of LazyLoader
 type controllerLazyLoader struct {
 	ctx context.Context
@@ -95,6 +105,11 @@ func (c *controllerLazyLoader) checkPending(item lazyItem) (ok bool, err error) 
 		c.Infow("controller setup started", "ctrl", item.checker.Name())
 		if err = item.checker.Setup(c.ctx, c.mgr, item.logger); err != nil {
 			c.Errorw("controller setup failed with error", "ctrl", item.checker.Name(), "err", err)
+			alreadyStarted := infomerHasAlreadyStartedError{}
+			if err.Error() == alreadyStarted.Error() {
+				c.Warnw("controller setup already started", "ctrl", item.checker.Name())
+				return false, nil
+			}
 		}
 		ok = true
 	}
