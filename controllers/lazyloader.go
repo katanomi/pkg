@@ -108,7 +108,7 @@ func (c *controllerLazyLoader) checkPending(item lazyItem) (ok bool, err error) 
 			alreadyStarted := infomerHasAlreadyStartedError{}
 			if err.Error() == alreadyStarted.Error() {
 				c.Warnw("controller setup already started", "ctrl", item.checker.Name())
-				return false, nil
+				return true, nil
 			}
 		}
 		ok = true
