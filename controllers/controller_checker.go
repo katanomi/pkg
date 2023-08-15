@@ -18,6 +18,6 @@ limitations under the License.
 package controllers
 
 type ControllerChecker interface {
-	ModuleInstalledCheckerInterface
+	DependencyCheckerInterface
 	SetupChecker
 }

@@ -72,7 +72,7 @@ func (r *FooBarReconciler) CheckSetup(ctx context.Context, mgr ctrl.Manager, log
 	return nil
 }
 
-func (m *FooBarReconciler) CheckCrdInstalled(ctx context.Context, logger *zap.SugaredLogger) (bool, error) {
+func (m *FooBarReconciler) DependentCrdInstalled(ctx context.Context, logger *zap.SugaredLogger) (bool, error) {
 	return true, nil
 }
 

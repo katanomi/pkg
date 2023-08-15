@@ -48,11 +48,11 @@ func NewLazyLoader(ctx context.Context, interval time.Duration) LazyLoader {
 
 type lazyItem struct {
 	logger  *zap.SugaredLogger
-	checker ControllerChecker
+	checker SetupChecker
 }
 
 // LazyLoad loads items to lazy load if any error found
-func (c *controllerLazyLoader) LazyLoad(ctx context.Context, mgr manager.Manager, logger *zap.SugaredLogger, checker ControllerChecker) error {
+func (c *controllerLazyLoader) LazyLoad(ctx context.Context, mgr manager.Manager, logger *zap.SugaredLogger, checker SetupChecker) error {
 	c.ctx = ctx
 	c.mgr = mgr
 	item := lazyItem{
@@ -74,17 +74,20 @@ func (c *controllerLazyLoader) LazyLoad(ctx context.Context, mgr manager.Manager
 }
 
 func (c *controllerLazyLoader) checkPending(item lazyItem) (ok bool, err error) {
+	if controllerChecker, ok := item.checker.(ControllerChecker); ok {
+		c.Debugw("checking crds", "ctrl", item.checker.Name())
+		checkCrdInstalled, err := controllerChecker.DependentCrdInstalled(c.ctx, c.SugaredLogger)
+		if err != nil {
+			c.Errorw("failed to check crds", "ctrl", item.checker.Name(), "err", err)
+			return false, err
+		}
+		if !checkCrdInstalled {
+			c.Debugw("controller setup is pending by crds", "ctrl", item.checker.Name(), "err", err)
+			return false, nil
+		}
+	}
 
-	checkCrdInstalled, err := item.checker.CheckCrdInstalled(c.ctx, c.SugaredLogger)
-	if err != nil {
-		c.Errorw("failed to check crds", "ctrl", item.checker.Name(), "err", err)
-		return false, err
-	}
-	if !checkCrdInstalled {
-		c.Debugw("controller setup is pending by crds", "ctrl", item.checker.Name(), "err", err)
-		return false, nil
-	}
-	c.Infow("controller setup is not pending by crds", "ctrl", item.checker.Name())
+	c.Debugw("controller setup is not pending by crds", "ctrl", item.checker.Name())
 
 	if err = item.checker.CheckSetup(c.ctx, c.mgr, item.logger); err != nil {
 		c.Debugw("controller setup is pending", "ctrl", item.checker.Name(), "err", err)

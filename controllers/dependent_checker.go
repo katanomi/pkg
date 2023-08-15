@@ -23,7 +23,7 @@ import (
 	"go.uber.org/zap"
 )
 
-// ModuleInstalledChecker is the interface for checking if a module is installed
-type ModuleInstalledCheckerInterface interface {
-	CheckCrdInstalled(ctx context.Context, logger *zap.SugaredLogger) (bool, error)
+// DependencyCheckerInterface is the interface for checking dependencies
+type DependencyCheckerInterface interface {
+	DependentCrdInstalled(ctx context.Context, logger *zap.SugaredLogger) (bool, error)
 }
