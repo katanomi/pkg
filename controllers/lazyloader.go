@@ -74,6 +74,21 @@ func (c *controllerLazyLoader) LazyLoad(ctx context.Context, mgr manager.Manager
 }
 
 func (c *controllerLazyLoader) checkPending(item lazyItem) (ok bool, err error) {
+	if controllerChecker, ok := item.checker.(ControllerChecker); ok {
+		c.Debugw("checking crds", "ctrl", item.checker.Name())
+		checkCrdInstalled, err := controllerChecker.DependentCrdInstalled(c.ctx, c.SugaredLogger)
+		if err != nil {
+			c.Errorw("failed to check crds", "ctrl", item.checker.Name(), "err", err)
+			return false, err
+		}
+		if !checkCrdInstalled {
+			c.Debugw("controller setup is pending by crds", "ctrl", item.checker.Name(), "err", err)
+			return false, nil
+		}
+	}
+
+	c.Debugw("controller setup is not pending by crds", "ctrl", item.checker.Name())
+
 	if err = item.checker.CheckSetup(c.ctx, c.mgr, item.logger); err != nil {
 		c.Debugw("controller setup is pending", "ctrl", item.checker.Name(), "err", err)
 		// errors returned by this function will cause an fatal error in the application

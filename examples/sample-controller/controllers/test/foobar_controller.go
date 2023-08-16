@@ -42,9 +42,10 @@ type FooBarReconciler struct {
 	Log           *zap.SugaredLogger
 	Scheme        *runtime.Scheme
 	EventRecorder record.EventRecorder
+	crds          []string
 }
 
-var _ pkgctrl.SetupChecker = &FooBarReconciler{}
+var _ pkgctrl.ControllerChecker = &FooBarReconciler{}
 
 // return trigger reconciler name
 func (FooBarReconciler) Name() string {
@@ -69,6 +70,10 @@ func (r *FooBarReconciler) Setup(ctx context.Context, mgr ctrl.Manager, logger *
 func (r *FooBarReconciler) CheckSetup(ctx context.Context, mgr ctrl.Manager, logger *zap.SugaredLogger) error {
 	// no dependencies for this reconciler
 	return nil
+}
+
+func (m *FooBarReconciler) DependentCrdInstalled(ctx context.Context, logger *zap.SugaredLogger) (bool, error) {
+	return true, nil
 }
 
 //+kubebuilder:rbac:groups=test.katanomi.dev,resources=*,verbs=get;list;watch;update;patch;create;delete
