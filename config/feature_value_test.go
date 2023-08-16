@@ -17,8 +17,11 @@ limitations under the License.
 package config
 
 import (
+	"context"
 	"testing"
 	"time"
+
+	. "github.com/onsi/gomega"
 )
 
 func TestFeatureValue_AsInt(t *testing.T) {
@@ -88,4 +91,36 @@ func TestFeatureValue_AsBool(t *testing.T) {
 			}
 		})
 	}
+}
+
+func Test_GetDurationConfig(t *testing.T) {
+	RegisterTestingT(t)
+
+	for _, c := range []struct {
+		description string
+		context     context.Context
+		key         string
+		defaultTime time.Duration
+		expect      time.Duration
+	}{
+		{
+			description: "return default duration",
+			context:     context.Background(),
+			key:         "not exist",
+			defaultTime: time.Hour,
+			expect:      time.Hour,
+		},
+		{
+			description: "return default config duration",
+			context:     WithKatanomiConfigManager(context.Background(), &Manager{}),
+			key:         TemplateRenderRetentionTimeKey,
+			defaultTime: time.Hour,
+			expect:      30 * time.Minute,
+		},
+	} {
+		t.Logf("<=== starting %s...", c.description)
+		Expect(GetDurationConfig(c.context, c.key, c.defaultTime)).To(Equal(c.expect))
+		t.Logf("===> passed %s...", c.description)
+	}
+
 }

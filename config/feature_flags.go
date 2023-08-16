@@ -37,6 +37,13 @@ const (
 
 	// BuildMRCheckTimeoutKey represent build merge request status check timeout key
 	BuildMRCheckTimeoutKey = "build.mergerequest.checkTimeout"
+
+	// TemplateRenderCheckTimeoutKey represent templatrender timeout key
+	TemplateRenderCheckTimeoutKey = "templateRender.checkTimeout"
+
+	// TemplateRenderRetentionTimeKey represent the config key for how long templatrender will remain
+	// retentionTime seems like a better name than delayAfterCompleted so that we use rententionTime here
+	TemplateRenderRetentionTimeKey = "templateRender.retentionTime"
 )
 
 const (
@@ -62,6 +69,12 @@ const (
 
 	// DefaultMRCheckTimeout represent default timeout for merge request status check
 	DefaultMRCheckTimeout FeatureValue = "10m"
+
+	// DefaultTemplateRenderCheckTimeout represent default timeout for templaterender check
+	DefaultTemplateRenderCheckTimeout FeatureValue = "30s"
+
+	// DefaultTemplateRenderRetentionTime represents default duration how long the templatrender will remain
+	DefaultTemplateRenderRetentionTime FeatureValue = "30m"
 )
 
 // defaultFeatureValue defines the default value for the feature switch.
@@ -72,6 +85,8 @@ var defaultFeatureValue = map[string]FeatureValue{
 	PrunerDelayAfterCompletedFeatureKey:    DefaultPrunerDelayAfterCompleted,
 	PrunerKeepFeatureKey:                   DefaultPrunerKeep,
 	BuildMRCheckTimeoutKey:                 DefaultMRCheckTimeout,
+	TemplateRenderCheckTimeoutKey:          DefaultTemplateRenderCheckTimeout,
+	TemplateRenderRetentionTimeKey:         DefaultTemplateRenderRetentionTime,
 }
 
 // FeatureFlags holds the features configurations

@@ -17,9 +17,12 @@ limitations under the License.
 package config
 
 import (
+	"context"
 	"fmt"
 	"strconv"
 	"time"
+
+	"knative.dev/pkg/logging"
 )
 
 // FeatureValue definition of FeatureValue feature value
@@ -55,4 +58,24 @@ func (f FeatureValue) AsBool() (bool, error) {
 		return false, fmt.Errorf("failed parsing feature flags config %q: %v", f.String(), err)
 	}
 	return v, nil
+}
+
+// GetDurationConfig return duration configuration store in manager and return default if not exist
+func GetDurationConfig(ctx context.Context, key string, defaultDuration time.Duration) time.Duration {
+	log := logging.FromContext(ctx)
+
+	var retention time.Duration
+	var err error
+
+	manager := KatanomiConfigManager(ctx)
+	if manager != nil {
+		retention, err = manager.GetFeatureFlag(key).AsDuration()
+		if err != nil {
+			log.Errorw("failed to get duration time", "key", key, "error", err)
+			retention = defaultDuration
+		}
+	} else {
+		retention = defaultDuration
+	}
+	return retention
 }
