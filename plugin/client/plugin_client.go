@@ -21,6 +21,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/emicklei/go-restful/v3"
 	"github.com/go-resty/resty/v2"
 	metav1alpha1 "github.com/katanomi/pkg/apis/meta/v1alpha1"
 	"github.com/katanomi/pkg/client"
@@ -473,4 +474,13 @@ func DefaultOptions() []OptionFunc {
 		ErrorOpts(&ResponseStatusErr{}),
 		HeaderOpts("Content-Type", "application/json"),
 	}
+}
+
+// GetSubResourcesOptionsFromRequest returns SubResourcesOptions based on a request
+func GetSubResourcesOptionsFromRequest(req *restful.Request) (opts metav1alpha1.SubResourcesOptions) {
+	subResourcesHeader := req.HeaderParameter(PluginSubresourcesHeader)
+	if strings.TrimSpace(subResourcesHeader) != "" {
+		opts.SubResources = strings.Split(subResourcesHeader, ",")
+	}
+	return
 }

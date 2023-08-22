@@ -21,6 +21,7 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -50,6 +51,40 @@ func TestListArtifacts(t *testing.T) {
 	container.Add(ws)
 	for _, project := range projects {
 		path := fmt.Sprintf("/plugins/v1alpha1/test-artifacts-1/projects/%s/repositories/katanomi/artifacts", project)
+		httpRequest, _ := http.NewRequest("GET", path, nil)
+		httpRequest.Header.Set("Accept", "application/json")
+
+		metaData := client.Meta{BaseURL: "http://api.test", Version: "v1"}
+		data, _ := json.Marshal(metaData)
+		meta := base64.StdEncoding.EncodeToString(data)
+		httpRequest.Header.Set(client.PluginMetaHeader, meta)
+		httpWriter := httptest.NewRecorder()
+		container.Dispatch(httpWriter, httpRequest)
+		g.Expect(httpWriter.Code).To(Equal(http.StatusOK))
+
+		branchList := metav1alpha1.GitBranchList{}
+		err = json.Unmarshal(httpWriter.Body.Bytes(), &branchList)
+		g.Expect(err).To(BeNil())
+	}
+}
+
+func TestListProjectArtifacts(t *testing.T) {
+	g := NewGomegaWithT(t)
+
+	ws, err := NewService(&TestListArtifact{}, client.MetaFilter)
+	g.Expect(err).To(BeNil())
+
+	var projects = []string{
+		"proj",
+		"proj%2Fsub",
+		"repositories",
+	}
+
+	container := restful.NewContainer()
+	container.Router(restful.RouterJSR311{})
+	container.Add(ws)
+	for _, project := range projects {
+		path := fmt.Sprintf("/plugins/v1alpha1/test-artifacts-1/projects/%s/artifacts", project)
 		httpRequest, _ := http.NewRequest("GET", path, nil)
 		httpRequest.Header.Set("Accept", "application/json")
 
@@ -98,7 +133,46 @@ func TestDeleteArtifactTag(t *testing.T) {
 	}
 }
 
+func TestDeleteProjectArtifact(t *testing.T) {
+	g := NewGomegaWithT(t)
+
+	ws, err := NewService(&TestListArtifact{}, client.MetaFilter)
+	g.Expect(err).To(BeNil())
+
+	var projects = []string{
+		"proj",
+		"proj%2Fsub",
+		"repositories",
+	}
+
+	container := restful.NewContainer()
+	container.Router(restful.RouterJSR311{})
+	container.Add(ws)
+	for _, project := range projects {
+		path := fmt.Sprintf("/plugins/v1alpha1/test-artifacts-1/projects/%s/artifacts/foo/bar.jpg", project)
+		httpRequest, _ := http.NewRequest("DELETE", path, nil)
+		httpRequest.Header.Set("Accept", "application/json")
+
+		metaData := client.Meta{BaseURL: "http://api.test", Version: "v1"}
+		data, _ := json.Marshal(metaData)
+		meta := base64.StdEncoding.EncodeToString(data)
+		httpRequest.Header.Set(client.PluginMetaHeader, meta)
+		httpWriter := httptest.NewRecorder()
+		container.Dispatch(httpWriter, httpRequest)
+		g.Expect(httpWriter.Code).To(Equal(http.StatusOK))
+		g.Expect(err).To(BeNil())
+	}
+}
+
 type TestListArtifact struct {
+}
+
+func (t *TestListArtifact) GetProjectArtifact(ctx context.Context, params metav1alpha1.ProjectArtifactOptions) (*metav1alpha1.Artifact, error) {
+	return &metav1alpha1.Artifact{}, nil
+}
+
+func (t *TestListArtifact) DownloadProjectArtifact(ctx context.Context, params metav1alpha1.ProjectArtifactOptions) (io.ReadCloser, error) {
+	return nil, nil
 }
 
 func (t *TestListArtifact) Path() string {
@@ -113,6 +187,18 @@ func (t *TestListArtifact) ListArtifacts(ctx context.Context, params metav1alpha
 	return &metav1alpha1.ArtifactList{}, nil
 }
 
+func (t *TestListArtifact) GetArtifact(ctx context.Context, params metav1alpha1.ArtifactOptions) (*metav1alpha1.Artifact, error) {
+	return &metav1alpha1.Artifact{}, nil
+}
+
+func (t *TestListArtifact) ListProjectArtifacts(ctx context.Context, params metav1alpha1.ArtifactOptions, option metav1alpha1.ListOptions) (*metav1alpha1.ArtifactList, error) {
+	return &metav1alpha1.ArtifactList{}, nil
+}
+
 func (t *TestListArtifact) DeleteArtifactTag(ctx context.Context, params metav1alpha1.ArtifactTagOptions) error {
+	return nil
+}
+
+func (t *TestListArtifact) DeleteProjectArtifact(ctx context.Context, params metav1alpha1.ProjectArtifactOptions) error {
 	return nil
 }

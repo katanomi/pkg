@@ -64,6 +64,8 @@ type ListMeta struct {
 
 // ListOptions options for list
 type ListOptions struct {
+	SubResourcesOptions `json:",inline"`
+
 	// ItemsPerPage desired number of items to be returned in each page
 	ItemsPerPage int `json:"itemsPerPage"`
 
@@ -77,14 +79,17 @@ type ListOptions struct {
 	// +optional
 	Search url.Values `json:",inline"`
 
-	// Subresoures for listing
+	// Sort for listing
+	Sort []SortOptions `json:"sort"`
+}
+
+// SubResourcesOptions options for subresources
+type SubResourcesOptions struct {
+	// SubResources for listing
 	// will only work for lists that support this feature
 	// when not supported, this values will be ignored
 	// +optional
 	SubResources []string `json:"subResources"`
-
-	// Sort for listing
-	Sort []SortOptions `json:"sort"`
 }
 
 func (opt *ListOptions) SearchSet(key, value string) {
@@ -151,7 +156,7 @@ type SortOptions struct {
 	Order SortOrder `json:"order"`
 }
 
-// RepositoryOptions list repositroy path params
+// RepositoryOptions list repository path params
 type RepositoryOptions struct {
 	// project name
 	Project string         `json:"project"`
@@ -167,6 +172,16 @@ type ArtifactOptions struct {
 
 	// artifact name
 	Artifact string `json:"artifact"`
+}
+
+// ProjectArtifactOptions for project artifact
+type ProjectArtifactOptions struct {
+	// project name
+	Project string `json:"project"`
+	// artifact name
+	Artifact string `json:"artifact"`
+	// subresources
+	SubResourcesOptions `json:",inline"`
 }
 
 // ArtifactTagOptions path params

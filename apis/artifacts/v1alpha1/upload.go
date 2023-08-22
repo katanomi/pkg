@@ -39,12 +39,18 @@ type FileUploadParams struct {
 	Properties *runtime.RawExtension `json:"properties,omitempty"`
 }
 
-// FileUploadResourceAttributes returns a ResourceAttribute object to be used in a filter
-func FileUploadResourceAttributes(verb string) authv1.ResourceAttributes {
+// FileUploadBinaryProperties Upload file expandable fields for binary artifact
+type FileUploadBinaryProperties struct {
+	Name      string `json:"name"`
+	Overwrite bool   `json:"overwrite,omitempty"`
+}
+
+// ArtifactResourceAttributes returns a ResourceAttribute object to be used in a filter
+func ArtifactResourceAttributes(verb string) authv1.ResourceAttributes {
 	return authv1.ResourceAttributes{
 		Group:    GroupVersion.Group,
 		Version:  GroupVersion.Version,
-		Resource: "artifactuploads",
+		Resource: "artifact",
 		Verb:     verb,
 	}
 }

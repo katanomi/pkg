@@ -18,6 +18,7 @@ package client
 
 import (
 	"context"
+	"io"
 
 	cloudevent "github.com/cloudevents/sdk-go/v2"
 	"github.com/emicklei/go-restful/v3"
@@ -142,10 +143,47 @@ type ArtifactLister interface {
 	ListArtifacts(ctx context.Context, params metav1alpha1.ArtifactOptions, option metav1alpha1.ListOptions) (*metav1alpha1.ArtifactList, error)
 }
 
+// ProjectArtifactLister list project-level artifacts
+type ProjectArtifactLister interface {
+	Interface
+	ListProjectArtifacts(ctx context.Context, params metav1alpha1.ArtifactOptions, option metav1alpha1.ListOptions) (*metav1alpha1.ArtifactList, error)
+}
+
 // ArtifactGetter get artifact detail
 type ArtifactGetter interface {
 	Interface
 	GetArtifact(ctx context.Context, params metav1alpha1.ArtifactOptions) (*metav1alpha1.Artifact, error)
+}
+
+// ProjectArtifactGetterDownloader get or download artifact within a project
+type ProjectArtifactGetterDownloader interface {
+	Interface
+	ProjectArtifactGetter
+	ProjectArtifactDownloader
+}
+
+// ProjectArtifactGetter get artifact detail
+type ProjectArtifactGetter interface {
+	Interface
+	GetProjectArtifact(ctx context.Context, params metav1alpha1.ProjectArtifactOptions) (*metav1alpha1.Artifact, error)
+}
+
+// ProjectArtifactDownloader download artifact within a project
+type ProjectArtifactDownloader interface {
+	Interface
+	DownloadProjectArtifact(ctx context.Context, params metav1alpha1.ProjectArtifactOptions) (io.ReadCloser, error)
+}
+
+// ProjectArtifactDeleter delete artifact
+type ProjectArtifactDeleter interface {
+	Interface
+	DeleteProjectArtifact(ctx context.Context, params metav1alpha1.ProjectArtifactOptions) error
+}
+
+// ProjectArtifactUploader upload artifact
+type ProjectArtifactUploader interface {
+	Interface
+	UploadArtifact(ctx context.Context, params metav1alpha1.ProjectArtifactOptions, r io.Reader) error
 }
 
 // ArtifactDeleter delete artifact
