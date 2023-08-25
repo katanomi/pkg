@@ -126,6 +126,15 @@ func (p *PluginClient) Get(ctx context.Context, baseURL *duckv1.Addressable, pat
 	return p.HandleError(response, err)
 }
 
+// GetResponse performs a GET request using defined options and return response
+func (p *PluginClient) GetResponse(ctx context.Context, baseURL *duckv1.Addressable, path string, options ...OptionFunc) (*resty.Response, error) {
+	clientOptions := append(DefaultOptions(), MetaOpts(p.meta), SecretOpts(p.secret))
+	options = append(clientOptions, options...)
+
+	request := p.R(ctx, baseURL, options...)
+	return request.Get(p.FullUrl(baseURL, path))
+}
+
 // Post performs a POST request with the given parameters
 func (p *PluginClient) Post(ctx context.Context, baseURL *duckv1.Addressable, path string, options ...OptionFunc) error {
 	clientOptions := append(DefaultOptions(), MetaOpts(p.meta), SecretOpts(p.secret))
@@ -277,6 +286,19 @@ func (p *PluginClient) Artifact(meta Meta, secret corev1.Secret) ClientArtifact 
 	clone := p.Clone().WithMeta(meta).WithSecret(secret)
 
 	return newArtifact(clone)
+}
+
+// ProjectArtifact get ProjectArtifact client
+func (p *PluginClient) ProjectArtifact(meta Meta, secret corev1.Secret) ClientProjectArtifact {
+	clone := p.Clone().WithMeta(meta).WithSecret(secret)
+
+	return newProjectArtifact(clone)
+}
+
+// NewProjectArtifact get ProjectArtifact client
+// Use the internal meta and secret to generate the client, please assign in advance.
+func (p *PluginClient) NewProjectArtifact() ClientProjectArtifact {
+	return newProjectArtifact(p)
 }
 
 // NewArtifact get Artifact client

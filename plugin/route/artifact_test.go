@@ -17,6 +17,7 @@ limitations under the License.
 package route
 
 import (
+	"bytes"
 	"context"
 	"encoding/base64"
 	"encoding/json"
@@ -26,10 +27,9 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/katanomi/pkg/plugin/client"
-
 	"github.com/emicklei/go-restful/v3"
 	metav1alpha1 "github.com/katanomi/pkg/apis/meta/v1alpha1"
+	"github.com/katanomi/pkg/plugin/client"
 	. "github.com/onsi/gomega"
 	"go.uber.org/zap"
 )
@@ -37,7 +37,7 @@ import (
 func TestListArtifacts(t *testing.T) {
 	g := NewGomegaWithT(t)
 
-	ws, err := NewService(&TestListArtifact{}, client.MetaFilter)
+	ws, err := NewService(&MockArtifactImpl{}, client.MetaFilter)
 	g.Expect(err).To(BeNil())
 
 	var projects = []string{
@@ -71,7 +71,7 @@ func TestListArtifacts(t *testing.T) {
 func TestListProjectArtifacts(t *testing.T) {
 	g := NewGomegaWithT(t)
 
-	ws, err := NewService(&TestListArtifact{}, client.MetaFilter)
+	ws, err := NewService(&MockArtifactImpl{}, client.MetaFilter)
 	g.Expect(err).To(BeNil())
 
 	var projects = []string{
@@ -102,10 +102,76 @@ func TestListProjectArtifacts(t *testing.T) {
 	}
 }
 
+func TestGetProjectArtifact(t *testing.T) {
+	g := NewGomegaWithT(t)
+
+	ws, err := NewService(&MockArtifactImpl{}, client.MetaFilter)
+	g.Expect(err).To(BeNil())
+
+	var projects = []string{
+		"proj",
+		"proj%2Fsub",
+		"repositories",
+	}
+
+	container := restful.NewContainer()
+	container.Router(restful.RouterJSR311{})
+	container.Add(ws)
+	for _, project := range projects {
+		path := fmt.Sprintf("/plugins/v1alpha1/test-artifacts-1/projects/%s/artifacts/test.jpg", project)
+		httpRequest, _ := http.NewRequest("GET", path, nil)
+		httpRequest.Header.Set("Accept", "application/json")
+
+		metaData := client.Meta{BaseURL: "http://api.test", Version: "v1"}
+		data, _ := json.Marshal(metaData)
+		meta := base64.StdEncoding.EncodeToString(data)
+		httpRequest.Header.Set(client.PluginMetaHeader, meta)
+		httpWriter := httptest.NewRecorder()
+		container.Dispatch(httpWriter, httpRequest)
+		g.Expect(httpWriter.Code).To(Equal(http.StatusOK))
+
+		var artifact metav1alpha1.Artifact
+		err = json.Unmarshal(httpWriter.Body.Bytes(), &artifact)
+		g.Expect(err).To(BeNil())
+	}
+}
+
+func TestGetProjectArtifactFile(t *testing.T) {
+	g := NewGomegaWithT(t)
+
+	ws, err := NewService(&MockArtifactImpl{}, client.MetaFilter)
+	g.Expect(err).To(BeNil())
+
+	var projects = []string{
+		"proj",
+		"proj%2Fsub",
+		"repositories",
+	}
+
+	container := restful.NewContainer()
+	container.Router(restful.RouterJSR311{})
+	container.Add(ws)
+	for _, project := range projects {
+		path := fmt.Sprintf("/plugins/v1alpha1/test-artifacts-1/projects/%s/artifacts/test.jpg/file", project)
+		httpRequest, _ := http.NewRequest("GET", path, nil)
+
+		metaData := client.Meta{BaseURL: "http://api.test", Version: "v1"}
+		data, _ := json.Marshal(metaData)
+		meta := base64.StdEncoding.EncodeToString(data)
+		httpRequest.Header.Set(client.PluginMetaHeader, meta)
+		httpWriter := httptest.NewRecorder()
+		container.Dispatch(httpWriter, httpRequest)
+		g.Expect(httpWriter.Code).To(Equal(http.StatusOK))
+
+		g.Expect(httpWriter.Body.Bytes()).To(Equal([]byte("xxx")))
+		g.Expect(err).To(BeNil())
+	}
+}
+
 func TestDeleteArtifactTag(t *testing.T) {
 	g := NewGomegaWithT(t)
 
-	ws, err := NewService(&TestListArtifact{}, client.MetaFilter)
+	ws, err := NewService(&MockArtifactImpl{}, client.MetaFilter)
 	g.Expect(err).To(BeNil())
 
 	var projects = []string{
@@ -136,7 +202,7 @@ func TestDeleteArtifactTag(t *testing.T) {
 func TestDeleteProjectArtifact(t *testing.T) {
 	g := NewGomegaWithT(t)
 
-	ws, err := NewService(&TestListArtifact{}, client.MetaFilter)
+	ws, err := NewService(&MockArtifactImpl{}, client.MetaFilter)
 	g.Expect(err).To(BeNil())
 
 	var projects = []string{
@@ -164,41 +230,41 @@ func TestDeleteProjectArtifact(t *testing.T) {
 	}
 }
 
-type TestListArtifact struct {
+type MockArtifactImpl struct {
 }
 
-func (t *TestListArtifact) GetProjectArtifact(ctx context.Context, params metav1alpha1.ProjectArtifactOptions) (*metav1alpha1.Artifact, error) {
+func (t *MockArtifactImpl) GetProjectArtifact(ctx context.Context, params metav1alpha1.ProjectArtifactOptions) (*metav1alpha1.Artifact, error) {
 	return &metav1alpha1.Artifact{}, nil
 }
 
-func (t *TestListArtifact) DownloadProjectArtifact(ctx context.Context, params metav1alpha1.ProjectArtifactOptions) (io.ReadCloser, error) {
-	return nil, nil
+func (t *MockArtifactImpl) GetProjectArtifactFile(ctx context.Context, params metav1alpha1.ProjectArtifactOptions) (io.ReadCloser, error) {
+	return io.NopCloser(bytes.NewReader([]byte("xxx"))), nil
 }
 
-func (t *TestListArtifact) Path() string {
+func (t *MockArtifactImpl) Path() string {
 	return "test-artifacts-1"
 }
 
-func (t *TestListArtifact) Setup(_ context.Context, _ *zap.SugaredLogger) error {
+func (t *MockArtifactImpl) Setup(_ context.Context, _ *zap.SugaredLogger) error {
 	return nil
 }
 
-func (t *TestListArtifact) ListArtifacts(ctx context.Context, params metav1alpha1.ArtifactOptions, option metav1alpha1.ListOptions) (*metav1alpha1.ArtifactList, error) {
+func (t *MockArtifactImpl) ListArtifacts(ctx context.Context, params metav1alpha1.ArtifactOptions, option metav1alpha1.ListOptions) (*metav1alpha1.ArtifactList, error) {
 	return &metav1alpha1.ArtifactList{}, nil
 }
 
-func (t *TestListArtifact) GetArtifact(ctx context.Context, params metav1alpha1.ArtifactOptions) (*metav1alpha1.Artifact, error) {
+func (t *MockArtifactImpl) GetArtifact(ctx context.Context, params metav1alpha1.ArtifactOptions) (*metav1alpha1.Artifact, error) {
 	return &metav1alpha1.Artifact{}, nil
 }
 
-func (t *TestListArtifact) ListProjectArtifacts(ctx context.Context, params metav1alpha1.ArtifactOptions, option metav1alpha1.ListOptions) (*metav1alpha1.ArtifactList, error) {
+func (t *MockArtifactImpl) ListProjectArtifacts(ctx context.Context, params metav1alpha1.ArtifactOptions, option metav1alpha1.ListOptions) (*metav1alpha1.ArtifactList, error) {
 	return &metav1alpha1.ArtifactList{}, nil
 }
 
-func (t *TestListArtifact) DeleteArtifactTag(ctx context.Context, params metav1alpha1.ArtifactTagOptions) error {
+func (t *MockArtifactImpl) DeleteArtifactTag(ctx context.Context, params metav1alpha1.ArtifactTagOptions) error {
 	return nil
 }
 
-func (t *TestListArtifact) DeleteProjectArtifact(ctx context.Context, params metav1alpha1.ProjectArtifactOptions) error {
+func (t *MockArtifactImpl) DeleteProjectArtifact(ctx context.Context, params metav1alpha1.ProjectArtifactOptions) error {
 	return nil
 }

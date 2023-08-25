@@ -93,6 +93,13 @@ func ResultOpts(dest interface{}) OptionFunc {
 	}
 }
 
+// DoNotParseResponseOpts do not parse response
+func DoNotParseResponseOpts() OptionFunc {
+	return func(request *resty.Request) {
+		request.SetDoNotParseResponse(true)
+	}
+}
+
 // ErrorOpts error response object
 func ErrorOpts(err interface{}) OptionFunc {
 	return func(request *resty.Request) {
