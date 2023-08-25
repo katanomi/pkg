@@ -142,8 +142,10 @@ func TryProtocolsWithRegistryURL(ctx context.Context, registry string, allowInse
 		}
 
 		caErr := errors.Unwrap(err)
-		_, ok := caErr.(x509.CertificateInvalidError)
-		if ok && allowInsecure {
+		_, isCertificateInvalidError := caErr.(x509.CertificateInvalidError)
+		_, isHostnameError := caErr.(x509.HostnameError)
+
+		if (isCertificateInvalidError || isHostnameError) && allowInsecure {
 			log.Debugw("Ignored invalid certificate", "protocol", proto, "registry", registry, "error", err)
 			return url, nil
 		}
