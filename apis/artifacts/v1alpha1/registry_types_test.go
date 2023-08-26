@@ -44,6 +44,10 @@ var _ = Describe("Test.GetAuthFromDockerConfigJson", func() {
 					"https://docker.io/user": {
 						"username": "u4",
 						"password": "p4"
+					},
+					"https://suffix.docker.io/////": {
+						"username": "u5",
+						"password": "p5"
 					}
 				}
 			}
@@ -81,6 +85,9 @@ var _ = Describe("Test.GetAuthFromDockerConfigJson", func() {
 		),
 		Entry("just matched registry", "https://docker.io/user", mockAuths,
 			"u4", "p4", nil,
+		),
+		Entry("matched registry suffixed with /", "https://suffix.docker.io", mockAuths,
+			"u5", "p5", nil,
 		),
 		Entry("fallback to host", "https://docker.io/not-exist", mockAuths,
 			"u1", "p1", nil,
