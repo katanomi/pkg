@@ -68,6 +68,12 @@ func GetAuthFromDockerConfigJson(registry string, dockerConfigJsonBytes []byte) 
 		candidate = append(candidate, u.Host, "https://"+u.Host, "http://"+u.Host)
 	}
 
+	// generate all possible address
+	for address, auth := range dockerConfig.Auths {
+		address = strings.TrimRight(address, "/")
+		dockerConfig.Auths[address] = auth
+	}
+
 	for _, address := range candidate {
 		if auth, ok := dockerConfig.Auths[address]; ok {
 			return auth.Username, auth.Password, nil
