@@ -18,6 +18,7 @@ package v1alpha1
 
 import (
 	"sort"
+	"strings"
 
 	"github.com/katanomi/pkg/common"
 
@@ -80,4 +81,33 @@ func (p *ProjectList) Filter(filter func(project Project) bool) *ProjectList {
 	}
 
 	return newList
+}
+
+// FilterProject filter project which satisfy condition of includetypes and excludetypes
+// if return value is true that indicates the project is staisfied
+func FilterProject(projectSubType string, includeType, excludeType string) bool {
+	if len(includeType) == 0 && len(excludeType) == 0 {
+		return true
+	}
+
+	includeTypes := strings.Split(includeType, ",")
+	excludeTypes := strings.Split(excludeType, ",")
+	subTypes := strings.Split(projectSubType, ",")
+
+	for _, subType := range subTypes {
+
+		for _, excludeType := range excludeTypes {
+			if subType == excludeType {
+				return false
+			}
+		}
+
+		for _, includeType := range includeTypes {
+			if subType == includeType {
+				return true
+			}
+		}
+
+	}
+	return false
 }

@@ -213,3 +213,99 @@ func TestProjectList_Filter(t *testing.T) {
 		})
 	}
 }
+
+func TestFilterProject(t *testing.T) {
+	tests := []struct {
+		project string
+		include string
+		exclude string
+		result  bool
+	}{
+		{
+			project: "abc",
+			include: "def",
+			exclude: "",
+			result:  false,
+		},
+		{
+			project: "abc",
+			include: "abc",
+			exclude: "",
+			result:  true,
+		},
+		{
+			project: "abc",
+			include: "abc",
+			exclude: "def",
+			result:  true,
+		},
+		{
+			project: "abc",
+			include: "abc",
+			exclude: "abc",
+			result:  false,
+		},
+		{
+			project: "abc",
+			include: "def,123",
+			exclude: "",
+			result:  false,
+		},
+		{
+			project: "abc",
+			include: "abc,123",
+			exclude: "",
+			result:  true,
+		},
+		{
+			project: "abc",
+			include: "abc,123",
+			exclude: "def,456",
+			result:  true,
+		},
+		{
+			project: "abc",
+			include: "abc,123",
+			exclude: "abc,456",
+			result:  false,
+		},
+		{
+			project: "abc,bcd",
+			include: "abc",
+			exclude: "abc,456",
+			result:  false,
+		},
+		{
+			project: "abc,bcd",
+			include: "abc,123",
+			exclude: "abc,456",
+			result:  false,
+		},
+		{
+			project: "abc,bcd",
+			include: "abc,123",
+			exclude: "456",
+			result:  true,
+		},
+		{
+			project: "abc,bcd",
+			include: "abc",
+			exclude: "",
+			result:  true,
+		},
+		{
+			project: "abc,bcd",
+			include: "abc",
+			exclude: "bcd",
+			result:  true,
+		},
+	}
+
+	g := NewGomegaWithT(t)
+
+	for i, item := range tests {
+		t.Run(fmt.Sprintf("%d", i+1), func(t *testing.T) {
+			g.Expect(FilterProject(item.project, item.include, item.exclude)).To(Equal(item.result))
+		})
+	}
+}
