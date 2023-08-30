@@ -44,6 +44,13 @@ const (
 	// TemplateRenderRetentionTimeKey represent the config key for how long templatrender will remain
 	// retentionTime seems like a better name than delayAfterCompleted so that we use rententionTime here
 	TemplateRenderRetentionTimeKey = "templateRender.retentionTime"
+
+	// PolicyRunRetentionTimeKey represent the config key for how long policyRun will remain
+	PolicyRunRetentionTimeKey = "policyRun.retentionTime"
+
+	// PolicyCheckEnabledFeatureKey indicates the configuration key of the policy check feature gate.
+	// If the value is true, the feature is enabled cluster-wide.
+	PolicyCheckEnabledFeatureKey = "policy.check.enabled"
 )
 
 const (
@@ -75,6 +82,13 @@ const (
 
 	// DefaultTemplateRenderRetentionTime represents default duration how long the templatrender will remain
 	DefaultTemplateRenderRetentionTime FeatureValue = "30m"
+
+	// DefaultPolicyRunRetentionTime represents default duration how long the policyRun will remain
+	DefaultPolicyRunRetentionTime = "30m"
+
+	// DefaultPolicyCheckEnabled indicates the default value of the policy check feature gate.
+	// If the corresponding key does not exist, the default value is returned.
+	DefaultPolicyCheckEnabled FeatureValue = "true"
 )
 
 // defaultFeatureValue defines the default value for the feature switch.
@@ -87,6 +101,8 @@ var defaultFeatureValue = map[string]FeatureValue{
 	BuildMRCheckTimeoutKey:                 DefaultMRCheckTimeout,
 	TemplateRenderCheckTimeoutKey:          DefaultTemplateRenderCheckTimeout,
 	TemplateRenderRetentionTimeKey:         DefaultTemplateRenderRetentionTime,
+	PolicyRunRetentionTimeKey:              DefaultPolicyRunRetentionTime,
+	PolicyCheckEnabledFeatureKey:           DefaultPolicyCheckEnabled,
 }
 
 // FeatureFlags holds the features configurations
