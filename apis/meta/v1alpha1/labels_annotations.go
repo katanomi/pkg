@@ -76,6 +76,8 @@ const (
 
 // Common Annotations
 const (
+	// DisplayNameAnnotationKey display name for objects
+	DisplayNameAnnotationKey = "katanomi.dev/displayName"
 	// CreatedTimeAnnotationKey creation time for objects
 	CreatedTimeAnnotationKey = "katanomi.dev/creationTime"
 	// DeletedTimeAnnotationKey deletion time for objects

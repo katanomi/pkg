@@ -23,9 +23,9 @@ import (
 	"errors"
 	"flag"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"net/http"
+	"os"
 	"sync"
 	"time"
 
@@ -527,23 +527,36 @@ func (a *AppBuilder) StoragePlugins(plugins ...client.Interface) *AppBuilder {
 
 // PluginAttributes set plugin attributes from yaml file
 func (a *AppBuilder) PluginAttributes(plugin client.PluginAttributes, file string) *AppBuilder {
-	data, err := ioutil.ReadFile(file)
-	if err != nil {
-		a.Logger.Fatalw("read plugin attributes file error", "err", err, "file", file)
-	}
-
 	attributes := make(map[string][]string)
-	reader := bytes.NewReader(data)
-	err = utilyaml.NewYAMLOrJSONDecoder(reader, len(data)).Decode(&attributes)
-	if err != nil {
-		a.Logger.Fatalw("parse plugin attributes file error", "err", err, "file", file)
-	}
-
+	a.readAttributes(file, &attributes)
 	for key, value := range attributes {
 		plugin.SetAttribute(key, value...)
 	}
 
 	return a
+}
+
+// PluginVersionAttributes set plugin attributes from yaml file
+func (a *AppBuilder) PluginVersionAttributes(plugin client.PluginVersionAttributes, file string) *AppBuilder {
+	attributes := make(map[string]map[string][]string)
+	a.readAttributes(file, &attributes)
+	for key, value := range attributes {
+		plugin.SetVersionAttributes(key, value)
+	}
+
+	return a
+}
+
+func (a *AppBuilder) readAttributes(file string, attributes interface{}) {
+	data, err := os.ReadFile(file)
+	if err != nil {
+		a.Logger.Fatalw("read plugin version attributes file error", "err", err, "file", file)
+	}
+	reader := bytes.NewReader(data)
+	err = utilyaml.NewYAMLOrJSONDecoder(reader, len(data)).Decode(attributes)
+	if err != nil {
+		a.Logger.Fatalw("parse plugin version attributes file error", "err", err, "file", file)
+	}
 }
 
 // APIDocs adds api docs to the server
