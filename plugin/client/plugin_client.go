@@ -460,6 +460,13 @@ func (p *PluginClient) NewToolService() ClientToolService {
 	return newToolService(p, p.ClassAddress)
 }
 
+// NewToolMetadata get tool metadata execution client
+func (p *PluginClient) NewToolMetadata(meta Meta, secret corev1.Secret) ClientToolMetadata {
+	clone := p.Clone().WithMeta(meta).WithSecret(secret)
+
+	return newToolMetadata(clone)
+}
+
 // DefaultOptions for default plugin client options
 func DefaultOptions() []OptionFunc {
 	return []OptionFunc{

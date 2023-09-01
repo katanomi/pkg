@@ -92,3 +92,37 @@ func (i *initialize) Initialize(request *restful.Request, response *restful.Resp
 
 	response.WriteHeader(http.StatusOK)
 }
+
+type toolMetadata struct {
+	impl client.ToolMetadataGetter
+	tags []string
+}
+
+// NewToolMetadata create a route for the tool service toolMetadata
+func NewToolMetadata(impl client.ToolMetadataGetter) Route {
+	return &toolMetadata{
+		tags: []string{"tools", "metadata"},
+		impl: impl,
+	}
+}
+
+// Register register route
+func (i *toolMetadata) Register(ws *restful.WebService) {
+	ws.Route(
+		ws.GET("/tools/metadata").To(i.GetToolMetadata).
+			Doc("metadata").
+			Metadata(restfulspec.KeyOpenAPITags, i.tags).
+			Returns(http.StatusOK, "OK", nil),
+	)
+}
+
+// GetToolMetadata http handler for tools/metadata
+func (i *toolMetadata) GetToolMetadata(request *restful.Request, response *restful.Response) {
+	metadata, err := i.impl.GetToolMetadata(request.Request.Context())
+	if err != nil {
+		kerrors.HandleError(request, response, err)
+		return
+	}
+
+	response.WriteHeaderAndEntity(http.StatusOK, metadata)
+}

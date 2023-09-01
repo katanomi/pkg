@@ -74,6 +74,8 @@ func SelectToolSecretByRefOrLabelOrURL(ctx context.Context, currentNamespace str
 		Namespace:       currentNamespace,
 		LabelSelector:   selector,
 		PerferredSecret: metav1alpha1.GetNamespacedNameFromRef(secretRef),
+		// https://github.com/katanomi/spec/blob/main/docs/core/3.core.credential.selection.md
+		Scene: string(metav1alpha1.ResourcePathSceneHttpClone),
 	}
 
 	secret, err := SelectToolSecret(log, clt, url, selectOption)

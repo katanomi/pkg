@@ -264,6 +264,9 @@ func match(c client.Interface) []Route {
 	if v, ok := c.(client.Initializer); ok {
 		routes = append(routes, NewInitializer(v))
 	}
+	if v, ok := c.(client.ToolMetadataGetter); ok {
+		routes = append(routes, NewToolMetadata(v))
+	}
 
 	return routes
 }
@@ -424,6 +427,9 @@ func GetMethods(c client.Interface) []string {
 	}
 	if _, ok := c.(client.Initializer); ok {
 		methods = append(methods, "Initialize")
+	}
+	if _, ok := c.(client.ToolMetadataGetter); ok {
+		methods = append(methods, "GetToolMetadata")
 	}
 
 	return methods

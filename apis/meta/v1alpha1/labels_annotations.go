@@ -76,6 +76,8 @@ const (
 
 // Common Annotations
 const (
+	// DisplayNameAnnotationKey display name for objects
+	DisplayNameAnnotationKey = "katanomi.dev/displayName"
 	// CreatedTimeAnnotationKey creation time for objects
 	CreatedTimeAnnotationKey = "katanomi.dev/creationTime"
 	// DeletedTimeAnnotationKey deletion time for objects
@@ -143,6 +145,10 @@ const (
 	// GitPRRevisionPrefixes allows git related integrations
 	// define custom PR revision prefixes
 	GitPRRevisionPrefixes = "gitPRRevisionPrefixes"
+
+	// GitPRRevisionSuffix allows git related integrations
+	// define custom PR revision suffixes
+	GitPRRevisionSuffixes = "gitPRRevisionSuffixes"
 
 	//  PYPISubResourceExtendedAddressSuffixKey Add the corresponding suffix to the specified subResource which for pypi.
 	// TODO: In the future, we need to adopt a better way to add

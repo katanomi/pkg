@@ -105,6 +105,15 @@ type PluginAttributes interface {
 	Attributes() map[string][]string
 }
 
+// PluginVersionAttributes get diff configurations for different versions.
+type PluginVersionAttributes interface {
+	// GetVersionAttributes get the differential configuration of the specified version
+	GetVersionAttributes(version string) map[string][]string
+
+	// SetVersionAttributes set the differential configuration of the specified version
+	SetVersionAttributes(version string, attributes map[string][]string)
+}
+
 // ProjectGetter list project api
 type ProjectGetter interface {
 	Interface
@@ -495,4 +504,10 @@ type LivenessChecker interface {
 type Initializer interface {
 	// Initialize  the tool service if desired
 	Initialize(ctx context.Context) error
+}
+
+// ToolMetadataGetter get the version information corresponding to the address.
+type ToolMetadataGetter interface {
+	// GetToolMetadata get the version information corresponding to the address.
+	GetToolMetadata(ctx context.Context) (*metav1alpha1.ToolMeta, error)
 }
