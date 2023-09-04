@@ -18,9 +18,11 @@ package client
 
 import (
 	"context"
+	"io"
 
 	cloudevent "github.com/cloudevents/sdk-go/v2"
 	"github.com/emicklei/go-restful/v3"
+	"github.com/go-resty/resty/v2"
 	"go.uber.org/zap"
 	corev1 "k8s.io/api/core/v1"
 	"knative.dev/pkg/apis"
@@ -142,10 +144,40 @@ type ArtifactLister interface {
 	ListArtifacts(ctx context.Context, params metav1alpha1.ArtifactOptions, option metav1alpha1.ListOptions) (*metav1alpha1.ArtifactList, error)
 }
 
+// ProjectArtifactLister list project-level artifacts
+type ProjectArtifactLister interface {
+	Interface
+	ListProjectArtifacts(ctx context.Context, params metav1alpha1.ArtifactOptions, option metav1alpha1.ListOptions) (*metav1alpha1.ArtifactList, error)
+}
+
 // ArtifactGetter get artifact detail
 type ArtifactGetter interface {
 	Interface
 	GetArtifact(ctx context.Context, params metav1alpha1.ArtifactOptions) (*metav1alpha1.Artifact, error)
+}
+
+// ProjectArtifactGetter get artifact detail
+type ProjectArtifactGetter interface {
+	Interface
+	GetProjectArtifact(ctx context.Context, params metav1alpha1.ProjectArtifactOptions) (*metav1alpha1.Artifact, error)
+}
+
+// ProjectArtifactFileGetter download artifact within a project
+type ProjectArtifactFileGetter interface {
+	Interface
+	GetProjectArtifactFile(ctx context.Context, params metav1alpha1.ProjectArtifactOptions) (io.ReadCloser, error)
+}
+
+// ProjectArtifactDeleter delete artifact
+type ProjectArtifactDeleter interface {
+	Interface
+	DeleteProjectArtifact(ctx context.Context, params metav1alpha1.ProjectArtifactOptions) error
+}
+
+// ProjectArtifactUploader upload artifact
+type ProjectArtifactUploader interface {
+	Interface
+	UploadArtifact(ctx context.Context, params metav1alpha1.ProjectArtifactOptions, r io.Reader) error
 }
 
 // ArtifactDeleter delete artifact
@@ -399,6 +431,7 @@ type BlobStoreLister interface {
 // as dependency
 type Client interface {
 	Get(ctx context.Context, baseURL *duckv1.Addressable, uri string, options ...OptionFunc) error
+	GetResponse(ctx context.Context, baseURL *duckv1.Addressable, uri string, options ...OptionFunc) (*resty.Response, error)
 	Post(ctx context.Context, baseURL *duckv1.Addressable, uri string, options ...OptionFunc) error
 	Put(ctx context.Context, baseURL *duckv1.Addressable, uri string, options ...OptionFunc) error
 	Delete(ctx context.Context, baseURL *duckv1.Addressable, uri string, options ...OptionFunc) error

@@ -87,6 +87,26 @@ func match(c client.Interface) []Route {
 		routes = append(routes, NewArtifactList(v))
 	}
 
+	if v, ok := c.(client.ProjectArtifactLister); ok {
+		routes = append(routes, NewProjectArtifactList(v))
+	}
+
+	if v, ok := c.(client.ProjectArtifactFileGetter); ok {
+		routes = append(routes, NewProjectArtifactFileGet(v))
+	}
+
+	if v, ok := c.(client.ProjectArtifactGetter); ok {
+		routes = append(routes, NewProjectArtifactGet(v))
+	}
+
+	if v, ok := c.(client.ProjectArtifactUploader); ok {
+		routes = append(routes, NewProjectArtifactUploader(v))
+	}
+
+	if v, ok := c.(client.ProjectArtifactDeleter); ok {
+		routes = append(routes, NewProjectArtifactDeleter(v))
+	}
+
 	if v, ok := c.(client.ArtifactGetter); ok {
 		routes = append(routes, NewArtifactGet(v))
 	}
@@ -287,11 +307,32 @@ func GetMethods(c client.Interface) []string {
 	if _, ok := c.(client.ArtifactLister); ok {
 		methods = append(methods, "ListArtifacts")
 	}
+
+	if _, ok := c.(client.ProjectArtifactLister); ok {
+		methods = append(methods, "ListProjectArtifacts")
+	}
+
+	if _, ok := c.(client.ProjectArtifactGetter); ok {
+		methods = append(methods, "GetProjectArtifact")
+	}
+
+	if _, ok := c.(client.ProjectArtifactFileGetter); ok {
+		methods = append(methods, "GetProjectArtifactFile")
+	}
+
+	if _, ok := c.(client.ProjectArtifactUploader); ok {
+		methods = append(methods, "UploadArtifact")
+	}
+
+	if _, ok := c.(client.ProjectArtifactDeleter); ok {
+		methods = append(methods, "DeleteProjectArtifact")
+	}
+
 	if _, ok := c.(client.ArtifactGetter); ok {
 		methods = append(methods, "GetArtifact")
 	}
 	if _, ok := c.(client.ArtifactDeleter); ok {
-		methods = append(methods, "DeleteArtifact")
+		methods = append(methods, "DeleteProjectArtifact")
 	}
 	if _, ok := c.(client.ArtifactTagDeleter); ok {
 		methods = append(methods, "DeleteArtifactTag")

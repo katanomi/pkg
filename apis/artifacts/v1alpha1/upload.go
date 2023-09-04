@@ -31,6 +31,9 @@ type FileUploadParams struct {
 	// current only support ContainerImage.
 	Type ArtifactType `json:"type,omitempty"`
 
+	// Name for artifact identity name
+	Name string `json:"name"`
+
 	// Checksum generate unique path value
 	Checksum string `json:"checksum"`
 
@@ -39,7 +42,16 @@ type FileUploadParams struct {
 	Properties *runtime.RawExtension `json:"properties,omitempty"`
 }
 
+// FileUploadBinaryProperties Upload file expandable fields for binary artifact
+type FileUploadBinaryProperties struct {
+	// Name for file key name
+	Name string `json:"name"`
+	// Overwrite allows to overwrite the file if it already exists
+	Overwrite bool `json:"overwrite,omitempty"`
+}
+
 // FileUploadResourceAttributes returns a ResourceAttribute object to be used in a filter
+// DEPRECATED: use ArtifactFileSubResourceAttributes instead
 func FileUploadResourceAttributes(verb string) authv1.ResourceAttributes {
 	return authv1.ResourceAttributes{
 		Group:    GroupVersion.Group,

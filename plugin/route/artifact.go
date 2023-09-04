@@ -17,15 +17,16 @@ limitations under the License.
 package route
 
 import (
+	"io"
 	"net/http"
-
-	"github.com/katanomi/pkg/plugin/path"
 
 	restfulspec "github.com/emicklei/go-restful-openapi/v2"
 	"github.com/emicklei/go-restful/v3"
 	metav1alpha1 "github.com/katanomi/pkg/apis/meta/v1alpha1"
 	kerrors "github.com/katanomi/pkg/errors"
 	"github.com/katanomi/pkg/plugin/client"
+	"github.com/katanomi/pkg/plugin/path"
+	"knative.dev/pkg/logging"
 )
 
 type artifactList struct {
@@ -72,6 +73,48 @@ func (a *artifactList) ListArtifacts(request *restful.Request, response *restful
 	response.WriteHeaderAndEntity(http.StatusOK, artifacts)
 }
 
+type projectArtifactLister struct {
+	impl client.ProjectArtifactLister
+	tags []string
+}
+
+// NewProjectArtifactList create a list project artifacts route with plugin client
+func NewProjectArtifactList(impl client.ProjectArtifactLister) Route {
+	return &projectArtifactLister{
+		tags: []string{"projects", "repositories", "artifacts"},
+		impl: impl,
+	}
+}
+
+func (a *projectArtifactLister) Register(ws *restful.WebService) {
+	projectParam := ws.PathParameter("project", "project belong to integraion")
+	ws.Route(
+		ListOptionsDocs(
+			ws.GET("/projects/{project:*}/artifacts").To(a.ListProjectArtifacts).
+				// docs
+				Doc("ListProjectArtifacts").Param(projectParam).
+				Metadata(restfulspec.KeyOpenAPITags, a.tags).
+				Returns(http.StatusOK, "OK", metav1alpha1.ArtifactList{}),
+		),
+	)
+}
+
+func (a *projectArtifactLister) ListProjectArtifacts(request *restful.Request, response *restful.Response) {
+	option := GetListOptionsFromRequest(request)
+	pathParams := metav1alpha1.ArtifactOptions{
+		RepositoryOptions: metav1alpha1.RepositoryOptions{
+			Project: path.Parameter(request, "project"),
+		},
+	}
+	artifacts, err := a.impl.ListProjectArtifacts(request.Request.Context(), pathParams, option)
+	if err != nil {
+		kerrors.HandleError(request, response, err)
+		return
+	}
+
+	response.WriteHeaderAndEntity(http.StatusOK, artifacts)
+}
+
 type artifactGetter struct {
 	impl client.ArtifactGetter
 	tags []string
@@ -102,10 +145,10 @@ func (a *artifactGetter) Register(ws *restful.WebService) {
 func (a *artifactGetter) GetArtifact(request *restful.Request, response *restful.Response) {
 	pathParams := metav1alpha1.ArtifactOptions{
 		RepositoryOptions: metav1alpha1.RepositoryOptions{
-			Project: path.Parameter(request, "project"),
+			Project: request.PathParameter("project"),
 		},
-		Repository: path.Parameter(request, "repository"),
-		Artifact:   path.Parameter(request, "artifact"),
+		Repository: request.PathParameter("repository"),
+		Artifact:   request.PathParameter("artifact"),
 	}
 	artifact, err := a.impl.GetArtifact(request.Request.Context(), pathParams)
 	if err != nil {
@@ -114,6 +157,183 @@ func (a *artifactGetter) GetArtifact(request *restful.Request, response *restful
 	}
 
 	response.WriteHeaderAndEntity(http.StatusOK, artifact)
+}
+
+type projectArtifactUploader struct {
+	impl client.ProjectArtifactUploader
+	tags []string
+}
+
+// NewProjectArtifactUploader create an upload artifact route with plugin client
+func NewProjectArtifactUploader(impl client.ProjectArtifactUploader) Route {
+	return &projectArtifactUploader{
+		tags: []string{"projects", "artifacts"},
+		impl: impl,
+	}
+}
+
+func (a *projectArtifactUploader) Register(ws *restful.WebService) {
+	projectParam := ws.PathParameter("project", "project belong to integration")
+	artifactParam := ws.PathParameter("artifact", "artifact name, maybe is version or tag")
+	ws.Route(
+		ws.PUT("/projects/{project:*}/artifacts/{artifact:*}").To(a.UploadProjectArtifact).
+			// docs
+			Doc("UploadProjectArtifact").Param(projectParam).Param(artifactParam).
+			Metadata(restfulspec.KeyOpenAPITags, a.tags).
+			Returns(http.StatusOK, "OK", metav1alpha1.Artifact{}),
+	)
+}
+
+// UploadProjectArtifact http handler for upload artifact
+func (a *projectArtifactUploader) UploadProjectArtifact(request *restful.Request, response *restful.Response) {
+	artifactOptions := metav1alpha1.ProjectArtifactOptions{
+		Project:  request.PathParameter("project"),
+		Artifact: request.PathParameter("artifact"),
+	}
+
+	artifactOptions.SubResourcesOptions = client.GetSubResourcesOptionsFromRequest(request)
+	err := a.impl.UploadArtifact(request.Request.Context(), artifactOptions, request.Request.Body)
+	if err != nil {
+		kerrors.HandleError(request, response, err)
+		return
+	}
+
+	response.WriteHeader(http.StatusCreated)
+}
+
+type projectArtifactGetter struct {
+	impl client.ProjectArtifactGetter
+	tags []string
+}
+
+// NewProjectArtifactGet create a get or download artifact route with plugin client
+func NewProjectArtifactGet(impl client.ProjectArtifactGetter) Route {
+	return &projectArtifactGetter{
+		tags: []string{"projects", "repositories", "artifacts"},
+		impl: impl,
+	}
+}
+
+func (a *projectArtifactGetter) Register(ws *restful.WebService) {
+	projectParam := ws.PathParameter("project", "project belong to integration")
+	artifactParam := ws.PathParameter("artifact", "artifact name, maybe is version or tag")
+	ws.Route(
+		ws.GET("/projects/{project:*}/artifacts/{artifact:*}").To(a.GetProjectArtifact).
+			// docs
+			Doc("GetProjectArtifact").Param(projectParam).Param(artifactParam).
+			Metadata(restfulspec.KeyOpenAPITags, a.tags).
+			Produces(restful.MIME_JSON, restful.MIME_OCTET).
+			Returns(http.StatusOK, "OK", metav1alpha1.Artifact{}),
+	)
+}
+
+// GetProjectArtifact http handler for get artifact
+func (a *projectArtifactGetter) GetProjectArtifact(request *restful.Request, response *restful.Response) {
+	logger := logging.FromContext(request.Request.Context())
+	projectArtifactOptions := metav1alpha1.ProjectArtifactOptions{
+		Project:  request.PathParameter("project"),
+		Artifact: request.PathParameter("artifact"),
+	}
+
+	projectArtifactOptions.SubResourcesOptions = client.GetSubResourcesOptionsFromRequest(request)
+
+	logger.Debugw("GetProjectArtifact", "project", projectArtifactOptions.Project, "artifact", projectArtifactOptions.Artifact)
+
+	artifact, err := a.impl.GetProjectArtifact(request.Request.Context(), projectArtifactOptions)
+	if err != nil {
+		kerrors.HandleError(request, response, err)
+		return
+	}
+	response.WriteHeaderAndEntity(http.StatusOK, artifact)
+}
+
+type projectArtifactFileGetter struct {
+	impl client.ProjectArtifactFileGetter
+	tags []string
+}
+
+// NewProjectArtifactFileGet create a get or download artifact route with plugin client
+func NewProjectArtifactFileGet(impl client.ProjectArtifactFileGetter) Route {
+	return &projectArtifactFileGetter{
+		tags: []string{"projects", "repositories", "artifacts"},
+		impl: impl,
+	}
+}
+
+func (a *projectArtifactFileGetter) Register(ws *restful.WebService) {
+	projectParam := ws.PathParameter("project", "project belong to integration")
+	artifactParam := ws.PathParameter("artifact", "artifact name, maybe is version or tag")
+	ws.Route(
+		ws.GET("/projects/{project:*}/artifacts/{artifact:*}/file").To(a.GetProjectArtifactFile).
+			// docs
+			Doc("GetProjectArtifactFile").Param(projectParam).Param(artifactParam).
+			Metadata(restfulspec.KeyOpenAPITags, a.tags).
+			Produces(restful.MIME_JSON, restful.MIME_OCTET).
+			Returns(http.StatusOK, "OK", nil),
+	)
+}
+
+// GetProjectArtifactFile http handler for download artifact
+func (a *projectArtifactFileGetter) GetProjectArtifactFile(request *restful.Request, response *restful.Response) {
+	projectArtifactOptions := metav1alpha1.ProjectArtifactOptions{
+		Project:  request.PathParameter("project"),
+		Artifact: request.PathParameter("artifact"),
+	}
+
+	projectArtifactOptions.SubResourcesOptions = client.GetSubResourcesOptionsFromRequest(request)
+	readCloser, err := a.impl.GetProjectArtifactFile(request.Request.Context(), projectArtifactOptions)
+	if err != nil {
+		kerrors.HandleError(request, response, err)
+		return
+	}
+	defer readCloser.Close()
+	_, err = io.Copy(response.ResponseWriter, readCloser)
+	if err != nil {
+		kerrors.HandleError(request, response, err)
+		return
+	}
+}
+
+type projectArtifactDeleter struct {
+	impl client.ProjectArtifactDeleter
+	tags []string
+}
+
+// NewProjectArtifactDeleter create a delete artifact route with plugin client
+func NewProjectArtifactDeleter(impl client.ProjectArtifactDeleter) Route {
+	return &projectArtifactDeleter{
+		tags: []string{"projects", "repositories", "artifacts"},
+		impl: impl,
+	}
+}
+
+func (a *projectArtifactDeleter) Register(ws *restful.WebService) {
+	projectParam := ws.PathParameter("project", "repository belong to integraion")
+	repositoryParam := ws.PathParameter("repository", "artifact belong to repository")
+	artifactParam := ws.PathParameter("artifact", "artifact name, maybe is version or tag")
+	ws.Route(
+		ws.DELETE("/projects/{project:*}/artifacts/{artifact:*}").To(a.DeleteProjectArtifact).
+			// docs
+			Doc("DeleteProjectArtifact").Param(projectParam).Param(repositoryParam).Param(artifactParam).
+			Metadata(restfulspec.KeyOpenAPITags, a.tags).
+			Returns(http.StatusOK, "OK", nil),
+	)
+}
+
+// DeleteProjectArtifact http handler for delete artifact
+func (a *projectArtifactDeleter) DeleteProjectArtifact(request *restful.Request, response *restful.Response) {
+	artifactOpts := metav1alpha1.ProjectArtifactOptions{
+		Project:  request.PathParameter("project"),
+		Artifact: request.PathParameter("artifact"),
+	}
+
+	artifactOpts.SubResourcesOptions = client.GetSubResourcesOptionsFromRequest(request)
+	err := a.impl.DeleteProjectArtifact(request.Request.Context(), artifactOpts)
+	if err != nil {
+		kerrors.HandleError(request, response, err)
+		return
+	}
+	response.WriteHeader(http.StatusOK)
 }
 
 type artifactDeleter struct {
@@ -136,7 +356,7 @@ func (a *artifactDeleter) Register(ws *restful.WebService) {
 	ws.Route(
 		ws.DELETE("/projects/{project:*}/repositories/{repository:*}/artifacts/{artifact}").To(a.DeleteArtifact).
 			// docs
-			Doc("DeleteArtifact").Param(projectParam).Param(repositoryParam).Param(artifactParam).
+			Doc("DeleteProjectArtifact").Param(projectParam).Param(repositoryParam).Param(artifactParam).
 			Metadata(restfulspec.KeyOpenAPITags, a.tags).
 			Returns(http.StatusOK, "OK", nil),
 	)
@@ -188,7 +408,7 @@ func (a *artifactTagDeleter) Register(ws *restful.WebService) {
 	)
 }
 
-// DeleteArtifact http handler for delete artifact
+// DeleteProjectArtifact http handler for delete artifact
 func (a *artifactTagDeleter) DeleteArtifactTag(request *restful.Request, response *restful.Response) {
 	pathParams := metav1alpha1.ArtifactTagOptions{
 		ArtifactOptions: metav1alpha1.ArtifactOptions{

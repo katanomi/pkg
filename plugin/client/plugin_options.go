@@ -59,8 +59,15 @@ func ListOpts(opts metav1alpha1.ListOptions) OptionFunc {
 		request.SetQueryParam("page", strconv.Itoa(opts.Page))
 		request.SetQueryParam("itemsPerPage", strconv.Itoa(opts.ItemsPerPage))
 
-		if len(opts.SubResources) > 0 {
-			request.SetHeader(PluginSubresourcesHeader, strings.Join(opts.SubResources, ","))
+		SubResourcesOpts(opts.SubResources)(request)
+	}
+}
+
+// SubResourcesOpts set subresources header for the request
+func SubResourcesOpts(subResources []string) OptionFunc {
+	return func(request *resty.Request) {
+		if len(subResources) > 0 {
+			request.SetHeader(PluginSubresourcesHeader, strings.Join(subResources, ","))
 		}
 	}
 }
@@ -83,6 +90,13 @@ func BodyOpts(body interface{}) OptionFunc {
 func ResultOpts(dest interface{}) OptionFunc {
 	return func(request *resty.Request) {
 		request.SetResult(dest)
+	}
+}
+
+// DoNotParseResponseOpts do not parse response
+func DoNotParseResponseOpts() OptionFunc {
+	return func(request *resty.Request) {
+		request.SetDoNotParseResponse(true)
 	}
 }
 

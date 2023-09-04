@@ -21,6 +21,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/emicklei/go-restful/v3"
 	"github.com/go-resty/resty/v2"
 	metav1alpha1 "github.com/katanomi/pkg/apis/meta/v1alpha1"
 	"github.com/katanomi/pkg/client"
@@ -123,6 +124,15 @@ func (p *PluginClient) Get(ctx context.Context, baseURL *duckv1.Addressable, pat
 	response, err := request.Get(p.FullUrl(baseURL, path))
 
 	return p.HandleError(response, err)
+}
+
+// GetResponse performs a GET request using defined options and return response
+func (p *PluginClient) GetResponse(ctx context.Context, baseURL *duckv1.Addressable, path string, options ...OptionFunc) (*resty.Response, error) {
+	clientOptions := append(DefaultOptions(), MetaOpts(p.meta), SecretOpts(p.secret))
+	options = append(clientOptions, options...)
+
+	request := p.R(ctx, baseURL, options...)
+	return request.Get(p.FullUrl(baseURL, path))
 }
 
 // Post performs a POST request with the given parameters
@@ -276,6 +286,19 @@ func (p *PluginClient) Artifact(meta Meta, secret corev1.Secret) ClientArtifact 
 	clone := p.Clone().WithMeta(meta).WithSecret(secret)
 
 	return newArtifact(clone)
+}
+
+// ProjectArtifact get ProjectArtifact client
+func (p *PluginClient) ProjectArtifact(meta Meta, secret corev1.Secret) ClientProjectArtifact {
+	clone := p.Clone().WithMeta(meta).WithSecret(secret)
+
+	return newProjectArtifact(clone)
+}
+
+// NewProjectArtifact get ProjectArtifact client
+// Use the internal meta and secret to generate the client, please assign in advance.
+func (p *PluginClient) NewProjectArtifact() ClientProjectArtifact {
+	return newProjectArtifact(p)
 }
 
 // NewArtifact get Artifact client
@@ -473,4 +496,13 @@ func DefaultOptions() []OptionFunc {
 		ErrorOpts(&ResponseStatusErr{}),
 		HeaderOpts("Content-Type", "application/json"),
 	}
+}
+
+// GetSubResourcesOptionsFromRequest returns SubResourcesOptions based on a request
+func GetSubResourcesOptionsFromRequest(req *restful.Request) (opts metav1alpha1.SubResourcesOptions) {
+	subResourcesHeader := req.HeaderParameter(PluginSubresourcesHeader)
+	if strings.TrimSpace(subResourcesHeader) != "" {
+		opts.SubResources = strings.Split(subResourcesHeader, ",")
+	}
+	return
 }

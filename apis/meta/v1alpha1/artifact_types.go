@@ -80,10 +80,10 @@ type ArtifactProperties struct {
 	// +optional
 	Tags []ArtifactTag `json:"tags,omitempty"`
 
-	//ExtraAttrs artifact extra attributes
+	// ExtraAttrs artifact extra attributes
 	// +optional
 	ExtraAttrs ArtifactExtraAttrs `json:"extra_attrs,omitempty"`
-	//References artifact references
+	// References artifact references
 	References []ArtifactReference `json:"references,omitempty"`
 }
 
@@ -144,5 +144,16 @@ func ArtifactResourceAttributes(verb string) authv1.ResourceAttributes {
 		Version:  GroupVersion.Version,
 		Resource: "artifacts",
 		Verb:     verb,
+	}
+}
+
+// ArtifactFileSubResourceAttributes returns artifacts/files SubResourceAttribute object to be used in a filter
+func ArtifactFileSubResourceAttributes(verb string) authv1.ResourceAttributes {
+	return authv1.ResourceAttributes{
+		Group:       GroupVersion.Group,
+		Version:     GroupVersion.Version,
+		Resource:    "artifacts",
+		Subresource: "files",
+		Verb:        verb,
 	}
 }
