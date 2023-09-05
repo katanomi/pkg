@@ -46,8 +46,10 @@ GO_VET_TAGS ?= e2e,containers_image_openpgp
 vet: ##@Development Run go vet against code.
 	go vet -tags $(GO_VET_TAGS) ./...
 
+# you can set lint configuration by GOLANGCILINT_CONFIG like GOLANGCILINT_CONFIG=--issues-exit-code=0
+GOLANGCILINT_CONFIG ?=
 lint: golangcilint ##@Development Run golangci-lint against code.
-	$(GOLANGCILINT) run
+	$(GOLANGCILINT) run $(GOLANGCILINT_CONFIG)
 
 ENVTEST_ASSETS_DIR=$(TOOLBIN)/testbin
 COVER_PROFILE ?= cover.out
