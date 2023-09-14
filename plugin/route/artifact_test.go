@@ -233,6 +233,10 @@ func TestDeleteProjectArtifact(t *testing.T) {
 type MockArtifactImpl struct {
 }
 
+func (t *MockArtifactImpl) DeleteArtifact(ctx context.Context, params metav1alpha1.ArtifactOptions) error {
+	return nil
+}
+
 func (t *MockArtifactImpl) GetProjectArtifact(ctx context.Context, params metav1alpha1.ProjectArtifactOptions) (*metav1alpha1.Artifact, error) {
 	return &metav1alpha1.Artifact{}, nil
 }

@@ -26,6 +26,7 @@ import (
 	"testing"
 
 	"github.com/emicklei/go-restful/v3"
+	"github.com/google/go-cmp/cmp"
 	metav1alpha1 "github.com/katanomi/pkg/apis/meta/v1alpha1"
 	"github.com/katanomi/pkg/plugin/client"
 	. "github.com/onsi/gomega"
@@ -95,6 +96,19 @@ func TestGetMethods(t *testing.T) {
 			c:       &TestGitRepoTagGetterAndLister{},
 			methods: []string{"GetGitRepositoryTag", "ListGitRepositoryTag"},
 		},
+		{
+			c: &MockArtifactImpl{},
+			methods: []string{
+				"ListArtifacts",
+				"ListProjectArtifacts",
+				"GetProjectArtifact",
+				"GetProjectArtifactFile",
+				"DeleteProjectArtifact",
+				"GetArtifact",
+				"DeleteArtifact",
+				"DeleteArtifactTag",
+			},
+		},
 	}
 
 	g := NewGomegaWithT(t)
@@ -102,7 +116,7 @@ func TestGetMethods(t *testing.T) {
 	for i, item := range testCases {
 		t.Run(fmt.Sprintf("test-%d", i+1), func(t *testing.T) {
 			methods := GetMethods(item.c)
-			g.Expect(methods).To(Equal(item.methods))
+			g.Expect(cmp.Diff(methods, item.methods)).To(BeEmpty())
 		})
 	}
 }
