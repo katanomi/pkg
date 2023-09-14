@@ -332,7 +332,7 @@ func GetMethods(c client.Interface) []string {
 		methods = append(methods, "GetArtifact")
 	}
 	if _, ok := c.(client.ArtifactDeleter); ok {
-		methods = append(methods, "DeleteProjectArtifact")
+		methods = append(methods, "DeleteArtifact")
 	}
 	if _, ok := c.(client.ArtifactTagDeleter); ok {
 		methods = append(methods, "DeleteArtifactTag")
