@@ -227,6 +227,13 @@ func TestValidateResourceNameWithChinese(t *testing.T) {
 				g.Expect(errs).To(HaveLen(0))
 			},
 		},
+		"Valid name with single char n": {
+			ktesting.LoadObjectOrDie(g, "testdata/pod-1abc.yaml", &corev1.Pod{}, ktesting.SetName("n")),
+			nil,
+			func(g *WithT, errs field.ErrorList) {
+				g.Expect(errs).To(HaveLen(0))
+			},
+		},
 		"Valid name with space \"123 abc\"": {
 			ktesting.LoadObjectOrDie(g, "testdata/pod-1abc.yaml", &corev1.Pod{}, ktesting.SetName("1113 abc")),
 			nil,
