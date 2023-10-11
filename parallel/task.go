@@ -29,6 +29,11 @@ import (
 	"k8s.io/apimachinery/pkg/util/errors"
 )
 
+const (
+	// DefaultConcurrentNum for default concurrent number of parallel
+	DefaultConcurrentNum = 10
+)
+
 type Task func() (interface{}, error)
 
 // ParallelTasks will construct a parallel tasks struct

@@ -33,7 +33,6 @@ import (
 // Interface interface for a multi-cluster functionality
 type Interface interface {
 	GetConfig(ctx context.Context, clusterRef *corev1.ObjectReference) (config *rest.Config, err error)
-	GetClient(ctx context.Context, clusterRef *corev1.ObjectReference, scheme *runtime.Scheme) (clt client.Client, err error)
 	GetDynamic(ctx context.Context, clusterRef *corev1.ObjectReference) (dyn dynamic.Interface, err error)
 	GetConfigFromCluster(ctx context.Context, cluster *unstructured.Unstructured) (config *rest.Config, err error)
 
@@ -42,6 +41,20 @@ type Interface interface {
 	ListClustersNamespaces(ctx context.Context, namespace string) (clusterNamespaces map[*corev1.ObjectReference][]corev1.Namespace, err error)
 	// StartWarmUpClientCache used to start warming the client cache, only needs to be called once.
 	StartWarmUpClientCache(ctx context.Context)
-	// GetNamespaceClusters returns a list of clusters related by special namespace
-	GetNamespaceClusters(ctx context.Context, namespace string) (clusters []corev1.ObjectReference, err error)
+
+	// ClientGetter for getting client for a clusterRef and given scheme
+	ClientGetter
+
+	// NamespaceClustersGetter for getting list of clusters related by special namespace
+	NamespaceClustersGetter
+}
+
+// NamespaceClustersGetter interface get list of clusters related by special namespace
+type NamespaceClustersGetter interface {
+	GetNamespaceClusters(ctx context.Context, namespace string) ([]corev1.ObjectReference, error)
+}
+
+// ClientGetter interface get client for a clusterRef and given scheme
+type ClientGetter interface {
+	GetClient(ctx context.Context, clusterRef *corev1.ObjectReference, scheme *runtime.Scheme) (clt client.Client, err error)
 }
