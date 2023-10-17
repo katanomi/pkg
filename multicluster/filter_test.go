@@ -29,6 +29,8 @@ import (
 	"github.com/katanomi/pkg/testing/mock/github.com/katanomi/pkg/multicluster"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	"k8s.io/apimachinery/pkg/api/meta"
+	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apiserver/pkg/authentication/user"
 	apiserverrequest "k8s.io/apiserver/pkg/endpoints/request"
 	"k8s.io/client-go/rest"
@@ -48,6 +50,7 @@ var _ = Describe("TestCrossClusterSubjectReview_GetClient", func() {
 		crossReview = &CrossClusterSubjectReview{
 			ClusterParameter: "cluster",
 			ClusterNamespace: "test",
+			restMapper:       meta.NewDefaultRESTMapper([]schema.GroupVersion{}),
 		}
 		req = restful.NewRequest(&http.Request{})
 		clt = nil
