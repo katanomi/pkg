@@ -74,3 +74,22 @@ func GitRepositoryResourceAttributes(verb string) authv1.ResourceAttributes {
 		Verb:     verb,
 	}
 }
+
+// GitRepositoryVisibility visibility of repository
+type GitRepositoryVisibility string
+
+const (
+	// GitRepositoryVisibilityPrivate private repository
+	GitRepositoryVisibilityPrivate GitRepositoryVisibility = "private"
+	// GitRepositoryVisibilityPublic public repository
+	GitRepositoryVisibilityPublic GitRepositoryVisibility = "public"
+)
+
+// CreateGitRepositoryPayload payload for create repository
+type CreateGitRepositoryPayload struct {
+	GitRepo
+
+	DisplayName string                  `json:"displayName"`
+	Visibility  GitRepositoryVisibility `json:"visibility"`
+	AutoInit    bool                    `json:"autoInit"`
+}
