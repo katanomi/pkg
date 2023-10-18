@@ -10,44 +10,28 @@ spec:
       name: cache
       optional: true
   tasks:
-    - name: downstream-test
+    - name: commit-status
       timeout: 30m
       retries: 0
       taskRef:
         kind: ClusterTask
-        name: katanomi-downstream-test
+        name: katanomi-github-commit-status
       workspaces:
         - name: source
           workspace: source
-        - name: cache
-          workspace: cache
       when: []
       params:
-        - name: tools-image
-          value: registry.alauda.cn:60080/devops/builder-go:1.19-bullseye-75424cc5
-        - name: test-command
-          value: |
-            export GOPROXY=https://build-nexus.alauda.cn/repository/golang/,direct
-            export GOMAXPROCS=4
-            export GO_TEST_FLAGS=-v
-            if [ "$GOCACHE" != "" ]; then
-              export TOOLBIN=$GOCACHE/../toolbin
-              mkdir -p $TOOLBIN
-            fi
-
-            go mod download
-            make manifests
-            make generate
-            make gotest
-        - name: repos
-          value: |
-            https://github.com/katanomi/builds.git
-            https://github.com/katanomi/deliveries.git
-            https://github.com/katanomi/integrations.git
-            https://github.com/katanomi/core.git
-            https://github.com/katanomi/integrations-gitlab.git
+        - name: state
+          value: success
+        - name: target-url
+          value: https://edge.alauda.cn/console-devops/workspace/devops/ci/update/katanomi-pkg-downstream-test
+        - name: description
+          value: 成功
   git:
     options:
       depth: 1
       timeout: 10m
       retries: 0
+  runTemplate:
+    spec:
+      taskRunSpecs: []
