@@ -335,6 +335,18 @@ type GitRepoFileCreator interface {
 	CreateGitRepoFile(ctx context.Context, payload metav1alpha1.CreateRepoFilePayload) (metav1alpha1.GitCommit, error)
 }
 
+// GitRepositoryCreator create a git repository
+type GitRepositoryCreator interface {
+	Interface
+	CreateGitRepository(ctx context.Context, payload metav1alpha1.CreateGitRepositoryPayload) (metav1alpha1.GitRepository, error)
+}
+
+// GitRepositoryDeleter delete a git repository
+type GitRepositoryDeleter interface {
+	Interface
+	DeleteGitRepository(ctx context.Context, gitRepo metav1alpha1.GitRepo) error
+}
+
 // GitRepositoryLister list git repository
 type GitRepositoryLister interface {
 	Interface
