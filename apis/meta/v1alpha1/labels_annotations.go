@@ -154,6 +154,9 @@ const (
 	// TODO: In the future, we need to adopt a better way to add
 	// an extended dependency repository address to the plug-in
 	PYPISubResourceExtendedAddressSuffixKey = "pypiSubResourceExtendedAddressSuffix"
+
+	// ProjectAccessURLEmpty this property should be defined when the tool cannot set the project access address.
+	ProjectAccessURLEmpty = "projectAccessURLEmpty"
 )
 
 // Attribute values for label source or manager
