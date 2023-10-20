@@ -19,6 +19,7 @@ package v1alpha1
 import (
 	"reflect"
 
+	"gorm.io/gorm"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 )
@@ -99,6 +100,15 @@ func Equal(key, value string) Condition {
 		Key:      key,
 		Operator: ConditionOperatorEqual,
 		Value:    value,
+	}
+}
+
+// EqualColumn generate condition with equal column operator
+func EqualColumn(key1, key2 string) Condition {
+	return Condition{
+		Key:      key1,
+		Operator: ConditionOperatorEqual,
+		Value:    gorm.Expr(key2),
 	}
 }
 

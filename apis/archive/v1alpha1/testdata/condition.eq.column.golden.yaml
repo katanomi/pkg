@@ -1,0 +1,6 @@
+operator: eq
+key: uid
+value:
+  SQL: uid2
+  Vars: null
+  WithoutParentheses: false

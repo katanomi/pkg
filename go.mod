@@ -65,6 +65,8 @@ require (
 	github.com/tektoncd/pipeline v0.41.0
 	github.com/tidwall/gjson v1.14.4
 	golang.org/x/net v0.8.0
+	gorm.io/gorm v1.25.5
+	k8s.io/apiextensions-apiserver v0.26.1
 	k8s.io/cli-runtime v0.25.2
 	oras.land/oras-go/v2 v2.0.0-rc.5
 )
@@ -105,6 +107,8 @@ require (
 	github.com/hashicorp/golang-lru v0.5.4 // indirect
 	github.com/imdario/mergo v0.3.15 // indirect
 	github.com/inconshreveable/mousetrap v1.0.1 // indirect
+	github.com/jinzhu/inflection v1.0.0 // indirect
+	github.com/jinzhu/now v1.1.5 // indirect
 	github.com/josharian/intern v1.0.0 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
 	github.com/kelseyhightower/envconfig v1.4.0 // indirect
@@ -156,7 +160,6 @@ require (
 	gopkg.in/ini.v1 v1.67.0 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
-	k8s.io/apiextensions-apiserver v0.26.1 // indirect
 	k8s.io/component-base v0.26.1 // indirect
 	k8s.io/klog/v2 v2.90.0 // indirect
 	k8s.io/kube-openapi v0.0.0-20221012153701-172d655c2280 // indirect

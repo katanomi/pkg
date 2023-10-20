@@ -178,3 +178,11 @@ func TestCompleteStatus(t *testing.T) {
 	cond := CompletedStatus()
 	g.Expect(cmp.Diff(cond, expect)).To(gomega.BeEmpty())
 }
+
+func TestEqualColumn(t *testing.T) {
+	g := gomega.NewGomegaWithT(t)
+	expect := Condition{}
+	ktesting.MustLoadYaml("testdata/condition.eq.column.golden.yaml", &expect)
+	cond := EqualColumn("uid", "uid2")
+	g.Expect(cmp.Diff(cond, expect)).To(gomega.BeEmpty())
+}

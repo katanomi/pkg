@@ -41,6 +41,7 @@ func checkCondition(file string, t *testing.T) {
 
 func TestCondition(t *testing.T) {
 	checkCondition("testdata/condition.or.golden.yaml", t)
+	checkCondition("testdata/condition.eq.column.golden.yaml", t)
 	checkCondition("testdata/condition.and.golden.yaml", t)
 	checkCondition("testdata/condition.in.string.golden.yaml", t)
 }

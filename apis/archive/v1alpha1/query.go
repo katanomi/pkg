@@ -20,6 +20,7 @@ import (
 	"encoding/json"
 
 	metav1alpha1 "github.com/katanomi/pkg/apis/meta/v1alpha1"
+	"gorm.io/gorm/clause"
 )
 
 // ConditionOperator describe the operator for condition
@@ -95,15 +96,27 @@ func (p *Condition) UnmarshalJSON(data []byte) error {
 		}
 		p.Value = v
 	default:
-		var v interface{}
-		if err := json.Unmarshal(c.Value, &v); err != nil {
+		val, err := ConvertPossibleValueStruct(c.Value)
+		if err != nil {
 			return err
 		}
-
-		p.Value = v
+		p.Value = val
 	}
 
 	return nil
+}
+
+// ConvertPossibleValueStruct try to convert condition value to a concrete struct value
+func ConvertPossibleValueStruct(raw []byte) (interface{}, error) {
+	var expr clause.Expr
+	if err := json.Unmarshal(raw, &expr); err == nil {
+		return expr, nil
+	}
+	var v interface{}
+	if err := json.Unmarshal(raw, &v); err != nil {
+		return nil, err
+	}
+	return v, nil
 }
 
 // DeleteOption describe the delete option
