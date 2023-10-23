@@ -1,6 +1,3 @@
-operator: eq
+operator: eqcol
 key: uid
-value:
-  SQL: uid2
-  Vars: null
-  WithoutParentheses: false
+value: uid2
