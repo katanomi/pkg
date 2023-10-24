@@ -19,13 +19,13 @@ require (
 	github.com/jarcoal/httpmock v1.0.8
 	github.com/onsi/ginkgo/v2 v2.6.0
 	github.com/onsi/gomega v1.24.1
-	github.com/opencontainers/image-spec v1.1.0-rc2
+	github.com/opencontainers/image-spec v1.1.0-rc4
 	github.com/opentracing/opentracing-go v1.1.0
 	github.com/prometheus/client_golang v1.14.0
 	github.com/uber/jaeger-client-go v2.29.1+incompatible
 	github.com/uber/jaeger-lib v2.4.1+incompatible
 	go.uber.org/zap v1.24.0
-	golang.org/x/sync v0.1.0
+	golang.org/x/sync v0.3.0
 	golang.org/x/time v0.3.0
 	k8s.io/api v0.26.1
 	k8s.io/apimachinery v0.26.1
@@ -67,7 +67,7 @@ require (
 	golang.org/x/net v0.8.0
 	k8s.io/apiextensions-apiserver v0.26.1
 	k8s.io/cli-runtime v0.25.2
-	oras.land/oras-go/v2 v2.0.0-rc.5
+	oras.land/oras-go/v2 v2.3.0
 )
 
 require (
@@ -173,7 +173,6 @@ require (
 )
 
 replace (
-	github.com/opencontainers/image-spec => github.com/opencontainers/image-spec v1.1.0-rc2
 	go.uber.org/zap => github.com/katanomi/zap v1.18.2 // indirect
 	knative.dev/pkg => github.com/katanomi/knative-pkg v0.0.0-20230205123800-ec0dda2ef42f
 )
