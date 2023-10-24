@@ -9,6 +9,10 @@ spec:
         Cache for go modules
       name: cache
       optional: true
+  params:
+  - name: update-cache
+    description: update mod cache using go mod tidy
+    default: "false"
   tasks:
     - name: downstream-test
       timeout: 30m
@@ -35,7 +39,12 @@ spec:
               mkdir -p $TOOLBIN
             fi
 
-            go mod download
+            if [[ "$(params.update-cache)" == "true" ]];then
+              go mod tidy
+            else
+              go mod download
+            fi
+
             make manifests
             make generate
             make gotest

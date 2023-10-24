@@ -102,6 +102,15 @@ func Equal(key, value string) Condition {
 	}
 }
 
+// EqualColumn generate condition with equal column operator
+func EqualColumn(key1, key2 string) Condition {
+	return Condition{
+		Key:      key1,
+		Operator: ConditionOperatorEqualColumn,
+		Value:    key2,
+	}
+}
+
 // Gt generate condition with gt operator
 func Gt(key, value string) Condition {
 	return Condition{

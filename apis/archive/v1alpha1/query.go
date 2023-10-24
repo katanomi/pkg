@@ -35,6 +35,8 @@ const (
 
 	// ConditionOperatorEqual is the operator for equal
 	ConditionOperatorEqual ConditionOperator = "eq"
+	// ConditionOperatorEqualColumn is the operator for equal column
+	ConditionOperatorEqualColumn ConditionOperator = "eqcol"
 	// ConditionOperatorNotEqual is the operator for not equal
 	ConditionOperatorNotEqual ConditionOperator = "ne"
 	// ConditionOperatorGt is the operator for greater than
