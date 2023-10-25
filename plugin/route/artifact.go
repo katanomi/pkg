@@ -400,7 +400,7 @@ func (a *artifactTagDeleter) Register(ws *restful.WebService) {
 	tagParam := ws.PathParameter("tag", "the name of the tag")
 
 	ws.Route(
-		ws.DELETE("/projects/{project:*}/repositories/{repository:*}/artifacts/{artifact}/tags/{tag}").To(a.DeleteArtifactTag).
+		ws.DELETE("/projects/{project:*}/repositories/{repository:*}/artifacts/{artifact:*}/tags/{tag}").To(a.DeleteArtifactTag).
 			// docs
 			Doc("DeleteArtifactTag").Param(projectParam).Param(repositoryParam).Param(artifactParam).Param(tagParam).
 			Metadata(restfulspec.KeyOpenAPITags, a.tags).
