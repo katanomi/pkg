@@ -48,7 +48,7 @@ func PushEmptyImage(ctx context.Context, uri URI) error {
 		Layers: []ocispec.Descriptor{},
 	}
 
-	manifestDescriptor, err := oras.PackManifest(ctx, memStore, oras.PackManifestVersion1_1_RC4, OCIEmptyArtifactType, opts)
+	manifestDescriptor, err := oras.PackManifest(ctx, memStore, oras.PackManifestVersion1_1_RC4, ocispec.MediaTypeImageManifest, opts)
 	if err != nil {
 		log.Errorw("failed to pack manifest with memory", "err", err)
 		return err
