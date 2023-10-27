@@ -1,5 +1,5 @@
 /*
-Copyright 2022 The Katanomi Authors.
+Copyright 2023 The Katanomi Authors.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -14,13 +14,15 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package v1alpha1
+package registry
 
 import (
 	"context"
 	"fmt"
 	"net/http"
 
+	"github.com/go-resty/resty/v2"
+	artifactv1 "github.com/katanomi/pkg/apis/artifacts/v1alpha1"
 	"github.com/katanomi/pkg/client"
 	pclient "github.com/katanomi/pkg/plugin/client"
 	"github.com/katanomi/pkg/restclient"
@@ -35,7 +37,7 @@ import (
 // PushEmptyImage an empty image will be created and pushed.
 // The function will read the credentials from the context. If the credentials
 // are empty, only the credentials will not be used for push.
-func PushEmptyImage(ctx context.Context, uri URI) error {
+func PushEmptyImage(ctx context.Context, uri artifactv1.URI) error {
 	log := logging.FromContext(ctx).Named("PushImage").With("ref", uri.String())
 	if uri.Host == "" || uri.Path == "" || uri.Tag == "" {
 		err := fmt.Errorf("repository host, path and tag must be set")
@@ -60,23 +62,29 @@ func PushEmptyImage(ctx context.Context, uri URI) error {
 		return err
 	}
 
-	repo, err := remote.NewRepository(uri.Repository())
-	if err != nil {
-		log.Errorw("failed to new repository", "err", err)
-		return err
-	}
-
-	credential, err := extraAuthFromContext(ctx)
-	if err != nil {
-		log.Warnw("failed to extra auth, will try to push without credentials", "err", err)
-	}
-
 	var httpCli *http.Client
 	restyClient := restclient.RESTClient(ctx)
 	if restyClient != nil {
 		httpCli = restyClient.GetClient()
 	} else {
 		httpCli = client.NewHTTPClient()
+	}
+
+	repo, err := remote.NewRepository(uri.Repository())
+	if err != nil {
+		log.Errorw("failed to new repository", "err", err)
+		return err
+	}
+
+	schemeDeter := NewDefaultRegistrySchemeDetection(resty.NewWithClient(httpCli), true, true)
+	scheme, _ := schemeDeter.DetectScheme(ctx, uri.Host)
+	if scheme == HTTP {
+		repo.PlainHTTP = true
+	}
+
+	credential, err := extraAuthFromContext(ctx)
+	if err != nil {
+		log.Warnw("failed to extra auth, will try to push without credentials", "err", err)
 	}
 
 	// need to make sure ignore authentication is set.
