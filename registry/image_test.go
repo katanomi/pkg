@@ -1,5 +1,5 @@
 /*
-Copyright 2022 The Katanomi Authors.
+Copyright 2023 The Katanomi Authors.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package v1alpha1
+package registry
 
 import (
 	"bytes"
@@ -27,6 +27,7 @@ import (
 	"strings"
 	"testing"
 
+	artifactv1 "github.com/katanomi/pkg/apis/artifacts/v1alpha1"
 	ocispec "github.com/opencontainers/image-spec/specs-go/v1"
 )
 
@@ -77,22 +78,22 @@ func mockRegistry(t *testing.T) *httptest.Server {
 
 func TestPushEmptyImage(t *testing.T) {
 	tests := map[string]struct {
-		uri     URI
+		uri     artifactv1.URI
 		wantErr bool
 	}{
 		"input is not satisfied": {
-			uri:     URI{Path: "repo"},
+			uri:     artifactv1.URI{Path: "repo"},
 			wantErr: true,
 		},
 		"invalid repo": {
-			uri:     URI{Path: "rep:^o", Tag: "tag"},
+			uri:     artifactv1.URI{Path: "rep:^o", Tag: "tag"},
 			wantErr: true,
 		},
 		"normal push": {
-			uri: URI{Path: "repo", Tag: "tag"},
+			uri: artifactv1.URI{Path: "repo", Tag: "tag"},
 		},
 		"push failed": {
-			uri:     URI{Path: "failed", Tag: "tag"},
+			uri:     artifactv1.URI{Path: "failed", Tag: "tag"},
 			wantErr: true,
 		},
 	}
