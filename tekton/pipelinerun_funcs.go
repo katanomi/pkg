@@ -1,5 +1,5 @@
 /*
-Copyright 2022 The Katanomi Authors.
+Copyright 2023 The Katanomi Authors.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -16,22 +16,16 @@ limitations under the License.
 
 package tekton
 
-import (
-	"testing"
+import "github.com/tektoncd/pipeline/pkg/apis/pipeline/v1beta1"
 
-	. "github.com/onsi/ginkgo/v2"
-	. "github.com/onsi/gomega"
-	"github.com/tektoncd/pipeline/pkg/apis/pipeline/v1beta1"
-	"k8s.io/apimachinery/pkg/runtime"
-)
+// GetPipelineSpec return pipelineSpec from pipelinerun
+func GetPipelineSpec(pr *v1beta1.PipelineRun) *v1beta1.PipelineSpec {
+	if pr == nil {
+		return nil
+	}
 
-var scheme = runtime.NewScheme()
-
-func init() {
-	_ = v1beta1.AddToScheme(scheme)
-}
-
-func TestTekton(t *testing.T) {
-	RegisterFailHandler(Fail)
-	RunSpecs(t, "Tekton Suite")
+	if pr.Spec.PipelineSpec != nil {
+		return pr.Spec.PipelineSpec
+	}
+	return pr.Status.PipelineSpec
 }
