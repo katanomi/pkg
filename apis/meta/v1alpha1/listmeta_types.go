@@ -159,8 +159,11 @@ type SortOptions struct {
 // RepositoryOptions list repository path params
 type RepositoryOptions struct {
 	// project name
-	Project string         `json:"project"`
-	SubType ProjectSubType `json:"subType"`
+	Project string `json:"project"`
+	// Repository repository name, needs to be set when retrieving the repository.
+	// +optional
+	Repository string         `json:"repository"`
+	SubType    ProjectSubType `json:"subType"`
 }
 
 // ArtifactOptions path params
