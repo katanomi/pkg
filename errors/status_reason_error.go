@@ -37,6 +37,9 @@ const (
 
 	// StatusReasonToolServiceUnavailable indicate that requested tool service unavailable
 	StatusReasonToolServiceUnavailable metav1.StatusReason = "ToolServiceUnavailable"
+
+	// StatusReasonStorageClassNotFound indicate that default storage class not found
+	StatusReasonStorageClassNotFound metav1.StatusReason = "DefaultStorageClassNotFound"
 )
 
 // NewCredentialNotProvided init a CredentialNotProvided k8s api error
@@ -75,6 +78,18 @@ func NewGitRevisionNotFound(message string) error {
 	}
 }
 
+// NewDefaultStorageClassNotFound init a GitRevisionNotFound k8s api error
+func NewDefaultStorageClassNotFound(message string) error {
+	return &k8serrors.StatusError{
+		ErrStatus: metav1.Status{
+			Status:  metav1.StatusFailure,
+			Code:    http.StatusNotFound,
+			Reason:  StatusReasonStorageClassNotFound,
+			Message: message,
+		},
+	}
+}
+
 // IsCredentialNotProvided judge if the error is CredentialNotProvided
 func IsCredentialNotProvided(err error) bool {
 	return k8serrors.ReasonForError(err) == StatusReasonCredentialNotProvided
@@ -100,6 +115,11 @@ func IsToolServiceUnavailable(err error) bool {
 	return k8serrors.ReasonForError(err) == StatusReasonToolServiceUnavailable
 }
 
+// IsDefaultStorageClassNotFound judge if the error is DefaultStorageClassNotFound
+func IsDefaultStorageClassNotFound(err error) bool {
+	return k8serrors.ReasonForError(err) == StatusReasonStorageClassNotFound
+}
+
 // Reason return reason for the error if it is a status reason error
 func Reason(err error) (exist bool, reason metav1.StatusReason) {
 	if IsCredentialNotProvided(err) {
@@ -113,6 +133,9 @@ func Reason(err error) (exist bool, reason metav1.StatusReason) {
 	}
 	if IsToolServiceUnavailable(err) {
 		return true, StatusReasonToolServiceUnavailable
+	}
+	if IsDefaultStorageClassNotFound(err) {
+		return true, StatusReasonStorageClassNotFound
 	}
 	if IsUnauthorized(err) {
 		return true, StatusReasonUnauthorized

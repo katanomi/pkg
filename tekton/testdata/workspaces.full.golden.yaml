@@ -1,0 +1,33 @@
+- configMap:
+    name: demo
+  name: demo-cm
+- name: demo-secret
+  secret:
+    secretName: demo
+- name: source
+  persistentVolumeClaim:
+    claimName: pvc-ba86a4e26c
+  volumeClaimTemplate:
+    metadata:
+      creationTimestamp: null
+    spec:
+      accessModes:
+        - ReadWriteMany
+      resources:
+        requests:
+          storage: 200Mi
+    status: {}
+- name: cache-rename
+  persistentVolumeClaim:
+    claimName: pvc-20973b9a8a
+  volumeClaimTemplate:
+    metadata:
+      creationTimestamp: null
+    spec:
+      accessModes:
+        - ReadWriteOnce
+        - ReadWriteMany
+      resources:
+        requests:
+          storage: 100Mi
+    status: {}
