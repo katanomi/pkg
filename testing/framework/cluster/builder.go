@@ -149,7 +149,7 @@ func (b *TestCaseBuilder) checkCondition(testContext *TestContext) (skip bool, e
 		return
 	}
 
-	conditions := append(b.Conditions, &TestNamespaceCondition{})
+	conditions := append([]Condition{&TestNamespaceCondition{}}, b.Conditions...)
 	for _, condition := range conditions {
 		if condition == nil {
 			continue
