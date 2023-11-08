@@ -14,15 +14,24 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package framework
+package cluster
 
-import "reflect"
+import (
+	v1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+)
 
-// reflectName reflect the name
-func reflectName(obj interface{}) string {
-	if t := reflect.TypeOf(obj); t.Kind() == reflect.Ptr {
-		return "*" + t.Elem().Name()
-	} else {
-		return t.Name()
+// NewTestConfigMap helper function for constructing a new configmap
+func NewTestConfigMap(name, namespace string, data map[string]string) *v1.ConfigMap {
+	return &v1.ConfigMap{
+		TypeMeta: metav1.TypeMeta{
+			Kind:       "ConfigMap",
+			APIVersion: "v1",
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      name,
+			Namespace: namespace,
+		},
+		Data: data,
 	}
 }

@@ -14,24 +14,17 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package framework
+package base
 
-import (
-	v1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-)
+// ConditionFunc helper function to wrapping condition
+type ConditionFunc func(testCtx *TestContext) error
 
-// NewTestConfigMap helper function for constructing a new configmap
-func NewTestConfigMap(name, namespace string, data map[string]string) *v1.ConfigMap {
-	return &v1.ConfigMap{
-		TypeMeta: metav1.TypeMeta{
-			Kind:       "ConfigMap",
-			APIVersion: "v1",
-		},
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      name,
-			Namespace: namespace,
-		},
-		Data: data,
-	}
+// Condition implement the Condition interface
+func (c ConditionFunc) Condition(testCtx *TestContext) error {
+	return c(testCtx)
+}
+
+// Condition describe the conditions which the test must match
+type Condition interface {
+	Condition(testCtx *TestContext) error
 }

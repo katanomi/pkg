@@ -1,5 +1,5 @@
 /*
-Copyright 2022 The Katanomi Authors.
+Copyright 2023 The Katanomi Authors.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package framework
+package cluster
 
 import (
 	"fmt"
@@ -26,17 +26,9 @@ import (
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
-	"k8s.io/apimachinery/pkg/util/wait"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"yunion.io/x/pkg/util/wait"
 )
-
-var (
-	skipWhenConditionMismatch = GetDefaultEnv("SKIP_WHEN_CONDITION_MISMATCH", "true")
-)
-
-var builtInConditions = []Condition{
-	&TestNamespaceCondition{},
-}
 
 // ConditionFunc helper function to wrapping condition
 type ConditionFunc func(testCtx *TestContext) error
@@ -46,7 +38,6 @@ func (c ConditionFunc) Condition(testCtx *TestContext) error {
 	return c(testCtx)
 }
 
-// Condition describe the conditions which the test must match
 type Condition interface {
 	Condition(testCtx *TestContext) error
 }

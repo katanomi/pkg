@@ -1,5 +1,5 @@
 /*
-Copyright 2021 The Katanomi Authors.
+Copyright 2023 The Katanomi Authors.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -14,35 +14,33 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package framework
+package cluster
 
 import (
-	"context"
 	"strings"
 
-	"github.com/katanomi/pkg/multicluster"
+	"github.com/katanomi/pkg/testing/framework/base"
 
-	"go.uber.org/zap"
+	"github.com/katanomi/pkg/multicluster"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/util/rand"
 	"k8s.io/client-go/rest"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
-// TestContext a test context
+// TestContext context for cluster testing
 type TestContext struct {
-	Context            context.Context
-	Config             *rest.Config
-	Client             client.Client
-	MultiClusterClient multicluster.Interface
-	*zap.SugaredLogger
+	*base.TestContext
 
+	Config    *rest.Config
+	Scheme    *runtime.Scheme
+	Client    client.Client
 	Namespace string
 
-	Scheme *runtime.Scheme
+	MultiClusterClient multicluster.Interface
 }
 
-// TestContextOption options for TestContext
+// TestContextOption options for building TestContext
 type TestContextOption func(*TestContext)
 
 // NamespaceOption customize the namespace name
@@ -59,5 +57,4 @@ func NamespacePrefixOption(prefix string) TestContextOption {
 	}
 }
 
-// TestFunction function used as describe
 type TestFunction func(*TestContext)
