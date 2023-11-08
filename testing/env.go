@@ -14,16 +14,14 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package framework
+package testing
 
-import (
-	"testing"
+import "os"
 
-	. "github.com/onsi/ginkgo/v2"
-	. "github.com/onsi/gomega"
-)
-
-func TestTesting(t *testing.T) {
-	RegisterFailHandler(Fail)
-	RunSpecs(t, "E2E Testing Framework Suite")
+// GetDefaultEnv get the parameter from env, if not set it use the defaultValue instead
+func GetDefaultEnv(key string, defaultValue string) string {
+	if value := os.Getenv(key); value != "" {
+		return value
+	}
+	return defaultValue
 }

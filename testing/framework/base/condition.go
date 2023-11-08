@@ -14,14 +14,17 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package framework
+package base
 
-import "os"
+// ConditionFunc helper function to wrapping condition
+type ConditionFunc func(testCtx *TestContext) error
 
-// GetDefaultEnv get the parameter from env, if not set it use the defaultValue instead
-func GetDefaultEnv(key string, defaultValue string) string {
-	if value := os.Getenv(key); value != "" {
-		return value
-	}
-	return defaultValue
+// Condition implement the Condition interface
+func (c ConditionFunc) Condition(testCtx *TestContext) error {
+	return c(testCtx)
+}
+
+// Condition describe the conditions which the test must match
+type Condition interface {
+	Condition(testCtx *TestContext) error
 }

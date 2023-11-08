@@ -1,8 +1,5 @@
-//go:build e2e
-// +build e2e
-
 /*
-Copyright 2021 The Katanomi Authors.
+Copyright 2023 The Katanomi Authors.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -17,24 +14,20 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package e2e
+package base
 
-import (
-	"testing"
+import "context"
 
-	_ "github.com/katanomi/pkg/examples/sample-e2e/another"
-	"github.com/katanomi/pkg/testing/framework"
-)
-
-var fmw = framework.New("sample-e2e")
-
-func TestMain(m *testing.M) {
-	fmw.SynchronizedBeforeSuite(nil).
-		SynchronizedAfterSuite(nil).
-		MRun(m)
+// SharedExtension describe interface for shared extension
+type SharedExtension interface {
+	// SetShardInfo set shard info into context
+	SetShardInfo(ctx context.Context) context.Context
 }
 
-func TestE2E(t *testing.T) {
-	// start step to run e2e
-	fmw.Run(t)
+// SharedExtensionFunc helper function to generate a new shared extension
+type SharedExtensionFunc func(ctx context.Context) context.Context
+
+// SetShardInfo set shard info into context
+func (p SharedExtensionFunc) SetShardInfo(ctx context.Context) context.Context {
+	return p(ctx)
 }

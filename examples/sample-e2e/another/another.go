@@ -21,6 +21,7 @@ package another
 
 import (
 	. "github.com/katanomi/pkg/testing/framework"
+	. "github.com/katanomi/pkg/testing/framework/cluster"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 )

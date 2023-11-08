@@ -78,20 +78,61 @@ After constructing a few more methods:
    1. `Do`: finilizes the test case construction
 
 
+## Examples
 
+Test k8s cluster related features such as controller.
 
 ```golang
 package another
 
 import (
 	. "github.com/katanomi/pkg/testing/framework"
+	. "github.com/katanomi/pkg/testing/framework/cluster"
+	. "github.com/onsi/ginkgo/v2"
+	. "github.com/onsi/gomega"
+)
+
+var _ = P1Case("test controller").
+	WithLabels(ControllerLabel).
+	Cluster().
+	DoFunc(func(ctx TestContext) {
+        // test case
+        BeforeEach(func() {
+            ctx.Debugw("before each in another pkg")
+        })
+        AfterEach(func() {
+            ctx.Debugw("after each in another pkg")
+        })
+        Context("With a cluster scoped test case", func() {
+            JustBeforeEach(func() {
+                ctx.Infow("just before each in another pkg")
+            })
+            JustAfterEach(func() {
+                ctx.Infow("just after each in another pkg")
+            })
+            It("it", func() {
+                Expect(ctx.Config).ToNot(BeNil())
+            })
+        })
+    })
+
+```
+
+Test normal features without deploy component to the cluster.
+
+```golang
+package another
+
+import (
+	. "github.com/katanomi/pkg/testing/framework"
+	. "github.com/katanomi/pkg/testing/framework/base"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 )
 
 
 
-var _ = TestCase(Options{Name: "Testinge2e", Priority: P0, Scope: NamespaceScoped}).WithFunc(func(ctx TestContext) {
+var _ = P0Case("normal case").DoFunc(func(ctx TestContext) {
 	BeforeEach(func() {
 		ctx.Debugw("some debug message")
 		// fmt.Println("TestCase BeforeEach", ctx.Config)
@@ -99,28 +140,6 @@ var _ = TestCase(Options{Name: "Testinge2e", Priority: P0, Scope: NamespaceScope
 	It("should succeed", func() {
 		Expect(ctx.Config).ToNot(BeNil())
 	})
-}).Do()
-
-var _ = P1Case("another-test").Cluster().WithFunc(func(ctx TestContext) {
-	// test case
-	BeforeEach(func() {
-		ctx.Debugw("before each in another pkg")
-	})
-	AfterEach(func() {
-		ctx.Debugw("after each in another pkg")
-	})
-	Context("With a cluster scoped test case", func() {
-		JustBeforeEach(func() {
-			ctx.Infow("just before each in another pkg")
-		})
-		JustAfterEach(func() {
-			ctx.Infow("just after each in another pkg")
-		})
-		It("it", func() {
-			Expect(ctx.Config).ToNot(BeNil())
-		})
-	})
-}).Do()
-
+})
 ```
 

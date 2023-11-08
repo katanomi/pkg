@@ -18,44 +18,20 @@ package framework
 
 import (
 	"context"
-	"io"
 	"math/rand"
 	"os"
-	"sync"
 	"testing"
 	"time"
 
+	. "github.com/katanomi/pkg/testing/framework/base"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
-	"k8s.io/apimachinery/pkg/runtime"
-	"k8s.io/client-go/rest"
-	"knative.dev/pkg/injection"
-	ctrl "sigs.k8s.io/controller-runtime"
 )
 
 // fmw global variable to used by different test cases
 var fmw = &Framework{}
-
-// Framework base framework for running automated test cases
-type Framework struct {
-	Name string
-
-	Config *rest.Config
-
-	Scheme *runtime.Scheme
-
-	Context context.Context
-
-	*zap.SugaredLogger
-
-	Output io.Writer
-
-	InitTimeout time.Duration
-
-	sync.Once
-}
 
 // New sets a name to framework
 func New(name string) *Framework {
@@ -64,20 +40,21 @@ func New(name string) *Framework {
 	return fmw
 }
 
-// init is a do once initialization function to startup any necessary data
-func (f *Framework) init() {
-	f.Once.Do(func() {
-		f.Context = context.TODO()
-		cfg := ctrl.GetConfigOrDie()
-		f.Context = injection.WithConfig(f.Context, cfg)
-		f.Config = cfg
+// Framework base framework for running automated test cases
+type Framework struct {
+	Name string
 
-		logger, err := zap.NewDevelopment(zap.ErrorOutput(zapcore.AddSync(GinkgoWriter)))
-		if err != nil {
-			panic(err)
-		}
-		f.SugaredLogger = logger.Sugar()
-	})
+	TestContext
+}
+
+func (f *Framework) init() {
+	f.Context = context.Background()
+
+	logger, err := zap.NewDevelopment(zap.ErrorOutput(zapcore.AddSync(GinkgoWriter)))
+	if err != nil {
+		panic(err)
+	}
+	f.SugaredLogger = logger.Sugar()
 }
 
 // MRun main testing.M run
@@ -88,14 +65,21 @@ func (f *Framework) MRun(m *testing.M) {
 }
 
 // Run start tests
+func (f *Framework) Extensions(extensions ...SharedExtension) *Framework {
+	for _, extension := range extensions {
+		f.Context = extension.SetShardInfo(f.Context)
+	}
+	return f
+}
+
+// Run start tests
 func (f *Framework) Run(t *testing.T) {
 	RegisterFailHandler(Fail)
 	RunSpecs(t, f.Name)
 }
 
-// WithScheme adds a scheme object to the framework
-func (f *Framework) WithScheme(scheme *runtime.Scheme) *Framework {
-	f.Scheme = scheme
+func (f *Framework) WithContext(ctx context.Context) *Framework {
+	f.Context = ctx
 	return f
 }
 
@@ -124,9 +108,4 @@ func (f *Framework) SynchronizedAfterSuite(destroyFunc func()) *Framework {
 		}
 	})
 	return f
-}
-
-// DurationToFloat converts a duration into a float64 seconds, useful for Ginkgo methods
-func DurationToFloat(dur time.Duration) float64 {
-	return float64(dur) / float64(time.Second)
 }

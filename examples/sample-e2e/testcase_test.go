@@ -21,23 +21,14 @@ package e2e
 
 import (
 	. "github.com/katanomi/pkg/testing/framework"
+	. "github.com/katanomi/pkg/testing/framework/cluster"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 )
-
-var _ = TestCase(Options{Name: "Testinge2e", Priority: P0, Scope: NamespaceScoped}).WithFunc(func(ctx *TestContext) {
-	BeforeEach(func() {
-		ctx.Debugw("some debug message")
-		// fmt.Println("TestCase BeforeEach", ctx.Config)
-	})
-	It("should succeed", func() {
-		Expect(ctx.Config).ToNot(BeNil())
-	})
-}).Do()
 
 var _ = P0Case("aaanother-test").Cluster().WithFunc(func(ctx *TestContext) {
 	// test case
 	It("should succeed", func() {
 		Expect(ctx.Config).ToNot(BeNil())
 	})
-}).Do()
+})

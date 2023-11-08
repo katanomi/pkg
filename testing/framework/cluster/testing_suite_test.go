@@ -1,8 +1,5 @@
-//go:build e2e
-// +build e2e
-
 /*
-Copyright 2021 The Katanomi Authors.
+Copyright 2022 The Katanomi Authors.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -17,24 +14,16 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package e2e
+package cluster
 
 import (
 	"testing"
 
-	_ "github.com/katanomi/pkg/examples/sample-e2e/another"
-	"github.com/katanomi/pkg/testing/framework"
+	. "github.com/onsi/ginkgo/v2"
+	. "github.com/onsi/gomega"
 )
 
-var fmw = framework.New("sample-e2e")
-
-func TestMain(m *testing.M) {
-	fmw.SynchronizedBeforeSuite(nil).
-		SynchronizedAfterSuite(nil).
-		MRun(m)
-}
-
-func TestE2E(t *testing.T) {
-	// start step to run e2e
-	fmw.Run(t)
+func TestTesting(t *testing.T) {
+	RegisterFailHandler(Fail)
+	RunSpecs(t, "E2E Testing Framework Suite")
 }

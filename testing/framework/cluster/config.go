@@ -14,13 +14,14 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package framework
+package cluster
 
 import (
 	"context"
 	"strings"
 	"sync"
 
+	"github.com/katanomi/pkg/testing"
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -33,8 +34,8 @@ const (
 )
 
 var (
-	e2eConfigNs         = GetDefaultEnv(e2eConfigNSKey, "katanomi-e2e")
-	e2eConfigNamePrefix = GetDefaultEnv(e2eConfigNameKey, "e2e-config")
+	e2eConfigNs         = testing.GetDefaultEnv(e2eConfigNSKey, "katanomi-e2e")
+	e2eConfigNamePrefix = testing.GetDefaultEnv(e2eConfigNameKey, "e2e-config")
 )
 
 // GetConfigFromContext get the config information from context

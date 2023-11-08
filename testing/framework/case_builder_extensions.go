@@ -1,5 +1,5 @@
 /*
-Copyright 2022 The Katanomi Authors.
+Copyright 2023 The Katanomi Authors.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -16,22 +16,9 @@ limitations under the License.
 
 package framework
 
-import (
-	v1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-)
+import "github.com/katanomi/pkg/testing/framework/cluster"
 
-// NewTestConfigMap helper function for constructing a new configmap
-func NewTestConfigMap(name, namespace string, data map[string]string) *v1.ConfigMap {
-	return &v1.ConfigMap{
-		TypeMeta: metav1.TypeMeta{
-			Kind:       "ConfigMap",
-			APIVersion: "v1",
-		},
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      name,
-			Namespace: namespace,
-		},
-		Data: data,
-	}
+// Cluster convert to cluster test case builder
+func (b *CaseBuilder) Cluster() *cluster.TestCaseBuilder {
+	return cluster.NewTestCaseBuilder(b.TestCaseBuilder)
 }
