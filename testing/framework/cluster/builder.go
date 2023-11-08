@@ -56,6 +56,7 @@ func NewTestCaseBuilder(baseBuilder base.TestCaseBuilder) *TestCaseBuilder {
 type TestCaseBuilder struct {
 	baseBuilder base.TestCaseBuilder
 
+	// Conditions condition list which will be checked before test case execution
 	Conditions []Condition
 
 	// Scope defines what kind of permissions this test case needs
@@ -64,9 +65,10 @@ type TestCaseBuilder struct {
 	// TestContextOptions used to setup TestContext
 	TestContextOptions []TestContextOption
 
-	testFunc TestFunction
-
+	// Scheme the scheme for initializing the k8s client
 	Scheme *runtime.Scheme
+
+	testSpecFunc TestSpecFunc
 }
 
 // WithCondition sets conditions
@@ -87,14 +89,14 @@ func (b *TestCaseBuilder) WithTestContextOptions(options ...TestContextOption) *
 	return b
 }
 
-// Namespaced set the scope of the testcase as namespaced
-func (b *TestCaseBuilder) Namespaced() *TestCaseBuilder {
+// WithNamespacedScope set the scope of the testcase as namespaced
+func (b *TestCaseBuilder) WithNamespacedScope() *TestCaseBuilder {
 	b.Scope = NamespaceScoped
 	return b
 }
 
-// Cluster set the scope of the testcase as a cluster scoped
-func (b *TestCaseBuilder) Cluster() *TestCaseBuilder {
+// WithClusterScope set the scope of the testcase as a cluster scoped
+func (b *TestCaseBuilder) WithClusterScope() *TestCaseBuilder {
 	b.Scope = ClusterScoped
 	return b
 }
@@ -102,12 +104,16 @@ func (b *TestCaseBuilder) Cluster() *TestCaseBuilder {
 // setupTestCase initial TestContext configuration
 func (b *TestCaseBuilder) setupTestContext() *TestContext {
 	ctx := &TestContext{
-		TestContext: b.baseBuilder.GetTestContext(),
+		TestContext: *b.baseBuilder.GetTestContext(),
 	}
 
 	cfg := ctrl.GetConfigOrDie()
 	ctx.Config = cfg
 	ctx.Context = injection.WithConfig(ctx.Context, cfg)
+
+	if b.Scheme == nil {
+		b.Scheme = FromSharedScheme(ctx.Context)
+	}
 	ctx.Scheme = b.Scheme
 
 	for _, option := range b.TestContextOptions {
@@ -138,7 +144,7 @@ func (b *TestCaseBuilder) setupTestContext() *TestContext {
 }
 
 func (b *TestCaseBuilder) checkCondition(testContext *TestContext) (skip bool, err error) {
-	skip, err = b.baseBuilder.CheckCondition(testContext.TestContext)
+	skip, err = b.baseBuilder.CheckCondition(&testContext.TestContext)
 	if err != nil {
 		return
 	}
@@ -160,6 +166,12 @@ func (b *TestCaseBuilder) checkCondition(testContext *TestContext) (skip bool, e
 	return
 }
 
+// WithFunc replaces the function with another given function
+func (b *TestCaseBuilder) WithFunc(tc TestSpecFunc) *TestCaseBuilder {
+	b.testSpecFunc = tc
+	return b
+}
+
 // Do build and return the test case
 func (b *TestCaseBuilder) Do() bool {
 	fullName := b.baseBuilder.CaseName()
@@ -178,14 +190,14 @@ func (b *TestCaseBuilder) Do() bool {
 			}
 		})
 
-		if b.testFunc != nil {
-			b.testFunc(testCtx)
+		if b.testSpecFunc != nil {
+			b.testSpecFunc(testCtx)
 		}
 	})
 }
 
 // DoFunc build and return the test case, just like the Do function
-func (b *TestCaseBuilder) DoFunc(f TestFunction) bool {
-	b.testFunc = f
+func (b *TestCaseBuilder) DoFunc(f TestSpecFunc) bool {
+	b.testSpecFunc = f
 	return b.Do()
 }

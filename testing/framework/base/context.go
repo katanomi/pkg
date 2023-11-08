@@ -22,20 +22,25 @@ import (
 	"go.uber.org/zap"
 )
 
+// TestContext the context of a test case
 type TestContext struct {
 	Context context.Context
 	*zap.SugaredLogger
 }
 
+// TestContextGetter interface to get test context
+type TestContextGetter interface {
+	// GetTestContext get test case context
+	GetTestContext() *TestContext
+}
+
+// TestContextGetterFunc a function used to generate an implementation of TestContextGetter
 type TestContextGetterFunc func() *TestContext
 
+// GetTestContext get test case context
 func (c TestContextGetterFunc) GetTestContext() *TestContext {
 	return c()
 }
 
-type TestContextGetter interface {
-	GetTestContext() *TestContext
-}
-
-// TestFunction function used as describe
-type TestFunction func(testContext *TestContext)
+// TestSpecFunc function used as describe
+type TestSpecFunc func(testContext *TestContext)

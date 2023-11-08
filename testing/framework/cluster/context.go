@@ -30,7 +30,7 @@ import (
 
 // TestContext context for cluster testing
 type TestContext struct {
-	*base.TestContext
+	base.TestContext
 
 	Config    *rest.Config
 	Scheme    *runtime.Scheme
@@ -57,4 +57,4 @@ func NamespacePrefixOption(prefix string) TestContextOption {
 	}
 }
 
-type TestFunction func(*TestContext)
+type TestSpecFunc func(*TestContext)

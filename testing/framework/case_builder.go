@@ -20,7 +20,6 @@ import (
 	"fmt"
 
 	. "github.com/katanomi/pkg/testing/framework/base"
-	"github.com/katanomi/pkg/testing/framework/cluster"
 	. "github.com/onsi/ginkgo/v2"
 )
 
@@ -59,6 +58,7 @@ func P3Case(name string) *CaseBuilder {
 	return newCase(name, P3)
 }
 
+// CaseBuilder builder for TestCases
 type CaseBuilder struct {
 	TestCaseBuilder
 }
@@ -83,19 +83,21 @@ func (b *CaseBuilder) appendLabels(labels ...string) {
 	}
 }
 
+// DoNotSkip set the test case to not skip when condition check failed
 func (b *CaseBuilder) DoNotSkip() *CaseBuilder {
 	b.FailedWhenConditionMismatch = false
 	return b
 }
 
+// AllowSkip set the test case to skip when condition check failed
 func (b *CaseBuilder) AllowSkip() *CaseBuilder {
 	b.FailedWhenConditionMismatch = true
 	return b
 }
 
 // WithFunc replaces the function with another given function
-func (b *CaseBuilder) WithFunc(tc TestFunction) *CaseBuilder {
-	b.TestFunc = tc
+func (b *CaseBuilder) WithFunc(tc TestSpecFunc) *CaseBuilder {
+	b.TestSpec = tc
 	return b
 }
 
@@ -156,18 +158,14 @@ func (b *CaseBuilder) Do() bool {
 			}
 		})
 
-		if b.TestFunc != nil {
-			b.TestFunc(testCtx)
+		if b.TestSpec != nil {
+			b.TestSpec(testCtx)
 		}
 	})
 }
 
 // DoFunc build and return the test case, just like the Do function
-func (b *CaseBuilder) DoFunc(f TestFunction) bool {
-	b.TestFunc = f
+func (b *CaseBuilder) DoFunc(f TestSpecFunc) bool {
+	b.TestSpec = f
 	return b.Do()
-}
-
-func (b *CaseBuilder) Cluster() *cluster.TestCaseBuilder {
-	return cluster.NewTestCaseBuilder(b.TestCaseBuilder)
 }

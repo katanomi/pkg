@@ -22,6 +22,9 @@ import (
 	"github.com/katanomi/pkg/testing"
 )
 
+// TestCaseLabel label for test case
+type TestCaseLabel = string
+
 // TestCasePriority priority for the testcase
 type TestCasePriority uint16
 
@@ -43,27 +46,32 @@ type TestCaseBuilder struct {
 
 	// Name of the test case
 	Name string
+
 	// Priority of the test case
 	Priority TestCasePriority
+
 	// Scope defines what kind of permissions this test case needs
 	// Labels used to filter test cases when executing testing
 	Labels []string
 
+	// Conditions condition list which will be checked before test case execution
 	Conditions []Condition
-
-	TestFunc TestFunction
 
 	// FailedWhenConditionMismatch allow skip test case when test condition check failed
 	// default to skip
 	FailedWhenConditionMismatch bool
+
+	// TestSpec the spec of the test case
+	TestSpec TestSpecFunc
 }
 
-func (b *TestCaseBuilder) CheckCondition(testContext *TestContext) (skip bool, err error) {
+// CheckCondition check test case condition
+func (b *TestCaseBuilder) CheckCondition(testCtx *TestContext) (skip bool, err error) {
 	for _, condition := range b.Conditions {
 		if condition == nil {
 			continue
 		}
-		if err = condition.Condition(testContext); err != nil {
+		if err = condition.Condition(testCtx); err != nil {
 			err = fmt.Errorf("condition %s check failed: %w", testing.ReflectName(condition), err)
 			break
 		}
@@ -75,6 +83,7 @@ func (b *TestCaseBuilder) CheckCondition(testContext *TestContext) (skip bool, e
 	return
 }
 
+// CaseName returns the formatted name of the test case
 func (b *TestCaseBuilder) CaseName() string {
 	return fmt.Sprintf("[P%d][%s]", b.Priority, b.Name)
 }

@@ -40,6 +40,7 @@ func New(name string) *Framework {
 	return fmw
 }
 
+// Framework base framework for running automated test cases
 type Framework struct {
 	Name string
 
@@ -61,6 +62,14 @@ func (f *Framework) MRun(m *testing.M) {
 	rand.Seed(time.Now().UnixNano())
 	result := m.Run()
 	os.Exit(result)
+}
+
+// Run start tests
+func (f *Framework) Extensions(extensions ...SharedExtension) *Framework {
+	for _, extension := range extensions {
+		f.Context = extension.SetShardInfo(f.Context)
+	}
+	return f
 }
 
 // Run start tests

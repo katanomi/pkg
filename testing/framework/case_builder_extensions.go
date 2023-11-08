@@ -14,7 +14,11 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package base
+package framework
 
-// TestCaseLabel label for test case
-type TestCaseLabel = string
+import "github.com/katanomi/pkg/testing/framework/cluster"
+
+// Cluster convert to cluster test case builder
+func (b *CaseBuilder) Cluster() *cluster.TestCaseBuilder {
+	return cluster.NewTestCaseBuilder(b.TestCaseBuilder)
+}

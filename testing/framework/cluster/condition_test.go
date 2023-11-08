@@ -75,7 +75,7 @@ var _ = Describe("TestCondition", func() {
 		})
 
 		When("rollback action", func() {
-			It("should rollback successfully", func() {
+			It("should roll back successfully", func() {
 				key := types.NamespacedName{
 					Namespace: cm.Namespace,
 					Name:      cm.Name,
@@ -93,11 +93,11 @@ var _ = Describe("TestCondition", func() {
 		})
 	})
 
-	Context("rollback but resouce not found", func() {
+	Context("rollback but resource not found", func() {
 		cm := NewTestConfigMap("aa", "default", nil)
 
 		When("rollback action", func() {
-			It("should rollback successfully", func() {
+			It("should roll back successfully", func() {
 				key := types.NamespacedName{
 					Namespace: cm.Namespace,
 					Name:      cm.Name,
