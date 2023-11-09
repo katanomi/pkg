@@ -23,7 +23,6 @@ import (
 	"context"
 
 	"github.com/google/go-cmp/cmp"
-	codev1alpha1 "github.com/katanomi/pkg/apis/coderepository/v1alpha1"
 	"github.com/katanomi/pkg/apis/meta/v1alpha1"
 	"github.com/katanomi/pkg/plugin/client"
 	. "github.com/katanomi/pkg/testing/framework"
@@ -81,15 +80,7 @@ var caseFileTreeList = P0Case("test for getting file tree").
 				},
 			})
 
-			payload := codev1alpha1.CreateGitCommitOption{
-				GitCreateCommit: codev1alpha1.GitCreateCommit{
-					Spec: codev1alpha1.GitCreateCommitSpec{
-						Branch: repoOption.TreeSha,
-					},
-				},
-			}
-
-			createCommit(ctx, instance, payload)
+			createCommit(ctx, repoOption.TreeSha, "commit message")
 		})
 
 		It("return specify branch filetree", func() {

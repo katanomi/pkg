@@ -171,6 +171,10 @@ var caseBranchList = P0Case("test getting branch list").
 					Branch: "test-b",
 				},
 			})
+
+			listOption.Search = map[string][]string{
+				v1alpha1.SearchValueKey: {"test"},
+			}
 		})
 
 		It("get return the branch list which contains the test branch", func() {
@@ -284,7 +288,7 @@ func getBranch(textCtx context.Context, ins TestablePlugin, gitRepo v1alpha1.Git
 }
 
 func createBranch(testCtx context.Context, ins TestablePlugin, payload v1alpha1.CreateBranchPayload) v1alpha1.GitBranch {
-	err := CreatNewBranch(testCtx, payload.Branch)
+	err := CreateNewBranch(testCtx, payload.Branch)
 	Expect(err).Should(Succeed())
 	return getBranch(testCtx, ins, payload.GitRepo, payload.Branch)
 }

@@ -24,6 +24,8 @@ import (
 
 	_ "github.com/katanomi/pkg/examples/sample-e2e/another"
 	"github.com/katanomi/pkg/testing/framework"
+	"github.com/katanomi/pkg/testing/framework/cluster"
+	"k8s.io/client-go/kubernetes/scheme"
 )
 
 var fmw = framework.New("sample-e2e")
@@ -31,6 +33,7 @@ var fmw = framework.New("sample-e2e")
 func TestMain(m *testing.M) {
 	fmw.SynchronizedBeforeSuite(nil).
 		SynchronizedAfterSuite(nil).
+		Extensions(cluster.ShareScheme(scheme.Scheme)).
 		MRun(m)
 }
 
