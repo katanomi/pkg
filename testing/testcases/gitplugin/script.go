@@ -81,12 +81,12 @@ func CreateNewCommit(ctx context.Context, branchName, message string) (err error
 	return CreateByScript(ctx, "scripts/create_commit.sh", branchName, message)
 }
 
-// CreatNewCommit create new commit
-func CreateMuiltCommit(ctx context.Context, branchName, message string, quantity int) (err error) {
+// CreateMultiCommit create new commit
+func CreateMultiCommit(ctx context.Context, branchName, message string, quantity int) (err error) {
 	if message == "" {
 		message = "e2e commit"
 	}
-	return CreateByScript(ctx, "scripts/create_mulit_commit.sh", branchName, message, strconv.Itoa(quantity))
+	return CreateByScript(ctx, "scripts/create_multi_commit.sh", branchName, message, strconv.Itoa(quantity))
 }
 
 // CreateNewTag create new tag
