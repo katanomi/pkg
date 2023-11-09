@@ -56,7 +56,7 @@ var caseCommitList = P0Case("test for getting commit list").
 	BeforeAll(func() {
 		ctx = testContext.Context
 		instance = GitPluginFromCtx(ctx)
-		createMuiltCommit(ctx, commitBranch, "commit message", 10)
+		createMultiCommit(ctx, commitBranch, "commit message", 10)
 	})
 
 	BeforeEach(func() {
@@ -167,8 +167,8 @@ func createCommit(testCtx context.Context, branch, message string) {
 	return
 }
 
-func createMuiltCommit(testCtx context.Context, branch, baseMessage string, commitQuantity int) {
-	err := CreateMuiltCommit(testCtx, branch, baseMessage, commitQuantity)
+func createMultiCommit(testCtx context.Context, branch, baseMessage string, commitQuantity int) {
+	err := CreateMultiCommit(testCtx, branch, baseMessage, commitQuantity)
 	Expect(err).Should(Succeed())
 }
 
