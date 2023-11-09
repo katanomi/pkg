@@ -128,7 +128,7 @@ func createTag(ctx context.Context, instance TestablePlugin, gitRepo v1alpha1.Gi
 		},
 	})
 
-	err := CreatNewTag(ctx, branch.GetName(), "e2e tag", tagName)
+	err := CreateNewTag(ctx, branch.GetName(), "e2e tag", tagName)
 	Expect(err).Should(Succeed())
 	return getTag(ctx, instance, gitRepo, tagName)
 }

@@ -70,7 +70,7 @@ var caseProjectList = P0Case("test for getting project list").
 		projectList, err = getter.ListProjects(ctx, *queryOption)
 	})
 
-	Context("list perject successfully", func() {
+	Context("list project successfully", func() {
 		It("get return the specified projects", func() {
 			Expect(err).Should(BeNil())
 			Expect(projectList).ShouldNot(BeNil())
@@ -189,7 +189,7 @@ var caseGetProject = P0Case("test for getting project info").
 
 	Context("project not exist", func() {
 		BeforeEach(func() {
-			projectName = pointer.String("not-exist-not-exist-not-exist")
+			*projectName = "not-exist-not-exist-not-exist"
 		})
 		It("get return 404", func() {
 			Expect(errors.IsNotFound(err)).Should(BeTrue())
@@ -198,7 +198,7 @@ var caseGetProject = P0Case("test for getting project info").
 
 	Context("project exist", func() {
 		BeforeEach(func() {
-			projectName = pointer.String(instance.GetTestOrgProject())
+			*projectName = instance.GetTestOrgProject()
 		})
 
 		It("should return the project", func() {
@@ -218,13 +218,9 @@ var caseCreateProject = P0Case("test for creating new project").
 		instance    TestablePlugin
 		project     *v1alpha1.Project
 		err         error
-		projectName string
+		projectName = "create-project-" + rand.String(4)
 		creator     client.ProjectCreator
 	)
-
-	BeforeAll(func() {
-		projectName = "create-project-" + rand.String(4)
-	})
 
 	BeforeEach(func() {
 		ctx = testContext.Context
@@ -240,16 +236,20 @@ var caseCreateProject = P0Case("test for creating new project").
 		project, err = creator.CreateProject(ctx, project)
 	})
 
-	It("project created successfully", func() {
-		Expect(err).Should(BeNil())
-		Expect(project).ShouldNot(BeNil())
-		Expect(project.GetName()).Should(Equal(projectName))
-		checkProjectRequired(project)
+	Context("first create project", func() {
+		It("should create successfully", func() {
+			Expect(err).Should(BeNil())
+			Expect(project).ShouldNot(BeNil())
+			Expect(project.GetName()).Should(Equal(projectName))
+			checkProjectRequired(project)
+		})
 	})
 
-	It("project exist, create failed", func() {
-		Expect(err).ShouldNot(BeNil())
-		Expect(project).Should(BeNil())
+	Context("create an existed project", func() {
+		It("should create failed", func() {
+			Expect(err).ShouldNot(BeNil())
+			Expect(project).Should(BeNil())
+		})
 	})
 
 	AfterAll(func() {

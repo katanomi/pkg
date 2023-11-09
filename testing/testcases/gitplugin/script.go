@@ -23,6 +23,7 @@ import (
 	"fmt"
 	"os"
 	"path"
+	"strconv"
 
 	"github.com/katanomi/pkg/testing"
 )
@@ -67,20 +68,28 @@ func CreateByScript(ctx context.Context, scriptName string, params ...string) (e
 	return testing.ExecBashScript(path.Join(e2eTempDir, scriptName), _params...).Error()
 }
 
-// CreatNewBranch create new branch
-func CreatNewBranch(ctx context.Context, branchName string) (err error) {
+// CreateNewBranch create new branch
+func CreateNewBranch(ctx context.Context, branchName string) (err error) {
 	return CreateByScript(ctx, "scripts/create_branch.sh", branchName)
 }
 
-// CreatNewCommit create new commit
-func CreatNewCommit(ctx context.Context, branchName, message string) (err error) {
+// CreateNewCommit create new commit
+func CreateNewCommit(ctx context.Context, branchName, message string) (err error) {
 	if message == "" {
 		message = "e2e commit"
 	}
 	return CreateByScript(ctx, "scripts/create_commit.sh", branchName, message)
 }
 
-// CreatNewTag create new tag
-func CreatNewTag(ctx context.Context, branchName, message, tag string) (err error) {
+// CreatNewCommit create new commit
+func CreateMuiltCommit(ctx context.Context, branchName, message string, quantity int) (err error) {
+	if message == "" {
+		message = "e2e commit"
+	}
+	return CreateByScript(ctx, "scripts/create_mulit_commit.sh", branchName, message, strconv.Itoa(quantity))
+}
+
+// CreateNewTag create new tag
+func CreateNewTag(ctx context.Context, branchName, message, tag string) (err error) {
 	return CreateByScript(ctx, "scripts/create_tag.sh", branchName, message, tag)
 }

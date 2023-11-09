@@ -21,9 +21,7 @@ package cases
 
 import (
 	"context"
-	"fmt"
 
-	codev1alpha1 "github.com/katanomi/pkg/apis/coderepository/v1alpha1"
 	"github.com/katanomi/pkg/apis/meta/v1alpha1"
 	"github.com/katanomi/pkg/plugin/client"
 	. "github.com/katanomi/pkg/testing/framework"
@@ -58,18 +56,7 @@ var caseCommitList = P0Case("test for getting commit list").
 	BeforeAll(func() {
 		ctx = testContext.Context
 		instance = GitPluginFromCtx(ctx)
-		payload := codev1alpha1.CreateGitCommitOption{
-			GitCreateCommit: codev1alpha1.GitCreateCommit{
-				Spec: codev1alpha1.GitCreateCommitSpec{
-					Branch: commitBranch,
-				},
-			},
-		}
-
-		for i := 0; i <= 10; i++ {
-			payload.Spec.Message = fmt.Sprintf("commit message %d", i)
-			createCommit(ctx, instance, payload)
-		}
+		createMuiltCommit(ctx, commitBranch, "commit message", 10)
 	})
 
 	BeforeEach(func() {
@@ -86,7 +73,6 @@ var caseCommitList = P0Case("test for getting commit list").
 
 	JustBeforeEach(func() {
 		commitList, err = getter.ListGitCommit(ctx, *option, *listOption)
-		Expect(err).Should(BeNil())
 	})
 
 	Context("search commit with message", func() {
@@ -112,7 +98,7 @@ var caseCommitList = P0Case("test for getting commit list").
 				listOption.ItemsPerPage = 5
 			})
 
-			It("return commit messgae include search value", func() {
+			It("return commit message include search value", func() {
 				Expect(err).Should(BeNil())
 				Expect(commitList.Items).Should(HaveLen(1))
 				Expect(commitList.Continue).Should(Equal("true"))
@@ -156,10 +142,12 @@ var caseCommitList = P0Case("test for getting commit list").
 	Context("commit list query since/util", func() {
 		var wantCommit v1alpha1.GitCommit
 		BeforeEach(func() {
-			allCommitList, err := getter.ListGitCommit(ctx, *option, v1alpha1.ListOptions{})
-			Expect(err).Should(BeNil())
+			createCommit(ctx, commitBranch, "commit_Message since/util.")
+			allCommitList, allErr := getter.ListGitCommit(ctx, *option, v1alpha1.ListOptions{Search: map[string][]string{v1alpha1.SearchValueKey: {"commit_Message since/util."}}})
+			Expect(allErr).Should(BeNil())
+			Expect(allCommitList.Items).Should(HaveLen(1))
 
-			wantCommit = allCommitList.Items[2]
+			wantCommit = allCommitList.Items[0]
 			option.Since = wantCommit.CreationTimestamp.DeepCopy()
 			option.Until = wantCommit.CreationTimestamp.DeepCopy()
 		})
@@ -173,10 +161,15 @@ var caseCommitList = P0Case("test for getting commit list").
 	})
 })
 
-func createCommit(testCtx context.Context, _ TestablePlugin, payload codev1alpha1.CreateGitCommitOption) {
-	err := CreatNewCommit(testCtx, payload.Spec.Branch, payload.Spec.Message)
+func createCommit(testCtx context.Context, branch, message string) {
+	err := CreateNewCommit(testCtx, branch, message)
 	Expect(err).Should(Succeed())
 	return
+}
+
+func createMuiltCommit(testCtx context.Context, branch, baseMessage string, commitQuantity int) {
+	err := CreateMuiltCommit(testCtx, branch, baseMessage, commitQuantity)
+	Expect(err).Should(Succeed())
 }
 
 func checkCommitRequiredFields(gotCommit, wantCommit *v1alpha1.GitCommit) {
