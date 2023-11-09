@@ -60,9 +60,9 @@ var caseCommitList = P0Case("test for getting commit list").
 	})
 
 	BeforeEach(func() {
-		gitrepo := GitRepoFromCtx(ctx)
+		gitRepo := GitRepoFromCtx(ctx)
 		option = &v1alpha1.GitCommitListOption{
-			GitRepo: *gitrepo,
+			GitRepo: *gitRepo,
 			Ref:     commitBranch,
 		}
 		listOption = &v1alpha1.ListOptions{}

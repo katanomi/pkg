@@ -116,6 +116,22 @@ var caseBranchList = P0Case("test getting branch list").
 		getter client.GitBranchLister
 	)
 
+	BeforeAll(func() {
+		branchList := []string{
+			"test-a", "test-b", "page-a", "page-b", "page-c", "page-d",
+		}
+
+		gitRepo = GitRepoFromCtx(ctx)
+		for _, item := range branchList {
+			createBranch(ctx, instance, v1alpha1.CreateBranchPayload{
+				GitRepo: *gitRepo,
+				CreateBranchParams: v1alpha1.CreateBranchParams{
+					Branch: item,
+				},
+			})
+		}
+	})
+
 	BeforeEach(func() {
 		ctx = testContext.Context
 		instance = GitPluginFromCtx(ctx)
@@ -140,13 +156,6 @@ var caseBranchList = P0Case("test getting branch list").
 			listOption.Search = map[string][]string{
 				v1alpha1.SearchValueKey: {notExistBranchName},
 			}
-
-			createBranch(ctx, instance, v1alpha1.CreateBranchPayload{
-				GitRepo: *gitRepo,
-				CreateBranchParams: v1alpha1.CreateBranchParams{
-					Branch: "master",
-				},
-			})
 		})
 
 		It("should return empty list", func() {
@@ -159,19 +168,6 @@ var caseBranchList = P0Case("test getting branch list").
 
 	Context("get branch list successfully", func() {
 		BeforeEach(func() {
-			createBranch(ctx, instance, v1alpha1.CreateBranchPayload{
-				GitRepo: *gitRepo,
-				CreateBranchParams: v1alpha1.CreateBranchParams{
-					Branch: "test-a",
-				},
-			})
-			createBranch(ctx, instance, v1alpha1.CreateBranchPayload{
-				GitRepo: *gitRepo,
-				CreateBranchParams: v1alpha1.CreateBranchParams{
-					Branch: "test-b",
-				},
-			})
-
 			listOption.Search = map[string][]string{
 				v1alpha1.SearchValueKey: {"test"},
 			}
@@ -201,30 +197,6 @@ var caseBranchList = P0Case("test getting branch list").
 
 	Context("page turning of branch list", func() {
 		BeforeEach(func() {
-			createBranch(ctx, instance, v1alpha1.CreateBranchPayload{
-				GitRepo: *gitRepo,
-				CreateBranchParams: v1alpha1.CreateBranchParams{
-					Branch: "page-a",
-				},
-			})
-			createBranch(ctx, instance, v1alpha1.CreateBranchPayload{
-				GitRepo: *gitRepo,
-				CreateBranchParams: v1alpha1.CreateBranchParams{
-					Branch: "page-b",
-				},
-			})
-			createBranch(ctx, instance, v1alpha1.CreateBranchPayload{
-				GitRepo: *gitRepo,
-				CreateBranchParams: v1alpha1.CreateBranchParams{
-					Branch: "page-c",
-				},
-			})
-			createBranch(ctx, instance, v1alpha1.CreateBranchPayload{
-				GitRepo: *gitRepo,
-				CreateBranchParams: v1alpha1.CreateBranchParams{
-					Branch: "page-d",
-				},
-			})
 			branchTwoPageList, err = getter.ListGitBranch(ctx, *branchOption, *listOption)
 			Expect(err).Should(BeNil())
 		})

@@ -93,6 +93,13 @@ var caseGitRepositoryList = P0Case("test for getting repo list").
 		})
 
 		Context("subtype of project is User", func() {
+			BeforeAll(func() {
+				wantGitRepo, _ = createRepository(ctx, instance, gitRepo, v1alpha1.GitRepositoryVisibilityPrivate)
+				DeferCleanup(func() {
+					cleanupRepository(ctx, instance, gitRepo)
+				})
+			})
+
 			BeforeEach(func() {
 				gitRepo.Project = instance.GetTestUserProject()
 				gitRepo.Repository = "e2e-user-repo-" + rand.String(4)
@@ -103,11 +110,6 @@ var caseGitRepositoryList = P0Case("test for getting repo list").
 				repoParams.Repository = gitRepo.Repository
 				projectSubtype = v1alpha1.GitUserProjectSubType
 				repoParams.SubType = v1alpha1.GitUserProjectSubType
-
-				wantGitRepo, _ = createRepository(ctx, instance, gitRepo, v1alpha1.GitRepositoryVisibilityPrivate)
-				DeferCleanup(func() {
-					cleanupRepository(ctx, instance, gitRepo)
-				})
 
 				repoGetter := instance.(client.RepositoryGetter)
 				wantRepo, _ = repoGetter.GetRepository(ctx, repoParams)
@@ -130,7 +132,7 @@ var caseGitRepositoryList = P0Case("test for getting repo list").
 		})
 
 		Context("subtype of project is Group", func() {
-			BeforeEach(func() {
+			BeforeAll(func() {
 				gitRepo.Project = instance.GetTestOrgProject()
 				gitRepo.Repository = "e2e-org-repo-" + rand.String(4)
 				repoParams.Project = gitRepo.Project
@@ -260,9 +262,9 @@ var caseGitRepositoryList = P0Case("test for getting repo list").
 			})
 		})
 
-		Context("filter by subresources", func() {
+		Context("filter by subResource", func() {
 			//check whether the warehouse meets the testing requirements,
-			BeforeEach(func() {
+			BeforeAll(func() {
 				gitRepo.Project = instance.GetTestUserProject()
 				projectSubtype = v1alpha1.GitUserProjectSubType
 				repoParams.Project = gitRepo.Project
@@ -274,7 +276,7 @@ var caseGitRepositoryList = P0Case("test for getting repo list").
 				Expect(repoErr).Should(BeNil())
 			})
 
-			When("subresources was set", func() {
+			When("subResource was set", func() {
 				BeforeEach(func() {
 					index := rand.Intn(1)
 					wantGitRepo = gitRepoTwoPageList.Items[index]
@@ -284,14 +286,14 @@ var caseGitRepositoryList = P0Case("test for getting repo list").
 					repoGitList, err = gitRepoGetter.ListGitRepository(ctx, gitRepo.Project, "", projectSubtype, listOption)
 					repoList, repoErr = repoLister.ListRepositories(ctx, repoParams, listOption)
 				})
-				It("return with subresource git repositories", func() {
+				It("return with subResource git repositories", func() {
 					Expect(err).Should(BeNil())
 					Expect(repoGitList.Items).ShouldNot(BeEmpty())
 					gotRepo := FindByName(ToPtrList(repoGitList.Items), wantGitRepo.GetName())
 					checkRequitedGitRepository(gotRepo, &wantGitRepo)
 				})
 
-				It("return with subresource repositories", func() {
+				It("return with subResource repositories", func() {
 					Expect(repoErr).Should(BeNil())
 					Expect(repoList.Items).ShouldNot(BeEmpty())
 					gotRepo := FindByName(ToPtrList(repoList.Items), wantRepo.GetName())
@@ -316,21 +318,21 @@ var caseGitRepositoryList = P0Case("test for getting repo list").
 				It("sort git repository by name", func() {
 					Expect(err).Should(BeNil())
 					Expect(repoGitList.Items).ShouldNot(BeEmpty())
-					sortRpos := repoGitList.DeepCopy()
-					sort.SliceStable(sortRpos.Items, func(i, j int) bool {
-						return sortRpos.Items[i].GetName() < sortRpos.Items[j].GetName()
+					sortRepos := repoGitList.DeepCopy()
+					sort.SliceStable(sortRepos.Items, func(i, j int) bool {
+						return sortRepos.Items[i].GetName() < sortRepos.Items[j].GetName()
 					})
-					Expect(repoGitList.Items).To(Equal(sortRpos.Items))
+					Expect(repoGitList.Items).To(Equal(sortRepos.Items))
 				})
 
 				It("sort by name", func() {
 					Expect(repoErr).Should(BeNil())
 					Expect(repoList.Items).ShouldNot(BeEmpty())
-					sortRpos := repoList.DeepCopy()
-					sort.SliceStable(sortRpos.Items, func(i, j int) bool {
-						return sortRpos.Items[i].GetName() < sortRpos.Items[j].GetName()
+					sortRepos := repoList.DeepCopy()
+					sort.SliceStable(sortRepos.Items, func(i, j int) bool {
+						return sortRepos.Items[i].GetName() < sortRepos.Items[j].GetName()
 					})
-					Expect(repoList.Items).To(Equal(sortRpos.Items))
+					Expect(repoList.Items).To(Equal(sortRepos.Items))
 				})
 			})
 			When("sort by createTime, and asc", func() {
@@ -340,21 +342,21 @@ var caseGitRepositoryList = P0Case("test for getting repo list").
 				It("sort git repository by createTime, and desc", func() {
 					Expect(err).Should(BeNil())
 					Expect(repoGitList.Items).ShouldNot(BeEmpty())
-					sortRpos := repoGitList.DeepCopy()
-					sort.SliceStable(sortRpos.Items, func(i, j int) bool {
-						return sortRpos.Items[i].GetCreationTimestamp().Unix() < sortRpos.Items[j].GetCreationTimestamp().Unix()
+					sortRepos := repoGitList.DeepCopy()
+					sort.SliceStable(sortRepos.Items, func(i, j int) bool {
+						return sortRepos.Items[i].GetCreationTimestamp().Unix() < sortRepos.Items[j].GetCreationTimestamp().Unix()
 					})
-					Expect(repoGitList.Items).To(Equal(sortRpos.Items))
+					Expect(repoGitList.Items).To(Equal(sortRepos.Items))
 				})
 
 				It("sort by createTime, and desc", func() {
 					Expect(repoErr).Should(BeNil())
 					Expect(repoList.Items).ShouldNot(BeEmpty())
-					sortRpos := repoList.DeepCopy()
-					sort.SliceStable(sortRpos.Items, func(i, j int) bool {
-						return sortRpos.Items[i].GetCreationTimestamp().Unix() < sortRpos.Items[j].GetCreationTimestamp().Unix()
+					sortRepos := repoList.DeepCopy()
+					sort.SliceStable(sortRepos.Items, func(i, j int) bool {
+						return sortRepos.Items[i].GetCreationTimestamp().Unix() < sortRepos.Items[j].GetCreationTimestamp().Unix()
 					})
-					Expect(repoList.Items).To(Equal(sortRpos.Items))
+					Expect(repoList.Items).To(Equal(sortRepos.Items))
 				})
 			})
 			When("sort by updateTime, and desc", func() {
@@ -364,21 +366,21 @@ var caseGitRepositoryList = P0Case("test for getting repo list").
 				It("sort git repository by updateTime", func() {
 					Expect(err).Should(BeNil())
 					Expect(repoGitList.Items).ShouldNot(BeEmpty())
-					sortRpos := repoGitList.DeepCopy()
-					sort.SliceStable(sortRpos.Items, func(i, j int) bool {
-						return sortRpos.Items[i].Spec.UpdatedAt.Unix() > sortRpos.Items[j].Spec.UpdatedAt.Unix()
+					sortRepos := repoGitList.DeepCopy()
+					sort.SliceStable(sortRepos.Items, func(i, j int) bool {
+						return sortRepos.Items[i].Spec.UpdatedAt.Unix() > sortRepos.Items[j].Spec.UpdatedAt.Unix()
 					})
-					Expect(repoGitList.Items).To(Equal(sortRpos.Items))
+					Expect(repoGitList.Items).To(Equal(sortRepos.Items))
 				})
 
 				It("sort by updateTime", func() {
 					Expect(repoErr).Should(BeNil())
 					Expect(repoList.Items).ShouldNot(BeEmpty())
-					sortRpos := repoList.DeepCopy()
-					sort.SliceStable(sortRpos.Items, func(i, j int) bool {
-						return sortRpos.Items[i].Spec.UpdatedTime.Unix() > sortRpos.Items[j].Spec.UpdatedTime.Unix()
+					sortRepos := repoList.DeepCopy()
+					sort.SliceStable(sortRepos.Items, func(i, j int) bool {
+						return sortRepos.Items[i].Spec.UpdatedTime.Unix() > sortRepos.Items[j].Spec.UpdatedTime.Unix()
 					})
-					Expect(repoList.Items).To(Equal(sortRpos.Items))
+					Expect(repoList.Items).To(Equal(sortRepos.Items))
 				})
 			})
 		})
@@ -403,7 +405,7 @@ var caseGetGitRepository = P0Case("test for getting repo list").
 		repo = v1alpha1.GitRepository{}
 		gitRepo.Project = instance.GetTestUserProject()
 		if gitRepo.Project == "" {
-			Skip("plugin does not support user gitrepository")
+			Skip("plugin does not support user git repository")
 		}
 		err = nil
 	})
@@ -413,7 +415,7 @@ var caseGetGitRepository = P0Case("test for getting repo list").
 		repo, err = gitRepoGetter.GetGitRepository(ctx, gitRepo)
 	})
 
-	Context("gitrepository not exist", func() {
+	Context("git repository not exist", func() {
 		BeforeEach(func() {
 			gitRepo.Repository = "not-exist-not-exist-not-exist"
 		})
@@ -422,7 +424,7 @@ var caseGetGitRepository = P0Case("test for getting repo list").
 		})
 	})
 
-	Context("gitrepository exist", func() {
+	Context("git repository exist", func() {
 		var wantGitRepo v1alpha1.GitRepository
 		BeforeEach(func() {
 			wantGitRepo, _ = createRepository(ctx, instance, gitRepo, v1alpha1.GitRepositoryVisibilityPrivate)
