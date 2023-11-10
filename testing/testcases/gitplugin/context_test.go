@@ -2,7 +2,7 @@
 // +build e2e
 
 /*
-Copyright 2021 The Katanomi Authors.
+Copyright 2023 The Katanomi Authors.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -17,27 +17,23 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package e2e
+package gitplugin
 
 import (
+	"context"
 	"testing"
 
-	_ "github.com/katanomi/pkg/examples/sample-e2e/another"
-	"github.com/katanomi/pkg/testing/framework"
-	"github.com/katanomi/pkg/testing/framework/cluster"
-	"k8s.io/client-go/kubernetes/scheme"
+	"github.com/katanomi/pkg/apis/meta/v1alpha1"
+	. "github.com/onsi/gomega"
 )
 
-var fmw = framework.New("sample-e2e")
+func TestWithGitRepo(t *testing.T) {
+	g := NewWithT(t)
+	gitRepo := v1alpha1.GitRepo{
+		Project: "abc",
+	}
 
-func TestMain(m *testing.M) {
-	fmw.SynchronizedBeforeSuite(nil).
-		SynchronizedAfterSuite(nil).
-		Extensions(cluster.ShareScheme(scheme.Scheme)).
-		MRun(m)
-}
-
-func TestE2E(t *testing.T) {
-	// start step to run e2e
-	fmw.Run(t)
+	ctx := WithGitRepo(context.Background(), &gitRepo)
+	got := GitRepoFromCtx(ctx)
+	g.Expect(*got).To(Equal(gitRepo))
 }

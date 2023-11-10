@@ -48,3 +48,27 @@ func (r *GitTag) Validate() error {
 	}
 	return nil
 }
+
+type CreateGitTagPayload struct {
+	GitTag
+
+	// Ref target of the tag, such as a commit sha/branch/tag
+	// sha: c3d0be41ecbe669545ee3e94d31ed9a4bc91ee3c
+	// branch: refs/heads/branch
+	// tag: refs/tags/tag
+	// +required
+	Ref string `json:"ref"`
+	// +optional
+	Message string `json:"message"`
+}
+
+// Validate validate the git repo
+func (r *CreateGitTagPayload) Validate() error {
+	if err := r.GitTag.Validate(); err != nil {
+		return err
+	}
+	if r.Ref == "" {
+		return errors.New("ref is empty")
+	}
+	return nil
+}

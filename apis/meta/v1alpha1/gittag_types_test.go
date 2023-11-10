@@ -81,3 +81,48 @@ func TestGitTag_Validate(t *testing.T) {
 		})
 	}
 }
+
+func TestCreateGitTagPayload_Validate(t *testing.T) {
+	tests := map[string]struct {
+		GitTag  GitTag
+		Ref     string
+		Message string
+		wantErr bool
+	}{
+		"validate pass": {
+			GitTag: GitTag{
+				GitRepo: GitRepo{
+					Project:    "test",
+					Repository: "test",
+				},
+				Tag: "0.1",
+			},
+			Ref: "master",
+		},
+		"ref is empty": {
+			GitTag: GitTag{
+				GitRepo: GitRepo{
+					Project:    "test",
+					Repository: "test",
+				},
+				Tag: "0.1",
+			},
+			wantErr: true,
+		},
+		"gitTag validate failed": {
+			wantErr: true,
+		},
+	}
+	for name, tt := range tests {
+		t.Run(name, func(t *testing.T) {
+			r := &CreateGitTagPayload{
+				GitTag:  tt.GitTag,
+				Ref:     tt.Ref,
+				Message: tt.Message,
+			}
+			if err := r.Validate(); (err != nil) != tt.wantErr {
+				t.Errorf("CreateGitTagPayload.Validate() error = %v, wantErr %v", err, tt.wantErr)
+			}
+		})
+	}
+}

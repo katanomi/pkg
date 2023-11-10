@@ -2,7 +2,7 @@
 // +build e2e
 
 /*
-Copyright 2021 The Katanomi Authors.
+Copyright 2023 The Katanomi Authors.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -17,27 +17,20 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package e2e
+package cases
 
 import (
-	"testing"
-
-	_ "github.com/katanomi/pkg/examples/sample-e2e/another"
-	"github.com/katanomi/pkg/testing/framework"
-	"github.com/katanomi/pkg/testing/framework/cluster"
-	"k8s.io/client-go/kubernetes/scheme"
+	. "github.com/onsi/ginkgo/v2"
 )
 
-var fmw = framework.New("sample-e2e")
-
-func TestMain(m *testing.M) {
-	fmw.SynchronizedBeforeSuite(nil).
-		SynchronizedAfterSuite(nil).
-		Extensions(cluster.ShareScheme(scheme.Scheme)).
-		MRun(m)
-}
-
-func TestE2E(t *testing.T) {
-	// start step to run e2e
-	fmw.Run(t)
+// RegisterTestCaseSet execute the complete set of test cases for testing git-like plugins
+func RegisterTestCaseSet() {
+	Describe("run full test case set", func() {
+		BranchCaseSet()
+		ProjectCaseSet()
+		RepositoryCaseSet()
+		TagCaseSet()
+		CommitCaseSet()
+		FileTreeCaseSet()
+	})
 }

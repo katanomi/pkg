@@ -128,6 +128,12 @@ type ProjectCreator interface {
 	CreateProject(ctx context.Context, project *metav1alpha1.Project) (*metav1alpha1.Project, error)
 }
 
+// ProjectDeleter create project api
+type ProjectDeleter interface {
+	Interface
+	DeleteProject(ctx context.Context, project *metav1alpha1.Project) error
+}
+
 // RepositoryLister list repository
 type RepositoryLister interface {
 	Interface
@@ -136,6 +142,15 @@ type RepositoryLister interface {
 		params metav1alpha1.RepositoryOptions,
 		option metav1alpha1.ListOptions,
 	) (*metav1alpha1.RepositoryList, error)
+}
+
+// RepositoryGetter get repository
+type RepositoryGetter interface {
+	Interface
+	GetRepository(
+		ctx context.Context,
+		params metav1alpha1.RepositoryOptions,
+	) (*metav1alpha1.Repository, error)
 }
 
 // ArtifactLister list artifact
@@ -404,6 +419,12 @@ type GitCommitCommentLister interface {
 type GitCommitCommentCreator interface {
 	Interface
 	CreateGitCommitComment(ctx context.Context, payload metav1alpha1.CreateCommitCommentPayload) (metav1alpha1.GitCommitComment, error)
+}
+
+// GitRepositoryTagCreator create git repository tag
+type GitRepositoryTagCreator interface {
+	Interface
+	CreateGitRepositoryTag(ctx context.Context, option metav1alpha1.CreateGitTagPayload) (metav1alpha1.GitRepositoryTag, error)
 }
 
 // GitRepositoryTagGetter get git repository Tag
