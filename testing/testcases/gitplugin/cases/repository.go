@@ -63,10 +63,21 @@ var caseGitRepositoryList = P0Case("test for getting repo list").
 		repoLister client.RepositoryLister
 	)
 
-	BeforeEach(func() {
+	BeforeAll(func() {
 		ctx = testContext.Context
 		instance = GitPluginFromCtx(ctx)
+		gitRepo.Project = instance.GetTestOrgProject()
+		for i := 0; i < 5; i++ {
+			_gitRepo := gitRepo
+			_gitRepo.Repository = "e2e-repo-list-" + rand.String(4)
+			createRepository(ctx, instance, _gitRepo, v1alpha1.GitRepositoryVisibilityPrivate)
+			DeferCleanup(func() {
+				cleanupRepository(ctx, instance, _gitRepo)
+			})
+		}
+	})
 
+	BeforeEach(func() {
 		gitRepoGetter = instance.(client.GitRepositoryLister)
 		repoLister = instance.(client.RepositoryLister)
 		repoGitList = v1alpha1.GitRepositoryList{}
@@ -74,315 +85,400 @@ var caseGitRepositoryList = P0Case("test for getting repo list").
 		err = nil
 		repoErr = nil
 		gitRepo = v1alpha1.GitRepo{}
-
 	})
 
-	Context("search repository", func() {
-		var projectSubtype v1alpha1.ProjectSubType
-		BeforeEach(func() {
-			repoParams.SubType = ""
-		})
+	Context("git repository case", func() {
+		Context("search repository", func() {
+			var projectSubtype v1alpha1.ProjectSubType
 
-		JustBeforeEach(func() {
-			repoGitList, err = gitRepoGetter.ListGitRepository(ctx, gitRepo.Project, gitRepo.Repository, projectSubtype, v1alpha1.ListOptions{})
-			repoList, repoErr = repoLister.ListRepositories(ctx, repoParams, v1alpha1.ListOptions{
-				Search: map[string][]string{
-					route.SearchQueryKey: {repoParams.Repository},
-				},
+			JustBeforeEach(func() {
+				repoGitList, err = gitRepoGetter.ListGitRepository(ctx, gitRepo.Project, gitRepo.Repository, projectSubtype, v1alpha1.ListOptions{})
 			})
-		})
 
-		Context("subtype of project is User", func() {
-			BeforeEach(func() {
-				gitRepo.Project = instance.GetTestUserProject()
-				gitRepo.Repository = "e2e-user-repo-" + rand.String(4)
-				repoParams.Project = gitRepo.Project
-				if gitRepo.Project == "" {
-					Skip("plugin does not support user project")
-				}
-				repoParams.Repository = gitRepo.Repository
-				projectSubtype = v1alpha1.GitUserProjectSubType
-				repoParams.SubType = v1alpha1.GitUserProjectSubType
+			Context("subtype of project is User", func() {
+				BeforeEach(func() {
+					gitRepo.Project = instance.GetTestUserProject()
+					gitRepo.Repository = "e2e-user-repo-" + rand.String(4)
+					if gitRepo.Project == "" {
+						Skip("plugin does not support user project")
+					}
 
-				wantGitRepo, _ = createRepository(ctx, instance, gitRepo, v1alpha1.GitRepositoryVisibilityPrivate)
-				DeferCleanup(func() {
-					cleanupRepository(ctx, instance, gitRepo)
+					wantGitRepo, _ = createRepository(ctx, instance, gitRepo, v1alpha1.GitRepositoryVisibilityPrivate)
+					DeferCleanup(func() {
+						cleanupRepository(ctx, instance, gitRepo)
+					})
 				})
 
-				repoGetter := instance.(client.RepositoryGetter)
-				wantRepo, _ = repoGetter.GetRepository(ctx, repoParams)
+				It("get return the specified repositories", func() {
+					Expect(err).Should(Succeed())
+					Expect(repoGitList.Items).ShouldNot(BeEmpty())
+					gotGitRepo := FindByName(ToPtrList(repoGitList.Items), gitRepo.Repository)
+					checkRequitedGitRepository(gotGitRepo, &wantGitRepo)
+				})
 			})
 
-			It("get return the specified git repositories", func() {
-				Expect(err).Should(Succeed())
-				Expect(repoGitList.Items).ShouldNot(BeEmpty())
-				gotRepo := FindByName(ToPtrList(repoGitList.Items), gitRepo.Repository)
-				checkRequitedGitRepository(gotRepo, &wantGitRepo)
-			})
+			Context("subtype of project is Group", func() {
+				BeforeEach(func() {
+					gitRepo.Project = instance.GetTestOrgProject()
+					gitRepo.Repository = "e2e-org-repo-" + rand.String(4)
+					if gitRepo.Project == "" {
+						Skip("plugin does not support user project")
+					}
 
-			It("get return the specified repositories", func() {
-				Expect(repoErr).Should(Succeed())
-				Expect(repoList.Items).ShouldNot(BeEmpty())
-				Expect(wantRepo).ShouldNot(BeNil())
-				gotRepo := FindByName(ToPtrList(repoList.Items), gitRepo.Repository)
-				checkRequitedRepository(gotRepo, wantRepo)
+					wantGitRepo, _ = createRepository(ctx, instance, gitRepo, v1alpha1.GitRepositoryVisibilityPrivate)
+					DeferCleanup(func() {
+						cleanupRepository(ctx, instance, gitRepo)
+					})
+				})
+
+				It("get return the specified git repositories", func() {
+					Expect(err).Should(BeNil())
+					Expect(repoGitList.Items).ShouldNot(BeEmpty())
+					gotGitRepo := FindByName(ToPtrList(repoGitList.Items), gitRepo.Repository)
+					checkRequitedGitRepository(gotGitRepo, &wantGitRepo)
+				})
 			})
 		})
 
-		Context("subtype of project is Group", func() {
+		Context("list git repository successfully", func() {
+			var (
+				listOption         v1alpha1.ListOptions
+				projectSubtype     v1alpha1.ProjectSubType
+				gitRepoTwoPageList v1alpha1.GitRepositoryList
+			)
+
 			BeforeEach(func() {
 				gitRepo.Project = instance.GetTestOrgProject()
-				gitRepo.Repository = "e2e-org-repo-" + rand.String(4)
-				repoParams.Project = gitRepo.Project
-				repoParams.Repository = gitRepo.Repository
-
 				projectSubtype = v1alpha1.GitGroupProjectSubType
-				repoParams.SubType = v1alpha1.GitGroupProjectSubType
-				if gitRepo.Project == "" {
-					Skip("plugin does not support user project")
-				}
 
-				wantGitRepo, _ = createRepository(ctx, instance, gitRepo, v1alpha1.GitRepositoryVisibilityPrivate)
-				DeferCleanup(func() {
-					cleanupRepository(ctx, instance, gitRepo)
+				listOption = v1alpha1.ListOptions{}
+				gitRepoTwoPageList = v1alpha1.GitRepositoryList{}
+			})
+
+			Context("page turning of repository list", func() {
+				JustBeforeEach(func() {
+					listOption.ItemsPerPage = 5
+					listOption.Page = 1
+					gitRepoTwoPageList, err = gitRepoGetter.ListGitRepository(ctx, gitRepo.Project, "", projectSubtype, listOption)
 				})
 
-				repoGetter := instance.(client.RepositoryGetter)
-				wantRepo, _ = repoGetter.GetRepository(ctx, repoParams)
+				When("page number is 1", func() {
+					BeforeEach(func() {
+						listOption.Page = 1
+						listOption.ItemsPerPage = 2
+						repoGitList, err = gitRepoGetter.ListGitRepository(ctx, gitRepo.Project, "", projectSubtype, listOption)
+					})
+
+					It("get return first page git repositories", func() {
+						Expect(err).Should(BeNil())
+						Expect(repoGitList.Items).ShouldNot(BeEmpty())
+						Expect(repoGitList.Items).To(Equal(gitRepoTwoPageList.Items[0:2]))
+						index := rand.Intn(2)
+						checkRequitedGitRepository(&repoGitList.Items[index], &gitRepoTwoPageList.Items[index])
+					})
+				})
+
+				When("page number is 2", func() {
+					BeforeEach(func() {
+						listOption.Page = 2
+						listOption.ItemsPerPage = 2
+						repoGitList, err = gitRepoGetter.ListGitRepository(ctx, gitRepo.Project, "", projectSubtype, listOption)
+					})
+
+					It("get return second page git repositories", func() {
+						Expect(err).Should(BeNil())
+						Expect(repoGitList.Items).ShouldNot(BeEmpty())
+						Expect(repoGitList.Items).To(Equal(gitRepoTwoPageList.Items[2:4]))
+						index := rand.Intn(2)
+						checkRequitedGitRepository(&repoGitList.Items[index], &gitRepoTwoPageList.Items[index+2])
+					})
+				})
 			})
 
-			It("get return the specified git repositories", func() {
-				Expect(err).Should(BeNil())
-				Expect(repoGitList.Items).ShouldNot(BeEmpty())
-				gotRepo := FindByName(ToPtrList(repoGitList.Items), gitRepo.Repository)
-				checkRequitedGitRepository(gotRepo, &wantGitRepo)
+			Context("filter by subResource", func() {
+				//check whether the warehouse meets the testing requirements,
+				BeforeAll(func() {
+					gitRepo.Project = instance.GetTestUserProject()
+					projectSubtype = v1alpha1.GitUserProjectSubType
+					gitRepoTwoPageList, err = gitRepoGetter.ListGitRepository(ctx, gitRepo.Project, "", projectSubtype, listOption)
+					Expect(err).Should(BeNil())
+				})
+
+				When("subResource was set", func() {
+					BeforeEach(func() {
+						index := rand.Intn(1)
+						wantGitRepo = gitRepoTwoPageList.Items[index]
+
+						listOption.SubResources = []string{wantGitRepo.GetName()}
+						repoGitList, err = gitRepoGetter.ListGitRepository(ctx, gitRepo.Project, "", projectSubtype, listOption)
+					})
+					It("return with subResource repositories", func() {
+						Expect(err).Should(BeNil())
+						Expect(repoGitList.Items).ShouldNot(BeEmpty())
+						gotRepo := FindByName(ToPtrList(repoGitList.Items), wantGitRepo.GetName())
+						checkRequitedGitRepository(gotRepo, &wantGitRepo)
+					})
+				})
 			})
 
-			It("get return the specified repositories", func() {
-				Expect(repoErr).Should(Succeed())
-				Expect(repoList.Items).ShouldNot(BeEmpty())
-				Expect(wantRepo).ShouldNot(BeNil())
-				gotRepo := FindByName(ToPtrList(repoList.Items), gitRepo.Repository)
-				checkRequitedRepository(gotRepo, wantRepo)
+			Context("list git repository with sort", func() {
+				JustBeforeEach(func() {
+					repoParams.Project = instance.GetTestOrgProject()
+					repoParams.SubType = projectSubtype
+
+					repoGitList, err = gitRepoGetter.ListGitRepository(ctx, gitRepo.Project, "", projectSubtype, listOption)
+					Expect(err).Should(BeNil())
+				})
+
+				When("default sort is name,  and asc", func() {
+					It("sort repository by name", func() {
+						Expect(err).Should(BeNil())
+						Expect(repoGitList.Items).ShouldNot(BeEmpty())
+						sortRepos := repoGitList.DeepCopy()
+						sort.SliceStable(sortRepos.Items, func(i, j int) bool {
+							return sortRepos.Items[i].GetName() < sortRepos.Items[j].GetName()
+						})
+						Expect(repoGitList.Items).To(Equal(sortRepos.Items))
+					})
+				})
+				When("sort by createTime, and asc", func() {
+					BeforeEach(func() {
+						listOption.Sort = []v1alpha1.SortOptions{{SortBy: v1alpha1.CreatedTimeSortKey, Order: v1alpha1.OrderAsc}}
+					})
+					It("sort git repository by createTime, and desc", func() {
+						Expect(err).Should(BeNil())
+						Expect(repoGitList.Items).ShouldNot(BeEmpty())
+						sortRepos := repoGitList.DeepCopy()
+						sort.SliceStable(sortRepos.Items, func(i, j int) bool {
+							return sortRepos.Items[i].GetCreationTimestamp().Unix() < sortRepos.Items[j].GetCreationTimestamp().Unix()
+						})
+						Expect(repoGitList.Items).To(Equal(sortRepos.Items))
+					})
+				})
+				When("sort by updateTime, and desc", func() {
+					BeforeEach(func() {
+						listOption.Sort = []v1alpha1.SortOptions{{SortBy: v1alpha1.UpdatedTimeSortKey, Order: v1alpha1.OrderDesc}}
+					})
+					It("sort git repository by updateTime", func() {
+						Expect(err).Should(BeNil())
+						Expect(repoGitList.Items).ShouldNot(BeEmpty())
+						sortRepos := repoGitList.DeepCopy()
+						sort.SliceStable(sortRepos.Items, func(i, j int) bool {
+							return sortRepos.Items[i].Spec.UpdatedAt.Unix() > sortRepos.Items[j].Spec.UpdatedAt.Unix()
+						})
+						Expect(repoGitList.Items).To(Equal(sortRepos.Items))
+					})
+				})
 			})
 		})
 	})
 
-	Context("list git repository successfully", func() {
-		var (
-			listOption         v1alpha1.ListOptions
-			projectSubtype     v1alpha1.ProjectSubType
-			gitRepoTwoPageList v1alpha1.GitRepositoryList
-
-			repoTwoPageList *v1alpha1.RepositoryList
-		)
-
-		BeforeAll(func() {
-			gitRepo.Project = instance.GetTestOrgProject()
-			projectSubtype = v1alpha1.GitGroupProjectSubType
-
-			for i := 0; i < 5; i++ {
-				_gitRepo := gitRepo
-				_gitRepo.Repository = "e2e-repo-list-" + rand.String(4)
-				createRepository(ctx, instance, _gitRepo, v1alpha1.GitRepositoryVisibilityPrivate)
-				DeferCleanup(func() {
-					cleanupRepository(ctx, instance, _gitRepo)
-				})
-			}
-		})
-
-		BeforeEach(func() {
-			gitRepo.Project = instance.GetTestOrgProject()
-			repoParams.Project = instance.GetTestOrgProject()
-			repoParams.SubType = projectSubtype
-
-			listOption = v1alpha1.ListOptions{}
-			gitRepoTwoPageList = v1alpha1.GitRepositoryList{}
-			repoTwoPageList = nil
-		})
-
-		Context("page turning of repository list", func() {
+	Context("repository case", func() {
+		Context("search repository", func() {
 			JustBeforeEach(func() {
-				listOption.ItemsPerPage = 5
-				listOption.Page = 1
-				gitRepoTwoPageList, err = gitRepoGetter.ListGitRepository(ctx, gitRepo.Project, "", projectSubtype, listOption)
-				repoTwoPageList, repoErr = repoLister.ListRepositories(ctx, repoParams, listOption)
+				repoList, repoErr = repoLister.ListRepositories(ctx, repoParams, v1alpha1.ListOptions{
+					Search: map[string][]string{
+						route.SearchQueryKey: {repoParams.Repository},
+					},
+				})
 			})
 
-			When("page number is 1", func() {
+			Context("subtype of project is User", func() {
 				BeforeEach(func() {
-					listOption.Page = 1
-					listOption.ItemsPerPage = 2
-					repoGitList, err = gitRepoGetter.ListGitRepository(ctx, gitRepo.Project, "", projectSubtype, listOption)
-					repoList, repoErr = repoLister.ListRepositories(ctx, repoParams, listOption)
+					gitRepo.Project = instance.GetTestUserProject()
+					gitRepo.Repository = "e2e-user-repo-" + rand.String(4)
+					repoParams.Project = gitRepo.Project
+					if gitRepo.Project == "" {
+						Skip("plugin does not support user project")
+					}
+					repoParams.Repository = gitRepo.Repository
+					repoParams.SubType = v1alpha1.GitUserProjectSubType
+
+					wantGitRepo, _ = createRepository(ctx, instance, gitRepo, v1alpha1.GitRepositoryVisibilityPrivate)
+					DeferCleanup(func() {
+						cleanupRepository(ctx, instance, gitRepo)
+					})
+
+					repoGetter := instance.(client.RepositoryGetter)
+					wantRepo, _ = repoGetter.GetRepository(ctx, repoParams)
 				})
 
-				It("get return first page git repositories", func() {
-					Expect(err).Should(BeNil())
-					Expect(repoGitList.Items).ShouldNot(BeEmpty())
-					Expect(repoGitList.Items).To(Equal(gitRepoTwoPageList.Items[0:2]))
-					index := rand.Intn(2)
-					checkRequitedGitRepository(&repoGitList.Items[index], &gitRepoTwoPageList.Items[index])
-				})
-
-				It("get return first page repositories", func() {
-					Expect(repoErr).Should(BeNil())
+				It("get return the specified repositories", func() {
+					Expect(repoErr).Should(Succeed())
 					Expect(repoList.Items).ShouldNot(BeEmpty())
-					Expect(repoList.Items).To(Equal(repoTwoPageList.Items[0:2]))
-					index := rand.Intn(2)
-					checkRequitedRepository(&repoList.Items[index], &repoTwoPageList.Items[index])
+					Expect(wantRepo).ShouldNot(BeNil())
+					gotRepo := FindByName(ToPtrList(repoList.Items), gitRepo.Repository)
+					checkRequitedRepository(gotRepo, wantRepo)
 				})
 			})
 
-			When("page number is 2", func() {
+			Context("subtype of project is Group", func() {
 				BeforeEach(func() {
-					listOption.Page = 2
-					listOption.ItemsPerPage = 2
-					repoGitList, err = gitRepoGetter.ListGitRepository(ctx, gitRepo.Project, "", projectSubtype, listOption)
-					repoList, repoErr = repoLister.ListRepositories(ctx, repoParams, listOption)
+					gitRepo.Project = instance.GetTestOrgProject()
+					gitRepo.Repository = "e2e-org-repo-" + rand.String(4)
+					repoParams.Project = gitRepo.Project
+					repoParams.Repository = gitRepo.Repository
+
+					repoParams.SubType = v1alpha1.GitGroupProjectSubType
+					if gitRepo.Project == "" {
+						Skip("plugin does not support user project")
+					}
+
+					wantGitRepo, _ = createRepository(ctx, instance, gitRepo, v1alpha1.GitRepositoryVisibilityPrivate)
+					DeferCleanup(func() {
+						cleanupRepository(ctx, instance, gitRepo)
+					})
+
+					repoGetter := instance.(client.RepositoryGetter)
+					wantRepo, _ = repoGetter.GetRepository(ctx, repoParams)
 				})
 
-				It("get return second page git repositories", func() {
-					Expect(err).Should(BeNil())
-					Expect(repoGitList.Items).ShouldNot(BeEmpty())
-					Expect(repoGitList.Items).To(Equal(gitRepoTwoPageList.Items[2:4]))
-					index := rand.Intn(2)
-					checkRequitedGitRepository(&repoGitList.Items[index], &gitRepoTwoPageList.Items[index+2])
-				})
-
-				It("get return second page repositories", func() {
-					Expect(repoErr).Should(BeNil())
+				It("get return the specified git repositories", func() {
+					Expect(repoErr).Should(Succeed())
 					Expect(repoList.Items).ShouldNot(BeEmpty())
-					Expect(repoList.Items).To(Equal(repoTwoPageList.Items[2:4]))
-					index := rand.Intn(2)
-					checkRequitedRepository(&repoList.Items[index], &repoTwoPageList.Items[index+2])
-				})
-			})
-		})
-
-		Context("filter by subresources", func() {
-			//check whether the warehouse meets the testing requirements,
-			BeforeEach(func() {
-				gitRepo.Project = instance.GetTestUserProject()
-				projectSubtype = v1alpha1.GitUserProjectSubType
-				repoParams.Project = gitRepo.Project
-				repoParams.SubType = v1alpha1.GitUserProjectSubType
-
-				gitRepoTwoPageList, err = gitRepoGetter.ListGitRepository(ctx, gitRepo.Project, "", projectSubtype, listOption)
-				Expect(err).Should(BeNil())
-				repoTwoPageList, repoErr = repoLister.ListRepositories(ctx, repoParams, listOption)
-				Expect(repoErr).Should(BeNil())
-			})
-
-			When("subresources was set", func() {
-				BeforeEach(func() {
-					index := rand.Intn(1)
-					wantGitRepo = gitRepoTwoPageList.Items[index]
-					wantRepo = &repoTwoPageList.Items[index]
-
-					listOption.SubResources = []string{wantGitRepo.GetName()}
-					repoGitList, err = gitRepoGetter.ListGitRepository(ctx, gitRepo.Project, "", projectSubtype, listOption)
-					repoList, repoErr = repoLister.ListRepositories(ctx, repoParams, listOption)
-				})
-				It("return with subresource git repositories", func() {
-					Expect(err).Should(BeNil())
-					Expect(repoGitList.Items).ShouldNot(BeEmpty())
-					gotRepo := FindByName(ToPtrList(repoGitList.Items), wantGitRepo.GetName())
-					checkRequitedGitRepository(gotRepo, &wantGitRepo)
-				})
-
-				It("return with subresource repositories", func() {
-					Expect(repoErr).Should(BeNil())
-					Expect(repoList.Items).ShouldNot(BeEmpty())
-					gotRepo := FindByName(ToPtrList(repoList.Items), wantRepo.GetName())
+					Expect(wantRepo).ShouldNot(BeNil())
+					gotRepo := FindByName(ToPtrList(repoList.Items), gitRepo.Repository)
 					checkRequitedRepository(gotRepo, wantRepo)
 				})
 			})
 		})
 
-		Context("list git repository with sort", func() {
-			JustBeforeEach(func() {
+		Context("list git repository successfully", func() {
+			var (
+				listOption      v1alpha1.ListOptions
+				repoTwoPageList *v1alpha1.RepositoryList
+			)
+
+			BeforeEach(func() {
+				gitRepo.Project = instance.GetTestOrgProject()
 				repoParams.Project = instance.GetTestOrgProject()
-				repoParams.SubType = projectSubtype
+				repoParams.SubType = v1alpha1.GitGroupProjectSubType
 
-				repoGitList, err = gitRepoGetter.ListGitRepository(ctx, gitRepo.Project, "", projectSubtype, listOption)
-				Expect(err).Should(BeNil())
-
-				repoList, repoErr = repoLister.ListRepositories(ctx, repoParams, listOption)
-				Expect(repoErr).Should(BeNil())
+				listOption = v1alpha1.ListOptions{}
 			})
 
-			When("default sort is name,  and asc", func() {
-				It("sort git repository by name", func() {
-					Expect(err).Should(BeNil())
-					Expect(repoGitList.Items).ShouldNot(BeEmpty())
-					sortRpos := repoGitList.DeepCopy()
-					sort.SliceStable(sortRpos.Items, func(i, j int) bool {
-						return sortRpos.Items[i].GetName() < sortRpos.Items[j].GetName()
-					})
-					Expect(repoGitList.Items).To(Equal(sortRpos.Items))
+			Context("page turning of repository list", func() {
+				BeforeAll(func() {
+					listOption.ItemsPerPage = 5
+					listOption.Page = 1
+					repoTwoPageList, repoErr = repoLister.ListRepositories(ctx, repoParams, listOption)
 				})
 
-				It("sort by name", func() {
-					Expect(repoErr).Should(BeNil())
-					Expect(repoList.Items).ShouldNot(BeEmpty())
-					sortRpos := repoList.DeepCopy()
-					sort.SliceStable(sortRpos.Items, func(i, j int) bool {
-						return sortRpos.Items[i].GetName() < sortRpos.Items[j].GetName()
+				When("page number is 1", func() {
+					BeforeEach(func() {
+						listOption.Page = 1
+						listOption.ItemsPerPage = 2
+						repoList, repoErr = repoLister.ListRepositories(ctx, repoParams, listOption)
 					})
-					Expect(repoList.Items).To(Equal(sortRpos.Items))
+
+					It("get return first page repositories", func() {
+						Expect(repoErr).Should(BeNil())
+						Expect(repoList.Items).ShouldNot(BeEmpty())
+						Expect(repoList.Items).To(Equal(repoTwoPageList.Items[0:2]))
+						index := rand.Intn(2)
+						checkRequitedRepository(&repoList.Items[index], &repoTwoPageList.Items[index])
+					})
+				})
+
+				When("page number is 2", func() {
+					BeforeEach(func() {
+						listOption.Page = 2
+						listOption.ItemsPerPage = 2
+						repoList, repoErr = repoLister.ListRepositories(ctx, repoParams, listOption)
+					})
+
+					It("get return second page repositories", func() {
+						Expect(repoErr).Should(BeNil())
+						Expect(repoList.Items).ShouldNot(BeEmpty())
+						Expect(repoList.Items).To(Equal(repoTwoPageList.Items[2:4]))
+						index := rand.Intn(2)
+						checkRequitedRepository(&repoList.Items[index], &repoTwoPageList.Items[index+2])
+					})
 				})
 			})
-			When("sort by createTime, and asc", func() {
+
+			Context("filter by subResource", func() {
+				//check whether the warehouse meets the testing requirements,
 				BeforeEach(func() {
-					listOption.Sort = []v1alpha1.SortOptions{{SortBy: v1alpha1.CreatedTimeSortKey, Order: v1alpha1.OrderAsc}}
-				})
-				It("sort git repository by createTime, and desc", func() {
-					Expect(err).Should(BeNil())
-					Expect(repoGitList.Items).ShouldNot(BeEmpty())
-					sortRpos := repoGitList.DeepCopy()
-					sort.SliceStable(sortRpos.Items, func(i, j int) bool {
-						return sortRpos.Items[i].GetCreationTimestamp().Unix() < sortRpos.Items[j].GetCreationTimestamp().Unix()
-					})
-					Expect(repoGitList.Items).To(Equal(sortRpos.Items))
+					gitRepo.Project = instance.GetTestUserProject()
+					repoParams.Project = gitRepo.Project
+					repoParams.SubType = v1alpha1.GitUserProjectSubType
+					repoTwoPageList, repoErr = repoLister.ListRepositories(ctx, repoParams, listOption)
+					Expect(repoErr).Should(BeNil())
 				})
 
-				It("sort by createTime, and desc", func() {
-					Expect(repoErr).Should(BeNil())
-					Expect(repoList.Items).ShouldNot(BeEmpty())
-					sortRpos := repoList.DeepCopy()
-					sort.SliceStable(sortRpos.Items, func(i, j int) bool {
-						return sortRpos.Items[i].GetCreationTimestamp().Unix() < sortRpos.Items[j].GetCreationTimestamp().Unix()
+				When("subResource was set", func() {
+					BeforeEach(func() {
+						index := rand.Intn(1)
+						wantRepo = &repoTwoPageList.Items[index]
+						listOption.SubResources = []string{wantRepo.GetName()}
+						repoParams.Project = gitRepo.Project
+						repoParams.SubType = v1alpha1.GitUserProjectSubType
+						repoList, repoErr = repoLister.ListRepositories(ctx, repoParams, listOption)
 					})
-					Expect(repoList.Items).To(Equal(sortRpos.Items))
+					It("return with subResource repositories", func() {
+						Expect(repoErr).Should(BeNil())
+						Expect(repoList.Items).ShouldNot(BeEmpty())
+						gotRepo := FindByName(ToPtrList(repoList.Items), wantRepo.GetName())
+						checkRequitedRepository(gotRepo, wantRepo)
+					})
 				})
 			})
-			When("sort by updateTime, and desc", func() {
-				BeforeEach(func() {
-					listOption.Sort = []v1alpha1.SortOptions{{SortBy: v1alpha1.UpdatedTimeSortKey, Order: v1alpha1.OrderDesc}}
-				})
-				It("sort git repository by updateTime", func() {
-					Expect(err).Should(BeNil())
-					Expect(repoGitList.Items).ShouldNot(BeEmpty())
-					sortRpos := repoGitList.DeepCopy()
-					sort.SliceStable(sortRpos.Items, func(i, j int) bool {
-						return sortRpos.Items[i].Spec.UpdatedAt.Unix() > sortRpos.Items[j].Spec.UpdatedAt.Unix()
-					})
-					Expect(repoGitList.Items).To(Equal(sortRpos.Items))
+
+			Context("list repository with sort", func() {
+				JustBeforeEach(func() {
+					repoParams.Project = instance.GetTestOrgProject()
+					repoParams.SubType = v1alpha1.GitGroupProjectSubType
+
+					repoList, repoErr = repoLister.ListRepositories(ctx, repoParams, listOption)
+					Expect(repoErr).Should(BeNil())
 				})
 
-				It("sort by updateTime", func() {
-					Expect(repoErr).Should(BeNil())
-					Expect(repoList.Items).ShouldNot(BeEmpty())
-					sortRpos := repoList.DeepCopy()
-					sort.SliceStable(sortRpos.Items, func(i, j int) bool {
-						return sortRpos.Items[i].Spec.UpdatedTime.Unix() > sortRpos.Items[j].Spec.UpdatedTime.Unix()
+				When("default sort is name,  and asc", func() {
+					It("sort repository by name", func() {
+						Expect(repoErr).Should(BeNil())
+						Expect(repoList.Items).ShouldNot(BeEmpty())
+						sortRepos := repoList.DeepCopy()
+						sort.SliceStable(sortRepos.Items, func(i, j int) bool {
+							return sortRepos.Items[i].GetName() < sortRepos.Items[j].GetName()
+						})
+						Expect(repoList.Items).To(Equal(sortRepos.Items))
 					})
-					Expect(repoList.Items).To(Equal(sortRpos.Items))
+				})
+
+				When("sort by createTime, and asc", func() {
+					BeforeEach(func() {
+						listOption.Sort = []v1alpha1.SortOptions{{SortBy: v1alpha1.CreatedTimeSortKey, Order: v1alpha1.OrderAsc}}
+					})
+					It("sort repository by createTime, and desc", func() {
+						Expect(repoErr).Should(BeNil())
+						Expect(repoList.Items).ShouldNot(BeEmpty())
+						sortRepos := repoList.DeepCopy()
+						sort.SliceStable(sortRepos.Items, func(i, j int) bool {
+							return sortRepos.Items[i].GetCreationTimestamp().Unix() < sortRepos.Items[j].GetCreationTimestamp().Unix()
+						})
+						Expect(repoList.Items).To(Equal(sortRepos.Items))
+					})
+				})
+
+				When("sort by updateTime, and desc", func() {
+					BeforeEach(func() {
+						listOption.Sort = []v1alpha1.SortOptions{{SortBy: v1alpha1.UpdatedTimeSortKey, Order: v1alpha1.OrderDesc}}
+					})
+					It("sort repository by updateTime", func() {
+						Expect(repoErr).Should(BeNil())
+						Expect(repoList.Items).ShouldNot(BeEmpty())
+						sortRepos := repoList.DeepCopy()
+						sort.SliceStable(sortRepos.Items, func(i, j int) bool {
+							return sortRepos.Items[i].Spec.UpdatedTime.Unix() > sortRepos.Items[j].Spec.UpdatedTime.Unix()
+						})
+						Expect(repoList.Items).To(Equal(sortRepos.Items))
+					})
 				})
 			})
 		})
 	})
+
 })
 
 var caseGetGitRepository = P0Case("test for getting repo list").
@@ -403,7 +499,7 @@ var caseGetGitRepository = P0Case("test for getting repo list").
 		repo = v1alpha1.GitRepository{}
 		gitRepo.Project = instance.GetTestUserProject()
 		if gitRepo.Project == "" {
-			Skip("plugin does not support user gitrepository")
+			Skip("plugin does not support user git repository")
 		}
 		err = nil
 	})
@@ -413,7 +509,7 @@ var caseGetGitRepository = P0Case("test for getting repo list").
 		repo, err = gitRepoGetter.GetGitRepository(ctx, gitRepo)
 	})
 
-	Context("gitrepository not exist", func() {
+	Context("git repository not exist", func() {
 		BeforeEach(func() {
 			gitRepo.Repository = "not-exist-not-exist-not-exist"
 		})
@@ -422,7 +518,7 @@ var caseGetGitRepository = P0Case("test for getting repo list").
 		})
 	})
 
-	Context("gitrepository exist", func() {
+	Context("git repository exist", func() {
 		var wantGitRepo v1alpha1.GitRepository
 		BeforeEach(func() {
 			wantGitRepo, _ = createRepository(ctx, instance, gitRepo, v1alpha1.GitRepositoryVisibilityPrivate)
