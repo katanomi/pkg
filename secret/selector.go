@@ -225,7 +225,7 @@ func SelectToolSecretFrom(logger *zap.SugaredLogger, secretList []corev1.Secret,
 
 	for _, _secret := range secretList {
 		var sec = _secret
-		logger := logger.With("SelectToolSecretFrom range secret", sec.Namespace+"/"+sec.Name)
+		logger := logger.With("secret", sec.Namespace+"/"+sec.Name)
 
 		if len(option.SecretTypes) != 0 && !option.SecretTypes.Contains(sec.Type) {
 			logger.Debugw("secret type mismatch")
