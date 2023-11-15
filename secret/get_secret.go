@@ -56,8 +56,9 @@ func GetSecretByRefOrLabel(ctx context.Context, clt client.Client, ref *corev1.O
 	if objKey.Namespace == "" {
 		objKey.Namespace = ns
 	}
-	obj = &corev1.Secret{}
-	if err = clt.Get(ctx, objKey, obj); err == nil {
+
+	obj, err = GetSecret(ctx, clt, objKey.Namespace, objKey.Name)
+	if err == nil {
 		return obj, nil
 	} else if !apierrors.IsNotFound(err) {
 		return nil, err
@@ -96,4 +97,11 @@ func GetSecretByRefOrLabel(ctx context.Context, clt client.Client, ref *corev1.O
 		log.Infow("found multiple secrets by labels", "ns", ns, "labels", matchingLabels, "#secretList.Items", len(secretList.Items))
 	}
 	return &secretList.Items[0], nil
+}
+
+// GetSecret retrieves an secret
+func GetSecret(ctx context.Context, clt client.Client, namespace, name string) (*corev1.Secret, error) {
+	obj := &corev1.Secret{}
+	err := clt.Get(ctx, client.ObjectKey{Name: name, Namespace: namespace}, obj)
+	return obj, err
 }
