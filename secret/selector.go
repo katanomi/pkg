@@ -202,6 +202,10 @@ func selectToolSecret(logger *zap.SugaredLogger, secretList []corev1.Secret, glo
 	if len(usableSecrets) == 0 {
 		return nil, nil
 	}
+
+	// sort secrets to reduce the chance of occasional bugs causing by random order
+	sort.Sort(SortedSecretList(usableSecrets))
+
 	find, secretIndex := findPreferredSecret(usableSecrets, option.PerferredSecret.Namespace, option.PerferredSecret.Name)
 	if find {
 		return &usableSecrets[secretIndex], nil
