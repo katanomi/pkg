@@ -19,6 +19,7 @@ package v1alpha1
 import (
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
+	"k8s.io/utils/strings"
 	"knative.dev/pkg/apis"
 )
 
@@ -50,7 +51,8 @@ func SetConditionByErrorReason(conditionManager apis.ConditionManager, condition
 		if reason == "" {
 			reason = ReasonForError(err)
 		}
-		message := err.Error()
+		message := strings.ShortenString(err.Error(), MaxConditionMessageLength)
+
 		if old == nil || !old.IsFalse() || old.GetMessage() != message || old.GetReason() != reason {
 			conditionManager.MarkFalse(condition, reason, message)
 		}
