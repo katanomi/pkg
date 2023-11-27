@@ -77,3 +77,8 @@ const (
 	// Error in sync report
 	CodeScanReportSyncErrorReason CodeScanReportSyncReason = "CodeScanSyncReportError"
 )
+
+const (
+	// MaxConditionMessageLength indicates max message field length in condition
+	MaxConditionMessageLength = 1000
+)
