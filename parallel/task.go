@@ -143,6 +143,15 @@ func (p *ParallelTasks) SetConcurrent(count int) *ParallelTasks {
 	return p
 }
 
+func (p *ParallelTasks) SetMaxConcurrent(count int, max int) *ParallelTasks {
+	if count > max {
+		count = max
+	}
+
+	p.Options.ConcurrencyCount = count
+	return p
+}
+
 // Context will set context , up to now , task is not support to cancel
 // if you cancel from context, wait will return immediately
 func (p *ParallelTasks) Context(ctx context.Context) *ParallelTasks {
