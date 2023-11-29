@@ -24,6 +24,7 @@ import (
 	"testing"
 
 	"github.com/emicklei/go-restful/v3"
+	"github.com/katanomi/pkg/multicluster"
 	. "github.com/onsi/gomega"
 	"k8s.io/client-go/rest"
 	"knative.dev/pkg/injection"
@@ -48,7 +49,7 @@ func TestManagerFilter(t *testing.T) {
 				Username: "abc",
 				Password: "def",
 			}, nil
-		})
+		}, func(config *rest.Config) (multicluster.Interface, error) { return nil, nil })
 		ws := new(restful.WebService)
 		ws.Consumes(restful.MIME_JSON)
 		ws.Route(ws.GET("/config").Filter(ManagerFilter(ctx, mgr)).To(EmptyHandler))
@@ -74,7 +75,7 @@ func TestManagerFilter(t *testing.T) {
 		mgr := NewManager(ctx, FromBearerToken, func() (*rest.Config, error) {
 			// will return an error
 			return &rest.Config{}, nil
-		})
+		}, nil)
 		req := restful.NewRequest(httptest.NewRequest(http.MethodGet, "http://example.com", nil))
 		req.Request = req.Request.WithContext(ctx)
 		resp := restful.NewResponse(httptest.NewRecorder())
@@ -83,7 +84,6 @@ func TestManagerFilter(t *testing.T) {
 		config := injection.GetConfig(req.Request.Context())
 		g.Expect(config).To(BeNil())
 	})
-
 }
 
 func TestUserFromBearerToken(t *testing.T) {
