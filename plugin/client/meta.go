@@ -61,26 +61,34 @@ func ExtraMeta(ctx context.Context) *Meta {
 
 // MetaFilter meta filter for go restful, parsing plugin meta
 func MetaFilter(req *restful.Request, resp *restful.Response, chain *restful.FilterChain) {
-	encodedMeta := req.HeaderParameter(PluginMetaHeader)
-	if encodedMeta == "" {
-		chain.ProcessFilter(req, resp)
-		return
-	}
-
-	decodedMeta, err := base64.StdEncoding.DecodeString(encodedMeta)
+	meta, err := MetaFromRequest(req)
 	if err != nil {
 		errors.HandleError(req, resp, fmt.Errorf("decode meta error: %s", err.Error()))
 		return
 	}
+	if meta != nil {
+		ctx := req.Request.Context()
+		req.Request = req.Request.WithContext(meta.WithContext(ctx))
+	}
+
+	chain.ProcessFilter(req, resp)
+}
+
+func MetaFromRequest(req *restful.Request) (*Meta, error) {
+	encodedMeta := req.HeaderParameter(PluginMetaHeader)
+	if encodedMeta == "" {
+		return nil, nil
+	}
+
+	decodedMeta, err := base64.StdEncoding.DecodeString(encodedMeta)
+	if err != nil {
+		return nil, fmt.Errorf("decode meta base64 error: %s", err.Error())
+	}
 
 	meta := &Meta{}
 	if err = json.Unmarshal(decodedMeta, meta); err != nil {
-		errors.HandleError(req, resp, fmt.Errorf("decode meta error: %s", err.Error()))
-		return
+		return nil, fmt.Errorf("decode meta error: %s", err.Error())
 	}
 
-	ctx := req.Request.Context()
-	req.Request = req.Request.WithContext(meta.WithContext(ctx))
-
-	chain.ProcessFilter(req, resp)
+	return meta, nil
 }
