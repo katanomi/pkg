@@ -47,6 +47,9 @@ type Interface interface {
 
 	// NamespaceClustersGetter for getting list of clusters related by special namespace
 	NamespaceClustersGetter
+
+	// DynamicClientCreator for creating dynamic client
+	DynamicClientCreator
 }
 
 // NamespaceClustersGetter interface get list of clusters related by special namespace
@@ -57,4 +60,9 @@ type NamespaceClustersGetter interface {
 // ClientGetter interface get client for a clusterRef and given scheme
 type ClientGetter interface {
 	GetClient(ctx context.Context, clusterRef *corev1.ObjectReference, scheme *runtime.Scheme) (clt client.Client, err error)
+}
+
+// DynamicClientCreator interface for creating dynamic client
+type DynamicClientCreator interface {
+	CreateDynamicClientByConfig(config *rest.Config, clusterRef *corev1.ObjectReference) (dyn dynamic.Interface, err error)
 }

@@ -40,6 +40,21 @@ func (m *MockInterface) EXPECT() *MockInterfaceMockRecorder {
 	return m.recorder
 }
 
+// CreateDynamicClientByConfig mocks base method.
+func (m *MockInterface) CreateDynamicClientByConfig(arg0 *rest.Config, arg1 *v1.ObjectReference) (dynamic.Interface, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CreateDynamicClientByConfig", arg0, arg1)
+	ret0, _ := ret[0].(dynamic.Interface)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CreateDynamicClientByConfig indicates an expected call of CreateDynamicClientByConfig.
+func (mr *MockInterfaceMockRecorder) CreateDynamicClientByConfig(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateDynamicClientByConfig", reflect.TypeOf((*MockInterface)(nil).CreateDynamicClientByConfig), arg0, arg1)
+}
+
 // GetClient mocks base method.
 func (m *MockInterface) GetClient(arg0 context.Context, arg1 *v1.ObjectReference, arg2 *runtime.Scheme) (client.Client, error) {
 	m.ctrl.T.Helper()

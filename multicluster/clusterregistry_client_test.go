@@ -26,6 +26,7 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/dynamic/fake"
 	"k8s.io/client-go/kubernetes/scheme"
+	"k8s.io/client-go/rest"
 )
 
 func TestClusterRegistryClientGetConfig(t *testing.T) {
@@ -72,6 +73,13 @@ func TestClusterRegistryClientGetConfig(t *testing.T) {
 
 	t.Run("get dynamic", func(t *testing.T) {
 		client, err := clusterClient.GetDynamic(ctx, ref)
+
+		g.Expect(err).To(BeNil())
+		g.Expect(client).ToNot(BeNil())
+	})
+
+	t.Run("create dynamic by config", func(t *testing.T) {
+		client, err := clusterClient.CreateDynamicClientByConfig(&rest.Config{}, ref)
 
 		g.Expect(err).To(BeNil())
 		g.Expect(client).ToNot(BeNil())

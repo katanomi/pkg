@@ -282,3 +282,8 @@ func (m *ClusterRegistryClient) GetNamespaceClusters(ctx context.Context, namesp
 	}
 	return clusterRefs, nil
 }
+
+// CreateDynamicClientByConfig creates a dynamic client by config
+func (m *ClusterRegistryClient) CreateDynamicClientByConfig(config *rest.Config, _ *corev1.ObjectReference) (dyn dynamic.Interface, err error) {
+	return dynamic.NewForConfig(dynamic.ConfigFor(config))
+}
