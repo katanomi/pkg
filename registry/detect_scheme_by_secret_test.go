@@ -80,7 +80,7 @@ var _ = Describe("Test.RegistrySchemeDetectionBySecret", func() {
 			detect = NewRegistrySchemeDetectionBySecret(nil, true, true)
 		})
 		It("should return error", func() {
-			Expect(protocols).To(Equal(""))
+			Expect(protocols).To(Equal(HTTPS))
 			Expect(err).ShouldNot(BeNil())
 			Expect(err.Error()).To(BeEquivalentTo("registry client is nil"))
 
