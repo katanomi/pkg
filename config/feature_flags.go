@@ -51,6 +51,12 @@ const (
 	// PolicyCheckEnabledFeatureKey indicates the configuration key of the policy check feature gate.
 	// If the value is true, the feature is enabled cluster-wide.
 	PolicyCheckEnabledFeatureKey = "policy.check.enabled"
+
+	// ClusterIntegrationSyncPeriodKey indicates the configuration key for clusterintegration synchronization.
+	ClusterIntegrationSyncPeriodKey = "clusterIntegration.syncPeriod"
+
+	// IntegrationSyncPeriodKey indicates the configuration key for integration synchronization.
+	IntegrationSyncPeriodKey = "integration.syncPeriod"
 )
 
 const (
@@ -89,6 +95,12 @@ const (
 	// DefaultPolicyCheckEnabled indicates the default value of the policy check feature gate.
 	// If the corresponding key does not exist, the default value is returned.
 	DefaultPolicyCheckEnabled FeatureValue = "true"
+
+	// DefaultClusterIntegrationSyncPeriod defines the default time interval of clusterintegration synchronization
+	DefaultClusterIntegrationSyncPeriod = "5m"
+
+	// DefaultIntegrationsSyncPeriod defines the default time interval of integration synchronization
+	DefaultIntegrationsSyncPeriod = "15m"
 )
 
 // defaultFeatureValue defines the default value for the feature switch.
@@ -103,6 +115,8 @@ var defaultFeatureValue = map[string]FeatureValue{
 	TemplateRenderRetentionTimeKey:         DefaultTemplateRenderRetentionTime,
 	PolicyRunRetentionTimeKey:              DefaultPolicyRunRetentionTime,
 	PolicyCheckEnabledFeatureKey:           DefaultPolicyCheckEnabled,
+	ClusterIntegrationSyncPeriodKey:        DefaultClusterIntegrationSyncPeriod,
+	IntegrationSyncPeriodKey:               DefaultIntegrationsSyncPeriod,
 }
 
 // FeatureFlags holds the features configurations

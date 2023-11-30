@@ -18,8 +18,11 @@ package client
 
 import (
 	"context"
+	"net/http"
+	"net/http/httptest"
 	"testing"
 
+	"github.com/emicklei/go-restful/v3"
 	"github.com/go-resty/resty/v2"
 	"github.com/katanomi/pkg/apis/meta/v1alpha1"
 	. "github.com/onsi/gomega"
@@ -181,4 +184,28 @@ func TestQuery(t *testing.T) {
 
 	authMethod(request)
 	g.Expect(request.QueryParam.Get("some_query")).To(Equal("123"))
+}
+
+func TestAuthFilter(t *testing.T) {
+	httpRequest, _ := http.NewRequest("GET", "http://example.com/test", nil)
+	httpRequest.Header.Set("Accept", "*/*")
+	httpRequest.Header.Set("Content-Type", "application/json")
+	httpRequest.Header.Set(PluginSecretHeader, "eyJ1c2VybmFtZSI6Ik1YRmhlZz09IiwicGFzc3dvcmQiOiJNbmR6ZUE9PSJ9")
+	httpRequest.Header.Set(PluginAuthHeader, "kubernetes.io/basic-auth")
+	httpRequest.Header.Set(PluginMetaHeader, "eyJiYXNlVVJMOiI6Imh0dHA6Ly9hYmMuY29tIn0=")
+	httpWriter := httptest.NewRecorder()
+
+	ws := new(restful.WebService).Filter(AuthFilter)
+	ws.Route(ws.Produces(restful.MIME_JSON).GET("test").To(func(request *restful.Request, response *restful.Response) {
+		auth := ExtractAuth(request.Request.Context())
+
+		g := NewGomegaWithT(t)
+		g.Expect(auth).NotTo(BeNil())
+		g.Expect(auth.Type).To(Equal(v1alpha1.AuthTypeBasic))
+		g.Expect(auth.Secret).To(HaveKeyWithValue("username", []byte("1qaz")))
+		g.Expect(auth.Secret).To(HaveKeyWithValue("password", []byte("2wsx")))
+	}))
+
+	c := restful.NewContainer().Add(ws)
+	c.Dispatch(httpWriter, httpRequest)
 }

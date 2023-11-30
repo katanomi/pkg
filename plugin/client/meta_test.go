@@ -18,8 +18,11 @@ package client
 
 import (
 	"context"
+	"net/http"
+	"net/http/httptest"
 	"testing"
 
+	"github.com/emicklei/go-restful/v3"
 	. "github.com/onsi/gomega"
 )
 
@@ -49,4 +52,24 @@ func TestExtractMeta(t *testing.T) {
 
 	g.Expect(newMeta).ToNot(BeNil())
 	g.Expect(newMeta).To(Equal(meta))
+}
+
+func TestMetaFilter(t *testing.T) {
+	httpRequest, _ := http.NewRequest("GET", "http://example.com/test", nil)
+	httpRequest.Header.Set("Accept", "*/*")
+	httpRequest.Header.Set("Content-Type", "application/json")
+	httpRequest.Header.Set(PluginMetaHeader, "eyJiYXNlVVJMIjoiaHR0cDovL2FiYy5jb20ifQ==")
+	httpWriter := httptest.NewRecorder()
+
+	ws := new(restful.WebService).Filter(MetaFilter)
+	ws.Route(ws.Produces(restful.MIME_JSON).GET("test").To(func(request *restful.Request, response *restful.Response) {
+		meta := ExtraMeta(request.Request.Context())
+
+		g := NewGomegaWithT(t)
+		g.Expect(meta).NotTo(BeNil())
+		g.Expect(meta.BaseURL).To(Equal("http://abc.com"))
+	}))
+
+	c := restful.NewContainer().Add(ws)
+	c.Dispatch(httpWriter, httpRequest)
 }
