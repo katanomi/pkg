@@ -138,11 +138,14 @@ func (p *ParallelTasks) FailFast() *ParallelTasks {
 	return p
 }
 
+// SetConcurrent set the number of concurrency
 func (p *ParallelTasks) SetConcurrent(count int) *ParallelTasks {
 	p.Options.ConcurrencyCount = count
 	return p
 }
 
+// SetMaxConcurrent set the number of concurrency.
+// if count is greater than max, max is used.
 func (p *ParallelTasks) SetMaxConcurrent(count int, max int) *ParallelTasks {
 	if count > max {
 		count = max
