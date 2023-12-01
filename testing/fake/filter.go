@@ -17,6 +17,8 @@ limitations under the License.
 package fake
 
 import (
+	"bytes"
+	"io"
 	"net/http"
 
 	"github.com/emicklei/go-restful/v3"
@@ -44,7 +46,8 @@ func (h *PolicyHandler) Filter(req *restful.Request, resp *restful.Response, cha
 	}
 
 	// Extract input for the OPA policy evaluation from the request.
-	input, err := InputFromRequest(req)
+	clone := cloneRequest(req)
+	input, err := InputFromRequest(clone)
 	if err != nil {
 		kerrors.HandleError(req, resp, err)
 		return
@@ -71,4 +74,18 @@ func (h *PolicyHandler) Filter(req *restful.Request, resp *restful.Response, cha
 	result := policy.MapResult(resultQuery)
 
 	_ = resp.WriteHeaderAndEntity(status, result)
+}
+
+func cloneRequest(original *restful.Request) *restful.Request {
+	clone := *original
+
+	if original.Request.Body != nil {
+		bodyBytes, _ := io.ReadAll(original.Request.Body)
+		original.Request.Body = io.NopCloser(bytes.NewReader(bodyBytes))
+
+		clone.Request = original.Request.Clone(original.Request.Context())
+		clone.Request.Body = io.NopCloser(bytes.NewReader(bodyBytes))
+	}
+
+	return &clone
 }
