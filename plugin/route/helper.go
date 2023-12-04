@@ -35,3 +35,8 @@ func wrapperH(handler http.Handler) restful.RouteFunction {
 		handler.ServeHTTP(response.ResponseWriter, request.Request)
 	}
 }
+
+// NoOpFilter creates a default no operation filter
+func NoOpFilter(req *restful.Request, res *restful.Response, chain *restful.FilterChain) {
+	chain.ProcessFilter(req, res)
+}

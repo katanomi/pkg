@@ -44,6 +44,9 @@ type plugin struct {
 
 type ShutdownFunc func() error
 
+// NewPlugin method never used. was supposed to initiate plugins
+// Deprecated: This plugin initializer has never been used and is not recommended
+// TODO: cleanup unnecessary code
 func NewPlugin() *plugin {
 	plugin := &plugin{
 		container: restful.NewContainer(),
@@ -78,7 +81,9 @@ func (p *plugin) prepare() {
 		}
 	}
 
-	p.container.Add(route.NewDefaultService())
+	// this plugin initialization process was never really used in production
+	// and is not recommended, so here we just give any context to the constructor
+	p.container.Add(route.NewDefaultService(context.Background()))
 
 	for _, each := range p.clients {
 		ws, err := route.NewService(each)
