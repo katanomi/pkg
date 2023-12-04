@@ -33,6 +33,9 @@ const (
 
 	// BuildMRCheckTimeoutKey represent build merge request status check timeout key
 	BuildMRCheckTimeoutKey = "build.mergerequest.checkTimeout"
+
+	// PprofEnabledKey indicates the configuration key of the /debug/pprof debugging api/
+	PprofEnabledKey = "pprof.enabled"
 )
 
 const (
@@ -54,6 +57,10 @@ const (
 
 	// DefaultMRCheckTimeout represent default timeout for merge request status check
 	DefaultMRCheckTimeout FeatureValue = "10m"
+
+	// DefaultPprofEnabled stores the default value "false" for the "pprof.enabled" /debug/pprof debugging api.
+	// If the corresponding key does not exist, the default value is returned.
+	DefaultPprofEnabled FeatureValue = "false"
 )
 
 // defaultFeatureValue defines the default value for the feature switch.
@@ -63,6 +70,7 @@ var defaultFeatureValue = map[string]FeatureValue{
 	PrunerDelayAfterCompletedFeatureKey:    DefaultPrunerDelayAfterCompleted,
 	PrunerKeepFeatureKey:                   DefaultPrunerKeep,
 	BuildMRCheckTimeoutKey:                 DefaultMRCheckTimeout,
+	PprofEnabledKey:                        DefaultPprofEnabled,
 }
 
 // FeatureFlags holds the features configurations
