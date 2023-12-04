@@ -120,3 +120,32 @@ var _ = Describe("Test.BuildRunGitStatus.GetValWithKey", func() {
 	})
 
 })
+
+var _ = Describe("Test.BaseGitStatus", func() {
+	Context("IsPR", func() {
+		It("should return true if GitStatus is a pull request", func() {
+			baseGitStatus := &BaseGitStatus{
+				PullRequest: &BuildGitPullRequestStatus{
+					ID: "123",
+				},
+			}
+			Expect(baseGitStatus.IsPR()).To(BeTrue())
+		})
+
+		It("should return false if GitStatus is not a pull request", func() {
+			baseGitStatus := &BaseGitStatus{
+				PullRequest: nil,
+			}
+			Expect(baseGitStatus.IsPR()).To(BeFalse())
+		})
+
+		It("should return false if GitStatus is a pull request but ID is empty", func() {
+			baseGitStatus := &BaseGitStatus{
+				PullRequest: &BuildGitPullRequestStatus{
+					ID: "",
+				},
+			}
+			Expect(baseGitStatus.IsPR()).To(BeFalse())
+		})
+	})
+})

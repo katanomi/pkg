@@ -38,7 +38,8 @@ func NewRootCommand(ctx context.Context, name string, subcommands ...SubcommandF
 	streams := io.MustGetIOStreams(ctx)
 	ctx = logger.WithLogger(ctx, logger.NewLogger(zapcore.AddSync(streams.ErrOut), logOpts))
 	rootCmd := &cobra.Command{
-		Use: fmt.Sprintf("%s [command] [options]", name),
+		Use:   fmt.Sprintf("%s [command] [options]", name),
+		Short: fmt.Sprintf("%s CLI", name),
 		PersistentPreRun: func(cmd *cobra.Command, args []string) {
 			logOpts.Setup(ctx, cmd, args)
 		},

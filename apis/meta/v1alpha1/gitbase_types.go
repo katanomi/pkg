@@ -23,6 +23,9 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
+// DefaultGitFilePath default git file path
+const DefaultGitFilePath = ".git/katanomi.git.json"
+
 // GitUserBaseInfo user base info
 type GitUserBaseInfo struct {
 	// Name is the login Name
