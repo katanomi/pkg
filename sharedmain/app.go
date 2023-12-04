@@ -607,7 +607,7 @@ func (a *AppBuilder) Run(startFuncs ...func(context.Context) error) error {
 	// adds a http server if there are any endpoints registered
 	if a.container != nil {
 		// adds profiling and health checks
-		a.container.Add(route.NewDefaultService())
+		a.container.Add(route.NewDefaultService(a.Context))
 
 		if len(a.container.RegisteredWebServices()) > 0 {
 			a.container.Add(route.NewDocService(a.container.RegisteredWebServices()...))
