@@ -499,10 +499,10 @@ func NewService(c client.Interface, filters ...restful.FilterFunction) (*restful
 }
 
 // NewDefaultService default service included with metrics,pprof
-func NewDefaultService() *restful.WebService {
+func NewDefaultService(ctx context.Context) *restful.WebService {
 	routes := []Route{
-		NewSystem(),
-		NewHealthz(),
+		NewSystem(ctx),
+		NewHealthz(ctx),
 	}
 
 	ws := &restful.WebService{}
