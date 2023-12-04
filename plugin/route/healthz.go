@@ -17,6 +17,7 @@ limitations under the License.
 package route
 
 import (
+	"context"
 	"net/http"
 
 	"github.com/emicklei/go-restful/v3"
@@ -26,7 +27,7 @@ type healthz struct {
 }
 
 // NewHealthz basic health check service
-func NewHealthz() Route {
+func NewHealthz(ctx context.Context) Route {
 	return &healthz{}
 }
 

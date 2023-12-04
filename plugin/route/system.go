@@ -18,17 +18,25 @@ limitations under the License.
 package route
 
 import (
+	"context"
 	"net/http/pprof"
 
 	"github.com/emicklei/go-restful/v3"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
+
+	"github.com/katanomi/pkg/config"
 )
 
 type system struct {
+	Context       context.Context
+	ConfigManager *config.Manager
 }
 
-func NewSystem() Route {
-	return &system{}
+func NewSystem(ctx context.Context) Route {
+	return &system{
+		Context:       ctx,
+		ConfigManager: config.KatanomiConfigManager(ctx),
+	}
 }
 
 func (s *system) Register(ws *restful.WebService) {
@@ -37,15 +45,21 @@ func (s *system) Register(ws *restful.WebService) {
 
 	// golang profile
 	ppprofPath := "/debug/pprof"
-	ws.Route(ws.GET(ppprofPath).To(wrapperF(pprof.Index)))
-	ws.Route(ws.GET(ppprofPath + "/cmdline").To(wrapperF(pprof.Index)))
-	ws.Route(ws.GET(ppprofPath + "/profile").To(wrapperF(pprof.Profile)))
-	ws.Route(ws.GET(ppprofPath + "/symbol").To(wrapperF(pprof.Symbol)))
-	ws.Route(ws.GET(ppprofPath + "/trace").To(wrapperF(pprof.Trace)))
-	ws.Route(ws.GET(ppprofPath + "/allocs").To(wrapperH(pprof.Handler("allocs"))))
-	ws.Route(ws.GET(ppprofPath + "/block").To(wrapperH(pprof.Handler("block"))))
-	ws.Route(ws.GET(ppprofPath + "/goroutine").To(wrapperH(pprof.Handler("goroutine"))))
-	ws.Route(ws.GET(ppprofPath + "/heap").To(wrapperH(pprof.Handler("heap"))))
-	ws.Route(ws.GET(ppprofPath + "/mutex").To(wrapperH(pprof.Handler("mutex"))))
-	ws.Route(ws.GET(ppprofPath + "/threadcreate").To(wrapperH(pprof.Handler("threadcreate"))))
+
+	configFilter := NoOpFilter
+	if s.ConfigManager != nil && s.Context != nil {
+		configFilter = config.ConfigFilter(s.Context, s.ConfigManager, config.PprofEnabledKey, config.ConfigFilterNotFoundWhenNotTrue)
+	}
+
+	ws.Route(ws.GET(ppprofPath).Filter(configFilter).To(wrapperF(pprof.Index)))
+	ws.Route(ws.GET(ppprofPath + "/cmdline").Filter(configFilter).To(wrapperF(pprof.Index)))
+	ws.Route(ws.GET(ppprofPath + "/profile").Filter(configFilter).To(wrapperF(pprof.Profile)))
+	ws.Route(ws.GET(ppprofPath + "/symbol").Filter(configFilter).To(wrapperF(pprof.Symbol)))
+	ws.Route(ws.GET(ppprofPath + "/trace").Filter(configFilter).To(wrapperF(pprof.Trace)))
+	ws.Route(ws.GET(ppprofPath + "/allocs").Filter(configFilter).To(wrapperH(pprof.Handler("allocs"))))
+	ws.Route(ws.GET(ppprofPath + "/block").Filter(configFilter).To(wrapperH(pprof.Handler("block"))))
+	ws.Route(ws.GET(ppprofPath + "/goroutine").Filter(configFilter).To(wrapperH(pprof.Handler("goroutine"))))
+	ws.Route(ws.GET(ppprofPath + "/heap").Filter(configFilter).To(wrapperH(pprof.Handler("heap"))))
+	ws.Route(ws.GET(ppprofPath + "/mutex").Filter(configFilter).To(wrapperH(pprof.Handler("mutex"))))
+	ws.Route(ws.GET(ppprofPath + "/threadcreate").Filter(configFilter).To(wrapperH(pprof.Handler("threadcreate"))))
 }
