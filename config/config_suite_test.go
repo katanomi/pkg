@@ -21,9 +21,20 @@ import (
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+
+	"knative.dev/pkg/logging"
+	"sigs.k8s.io/controller-runtime/pkg/log/zap"
+)
+
+var (
+	log, _ = logging.NewLogger("", "debug")
 )
 
 func TestConfig(t *testing.T) {
 	RegisterFailHandler(Fail)
 	RunSpecs(t, "Config Suite")
 }
+
+var _ = BeforeSuite(func() {
+	log = zap.NewRaw(zap.WriteTo(GinkgoWriter), zap.UseDevMode(true)).Sugar()
+})

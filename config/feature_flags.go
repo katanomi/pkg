@@ -51,6 +51,9 @@ const (
 	// PolicyCheckEnabledFeatureKey indicates the configuration key of the policy check feature gate.
 	// If the value is true, the feature is enabled cluster-wide.
 	PolicyCheckEnabledFeatureKey = "policy.check.enabled"
+
+	// PprofEnabledKey indicates the configuration key of the /debug/pprof debugging api/
+	PprofEnabledKey = "pprof.enabled"
 )
 
 const (
@@ -89,6 +92,10 @@ const (
 	// DefaultPolicyCheckEnabled indicates the default value of the policy check feature gate.
 	// If the corresponding key does not exist, the default value is returned.
 	DefaultPolicyCheckEnabled FeatureValue = "true"
+
+	// DefaultPprofEnabled stores the default value "false" for the "pprof.enabled" /debug/pprof debugging api.
+	// If the corresponding key does not exist, the default value is returned.
+	DefaultPprofEnabled FeatureValue = "false"
 )
 
 // defaultFeatureValue defines the default value for the feature switch.
@@ -103,6 +110,7 @@ var defaultFeatureValue = map[string]FeatureValue{
 	TemplateRenderRetentionTimeKey:         DefaultTemplateRenderRetentionTime,
 	PolicyRunRetentionTimeKey:              DefaultPolicyRunRetentionTime,
 	PolicyCheckEnabledFeatureKey:           DefaultPolicyCheckEnabled,
+	PprofEnabledKey:                        DefaultPprofEnabled,
 }
 
 // FeatureFlags holds the features configurations
