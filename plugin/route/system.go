@@ -43,6 +43,9 @@ func (s *system) Register(ws *restful.WebService) {
 	// prometheus metrics
 	ws.Route(ws.GET("/metrics").To(wrapperH(promhttp.Handler())))
 
+	// set web service to accept and return JSON.
+	ws.Consumes(restful.MIME_JSON).Produces(restful.MIME_JSON)
+
 	// golang profile
 	ppprofPath := "/debug/pprof"
 
