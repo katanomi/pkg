@@ -46,14 +46,17 @@ type GetBaseConfigFunc func() (*rest.Config, error)
 // GetConfigFunc retrieves a configuration based on a request
 type GetConfigFunc func(req *restful.Request, baseConfig GetBaseConfigFunc) (*rest.Config, error)
 
-// GetMultiClusterFunc constructs a multi cluster client based on the specified config.
-type GetMultiClusterFunc func(*rest.Config) (multicluster.Interface, error)
+// NewClusterRegistryClientFunc constructs a multi cluster client based on the specified config.
+type NewClusterRegistryClientFunc func(*rest.Config) (multicluster.Interface, error)
 
 // Manager dynamically generates client based on user requests
 type Manager struct {
-	GetConfig       GetConfigFunc
-	GetBasicConfig  GetBaseConfigFunc
-	GetMultiCluster GetMultiClusterFunc
+	// GetConfig retrieves a configuration based on a request
+	GetConfig GetConfigFunc
+	// GetBasicConfig retrieves a configuration based on a request
+	GetBasicConfig GetBaseConfigFunc
+	// NewClusterRegistryClient constructs a multi cluster client based on the specified config.
+	NewClusterRegistryClient NewClusterRegistryClientFunc
 	*zap.SugaredLogger
 }
 
@@ -72,7 +75,7 @@ func WithCtxManagerFilters(ctx context.Context, ws *restful.WebService) error {
 }
 
 // NewManager initializes a new manager based on func
-func NewManager(ctx context.Context, get GetConfigFunc, baseConfig GetBaseConfigFunc, getMultiCluster GetMultiClusterFunc) *Manager {
+func NewManager(ctx context.Context, get GetConfigFunc, baseConfig GetBaseConfigFunc, newClusterRegistryClient NewClusterRegistryClientFunc) *Manager {
 	if get == nil {
 		get = FromBearerToken
 	}
@@ -87,10 +90,10 @@ func NewManager(ctx context.Context, get GetConfigFunc, baseConfig GetBaseConfig
 		baseConfig = config.GetConfig
 	}
 	return &Manager{
-		SugaredLogger:   logging.FromContext(ctx),
-		GetConfig:       configGetter,
-		GetBasicConfig:  baseConfig,
-		GetMultiCluster: getMultiCluster,
+		SugaredLogger:            logging.FromContext(ctx),
+		GetConfig:                configGetter,
+		GetBasicConfig:           baseConfig,
+		NewClusterRegistryClient: newClusterRegistryClient,
 	}
 }
 
@@ -162,8 +165,8 @@ func ManagerFilter(ctx context.Context, mgr *Manager) restful.FilterFunction {
 		}
 		reqCtx = WithDynamicClient(reqCtx, dynamicClient)
 
-		if mgr.GetMultiCluster != nil {
-			multiClusterClient, err := mgr.GetMultiCluster(config)
+		if mgr.NewClusterRegistryClient != nil {
+			multiClusterClient, err := mgr.NewClusterRegistryClient(config)
 			if err != nil {
 				log.Errorw("cannot get multi cluster client", "err", err)
 				kerrors.HandleError(req, resp, err)
