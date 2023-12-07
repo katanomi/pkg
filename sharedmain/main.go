@@ -52,7 +52,7 @@ import (
 func GetClientManager(ctx context.Context) (context.Context, *kclient.Manager) {
 	clientManager := kclient.ManagerCtx(ctx)
 	if clientManager == nil {
-		clientManager = kclient.NewManager(ctx, nil, nil)
+		clientManager = kclient.NewManager(ctx, nil, nil, nil)
 		ctx = kclient.WithManager(ctx, clientManager)
 	}
 	return ctx, clientManager

@@ -32,9 +32,7 @@ import (
 
 // Interface interface for a multi-cluster functionality
 type Interface interface {
-	GetConfig(ctx context.Context, clusterRef *corev1.ObjectReference) (config *rest.Config, err error)
 	GetDynamic(ctx context.Context, clusterRef *corev1.ObjectReference) (dyn dynamic.Interface, err error)
-	GetConfigFromCluster(ctx context.Context, cluster *unstructured.Unstructured) (config *rest.Config, err error)
 
 	// ListClustersNamespaces lists all namespaces in all clusters
 	// TODO: add this method to the interface and implementation
@@ -47,6 +45,9 @@ type Interface interface {
 
 	// NamespaceClustersGetter for getting list of clusters related by special namespace
 	NamespaceClustersGetter
+
+	// ConfigGetter for getting config for a clusterRef
+	ConfigGetter
 }
 
 // NamespaceClustersGetter interface get list of clusters related by special namespace
@@ -57,4 +58,10 @@ type NamespaceClustersGetter interface {
 // ClientGetter interface get client for a clusterRef and given scheme
 type ClientGetter interface {
 	GetClient(ctx context.Context, clusterRef *corev1.ObjectReference, scheme *runtime.Scheme) (clt client.Client, err error)
+}
+
+// ConfigGetter interface get config for a clusterRef
+type ConfigGetter interface {
+	GetConfig(ctx context.Context, clusterRef *corev1.ObjectReference) (config *rest.Config, err error)
+	GetConfigFromCluster(ctx context.Context, cluster *unstructured.Unstructured) (config *rest.Config, err error)
 }
