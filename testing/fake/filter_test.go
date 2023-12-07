@@ -103,8 +103,8 @@ func TestPolicyHandlerFilter(t *testing.T) {
 
 			h := PolicyHandler{Store: store}
 			ws := new(restful.WebService).Filter(h.Filter)
-			ws.Route(ws.Produces(restful.MIME_JSON).POST(name).To(simple))
-			ws.Route(ws.Produces(restful.MIME_JSON).GET(name).To(simple))
+			ws.Route(ws.Produces(restful.MIME_JSON).POST(name).To(simple(g, item.body)))
+			ws.Route(ws.Produces(restful.MIME_JSON).GET(name).To(simple(g, item.body)))
 			c := restful.NewContainer().Add(ws)
 			c.Dispatch(httpWriter, httpRequest)
 
@@ -114,9 +114,13 @@ func TestPolicyHandlerFilter(t *testing.T) {
 			g.Expect(result).To(Equal(item.expected))
 		})
 	}
-
 }
+func simple(g Gomega, body string) restful.RouteFunction {
+	return func(req *restful.Request, resp *restful.Response) {
+		bytes, err := io.ReadAll(req.Request.Body)
+		g.Expect(err).To(BeNil())
+		g.Expect(string(bytes)).To(Equal(body))
 
-func simple(req *restful.Request, resp *restful.Response) {
-	_, _ = io.WriteString(resp.ResponseWriter, `{"result":"simple"}`)
+		_, _ = io.WriteString(resp.ResponseWriter, `{"result":"simple"}`)
+	}
 }
