@@ -139,6 +139,11 @@ func (b *BaseGitStatus) GetValWithKey(ctx context.Context, path *field.Path) map
 	return stringReplacements
 }
 
+// IsPR returns true if GitStatus is a pull request
+func (b *BaseGitStatus) IsPR() bool {
+	return b.PullRequest != nil && b.PullRequest.ID != ""
+}
+
 func (b *BuildRunGitStatus) GetValWithKey(ctx context.Context, path *field.Path) map[string]string {
 	if b == nil {
 		b = &BuildRunGitStatus{}
