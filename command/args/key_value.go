@@ -19,11 +19,9 @@ package args
 import (
 	"context"
 	"fmt"
-
-	// "fmt"
 	"strings"
 
-	"github.com/katanomi/pkg/common"
+	"golang.org/x/exp/slices"
 	"k8s.io/apimachinery/pkg/util/errors"
 )
 
@@ -45,7 +43,7 @@ var ValuesValidationOptDuplicatedKeys ValuesValidateOption = func(pairs []string
 
 	for _, pair := range pairs {
 		split := strings.SplitN(pair, "=", 2)
-		if len(split) != 2 && !common.Contains(invalidPairs, pair) {
+		if len(split) != 2 && !slices.Contains(invalidPairs, pair) {
 			invalidPairs = append(invalidPairs, pair)
 			continue
 		}

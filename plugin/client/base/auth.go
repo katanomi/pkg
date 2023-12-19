@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-// Package client contains functions to add and retrieve auth from context
-package client
+// Package base contains functions to add and retrieve auth from context
+package base
 
 import (
 	"context"
@@ -28,7 +28,6 @@ import (
 	"github.com/go-resty/resty/v2"
 	"github.com/katanomi/pkg/apis/meta/v1alpha1"
 	"github.com/katanomi/pkg/errors"
-
 	corev1 "k8s.io/api/core/v1"
 )
 
