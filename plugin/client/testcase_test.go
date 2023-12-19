@@ -25,9 +25,25 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	v1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"knative.dev/pkg/apis"
 	duckv1 "knative.dev/pkg/apis/duck/v1"
 )
+
+func secretForTest() v1.Secret {
+	secretData := map[string][]byte{
+		"username": []byte("123"),
+		"password": []byte("456"),
+	}
+
+	secret := v1.Secret{
+		TypeMeta:   metav1.TypeMeta{},
+		ObjectMeta: metav1.ObjectMeta{},
+		Type:       v1.SecretTypeBasicAuth,
+		Data:       secretData,
+	}
+	return secret
+}
 
 var _ = Describe("TestCase", func() {
 	var pluginClient *PluginClient

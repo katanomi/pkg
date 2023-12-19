@@ -14,19 +14,16 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package client
+package base
 
 import (
 	"encoding/base64"
 	"encoding/json"
-	"io/ioutil"
-	"path/filepath"
 	"testing"
-
-	"sigs.k8s.io/yaml"
 
 	"github.com/go-resty/resty/v2"
 	metav1alpha1 "github.com/katanomi/pkg/apis/meta/v1alpha1"
+	ktesting "github.com/katanomi/pkg/testing"
 	. "github.com/onsi/gomega"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -74,8 +71,8 @@ func TestSecretOptsWithLabel(t *testing.T) {
 }
 
 func TestSecretOptsWithRealFile(t *testing.T) {
-
-	secret := parseSecret("testdata/secret.yaml")
+	secret := v1.Secret{}
+	ktesting.MustLoadYaml("testdata/secret.yaml", &secret)
 	opt := SecretOpts(secret)
 	request := resty.New().R()
 	opt(request)
@@ -100,25 +97,4 @@ func secretForTest() v1.Secret {
 		Data:       secretData,
 	}
 	return secret
-}
-
-func parseSecret(path string) v1.Secret {
-	filename, err := filepath.Abs(path)
-	if err != nil {
-		panic(err)
-	}
-	yamlFile, err := ioutil.ReadFile(filename)
-
-	if err != nil {
-		panic(err)
-	}
-
-	secret := &v1.Secret{}
-
-	err = yaml.Unmarshal(yamlFile, &secret)
-	if err != nil {
-		panic(err)
-	}
-
-	return *secret
 }

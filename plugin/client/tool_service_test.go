@@ -53,10 +53,8 @@ var _ = Describe("ToolService-CheckAlive", func() {
 		secret = secretForTest()
 		classAddr := testClassAddress()
 		pluginURL = fmt.Sprintf("%s/tools/liveness", classAddr.URL.String())
-		pluginClient = NewPluginClient(ClientOpts(defaultClient))
-		pluginClient.meta = meta
-		pluginClient.secret = secret
-		pluginClient.ClassAddress = classAddr
+		pluginClient = NewPluginClient(ClientOpts(defaultClient)).
+			WithMeta(meta).WithSecret(secret).WithClassAddress(classAddr)
 		ctx = context.Background()
 	})
 

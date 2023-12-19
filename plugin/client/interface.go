@@ -22,14 +22,12 @@ import (
 
 	cloudevent "github.com/cloudevents/sdk-go/v2"
 	"github.com/emicklei/go-restful/v3"
-	"github.com/go-resty/resty/v2"
+	coderepositoryv1alpha1 "github.com/katanomi/pkg/apis/coderepository/v1alpha1"
+	metav1alpha1 "github.com/katanomi/pkg/apis/meta/v1alpha1"
+	"github.com/katanomi/pkg/plugin/client/base"
 	"go.uber.org/zap"
 	corev1 "k8s.io/api/core/v1"
 	"knative.dev/pkg/apis"
-	duckv1 "knative.dev/pkg/apis/duck/v1"
-
-	coderepositoryv1alpha1 "github.com/katanomi/pkg/apis/coderepository/v1alpha1"
-	metav1alpha1 "github.com/katanomi/pkg/apis/meta/v1alpha1"
 )
 
 // Interface base interface for plugins
@@ -462,13 +460,7 @@ type BlobStoreLister interface {
 
 // Client inteface for PluginClient, client code shoud use the interface
 // as dependency
-type Client interface {
-	Get(ctx context.Context, baseURL *duckv1.Addressable, uri string, options ...OptionFunc) error
-	GetResponse(ctx context.Context, baseURL *duckv1.Addressable, uri string, options ...OptionFunc) (*resty.Response, error)
-	Post(ctx context.Context, baseURL *duckv1.Addressable, uri string, options ...OptionFunc) error
-	Put(ctx context.Context, baseURL *duckv1.Addressable, uri string, options ...OptionFunc) error
-	Delete(ctx context.Context, baseURL *duckv1.Addressable, uri string, options ...OptionFunc) error
-}
+type Client = base.Client
 
 type ClientProjectGetter interface {
 	Project(meta Meta, secret corev1.Secret) ClientProject

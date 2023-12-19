@@ -17,6 +17,7 @@ limitations under the License.
 package common
 
 // Contains returns true if an element is present in a collection.
+// Deprecated: use `slice.Contains` which import from `golang.org/x/exp/slices` instead
 func Contains[T comparable](collection []T, element T) bool {
 	for _, item := range collection {
 		if item == element {
