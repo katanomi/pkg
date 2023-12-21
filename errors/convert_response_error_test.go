@@ -19,7 +19,9 @@ package errors
 import (
 	"context"
 	"fmt"
+	"io"
 	"net/http"
+	"strings"
 
 	"k8s.io/apimachinery/pkg/api/errors"
 
@@ -44,20 +46,58 @@ var _ = Describe("ConvertResponseError", func() {
 			StatusCode: http.StatusBadGateway,
 			Request:    &http.Request{Method: http.MethodGet},
 		}
-
 	})
 	JustBeforeEach(func() {
 		result = ConvertResponseError(ctx, response, err, gvk, names...)
 	})
 
-	Context("nil error", func() {
+	Context("nil error, and get response error message", func() {
 		BeforeEach(func() {
 			err = nil
+			body := strings.NewReader("some error")
+			response = &http.Response{
+				StatusCode: http.StatusHTTPVersionNotSupported,
+				Request:    &http.Request{Method: http.MethodGet},
+				Body:       io.NopCloser(body),
+			}
+		})
+		It("should return kubernetes internal server error", func() {
+			Expect(result).NotTo(BeNil())
+			Expect(errors.IsInternalError(result)).To(BeTrue())
+			status, ok := result.(errors.APIStatus)
+			Expect(ok).To(BeTrue())
+			Expect(status.Status().Code).To(Equal(int32(http.StatusHTTPVersionNotSupported)))
+			Expect(status.Status().Details.Causes[0].Message).To(Equal("some error"))
+		})
+	})
+
+	Context("nil error, and response is badGateway", func() {
+		BeforeEach(func() {
+			err = nil
+		})
+		It("should return kubernetes internal server error", func() {
+			Expect(result).NotTo(BeNil())
+			Expect(errors.IsInternalError(result)).To(BeTrue())
+			status, ok := result.(errors.APIStatus)
+			Expect(ok).To(BeTrue())
+			Expect(status.Status().Code).To(Equal(int32(http.StatusBadGateway)))
+			Expect(status.Status().Details.Causes[0].Message).To(Equal("unknown error"))
+		})
+	})
+
+	Context("nil error, and response status not bad request", func() {
+		BeforeEach(func() {
+			err = nil
+			response = &http.Response{
+				StatusCode: http.StatusAccepted,
+				Request:    &http.Request{Method: http.MethodGet},
+			}
 		})
 		It("should be nil", func() {
 			Expect(result).To(BeNil())
 		})
 	})
+
 	Context("bad request error", func() {
 		BeforeEach(func() {
 			err = fmt.Errorf("some bad request")
