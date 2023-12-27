@@ -38,6 +38,9 @@ const (
 	// BuildMRCheckTimeoutKey represent build merge request status check timeout key
 	BuildMRCheckTimeoutKey = "build.mergerequest.checkTimeout"
 
+	// BuildMRCheckTimeoutContinueKey represent build merge request status check timeout continue key
+	BuildMRCheckTimeoutContinueKey = "build.mergerequest.checkTimeoutContinue"
+
 	// TemplateRenderCheckTimeoutKey represent templatrender timeout key
 	TemplateRenderCheckTimeoutKey = "templateRender.checkTimeout"
 
@@ -86,6 +89,9 @@ const (
 	// DefaultMRCheckTimeout represent default timeout for merge request status check
 	DefaultMRCheckTimeout FeatureValue = "10m"
 
+	// DefaultMRCheckTimeoutContinue represent default timeout continue for merge request status check
+	DefaultMRCheckTimeoutContinue FeatureValue = "true"
+
 	// DefaultTemplateRenderCheckTimeout represent default timeout for templaterender check
 	DefaultTemplateRenderCheckTimeout FeatureValue = "30s"
 
@@ -118,6 +124,7 @@ var defaultFeatureValue = map[string]FeatureValue{
 	PrunerDelayAfterCompletedFeatureKey:    DefaultPrunerDelayAfterCompleted,
 	PrunerKeepFeatureKey:                   DefaultPrunerKeep,
 	BuildMRCheckTimeoutKey:                 DefaultMRCheckTimeout,
+	BuildMRCheckTimeoutContinueKey:         DefaultMRCheckTimeoutContinue,
 	TemplateRenderCheckTimeoutKey:          DefaultTemplateRenderCheckTimeout,
 	TemplateRenderRetentionTimeKey:         DefaultTemplateRenderRetentionTime,
 	PolicyRunRetentionTimeKey:              DefaultPolicyRunRetentionTime,
