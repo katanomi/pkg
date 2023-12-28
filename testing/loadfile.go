@@ -21,7 +21,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io/ioutil"
+	"os"
 	"strings"
 
 	. "github.com/onsi/gomega"
@@ -35,17 +35,24 @@ import (
 // will panic if if failes
 // ONLY FOR TEST USAGE
 func MustLoadFileString(file string, content *string) {
-	data, err := ioutil.ReadFile(file)
+	*content = string(MustLoadFileBytes(file))
+}
+
+// MustLoadFileBytes loads a file as []bytes
+// will panic if if failes
+// ONLY FOR TEST USAGE
+func MustLoadFileBytes(file string) []byte {
+	content, err := os.ReadFile(file)
 	if err != nil {
 		panic(err)
 	}
-	*content = string(data)
+	return content
 }
 
 // LoadJSON loads json
 func LoadJSON(file string, obj interface{}) (err error) {
 	var data []byte
-	if data, err = ioutil.ReadFile(file); err != nil {
+	if data, err = os.ReadFile(file); err != nil {
 		return
 	}
 	err = json.Unmarshal(data, obj)
@@ -66,7 +73,7 @@ func LoadMultiYamlOrJson[T any](file string, list *[]T) (err error) {
 		return errors.New("list should not be nil")
 	}
 	var data []byte
-	if data, err = ioutil.ReadFile(file); err != nil {
+	if data, err = os.ReadFile(file); err != nil {
 		return
 	}
 	parts := strings.Split(string(data), "---")
@@ -96,7 +103,7 @@ func MustLoadMultiYamlOrJson[T any](file string, list *[]T) {
 // LoadYAML loads yaml
 func LoadYAML(file string, obj interface{}) (err error) {
 	var data []byte
-	if data, err = ioutil.ReadFile(file); err != nil {
+	if data, err = os.ReadFile(file); err != nil {
 		return
 	}
 	err = yaml.Unmarshal(data, obj)
