@@ -528,6 +528,17 @@ func (a *AppBuilder) StoragePlugins(plugins ...client.Interface) *AppBuilder {
 	return a
 }
 
+// PluginDisplayColumns set plugin displayColumns from yaml file
+func (a *AppBuilder) PluginDisplayColumns(plugin client.PluginDisplayColumns, file string) *AppBuilder {
+	attributes := make(map[string][]string)
+	a.readAttributes(file, &attributes)
+	for key, value := range attributes {
+		plugin.SetDisplayColumns(key, value...)
+	}
+
+	return a
+}
+
 // PluginAttributes set plugin attributes from yaml file
 func (a *AppBuilder) PluginAttributes(plugin client.PluginAttributes, file string) *AppBuilder {
 	attributes := make(map[string][]string)

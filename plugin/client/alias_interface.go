@@ -48,6 +48,9 @@ type ProjectLister = types.ProjectLister
 
 type PluginAttributes = types.PluginAttributes
 
+// PluginDisplayColumns implements display columns manager.
+type PluginDisplayColumns = types.PluginDisplayColumns
+
 // PluginVersionAttributes get diff configurations for different versions.
 type PluginVersionAttributes = types.PluginVersionAttributes
 

@@ -49,6 +49,14 @@ func (m *MockPlugin) Attributes() map[string][]string {
 	return m.DataAttributes
 }
 
+func (m *MockPlugin) GetDisplayColumns() map[string][]string {
+	return m.DataAttributes
+}
+
+func (m *MockPlugin) SetDisplayColumns(k string, values ...string) {
+	m.DataAttributes[k] = values
+}
+
 func NewMockPlugin() *MockPlugin {
 	return &MockPlugin{
 		VersionAttributes: map[string]map[string][]string{},
@@ -84,4 +92,20 @@ func TestAppBuilder_PluginAttributes(t *testing.T) {
 
 	diff := cmp.Diff(plugin.DataAttributes["attr"], []string{"field1", "field2"})
 	g.Expect(diff).To(BeEmpty())
+}
+
+func TestAppBuilder_PluginDisplayColumns(t *testing.T) {
+	t.Run("read version attributes to plugin", func(t *testing.T) {
+		g := NewGomegaWithT(t)
+		logger, _ := zap.NewDevelopment()
+		app := AppBuilder{
+			Logger: logger.Sugar(),
+		}
+		plugin := NewMockPlugin()
+
+		app.PluginDisplayColumns(plugin, "testdata/attributes.yaml")
+
+		diff := cmp.Diff(plugin.DataAttributes["attr"], []string{"field1", "field2"})
+		g.Expect(diff).To(BeEmpty())
+	})
 }
