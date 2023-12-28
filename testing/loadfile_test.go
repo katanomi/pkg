@@ -106,3 +106,36 @@ func TestMustLoadMultiYaml_fail(t *testing.T) {
 		MustLoadMultiYamlOrJson("./testdata/not-exist.yaml", &cms)
 	}).Should(Panic())
 }
+
+func TestMustLoadFileString_success(t *testing.T) {
+	g := NewGomegaWithT(t)
+	var strs string
+	g.Expect(func() {
+		MustLoadFileString("./testdata/loadMultiYaml.configmap.success.json", &strs)
+	}).ShouldNot(Panic())
+	g.Expect(strs).NotTo(BeEmpty())
+}
+
+func TestMustLoadFileString_fail(t *testing.T) {
+	g := NewGomegaWithT(t)
+	var strs string
+	g.Expect(func() {
+		MustLoadFileString("./testdata/not-exist.yaml", &strs)
+	}).Should(Panic())
+}
+
+func TestMustLoadFileBytes_success(t *testing.T) {
+	g := NewGomegaWithT(t)
+	var content []byte
+	g.Expect(func() {
+		content = MustLoadFileBytes("./testdata/loadMultiYaml.configmap.success.json")
+	}).ShouldNot(Panic())
+	g.Expect(content).NotTo(BeEmpty())
+}
+
+func TestMustLoadFileBytes_fail(t *testing.T) {
+	g := NewGomegaWithT(t)
+	g.Expect(func() {
+		MustLoadFileBytes("./testdata/not-exist.yaml")
+	}).Should(Panic())
+}
