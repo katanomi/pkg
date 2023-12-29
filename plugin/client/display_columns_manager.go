@@ -16,24 +16,28 @@ limitations under the License.
 
 package client
 
+import "github.com/katanomi/pkg/apis/meta/v1alpha1"
+
+var _ PluginDisplayColumns = &DisplayColumnsManager{}
+
 // DisplayColumnsManager provide default displayColumn management.
 // When the default implementation is not satisfied, you need to implement it yourself.
 type DisplayColumnsManager struct {
-	displayColumns map[string][]string
+	displayColumns map[string]v1alpha1.DisplayColumns
 }
 
 // SetDisplayColumns set display columns
-func (d *DisplayColumnsManager) SetDisplayColumns(key string, values ...string) {
+func (d *DisplayColumnsManager) SetDisplayColumns(key string, values ...v1alpha1.DisplayColumn) {
 	if d.displayColumns == nil {
-		d.displayColumns = make(map[string][]string)
+		d.displayColumns = make(map[string]v1alpha1.DisplayColumns)
 	}
 	d.displayColumns[key] = values
 }
 
 // GetDisplayColumns get display columns
-func (d *DisplayColumnsManager) GetDisplayColumns() map[string][]string {
+func (d *DisplayColumnsManager) GetDisplayColumns() map[string]v1alpha1.DisplayColumns {
 	if d.displayColumns == nil {
-		return make(map[string][]string)
+		return make(map[string]v1alpha1.DisplayColumns)
 	}
 	return d.displayColumns
 }

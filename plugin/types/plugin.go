@@ -91,8 +91,8 @@ type ResourcePathFormatter interface {
 // displayName: index used to find specific display data.
 // field: the field of the data to be displayed.
 type PluginDisplayColumns interface {
-	SetDisplayColumns(k string, values ...string)
-	GetDisplayColumns() map[string][]string
+	SetDisplayColumns(k string, values ...metav1alpha1.DisplayColumn)
+	GetDisplayColumns() map[string]metav1alpha1.DisplayColumns
 }
 
 type PluginAttributes interface {

@@ -1,0 +1,7 @@
+projectColumns:
+  - name: name
+    displayName: _.integrations.project.columns.name
+    field: metadata.name
+    properties:
+      width: "200"
+

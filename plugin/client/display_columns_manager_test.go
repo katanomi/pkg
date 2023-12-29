@@ -17,6 +17,7 @@ limitations under the License.
 package client
 
 import (
+	"github.com/katanomi/pkg/apis/meta/v1alpha1"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 )
@@ -30,23 +31,11 @@ var _ = Describe("Test.DisplayColumnsManager", func() {
 	})
 	Context("set display columns", func() {
 		BeforeEach(func() {
-			displayColumnsManager.SetDisplayColumns("key", "value")
+			displayColumnsManager.SetDisplayColumns("key", v1alpha1.DisplayColumn{Name: "value"})
 		})
 
 		It("should get display columns", func() {
-			Expect(displayColumnsManager.GetDisplayColumns()).To(Equal(map[string][]string{"key": {"value"}}))
-		})
-	})
-
-	Context("set display columns with nil", func() {
-		BeforeEach(func() {
-			displayColumnsManager.SetDisplayColumns("key", "value")
-			displayColumnsManager.SetDisplayColumns("key", "value1", "value2")
-			displayColumnsManager.SetDisplayColumns("key", "value3", "value4")
-		})
-
-		It("should get display columns", func() {
-			Expect(displayColumnsManager.GetDisplayColumns()).To(Equal(map[string][]string{"key": {"value3", "value4"}}))
+			Expect(displayColumnsManager.GetDisplayColumns()).To(Equal(map[string]v1alpha1.DisplayColumns{"key": {{Name: "value"}}}))
 		})
 	})
 })
