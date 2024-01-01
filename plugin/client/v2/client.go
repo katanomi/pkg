@@ -17,10 +17,8 @@ limitations under the License.
 package v2
 
 import (
-	"context"
-
+	"github.com/katanomi/pkg/plugin/client"
 	"github.com/katanomi/pkg/plugin/client/base"
-	"go.uber.org/zap"
 	corev1 "k8s.io/api/core/v1"
 	duckv1 "knative.dev/pkg/apis/duck/v1"
 )
@@ -35,17 +33,9 @@ func NewPluginClientV2(pluginAddress *duckv1.Addressable, meta base.Meta, secret
 
 // PluginClientV2 describe a plugin client with version 2
 type PluginClientV2 struct {
+	client.Interface
+
 	*base.PluginClient
-}
-
-// Path empty implementation for `plugin Interface`
-func (p *PluginClientV2) Path() string {
-	return ""
-}
-
-// Setup empty implementation for `plugin Interface`
-func (p *PluginClientV2) Setup(_ context.Context, _ *zap.SugaredLogger) error {
-	return nil
 }
 
 // WithMeta set metadata of target tool

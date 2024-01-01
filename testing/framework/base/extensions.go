@@ -16,7 +16,11 @@ limitations under the License.
 
 package base
 
-import "context"
+import (
+	"context"
+
+	"github.com/onsi/ginkgo/v2/types"
+)
 
 // SharedExtension describe interface for shared extension
 type SharedExtension interface {
@@ -30,4 +34,18 @@ type SharedExtensionFunc func(ctx context.Context) context.Context
 // SetShardInfo set shard info into context
 func (p SharedExtensionFunc) SetShardInfo(ctx context.Context) context.Context {
 	return p(ctx)
+}
+
+// Configure describe interface for configure framework
+type Configure interface {
+	// Config mutate suite config and reporter config
+	Config(suiteConfig *types.SuiteConfig, reporterConfig *types.ReporterConfig)
+}
+
+// ConfigureFunc helper function to generate a implementation of configure interface
+type ConfigureFunc func(suiteConfig *types.SuiteConfig, reporterConfig *types.ReporterConfig)
+
+// Config mutate suite config and reporter config
+func (p ConfigureFunc) Config(suiteConfig *types.SuiteConfig, reporterConfig *types.ReporterConfig) {
+	p(suiteConfig, reporterConfig)
 }

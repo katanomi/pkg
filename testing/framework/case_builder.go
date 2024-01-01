@@ -17,6 +17,7 @@ limitations under the License.
 package framework
 
 import (
+	"context"
 	"fmt"
 
 	. "github.com/katanomi/pkg/testing/framework/base"
@@ -109,8 +110,19 @@ func (b *CaseBuilder) WithPriority(prior TestCasePriority) *CaseBuilder {
 }
 
 // WithLabels sets labels
-func (b *CaseBuilder) WithLabels(labels ...string) *CaseBuilder {
-	b.appendLabels(labels...)
+func (b *CaseBuilder) WithLabels(labels ...interface{}) *CaseBuilder {
+	for _, label := range labels {
+		switch label.(type) {
+		case string:
+			b.appendLabels(Labels{label.(string)}...)
+		case Labels:
+			b.appendLabels(label.(Labels)...)
+		case interface{ Labels() Labels }:
+			b.appendLabels(label.(interface{ Labels() Labels }).Labels()...)
+		default:
+			GinkgoWriter.Printf("unknown label type %s", label)
+		}
+	}
 	return b
 }
 
@@ -142,9 +154,15 @@ func (b *CaseBuilder) P3() *CaseBuilder {
 
 // Do build and return the test case
 func (b *CaseBuilder) Do() bool {
+	return b.DoWithContext(context.Background())
+}
+
+// DoWithContext run a test case with special context
+// The context can be used for construct case layouts
+func (b *CaseBuilder) DoWithContext(ctx context.Context) bool {
 	fullName := b.CaseName()
 	return Describe(fullName, Ordered, Labels(b.Labels), func() {
-		var testCtx = &TestContext{}
+		var testCtx = &TestContext{Context: ctx}
 
 		BeforeAll(func() {
 			*testCtx = *b.GetTestContext()

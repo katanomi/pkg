@@ -19,8 +19,12 @@ package cluster
 import (
 	"context"
 
+	kclient "github.com/katanomi/pkg/client"
 	"github.com/katanomi/pkg/testing/framework/base"
 	"k8s.io/apimachinery/pkg/runtime"
+	"knative.dev/pkg/injection"
+	ctrl "sigs.k8s.io/controller-runtime"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 type sharedSchemeCtxKey struct{}
@@ -43,5 +47,23 @@ func FromSharedScheme(ctx context.Context) *runtime.Scheme {
 func ShareScheme(scheme *runtime.Scheme) base.SharedExtension {
 	return base.SharedExtensionFunc(func(ctx context.Context) context.Context {
 		return WithSharedScheme(ctx, scheme)
+	})
+}
+
+// SharedClient to construct extension to share client
+func SharedClient() base.SharedExtension {
+	return base.SharedExtensionFunc(func(ctx context.Context) context.Context {
+		cfg := injection.GetConfig(ctx)
+		if cfg == nil {
+			cfg = ctrl.GetConfigOrDie()
+			ctx = injection.WithConfig(ctx, cfg)
+		}
+
+		scheme := FromSharedScheme(ctx)
+		client, err := client.New(cfg, client.Options{Scheme: scheme})
+		if err != nil {
+			panic(err)
+		}
+		return kclient.WithDirectClient(ctx, client)
 	})
 }
