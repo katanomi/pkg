@@ -202,6 +202,8 @@ func TestClientProjectArtifactDownload(t *testing.T) {
 		client.Secret(corev1.Secret{Type: corev1.SecretTypeBasicAuth, Data: map[string][]byte{"username": []byte("username")}}),
 	)
 
+	defer readCloser.Close()
+
 	g.Expect(err).To(BeNil())
 	g.Expect(io.ReadAll(readCloser)).To(Equal([]byte("OK")))
 }

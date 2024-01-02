@@ -73,17 +73,17 @@ var _ = Describe("Test.GenerateGitPluginClient", func() {
 		})
 	})
 
-	Context("valid paramters", func() {
+	Context("valid parameters", func() {
 		It("should generate success", func() {
 			Expect(err).To(BeNil())
 			Expect(gpclient).ToNot(BeNil())
-			Expect(gpclient.meta.BaseURL).To(Equal("https://github.com"))
+			Expect(gpclient.GetMeta().BaseURL).To(Equal("https://github.com"))
 			Expect(gpclient.GitRepo).To(Equal(metav1alpha1.GitRepo{
 				Project:    "katanomi",
 				Repository: "pkg",
 			}))
 			Expect(gpclient.ClassAddress).To(Equal(classAddress))
-			Expect(gpclient.secret).To(Equal(corev1.Secret{}))
+			Expect(gpclient.GetSecret()).To(Equal(corev1.Secret{}))
 			Expect(gpclient.IntegrationClassName).To(Equal(integrationClassName))
 		})
 	})

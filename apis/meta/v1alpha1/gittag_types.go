@@ -20,11 +20,8 @@ import "errors"
 
 // GitRepositoryTagOption option for repository tag
 // Deprecated: use GitTag instead
-type GitRepositoryTagOption struct {
-	GitRepo
-	// Tag the name of the tag
-	Tag string `json:"tag"`
-}
+// +k8s:deepcopy-gen=false
+type GitRepositoryTagOption = GitTag
 
 // GitRepositoryTagListOption option for list repository tag
 type GitRepositoryTagListOption struct {

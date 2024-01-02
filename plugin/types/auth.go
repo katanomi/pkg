@@ -1,5 +1,5 @@
 /*
-Copyright 2022 The Katanomi Authors.
+Copyright 2024 The Katanomi Authors.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -14,16 +14,20 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package common
+package types
 
-// Contains returns true if an element is present in a collection.
-// Deprecated: use `slice.Contains` which import from `golang.org/x/exp/slices` instead
-func Contains[T comparable](collection []T, element T) bool {
-	for _, item := range collection {
-		if item == element {
-			return true
-		}
-	}
+import (
+	"context"
 
-	return false
+	metav1alpha1 "github.com/katanomi/pkg/apis/meta/v1alpha1"
+)
+
+// AuthChecker implements an authorization check method for plugins
+type AuthChecker interface {
+	AuthCheck(ctx context.Context, option metav1alpha1.AuthCheckOptions) (*metav1alpha1.AuthCheck, error)
+}
+
+// AuthTokenGenerator implements token generation/refresh API method
+type AuthTokenGenerator interface {
+	AuthToken(ctx context.Context) (*metav1alpha1.AuthToken, error)
 }

@@ -1,5 +1,5 @@
 /*
-Copyright 2022 The Katanomi Authors.
+Copyright 2024 The Katanomi Authors.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -14,16 +14,5 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package common
-
-// Contains returns true if an element is present in a collection.
-// Deprecated: use `slice.Contains` which import from `golang.org/x/exp/slices` instead
-func Contains[T comparable](collection []T, element T) bool {
-	for _, item := range collection {
-		if item == element {
-			return true
-		}
-	}
-
-	return false
-}
+// Package types defines the interfaces for plugin
+package types
