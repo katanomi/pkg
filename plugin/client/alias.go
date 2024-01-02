@@ -17,7 +17,9 @@ limitations under the License.
 // Package client contains functions to add and retrieve auth from context
 package client
 
-import "github.com/katanomi/pkg/plugin/client/base"
+import (
+	"github.com/katanomi/pkg/plugin/client/base"
+)
 
 const (
 	OAuth2KeyAccessToken    = base.OAuth2KeyAccessToken
@@ -154,3 +156,7 @@ var DefaultOptions = base.DefaultOptions
 
 // GetSubResourcesOptionsFromRequest returns SubResourcesOptions based on a request
 var GetSubResourcesOptionsFromRequest = base.GetSubResourcesOptionsFromRequest
+
+// Client inteface for PluginClient, client code shoud use the interface
+// as dependency
+type Client = base.Client
