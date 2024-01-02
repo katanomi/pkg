@@ -14,24 +14,20 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package cluster
+package v2
 
 import (
 	"context"
 
-	corev1 "k8s.io/api/core/v1"
-	"sigs.k8s.io/controller-runtime/pkg/client"
+	metav1alpha1 "github.com/katanomi/pkg/apis/meta/v1alpha1"
+	"github.com/katanomi/pkg/plugin/client/base"
 )
 
-// PluginService Get plugin service by plugin name
-func PluginService(ctx context.Context, clt client.Client, name string) (*corev1.Service, error) {
-	services := &corev1.ServiceList{}
-	if err := clt.List(ctx, services, client.MatchingLabels{"plugin": name}); err != nil {
+// GetToolMetadata get tool metadata
+func (p *PluginClient) GetToolMetadata(ctx context.Context) (*metav1alpha1.ToolMeta, error) {
+	toolMeta := &metav1alpha1.ToolMeta{}
+	if err := p.Get(ctx, p.ClassAddress, "tools/metadata", base.ResultOpts(toolMeta)); err != nil {
 		return nil, err
 	}
-
-	if len(services.Items) > 0 {
-		return &services.Items[0], nil
-	}
-	return nil, nil
+	return toolMeta, nil
 }
