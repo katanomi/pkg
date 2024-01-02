@@ -1,8 +1,6 @@
 module github.com/katanomi/pkg
 
-go 1.21
-
-toolchain go1.21.5
+go 1.18
 
 require (
 	github.com/HdrHistogram/hdrhistogram-go v1.1.0 // indirect
@@ -81,9 +79,6 @@ require (
 	github.com/agnivade/levenshtein v1.1.1 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/blang/semver/v4 v4.0.0 // indirect
-	github.com/brianvoe/gofakeit v2.2.0+incompatible // indirect
-	github.com/brianvoe/gofakeit/v6 v6.26.3 // indirect
-	github.com/bxcodec/faker v2.0.1+incompatible // indirect
 	github.com/census-instrumentation/opencensus-proto v0.4.1 // indirect
 	github.com/cespare/xxhash/v2 v2.2.0 // indirect
 	github.com/docker/libtrust v0.0.0-20160708172513-aabc10ec26b7 // indirect
