@@ -2,6 +2,7 @@ apiVersion: backstage.io/v1alpha1
 kind: Component
 metadata:
   name: katanomi-pkg
+  description: Provide common packages for katanomi
   title: Katanomi Pkg
   annotations:
     # github plugin
@@ -16,4 +17,4 @@ spec:
   type: service
   system: system:katanomi-system
   lifecycle: production
-  owner: group:g-5cstm
+  owner: devops
