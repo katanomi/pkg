@@ -14,24 +14,23 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package cluster
+package v2
 
 import (
 	"context"
 
-	corev1 "k8s.io/api/core/v1"
-	"sigs.k8s.io/controller-runtime/pkg/client"
+	metav1alpha1 "github.com/katanomi/pkg/apis/meta/v1alpha1"
+	"github.com/katanomi/pkg/plugin/client/base"
 )
 
-// PluginService Get plugin service by plugin name
-func PluginService(ctx context.Context, clt client.Client, name string) (*corev1.Service, error) {
-	services := &corev1.ServiceList{}
-	if err := clt.List(ctx, services, client.MatchingLabels{"plugin": name}); err != nil {
+// ListBlobStores list blob stores
+func (p *PluginClient) ListBlobStores(ctx context.Context, listOption metav1alpha1.ListOptions) (*metav1alpha1.BlobStoreList, error) {
+	list := &metav1alpha1.BlobStoreList{}
+
+	options := []base.OptionFunc{base.ResultOpts(list), base.ListOpts(listOption)}
+	if err := p.Get(ctx, p.ClassAddress, "blobStores", options...); err != nil {
 		return nil, err
 	}
 
-	if len(services.Items) > 0 {
-		return &services.Items[0], nil
-	}
-	return nil, nil
+	return list, nil
 }
