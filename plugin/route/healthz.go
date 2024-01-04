@@ -20,6 +20,7 @@ import (
 	"context"
 	"net/http"
 
+	restfulspec "github.com/emicklei/go-restful-openapi/v2"
 	"github.com/emicklei/go-restful/v3"
 )
 
@@ -32,11 +33,25 @@ func NewHealthz(ctx context.Context) Route {
 }
 
 func (s *healthz) Register(ws *restful.WebService) {
+	tags := []string{"system"}
+
 	// ws.Consumes("*/*")
-	ws.Route(ws.GET("/healthz").To(s.healthz))
+	ws.Route(
+		ws.GET("/healthz").
+			Doc("healthz").
+			Metadata(restfulspec.KeyOpenAPITags, tags).
+			To(s.healthz))
 	// TODO: make livez a more concrete check over the system?
-	ws.Route(ws.GET("/livez").To(s.healthz))
-	ws.Route(ws.GET("/readyz").To(s.healthz))
+	ws.Route(
+		ws.GET("/livez").
+			Doc("livez").
+			Metadata(restfulspec.KeyOpenAPITags, tags).
+			To(s.healthz))
+	ws.Route(
+		ws.GET("/readyz").
+			Doc("readyz").
+			Metadata(restfulspec.KeyOpenAPITags, tags).
+			To(s.healthz))
 }
 
 func (s *healthz) healthz(req *restful.Request, resp *restful.Response) {
