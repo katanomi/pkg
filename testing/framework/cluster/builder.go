@@ -17,6 +17,7 @@ limitations under the License.
 package cluster
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/katanomi/pkg/multicluster"
@@ -172,11 +173,14 @@ func (b *TestCaseBuilder) WithFunc(tc TestSpecFunc) *TestCaseBuilder {
 	return b
 }
 
-// Do build and return the test case
-func (b *TestCaseBuilder) Do() bool {
+func (b *TestCaseBuilder) DoWithContext(ctx context.Context) bool {
 	fullName := b.baseBuilder.CaseName()
 	return Describe(fullName, Ordered, Labels(b.baseBuilder.Labels), func() {
-		var testCtx = &TestContext{}
+		var testCtx = &TestContext{
+			TestContext: base.TestContext{
+				Context: ctx,
+			},
+		}
 
 		BeforeAll(func() {
 			*testCtx = *b.setupTestContext()
@@ -194,6 +198,11 @@ func (b *TestCaseBuilder) Do() bool {
 			b.testSpecFunc(testCtx)
 		}
 	})
+}
+
+// Do build and return the test case
+func (b *TestCaseBuilder) Do() bool {
+	return b.DoWithContext(context.Background())
 }
 
 // DoFunc build and return the test case, just like the Do function

@@ -45,6 +45,8 @@ type Framework struct {
 	Name string
 
 	TestContext
+
+	configures []Configure
 }
 
 func (f *Framework) init() {
@@ -72,10 +74,21 @@ func (f *Framework) Extensions(extensions ...SharedExtension) *Framework {
 	return f
 }
 
+// Config register configuration mutators which executed before case running
+func (f *Framework) Config(configures ...Configure) *Framework {
+	f.configures = append(f.configures, configures...)
+	return f
+}
+
 // Run start tests
 func (f *Framework) Run(t *testing.T) {
+	sConfig, rConfig := GinkgoConfiguration()
+	for _, configure := range f.configures {
+		configure.Config(&sConfig, &rConfig)
+	}
+
 	RegisterFailHandler(Fail)
-	RunSpecs(t, f.Name)
+	RunSpecs(t, f.Name, sConfig, rConfig)
 }
 
 func (f *Framework) WithContext(ctx context.Context) *Framework {

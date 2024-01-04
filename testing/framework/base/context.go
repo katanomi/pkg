@@ -19,6 +19,7 @@ package base
 import (
 	"context"
 
+	. "github.com/onsi/ginkgo/v2"
 	"go.uber.org/zap"
 )
 
@@ -44,3 +45,19 @@ func (c TestContextGetterFunc) GetTestContext() *TestContext {
 
 // TestSpecFunc function used as describe
 type TestSpecFunc func(testContext *TestContext)
+
+var contextLabelKey = struct{}{}
+
+// WithContextLabel inject labels into context
+func WithContextLabel(ctx context.Context, labels Labels) context.Context {
+	return context.WithValue(ctx, contextLabelKey, labels)
+}
+
+// ContextLabel get labels from context
+func ContextLabel(ctx context.Context) Labels {
+	val := ctx.Value(contextLabelKey)
+	if val == nil {
+		return nil
+	}
+	return val.(Labels)
+}
