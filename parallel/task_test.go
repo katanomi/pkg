@@ -247,7 +247,6 @@ var _ = Describe("P().Do().Wait()", func() {
 	})
 
 	Context("when set conccurrent", func() {
-
 		flag4 := &executeFlag{}
 		flag5 := &executeFlag{}
 		flag6 := &executeFlag{}
@@ -289,5 +288,33 @@ var _ = Describe("P().Do().Wait()", func() {
 			}
 		})
 	})
+})
 
+var _ = Describe("SetMaxConcurrent", func() {
+	var (
+		ptasks    *parallel.ParallelTasks
+		zapLog, _ = zap.NewDevelopment()
+		log       = zapLog.Sugar()
+	)
+
+	BeforeEach(func() {
+		ptasks = parallel.P(log, "custom case")
+	})
+
+	Context("SetMaxConcurrent", func() {
+		It("when max great concurrent", func() {
+			ptasks.SetMaxConcurrent(5, 6)
+			Expect(ptasks.Options.ConcurrencyCount).To(BeEquivalentTo(5))
+		})
+
+		It("when max less concurrent", func() {
+			ptasks.SetMaxConcurrent(5, 4)
+			Expect(ptasks.Options.ConcurrencyCount).To(BeEquivalentTo(4))
+		})
+
+		It("when max equal concurrent", func() {
+			ptasks.SetMaxConcurrent(5, 5)
+			Expect(ptasks.Options.ConcurrencyCount).To(BeEquivalentTo(5))
+		})
+	})
 })

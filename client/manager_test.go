@@ -24,17 +24,25 @@ import (
 	"testing"
 
 	"github.com/emicklei/go-restful/v3"
+	"github.com/golang/mock/gomock"
+	"github.com/katanomi/pkg/multicluster"
+	multiclustermock "github.com/katanomi/pkg/testing/mock/github.com/katanomi/pkg/multicluster"
+	"sigs.k8s.io/controller-runtime/pkg/client/fake"
+
+	// . "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	"k8s.io/client-go/rest"
 	"knative.dev/pkg/injection"
+)
+
+const (
+	mockToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyLCJlbWFpbCI6ImRldiJ9.v5leOJQ8mxkOzWW-dWWFfPGPn__0eYUGtDCdwx1LWkM"
 )
 
 func EmptyHandler(rq *restful.Request, rp *restful.Response) {
 }
 
 func TestManagerFilter(t *testing.T) {
-	// TODO: Find a better and more reliable way to do these
-	t.Skip()
 	os.Setenv("KUBERNETES_MASTER", "127.0.0.1:16003")
 	target := func(req *restful.Request, resp *restful.Response) {}
 	chain := &restful.FilterChain{Target: target}
@@ -42,30 +50,38 @@ func TestManagerFilter(t *testing.T) {
 	t.Run("should succeed", func(t *testing.T) {
 		g := NewGomegaWithT(t)
 		ctx := context.TODO()
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+		dynamic := multiclustermock.NewMockInterface(ctrl)
+
 		mgr := NewManager(ctx, FromBearerToken, func() (*rest.Config, error) {
 			return &rest.Config{
 				Host:     "https://127.0.0.1:6443",
 				Username: "abc",
 				Password: "def",
 			}, nil
-		})
+		}, func(config *rest.Config) (multicluster.Interface, error) { return dynamic, nil })
 		ws := new(restful.WebService)
 		ws.Consumes(restful.MIME_JSON)
+		clt := fake.NewClientBuilder().Build()
+		ctx = WithClient(ctx, clt)
 		ws.Route(ws.GET("/config").Filter(ManagerFilter(ctx, mgr)).To(EmptyHandler))
 		restful.Add(ws)
 		testReq := httptest.NewRequest(http.MethodGet, "/config", nil)
 		req := restful.NewRequest(testReq)
-		req.Request.Header.Set("Authorization", "Bearer 0123456789")
+		req.Request.Header.Set("Authorization", "Bearer "+mockToken)
 		req.Request = req.Request.WithContext(ctx)
 		resp := restful.NewResponse(httptest.NewRecorder())
 
-		restful.DefaultContainer.ServeHTTP(resp, testReq)
-		// ManagerFilter(ctx, mgr)(req, resp, chain)
+		// restful.DefaultContainer.ServeHTTP(resp, testReq)
+		ManagerFilter(ctx, mgr)(req, resp, chain)
 
-		config := injection.GetConfig(testReq.Context())
+		config := injection.GetConfig(req.Request.Context())
 		g.Expect(config).ToNot(BeNil())
+		dynamicClient := multicluster.MultiCluster(req.Request.Context())
+		g.Expect(dynamicClient).ToNot(BeNil())
 		g.Expect(resp.StatusCode()).ToNot(Equal(http.StatusInternalServerError))
-		g.Expect(config.BearerToken).To(Equal("0123456789"))
+		g.Expect(config.BearerToken).To(Equal(mockToken))
 	})
 
 	t.Run("should return error", func(t *testing.T) {
@@ -74,21 +90,23 @@ func TestManagerFilter(t *testing.T) {
 		mgr := NewManager(ctx, FromBearerToken, func() (*rest.Config, error) {
 			// will return an error
 			return &rest.Config{}, nil
+		}, func(c *rest.Config) (multicluster.Interface, error) {
+			return nil, nil
 		})
 		req := restful.NewRequest(httptest.NewRequest(http.MethodGet, "http://example.com", nil))
 		req.Request = req.Request.WithContext(ctx)
 		resp := restful.NewResponse(httptest.NewRecorder())
 		ManagerFilter(ctx, mgr)(req, resp, chain)
-		g.Expect(resp.StatusCode()).To(Equal(http.StatusUnauthorized))
+		g.Expect(resp.StatusCode()).To(Equal(http.StatusNotAcceptable))
 		config := injection.GetConfig(req.Request.Context())
 		g.Expect(config).To(BeNil())
+		dynamic := multicluster.MultiCluster(req.Request.Context())
+		g.Expect(dynamic).To(BeNil())
 	})
-
 }
 
 func TestUserFromBearerToken(t *testing.T) {
-	token := "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyLCJlbWFpbCI6ImRldiJ9.v5leOJQ8mxkOzWW-dWWFfPGPn__0eYUGtDCdwx1LWkM"
-	info, err := UserFromBearerToken(token)
+	info, err := UserFromBearerToken(mockToken)
 	if err != nil {
 		t.Errorf("error: %s", err)
 	}

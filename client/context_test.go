@@ -66,7 +66,7 @@ func TestManagerContext(t *testing.T) {
 	clt := ManagerCtx(ctx)
 	g.Expect(clt).To(BeNil())
 
-	mgr := NewManager(ctx, nil, nil)
+	mgr := NewManager(ctx, nil, nil, nil)
 	ctx = WithManager(ctx, mgr)
 	g.Expect(ManagerCtx(ctx)).To(Equal(mgr))
 }
