@@ -301,6 +301,9 @@ func GetMethods(c client.Interface) []string {
 	if _, ok := c.(client.ProjectCreator); ok {
 		methods = append(methods, "CreateProject")
 	}
+	if _, ok := c.(client.ProjectGetter); ok {
+		methods = append(methods, "GetProject")
+	}
 	if _, ok := c.(client.RepositoryLister); ok {
 		methods = append(methods, "ListRepositories")
 	}
@@ -382,6 +385,9 @@ func GetMethods(c client.Interface) []string {
 	if _, ok := c.(client.GitPullRequestCommentCreator); ok {
 		methods = append(methods, "CreatePullRequestComment")
 	}
+	if _, ok := c.(client.GitPullRequestCommentUpdater); ok {
+		methods = append(methods, "UpdatePullRequestComment")
+	}
 	if _, ok := c.(client.GitPullRequestCommentLister); ok {
 		methods = append(methods, "ListPullRequestComment")
 	}
@@ -420,6 +426,9 @@ func GetMethods(c client.Interface) []string {
 	}
 	if _, ok := c.(client.AuthChecker); ok {
 		methods = append(methods, "AuthCheck")
+	}
+	if _, ok := c.(client.AuthTokenGenerator); ok {
+		methods = append(methods, "AuthToken")
 	}
 	if _, ok := c.(client.IssueLister); ok {
 		methods = append(methods, "ListIssues")
