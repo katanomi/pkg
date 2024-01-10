@@ -82,7 +82,7 @@ func TestGetMethods(t *testing.T) {
 		},
 		{
 			c:       &TestProjectCreate{},
-			methods: []string{"CreateProject"},
+			methods: []string{"CreateProject", "GetProject"},
 		},
 		{
 			c:       &TestRepositoryList{},
