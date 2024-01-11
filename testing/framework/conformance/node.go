@@ -40,8 +40,15 @@ type Node struct {
 
 	caseRegister func()
 
+	additionalLabels Labels
+
 	ParentNode *Node   `json:"parentNode,omitempty" yaml:"parentNode,omitempty"`
 	SubNodes   []*Node `json:"subNodes" yaml:"subNodes"`
+}
+
+// AddAdditionalLabels  add additional labels to the node
+func (n *Node) AddAdditionalLabels(labels Labels) {
+	n.additionalLabels = append(n.additionalLabels, labels...)
 }
 
 // RegisterTestCase iterate over the node tree, register all the test case to ginkgo
@@ -50,7 +57,8 @@ func (n *Node) RegisterTestCase() {
 }
 
 func (n *Node) registerTestCase() {
-	Describe(fmt.Sprintf("test for %s %s", n.Name, n.Level), n.IdentifyLabels(), func() {
+	labels := append(n.IdentifyLabels(), n.additionalLabels...)
+	Describe(fmt.Sprintf("test for %s %s", n.Name, n.Level), labels, func() {
 		if n.caseRegister != nil {
 			n.caseRegister()
 		}
@@ -79,6 +87,7 @@ func (n *Node) clone(original *Node) *Node {
 		}
 	}
 
+	clone.additionalLabels = Labels{}
 	return &clone
 }
 

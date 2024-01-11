@@ -28,6 +28,9 @@ type CaseSet interface {
 
 	// Focus specify the test points to be executed
 	Focus(testPoints ...*testPoint) CaseSet
+
+	// Optional mark the test as optional
+	Optional() CaseSet
 }
 
 // CaseLinker describe a interface to link test case to parent node
