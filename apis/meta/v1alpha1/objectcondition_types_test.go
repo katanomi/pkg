@@ -29,7 +29,7 @@ import (
 	"knative.dev/pkg/apis"
 )
 
-//go:generate ../../../bin/mockgen -package=apis -destination=../../../testing/mock/github.com/katanomi/pkg/apis/meta/v1alpha1/top_level_condition_object.go  github.com/katanomi/pkg/apis/meta/v1alpha1 TopLevelConditionObject
+//go:generate mockgen -package=apis -destination=../../../testing/mock/github.com/katanomi/pkg/apis/meta/v1alpha1/top_level_condition_object.go  github.com/katanomi/pkg/apis/meta/v1alpha1 TopLevelConditionObject
 
 func TestObjectConditions(t *testing.T) {
 	g := NewGomegaWithT(t)

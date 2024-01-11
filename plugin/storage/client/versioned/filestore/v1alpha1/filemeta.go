@@ -28,7 +28,7 @@ import (
 	"knative.dev/pkg/logging"
 )
 
-//go:generate ../../../../../../bin/mockgen -source=filemeta.go -destination=../../../../../../testing/mock/github.com/katanomi/pkg/plugin/storage/client/versioned/filestore/v1alpha1/filemeta.go -package=v1alpha1 FileMetaInterface
+//go:generate mockgen -source=filemeta.go -destination=../../../../../../testing/mock/github.com/katanomi/pkg/plugin/storage/client/versioned/filestore/v1alpha1/filemeta.go -package=v1alpha1 FileMetaInterface
 
 // FileMetaInterface for file meta restful resource methods
 type FileMetaInterface interface {

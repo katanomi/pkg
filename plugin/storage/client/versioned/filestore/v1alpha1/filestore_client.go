@@ -21,7 +21,7 @@ import (
 	"github.com/katanomi/pkg/plugin/storage/client"
 )
 
-//go:generate ../../../../../../bin/mockgen -source=filestore_client.go -destination=../../../../../../testing/mock/github.com/katanomi/pkg/plugin/storage/client/versioned/filestore/v1alpha1/filestore_client.go -package=v1alpha1 FileStoreV1alpha1Interface
+//go:generate mockgen -source=filestore_client.go -destination=../../../../../../testing/mock/github.com/katanomi/pkg/plugin/storage/client/versioned/filestore/v1alpha1/filestore_client.go -package=v1alpha1 FileStoreV1alpha1Interface
 
 // FileStoreV1alpha1Interface provides file store client methods
 type FileStoreV1alpha1Interface interface {

@@ -27,7 +27,7 @@ import (
 	duckv1 "knative.dev/pkg/apis/duck/v1"
 )
 
-//go:generate ../../bin/mockgen -source=gitcontent.go -destination=../../testing/mock/github.com/katanomi/pkg/plugin/client/gitcontent.go -package=client ClientGitContent
+//go:generate mockgen -source=gitcontent.go -destination=../../testing/mock/github.com/katanomi/pkg/plugin/client/gitcontent.go -package=client ClientGitContent
 type ClientGitContent interface {
 	Get(ctx context.Context, baseURL *duckv1.Addressable, option metav1alpha1.GitRepoFileOption, options ...OptionFunc) (*metav1alpha1.GitRepoFile, error)
 	Create(ctx context.Context, baseURL *duckv1.Addressable, payload metav1alpha1.CreateRepoFilePayload, options ...OptionFunc) (*metav1alpha1.GitCommit, error)

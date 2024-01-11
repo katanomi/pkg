@@ -21,6 +21,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/http/httptest"
+	"net/url"
 	"os"
 	"testing"
 
@@ -52,7 +53,9 @@ var _ = Describe("TestCrossClusterSubjectReview_GetClient", func() {
 			ClusterNamespace: "test",
 			restMapper:       meta.NewDefaultRESTMapper([]schema.GroupVersion{}),
 		}
-		req = restful.NewRequest(&http.Request{})
+		req = restful.NewRequest(&http.Request{
+			URL: &url.URL{},
+		})
 		clt = nil
 		err = nil
 	})

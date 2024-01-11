@@ -21,7 +21,7 @@ import (
 	"github.com/katanomi/pkg/plugin/storage/client"
 )
 
-//go:generate ../../../../../../bin/mockgen -source=archive.go -destination=../../../../../../testing/mock/github.com/katanomi/pkg/plugin/storage/client/versioned/archive/v1alpha1/interface.go -package=v1alpha1 ArchiveInterface
+//go:generate mockgen -source=archive.go -destination=../../../../../../testing/mock/github.com/katanomi/pkg/plugin/storage/client/versioned/archive/v1alpha1/interface.go -package=v1alpha1 ArchiveInterface
 type ArchiveInterface interface {
 	RESTClient() client.Interface
 	RecordGetter
