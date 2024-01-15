@@ -31,6 +31,7 @@ import (
 
 	cloudevents "github.com/cloudevents/sdk-go/v2"
 	cloudeventsv2client "github.com/cloudevents/sdk-go/v2/client"
+	metav1alpha1 "github.com/katanomi/pkg/apis/meta/v1alpha1"
 
 	"github.com/katanomi/pkg/config"
 	storageroute "github.com/katanomi/pkg/plugin/storage/route"
@@ -525,6 +526,17 @@ func (a *AppBuilder) StoragePlugins(plugins ...client.Interface) *AppBuilder {
 		}
 
 	}
+	return a
+}
+
+// PluginDisplayColumns set plugin displayColumns from yaml file
+func (a *AppBuilder) PluginDisplayColumns(plugin client.PluginDisplayColumns, file string) *AppBuilder {
+	attributes := make(map[string]metav1alpha1.DisplayColumns)
+	a.readAttributes(file, &attributes)
+	for key, values := range attributes {
+		plugin.SetDisplayColumns(key, values...)
+	}
+
 	return a
 }
 

@@ -20,13 +20,16 @@ import (
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
+	"github.com/katanomi/pkg/apis/meta/v1alpha1"
 	. "github.com/onsi/gomega"
 	"go.uber.org/zap"
+	"k8s.io/apimachinery/pkg/runtime"
 )
 
 type MockPlugin struct {
 	VersionAttributes map[string]map[string][]string
 	DataAttributes    map[string][]string
+	DisplayColumnsMap map[string]v1alpha1.DisplayColumns
 }
 
 func (m *MockPlugin) GetVersionAttributes(version string) map[string][]string {
@@ -49,10 +52,19 @@ func (m *MockPlugin) Attributes() map[string][]string {
 	return m.DataAttributes
 }
 
+func (m *MockPlugin) GetDisplayColumns() map[string]v1alpha1.DisplayColumns {
+	return m.DisplayColumnsMap
+}
+
+func (m *MockPlugin) SetDisplayColumns(k string, values ...v1alpha1.DisplayColumn) {
+	m.DisplayColumnsMap[k] = values
+}
+
 func NewMockPlugin() *MockPlugin {
 	return &MockPlugin{
 		VersionAttributes: map[string]map[string][]string{},
 		DataAttributes:    map[string][]string{},
+		DisplayColumnsMap: map[string]v1alpha1.DisplayColumns{},
 	}
 }
 
@@ -84,4 +96,27 @@ func TestAppBuilder_PluginAttributes(t *testing.T) {
 
 	diff := cmp.Diff(plugin.DataAttributes["attr"], []string{"field1", "field2"})
 	g.Expect(diff).To(BeEmpty())
+}
+
+func TestAppBuilder_PluginDisplayColumns(t *testing.T) {
+	t.Run("read display columns to plugin", func(t *testing.T) {
+		g := NewGomegaWithT(t)
+		logger, _ := zap.NewDevelopment()
+		app := AppBuilder{
+			Logger: logger.Sugar(),
+		}
+		plugin := NewMockPlugin()
+
+		app.PluginDisplayColumns(plugin, "testdata/displaycolumns.yaml")
+
+		diff := cmp.Diff(plugin.DisplayColumnsMap["projectColumns"], v1alpha1.DisplayColumns{{
+			Name:        "name",
+			Field:       "metadata.name",
+			DisplayName: "_.integrations.project.columns.name",
+			Properties: &runtime.RawExtension{
+				Raw: []byte(`{"width":"200"}`),
+			},
+		}})
+		g.Expect(diff).To(BeEmpty())
+	})
 }

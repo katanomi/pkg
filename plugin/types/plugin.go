@@ -78,6 +78,23 @@ type ResourcePathFormatter interface {
 	GetSubResourcePathFmt() map[metav1alpha1.ResourcePathScene]string
 }
 
+// PluginDisplayColumns implements display columns manager.
+//
+// Used to record the format in which the front end should display data.
+// example:
+//
+// projectColumns: ['{"name":"name","displayName":"_.integrations.project.columns.name","field":"metadata.name"}']
+//
+// projectColumns: the value agreed usage location.
+// {"name":"name","displayName":"_.integrations.project.columns.name","field":"metadata.name"}: describe the details displayed.
+// name: the name of the column.
+// displayName: index used to find specific display data.
+// field: the field of the data to be displayed.
+type PluginDisplayColumns interface {
+	SetDisplayColumns(k string, values ...metav1alpha1.DisplayColumn)
+	GetDisplayColumns() map[string]metav1alpha1.DisplayColumns
+}
+
 type PluginAttributes interface {
 	SetAttribute(k string, values ...string)
 	GetAttribute(k string) []string
