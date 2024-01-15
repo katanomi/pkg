@@ -83,6 +83,12 @@ func (m *caseProxy) Build(caseRegister func(ctx context.Context)) CaseSetFactory
 	return m
 }
 
+// Optional mark test as optional
+func (m *caseProxy) Optional() CaseSet {
+	m.proxyNode.AddAdditionalLabels(Labels{"optional"})
+	return m
+}
+
 // Focus specify the test points to be executed
 func (m *caseProxy) Focus(testPoints ...*testPoint) CaseSet {
 	for _, item := range testPoints {

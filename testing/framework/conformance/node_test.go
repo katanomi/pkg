@@ -19,6 +19,7 @@ package conformance
 import (
 	"testing"
 
+	"github.com/google/go-cmp/cmp"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 )
@@ -70,9 +71,7 @@ var _ = Describe("test for node clone", func() {
 
 	compareNode := func(a, b *Node) {
 		GinkgoHelper()
-		Expect(a.Name).To(Equal(b.Name))
-		Expect(a.Level).To(Equal(b.Level))
-		Expect(a.ParentNode).To(Equal(b.ParentNode))
+		Expect(cmp.Diff(a, b)).To(BeEmpty())
 		// compare pointers
 		Expect(a == b).NotTo(BeTrue())
 	}
