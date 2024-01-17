@@ -21,6 +21,7 @@ import (
 	"context"
 	"net/http/pprof"
 
+	restfulspec "github.com/emicklei/go-restful-openapi/v2"
 	"github.com/emicklei/go-restful/v3"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 
@@ -54,15 +55,72 @@ func (s *system) Register(ws *restful.WebService) {
 		configFilter = config.ConfigFilter(s.Context, s.ConfigManager, config.PprofEnabledKey, config.ConfigFilterNotFoundWhenNotTrue)
 	}
 
-	ws.Route(ws.GET(ppprofPath).Filter(configFilter).To(wrapperF(pprof.Index)))
-	ws.Route(ws.GET(ppprofPath + "/cmdline").Filter(configFilter).To(wrapperF(pprof.Index)))
-	ws.Route(ws.GET(ppprofPath + "/profile").Filter(configFilter).To(wrapperF(pprof.Profile)))
-	ws.Route(ws.GET(ppprofPath + "/symbol").Filter(configFilter).To(wrapperF(pprof.Symbol)))
-	ws.Route(ws.GET(ppprofPath + "/trace").Filter(configFilter).To(wrapperF(pprof.Trace)))
-	ws.Route(ws.GET(ppprofPath + "/allocs").Filter(configFilter).To(wrapperH(pprof.Handler("allocs"))))
-	ws.Route(ws.GET(ppprofPath + "/block").Filter(configFilter).To(wrapperH(pprof.Handler("block"))))
-	ws.Route(ws.GET(ppprofPath + "/goroutine").Filter(configFilter).To(wrapperH(pprof.Handler("goroutine"))))
-	ws.Route(ws.GET(ppprofPath + "/heap").Filter(configFilter).To(wrapperH(pprof.Handler("heap"))))
-	ws.Route(ws.GET(ppprofPath + "/mutex").Filter(configFilter).To(wrapperH(pprof.Handler("mutex"))))
-	ws.Route(ws.GET(ppprofPath + "/threadcreate").Filter(configFilter).To(wrapperH(pprof.Handler("threadcreate"))))
+	tags := []string{"profiling"}
+
+	ws.Route(
+		ws.GET(ppprofPath).
+			Doc("pprof index").
+			Metadata(restfulspec.KeyOpenAPITags, tags).
+			Filter(configFilter).
+			To(wrapperF(pprof.Index)))
+	ws.Route(
+		ws.GET(ppprofPath+"/cmdline").
+			Doc("pprof cmdline").
+			Metadata(restfulspec.KeyOpenAPITags, tags).
+			Filter(configFilter).
+			To(wrapperF(pprof.Cmdline)))
+	ws.Route(
+		ws.GET(ppprofPath+"/profile").
+			Doc("pprof profile").
+			Metadata(restfulspec.KeyOpenAPITags, tags).
+			Filter(configFilter).
+			To(wrapperF(pprof.Profile)))
+	ws.Route(
+		ws.GET(ppprofPath+"/symbol").
+			Doc("pprof symbol").
+			Metadata(restfulspec.KeyOpenAPITags, tags).
+			Filter(configFilter).
+			To(wrapperF(pprof.Symbol)))
+	ws.Route(
+		ws.GET(ppprofPath+"/trace").
+			Doc("pprof trace").
+			Metadata(restfulspec.KeyOpenAPITags, tags).
+			Filter(configFilter).
+			To(wrapperF(pprof.Trace)))
+	ws.Route(
+		ws.GET(ppprofPath+"/allocs").
+			Doc("pprof allocs").
+			Metadata(restfulspec.KeyOpenAPITags, tags).
+			Filter(configFilter).
+			To(wrapperH(pprof.Handler("allocs"))))
+	ws.Route(
+		ws.GET(ppprofPath+"/block").
+			Doc("pprof block").
+			Metadata(restfulspec.KeyOpenAPITags, tags).
+			Filter(configFilter).
+			To(wrapperH(pprof.Handler("block"))))
+	ws.Route(
+		ws.GET(ppprofPath+"/goroutine").
+			Doc("pprof goroutine").
+			Metadata(restfulspec.KeyOpenAPITags, tags).
+			Filter(configFilter).
+			To(wrapperH(pprof.Handler("goroutine"))))
+	ws.Route(
+		ws.GET(ppprofPath+"/heap").
+			Doc("pprof heap").
+			Metadata(restfulspec.KeyOpenAPITags, tags).
+			Filter(configFilter).
+			To(wrapperH(pprof.Handler("heap"))))
+	ws.Route(
+		ws.GET(ppprofPath+"/mutex").
+			Doc("pprof mutex").
+			Metadata(restfulspec.KeyOpenAPITags, tags).
+			Filter(configFilter).
+			To(wrapperH(pprof.Handler("mutex"))))
+	ws.Route(
+		ws.GET(ppprofPath+"/threadcreate").
+			Doc("pprof threadcreate").
+			Metadata(restfulspec.KeyOpenAPITags, tags).
+			Filter(configFilter).
+			To(wrapperH(pprof.Handler("threadcreate"))))
 }
