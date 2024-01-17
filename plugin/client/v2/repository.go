@@ -28,8 +28,15 @@ import (
 func (p *PluginClient) ListRepositories(ctx context.Context, params metav1alpha1.RepositoryOptions, option metav1alpha1.ListOptions) (*metav1alpha1.RepositoryList, error) {
 	list := &metav1alpha1.RepositoryList{}
 
+	options := []base.OptionFunc{
+		base.QueryOpts(map[string]string{
+			"subType": params.SubType.String(),
+		}),
+		base.ResultOpts(list),
+		base.ListOpts(option),
+	}
+
 	uri := fmt.Sprintf("projects/%s/repositories", params.Project)
-	options := []base.OptionFunc{base.ResultOpts(list), base.ListOpts(option)}
 	if err := p.Get(ctx, p.ClassAddress, uri, options...); err != nil {
 		return nil, err
 	}
