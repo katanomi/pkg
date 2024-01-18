@@ -98,3 +98,25 @@ func secretForTest() v1.Secret {
 	}
 	return secret
 }
+
+func TestListOpts(t *testing.T) {
+	g := NewGomegaWithT(t)
+	opts := metav1alpha1.ListOptions{
+		ItemsPerPage: 10,
+		Page:         1,
+		Search:       map[string][]string{"key": {"value"}},
+		Sort:         []metav1alpha1.SortOptions{{SortBy: "name", Order: "asc"}},
+	}
+	opts.SubResources = []string{"subresource1", "subresource2"}
+
+	request := resty.New().R()
+
+	optionFunc := ListOpts(opts)
+	optionFunc(request)
+
+	g.Expect(request.QueryParam["itemsPerPage"][0]).To(Equal("10"))
+	g.Expect(request.QueryParam.Get("page")).To(Equal("1"))
+	g.Expect(request.QueryParam.Get("sortBy")).To(Equal("asc,name"))
+	g.Expect(request.QueryParam.Get("key")).To(Equal("value"))
+	g.Expect(request.Header.Get(PluginSubresourcesHeader)).To(Equal("subresource1,subresource2"))
+}

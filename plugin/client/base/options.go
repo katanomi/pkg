@@ -19,6 +19,7 @@ package base
 import (
 	"encoding/base64"
 	"encoding/json"
+	"fmt"
 	"strconv"
 	"strings"
 
@@ -58,6 +59,13 @@ func ListOpts(opts metav1alpha1.ListOptions) OptionFunc {
 		}
 		request.SetQueryParam("page", strconv.Itoa(opts.Page))
 		request.SetQueryParam("itemsPerPage", strconv.Itoa(opts.ItemsPerPage))
+		if len(opts.Sort) > 0 {
+			var sorts = make([]string, 0, len(opts.Sort))
+			for _, item := range opts.Sort {
+				sorts = append(sorts, fmt.Sprintf("%s,%s", item.Order, item.SortBy))
+			}
+			request.SetQueryParam("sortBy", strings.Join(sorts, ","))
+		}
 
 		SubResourcesOpts(opts.SubResources)(request)
 	}
