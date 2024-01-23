@@ -47,3 +47,22 @@ func TestFindOwnerReference(t *testing.T) {
 	g.Expect(FindOwnerReference(cmWithRefs.GetOwnerReferences(), gvk)).NotTo(BeNil())
 	g.Expect(FindOwnerReference(cmWithRefs.GetOwnerReferences(), notExistGvk)).To(BeNil())
 }
+
+func TestFindOwnerReferenceWithGroupKind(t *testing.T) {
+	g := NewGomegaWithT(t)
+
+	cmWithRefs := &corev1.ConfigMap{}
+	cmWithoutRefs := &corev1.ConfigMap{}
+	ktesting.MustLoadYaml("testdata/findOwnerReference.cm.withRefs.yaml", cmWithRefs)
+	ktesting.MustLoadYaml("testdata/findOwnerReference.cm.withoutRefs.yaml", cmWithoutRefs)
+
+	cmGroupKind := cmWithRefs.GroupVersionKind().GroupKind()
+	noExistGroupKind := schema.GroupKind{
+		Group: "not-exist",
+		Kind:  "not-exist",
+	}
+	g.Expect(FindOwnerReferenceWithGroupKind(cmWithoutRefs.GetOwnerReferences(), cmGroupKind)).To(BeNil())
+	g.Expect(FindOwnerReferenceWithGroupKind(cmWithoutRefs.GetOwnerReferences(), noExistGroupKind)).To(BeNil())
+	g.Expect(FindOwnerReferenceWithGroupKind(cmWithRefs.GetOwnerReferences(), cmGroupKind)).NotTo(BeNil())
+	g.Expect(FindOwnerReferenceWithGroupKind(cmWithRefs.GetOwnerReferences(), noExistGroupKind)).To(BeNil())
+}
