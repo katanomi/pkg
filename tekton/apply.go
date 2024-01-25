@@ -21,7 +21,6 @@ import (
 	"fmt"
 
 	"github.com/tektoncd/pipeline/pkg/apis/config"
-	testing "github.com/tektoncd/pipeline/pkg/apis/config/testing"
 	"github.com/tektoncd/pipeline/pkg/apis/pipeline/v1beta1"
 )
 
@@ -44,7 +43,7 @@ const (
 // Replacements return replacements base on the params spec and provided params values
 func Replacements(ctx context.Context, paramSpecs []v1beta1.ParamSpec, params []v1beta1.Param) (stringReplacements map[string]string, arrayReplacements map[string][]string, objectReplacements map[string]map[string]string) {
 
-	ctx = testing.EnableAlphaAPIFields(ctx)
+	ctx = WithDefaultConfig(ctx)
 
 	strings, arrays, objects := paramDefaultReplacements(ctx, paramSpecs)
 	// Set and overwrite params with the ones from the parameters provided
