@@ -28,10 +28,29 @@ import (
 
 // WebhookRegister used to register and manage webhooks
 type WebhookRegister interface {
-	// Use the methods below to manage webhooks in the target platform
+	WebhookCreator
+	WebhookUpdater
+	WebhookDeleter
+	WebhookLister
+}
+
+// WebhookCreator create a new webhook
+type WebhookCreator interface {
 	CreateWebhook(ctx context.Context, spec metav1alpha1.WebhookRegisterSpec, secret corev1.Secret) (metav1alpha1.WebhookRegisterStatus, error)
+}
+
+// WebhookUpdater update a webhook
+type WebhookUpdater interface {
 	UpdateWebhook(ctx context.Context, spec metav1alpha1.WebhookRegisterSpec, secret corev1.Secret) (metav1alpha1.WebhookRegisterStatus, error)
+}
+
+// WebhookDeleter delete a webhook
+type WebhookDeleter interface {
 	DeleteWebhook(ctx context.Context, spec metav1alpha1.WebhookRegisterSpec, secret corev1.Secret) error
+}
+
+// WebhookLister list webhooks
+type WebhookLister interface {
 	ListWebhooks(ctx context.Context, uri apis.URL, secret corev1.Secret) ([]metav1alpha1.WebhookRegisterStatus, error)
 }
 
