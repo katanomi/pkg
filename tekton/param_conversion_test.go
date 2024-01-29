@@ -17,11 +17,8 @@ limitations under the License.
 package tekton
 
 import (
-	"context"
-
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	"knative.dev/pkg/logging"
 
 	. "github.com/katanomi/pkg/testing"
 	pipelinev1 "github.com/tektoncd/pipeline/pkg/apis/pipeline/v1"
@@ -35,7 +32,6 @@ var _ = Describe("Test.Params.Conversion", func() {
 	)
 
 	BeforeEach(func() {
-		// loadV1Params("testdata/params.v1beta1.yaml")
 		Expect(LoadYAML("testdata/params.conversion.v1beta1.yaml", &paramsBeta1)).To(Succeed())
 		Expect(LoadYAML("testdata/params.conversion.v1.yaml", &paramsV1)).To(Succeed())
 	})
@@ -54,13 +50,3 @@ var _ = Describe("Test.Params.Conversion", func() {
 		})
 	})
 })
-
-func loadV1Params(filepath string) []pipelinev1.Param {
-	params := []struct {
-		Name  string `json:"name"`
-		Value string `json:"value"`
-	}{}
-	Expect(LoadYAML(filepath, &params)).To(Succeed())
-	logging.FromContext(context.TODO()).Infow("LQTEST", "params", params)
-	return nil
-}
