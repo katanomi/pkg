@@ -375,6 +375,9 @@ func (a *AppBuilder) Controllers(ctors ...controllers.SetupChecker) *AppBuilder 
 	if err != nil {
 		a.Logger.Fatalw("unable to start manager", "err", err)
 	}
+	a.Manager = controllers.ControllerManager{
+		Manager: a.Manager,
+	}
 	if err := a.Manager.AddHealthzCheck(healthzRoutePath, healthz.Ping); err != nil {
 		a.Logger.Fatalw("unable to set up health check", "err", err)
 	}
