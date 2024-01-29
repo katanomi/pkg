@@ -27,7 +27,7 @@ import (
 	v1 "knative.dev/pkg/apis/duck/v1"
 )
 
-//go:generate ../../bin/mockgen -source=clientset.go -destination=../../testing/mock/github.com/katanomi/pkg/plugin/storage/clientset.go -package=storage Interface
+//go:generate mockgen -source=clientset.go -destination=../../testing/mock/github.com/katanomi/pkg/plugin/storage/clientset.go -package=storage Interface
 
 type Interface interface {
 	CoreV1alpha1() corev1alpha1.CoreV1alpha1Interface

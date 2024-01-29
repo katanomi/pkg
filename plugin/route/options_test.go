@@ -111,7 +111,9 @@ var _ = Describe("TestParsePagerFromRequest", func() {
 
 	BeforeEach(func() {
 		req = &restful.Request{
-			Request: &http.Request{},
+			Request: &http.Request{
+				URL: &url.URL{},
+			},
 		}
 		pager = metav1alpha1.Pager{}
 	})
@@ -150,7 +152,9 @@ var _ = Describe("ParseTimeCursorFormRequest", func() {
 
 	BeforeEach(func() {
 		req = &restful.Request{
-			Request: &http.Request{},
+			Request: &http.Request{
+				URL: &url.URL{},
+			},
 		}
 		cursor = &metav1alpha1.TimeCursor{}
 		startTime = time.Now()

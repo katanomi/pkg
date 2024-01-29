@@ -34,7 +34,7 @@ import (
 	duckv1 "knative.dev/pkg/apis/duck/v1"
 )
 
-//go:generate ../../../bin/mockgen -package=apis -destination=../../../testing/mock/knative.dev/pkg/apis/condition_manager.go  knative.dev/pkg/apis ConditionManager
+//go:generate mockgen -package=apis -destination=../../../testing/mock/knative.dev/pkg/apis/condition_manager.go  knative.dev/pkg/apis ConditionManager
 
 const (
 	SomeCondition apis.ConditionType = "SomeCondition"

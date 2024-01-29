@@ -29,7 +29,7 @@ import (
 	duckv1 "knative.dev/pkg/apis/duck/v1"
 )
 
-//go:generate ../../../bin/mockgen -source=client.go -destination=../../../testing/mock/github.com/katanomi/pkg/plugin/storage/client/client.go -package=v1alpha1 Interface
+//go:generate mockgen -source=client.go -destination=../../../testing/mock/github.com/katanomi/pkg/plugin/storage/client/client.go -package=v1alpha1 Interface
 
 // Interface captures the set of operations for generically interacting with Kubernetes REST apis.
 type Interface interface {
