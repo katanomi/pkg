@@ -26,7 +26,10 @@ import (
 
 var globalModuleCases []*moduleCase
 var Configure = base.ConfigureFunc(func(suiteConfig *types.SuiteConfig, reporterConfig *types.ReporterConfig) {
-	suiteConfig.LabelFilter = strings.Join(GlobalModuleCaseLabels(), ",")
+	// user specified filter has higher priority
+	if suiteConfig.LabelFilter == "" {
+		suiteConfig.LabelFilter = strings.Join(GlobalModuleCaseLabels(), ",")
+	}
 })
 
 func pushModuleCase(m *moduleCase) {

@@ -21,6 +21,7 @@ import (
 
 	metav1alpha1 "github.com/katanomi/pkg/apis/meta/v1alpha1"
 	"github.com/katanomi/pkg/plugin/client/base"
+	"github.com/katanomi/pkg/plugin/types"
 )
 
 // ListProjects list projects
@@ -55,4 +56,11 @@ func (p *PluginClient) GetProject(ctx context.Context, id string) (*metav1alpha1
 	}
 
 	return resp, nil
+}
+
+// GetSubTypeProject get project with subtype
+func (p *PluginClient) GetSubTypeProject(ctx context.Context, getOption types.GetProjectOption) (*metav1alpha1.Project, error) {
+	return p.WithRequestOptions(base.QueryOpts(map[string]string{
+		"type": string(getOption.SubType),
+	})).GetProject(ctx, getOption.ProjectName)
 }

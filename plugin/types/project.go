@@ -29,9 +29,23 @@ type ProjectLister interface {
 }
 
 // ProjectGetter list project api
+// Deprecated: use ProjectSubTypeGetter instead
 type ProjectGetter interface {
 	Interface
 	GetProject(ctx context.Context, id string) (*metav1alpha1.Project, error)
+}
+
+// GetProjectOption option to get a subtype project
+type GetProjectOption struct {
+	ProjectName string                      `json:"projectName" yaml:"projectName"`
+	SubType     metav1alpha1.ProjectSubType `json:"subType" yaml:"subType"`
+}
+
+// SubtypeProjectGetter get project with subtype
+// alias of ProjectGetter for better experience
+type SubtypeProjectGetter interface {
+	Interface
+	GetSubTypeProject(ctx context.Context, getOption GetProjectOption) (*metav1alpha1.Project, error)
 }
 
 // ProjectCreator create project api
