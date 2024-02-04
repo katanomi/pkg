@@ -49,27 +49,56 @@ var ErrDoesNotHaveToken = errors.New("secret does not have data.token")
 // https://github.com/kubernetes-retired/cluster-registry/blob/master/pkg/apis/clusterregistry/v1alpha1/types.go
 type ClusterRegistryClient struct {
 	dynamic.Interface
+
+	insecure bool
+	// proxy host for accessing cluster
+	clusterProxyHost string
+	// proxy host for accessing cluster, support {name} placeholder with the actual cluster name
+	clusterProxyPath string
 }
 
 var _ Interface = &ClusterRegistryClient{}
 
 // NewClusterRegistryClient initiates a ClusterRegistryClient
-func NewClusterRegistryClient(config *rest.Config) (Interface, error) {
+func NewClusterRegistryClient(config *rest.Config, options ...ClusterRegistryClientOption) (Interface, error) {
 	dyn, err := dynamic.NewForConfig(config)
 	if err != nil {
 		return nil, err
 	}
-	return &ClusterRegistryClient{Interface: dyn}, nil
+	registryClient := &ClusterRegistryClient{Interface: dyn}
+	for _, option := range options {
+		option(registryClient)
+	}
+
+	return registryClient, nil
 }
 
 // NewClusterRegistryClientOrDie initiates a ClusterRegistryClient and
 // panics if it fails
-func NewClusterRegistryClientOrDie(config *rest.Config) Interface {
-	clt, err := NewClusterRegistryClient(config)
+func NewClusterRegistryClientOrDie(config *rest.Config, options ...ClusterRegistryClientOption) Interface {
+	clt, err := NewClusterRegistryClient(config, options...)
 	if err != nil {
 		panic(err)
 	}
 	return clt
+}
+
+// ClusterRegistryClientOption functions for configuring a ClusterRegistryClient
+type ClusterRegistryClientOption func(*ClusterRegistryClient)
+
+// ClusterProxyOption sets the proxy host and path for the cluster registry client
+func ClusterProxyOption(proxyHost string, proxyPath string) ClusterRegistryClientOption {
+	return func(c *ClusterRegistryClient) {
+		c.clusterProxyHost = proxyHost
+		c.clusterProxyPath = proxyPath
+	}
+}
+
+// ClusterProxyInsecure allows specifying whether the client should use an insecure connection.
+func ClusterProxyInsecure(insecure bool) ClusterRegistryClientOption {
+	return func(c *ClusterRegistryClient) {
+		c.insecure = insecure
+	}
 }
 
 var ClusterRegistryGroupVersion = schema.GroupVersion{Group: "clusterregistry.k8s.io", Version: "v1alpha1"}
@@ -86,6 +115,14 @@ func (m *ClusterRegistryClient) GetConfig(ctx context.Context, clusterRef *corev
 		return
 	}
 	config, err = m.GetConfigFromCluster(ctx, cluster)
+	if m.clusterProxyHost != "" {
+		proxyHost, err := ClusterProxyHost(m.clusterProxyHost, m.clusterProxyPath, cluster.GetName())
+		if err != nil {
+			return nil, err
+		}
+		config.Host = proxyHost
+	}
+
 	return
 }
 
@@ -161,7 +198,8 @@ func (m *ClusterRegistryClient) GetConfigFromCluster(ctx context.Context, cluste
 	config = &rest.Config{
 		Host: address,
 		TLSClientConfig: rest.TLSClientConfig{
-			CAData: caBundle,
+			CAData:   caBundle,
+			Insecure: m.insecure,
 		},
 	}
 
