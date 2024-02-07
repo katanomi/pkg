@@ -88,6 +88,9 @@ var (
 
 	WebServerPort      int
 	InsecureSkipVerify bool
+
+	ClusterProxyHost string
+	ClusterProxyPath string
 )
 
 // AppBuilder builds an app using multiple configuration options
@@ -154,6 +157,10 @@ func ParseFlag() {
 			"Command-line flags override configuration from this file.")
 	flag.BoolVar(&InsecureSkipVerify, "insecure-skip-tls-verify", false,
 		"skip TLS verification and disable cert checking (default: false)")
+	flag.StringVar(&ClusterProxyHost, "cluster-proxy-host", "",
+		"Specify the hostname or IP address of the cluster proxy.")
+	flag.StringVar(&ClusterProxyPath, "cluster-proxy-path", "",
+		"Specify the endpoint path for the cluster proxy, '{name}' as the placeholder for the cluster name.")
 	flag.IntVar(&WebServerPort, "web-server-port", 8100, "http web server port")
 	flag.Parse()
 }
@@ -192,7 +199,11 @@ func (a *AppBuilder) init() {
 			return a.ConfigMapWatcher.Start(ctx.Done())
 		})
 
-		a.Context = multicluster.WithMultiCluster(a.Context, multicluster.NewClusterRegistryClientOrDie(a.Config))
+		multiCluster := multicluster.NewClusterRegistryClientOrDie(a.Config,
+			multicluster.ClusterProxyOption(ClusterProxyHost, ClusterProxyPath),
+			multicluster.ClusterProxyInsecure(InsecureSkipVerify),
+		)
+		a.Context = multicluster.WithMultiCluster(a.Context, multiCluster)
 
 		a.container = restful.NewContainer()
 		a.container.Router(restful.RouterJSR311{})

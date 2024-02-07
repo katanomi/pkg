@@ -60,6 +60,20 @@ func TestClusterRegistryClientGetConfig(t *testing.T) {
 		g.Expect(config.BearerToken).To(Equal("abctoken"))
 	})
 
+	t.Run("get config with proxy", func(t *testing.T) {
+		g := NewGomegaWithT(t)
+
+		opt := ClusterProxyOption("proxy.test", "kubernetes/{name}")
+		opt(clusterClient)
+
+		config, err := clusterClient.GetConfig(ctx, ref)
+
+		g.Expect(err).To(BeNil())
+		g.Expect(config).ToNot(BeNil())
+		g.Expect(config.Host).To(Equal("https://proxy.test/kubernetes/my-cluster"))
+		g.Expect(config.BearerToken).To(Equal("abctoken"))
+	})
+
 	t.Run("get client", func(t *testing.T) {
 		client, err := clusterClient.GetClient(ctx, ref, scheme.Scheme)
 
