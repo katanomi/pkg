@@ -5,6 +5,7 @@
 # https://docs.getwoke.tech/rules/
 ignore_files:
   - .golangci.yaml
+  - ./build/*
 
 # https://docs.getwoke.tech/ignore/
 rules:
@@ -15,3 +16,8 @@ rules:
     alternatives:
       - allowlist
     # severity: warn # disabled to show that error is the default
+  - name: alauda
+    terms:
+      - alauda
+    alternatives:
+      - katanomi
