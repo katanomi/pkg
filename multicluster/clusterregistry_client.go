@@ -195,12 +195,17 @@ func (m *ClusterRegistryClient) GetConfigFromCluster(ctx context.Context, cluste
 	address := clusterObj.Spec.KubernetesAPIEndpoints.ServerEndpoints[0].ServerAddress
 	caBundle := clusterObj.Spec.KubernetesAPIEndpoints.CABundle
 
+	tlsConfig := rest.TLSClientConfig{
+		Insecure: m.insecure,
+	}
+	// If connections are not intended to be insecure, configure CAData with the certificate bundle.
+	// This ensures SSL certificates are verified unless explicitly disabled by setting the insecure flag.
+	if !m.insecure {
+		tlsConfig.CAData = caBundle
+	}
 	config = &rest.Config{
-		Host: address,
-		TLSClientConfig: rest.TLSClientConfig{
-			CAData:   caBundle,
-			Insecure: m.insecure,
-		},
+		Host:            address,
+		TLSClientConfig: tlsConfig,
 	}
 
 	config.Wrap(tracing.WrapTransport)
