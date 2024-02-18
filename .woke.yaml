@@ -5,7 +5,8 @@
 # https://docs.getwoke.tech/rules/
 ignore_files:
   - .golangci.yaml
-  - ./build/*
+  - .build/*
+  - catalog.yaml
 
 # https://docs.getwoke.tech/ignore/
 rules:
