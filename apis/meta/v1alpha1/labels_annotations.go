@@ -80,6 +80,8 @@ const (
 	DisplayNameAnnotationKey = "katanomi.dev/displayName"
 	// CreatedTimeAnnotationKey creation time for objects
 	CreatedTimeAnnotationKey = "katanomi.dev/creationTime"
+	// UpdatedTimeAnnotationKey update time for objects
+	UpdatedTimeAnnotationKey = "katanomi.dev/updateTime"
 	// DeletedTimeAnnotationKey deletion time for objects
 	DeletedTimeAnnotationKey = "katanomi.dev/deletionTime"
 	// CrossClusterAnnotationKey annotates a cross cluster resource/action

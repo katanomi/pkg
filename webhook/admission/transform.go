@@ -18,6 +18,7 @@ package admission
 
 import (
 	"context"
+	"time"
 
 	mv1alpha1 "github.com/katanomi/pkg/apis/meta/v1alpha1"
 	admissionv1 "k8s.io/api/admission/v1"
@@ -172,6 +173,22 @@ func WithCancelledBy(scheme *runtime.Scheme, isCancelled func(oldObj runtime.Obj
 		}
 
 		setCancelledBy(ctx, obj, req)
+	}
+}
+
+// WithUpdateTime adds a updateTime annotation to the object
+func WithUpdateTime() TransformFunc {
+	return func(ctx context.Context, obj runtime.Object, req admission.Request) {
+		if req.Operation != admissionv1.Update {
+			return
+		}
+		newObj := obj.(metav1.Object)
+		annotations := newObj.GetAnnotations()
+		if annotations == nil {
+			annotations = map[string]string{}
+		}
+		annotations[mv1alpha1.UpdatedTimeAnnotationKey] = time.Now().Format(time.RFC3339)
+		newObj.SetAnnotations(annotations)
 	}
 }
 

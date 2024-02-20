@@ -19,10 +19,13 @@ package admission
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"testing"
+	"time"
 
 	"github.com/katanomi/pkg/apis/meta/v1alpha1"
 	. "github.com/onsi/gomega"
+	"github.com/onsi/gomega/matchers"
 	v1 "k8s.io/api/admission/v1"
 	authenticationv1 "k8s.io/api/authentication/v1"
 	corev1 "k8s.io/api/core/v1"
@@ -92,4 +95,42 @@ func TestWithCancelledBy(t *testing.T) {
 	cancelledBy(ctx, pod, request)
 	Expect(pod.Annotations[v1alpha1.CancelledByAnnotationKey]).To(Equal(`{"user":{"kind":"User","name":"admin"}}`))
 
+}
+
+func TestWithUpdateTime(t *testing.T) {
+	g := NewGomegaWithT(t)
+	ctx := context.Background()
+	obj := &corev1.Pod{
+		TypeMeta: metav1.TypeMeta{
+			APIVersion: "v1",
+			Kind:       "Pod",
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "pod",
+			Namespace: "default",
+			UID:       types.UID("abc"),
+		},
+	}
+
+	req := admission.Request{
+		AdmissionRequest: v1.AdmissionRequest{
+			Operation: v1.Create,
+		},
+	}
+	WithUpdateTime()(ctx, obj, req)
+	g.Expect(obj.Annotations).NotTo(HaveKey(v1alpha1.UpdatedTimeAnnotationKey))
+
+	req.Operation = v1.Update
+	WithUpdateTime()(ctx, obj, req)
+	beTimeString := matchers.NewWithTransformMatcher(checkTimeString, BeTrue())
+	g.Expect(obj.Annotations[v1alpha1.UpdatedTimeAnnotationKey]).To(beTimeString)
+}
+
+func checkTimeString(actual interface{}) (interface{}, error) {
+	str, ok := actual.(string)
+	if !ok {
+		return false, fmt.Errorf("expected string value, got %v", actual)
+	}
+	_, err := time.Parse(time.RFC3339, str)
+	return err == nil, err
 }
