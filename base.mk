@@ -83,8 +83,9 @@ undeploy: ##@Deployment Undeploy controller from the K8s cluster specified in ~/
 certmanager: ##@Deployment Install certmanager v1.4.0 from github manifest to the K8s cluster specified in ~/.kube/config.
 	$(call installyaml,cert-manager,https://github.com/jetstack/cert-manager/releases/download/v1.4.0/cert-manager.yaml,cert-manager)
 
+E2E_OPTIONS ?=
 e2e: ginkgo ##@Testing Executes e2e tests inside test/e2e folder
-	$(GINKGO) -progress -v -tags $(GO_VET_TAGS) ./test/e2e
+	$(GINKGO) -progress -v -tags $(GO_VET_TAGS) $(E2E_OPTIONS) ./test/e2e
 
 CONTROLLER_GEN = $(TOOLBIN)/controller-gen
 controller-gen: ##@Setup Download controller-gen locally if necessary.
@@ -107,7 +108,7 @@ goimports: ##@Setup Download goimports locally if necessary.
 
 GINKGO = $(TOOLBIN)/ginkgo
 ginkgo: ##@Setup Download ginkgo locally if necessary
-	$(call go-get-tool,$(GINKGO),github.com/onsi/ginkgo/ginkgo@v1.16.4)
+	$(call go-get-tool,$(GINKGO),github.com/onsi/ginkgo/v2/ginkgo@v2.15.0)
 
 GOLANGCILINT = $(TOOLBIN)/golangci-lint
 golangcilint: ##@Setup Download golangci-lint locally if necessary
