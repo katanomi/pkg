@@ -20,6 +20,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/katanomi/pkg/testing"
 	. "github.com/katanomi/pkg/testing/framework/base"
 	. "github.com/onsi/ginkgo/v2"
 )
@@ -35,6 +36,8 @@ func newCase(name string, priority TestCasePriority) *CaseBuilder {
 					SugaredLogger: fmw.SugaredLogger.Named(name),
 				}
 			}),
+			// set the unique case name label
+			Labels: testing.Case(name),
 		},
 	}
 }
