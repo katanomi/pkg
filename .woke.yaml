@@ -22,3 +22,11 @@ rules:
       - alauda
     alternatives:
       - katanomi
+  - name: merge request
+    terms:
+      - Merge Request
+      - merge request
+    alternatives:
+      - Pull Request
+      - pull request
+
