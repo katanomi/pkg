@@ -17,6 +17,7 @@ limitations under the License.
 package v1alpha1
 
 import (
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"net/url"
@@ -48,6 +49,12 @@ type DockerAuthItem struct {
 	Eamil string `json:"email"`
 	// Scope project scope for credential authentication
 	Scope string `json:"scope"`
+}
+
+// GenerateDockerAuth generate docker auth by input.
+func GenerateDockerAuth(username, password []byte) string {
+	authData := make([]byte, 0, len(username)+len(password)+1)
+	return base64.StdEncoding.EncodeToString(fmt.Appendf(authData, "%s:%s", username, password))
 }
 
 // GetAuthFromDockerConfigJson get docker credential information from docker config json

@@ -18,6 +18,7 @@ package v1alpha1
 
 import (
 	"errors"
+	"testing"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
@@ -100,3 +101,25 @@ var _ = Describe("Test.GetAuthFromDockerConfigJson", func() {
 		),
 	)
 })
+
+func TestDockerAuthItem_SetStringAuth(t *testing.T) {
+	tests := map[string]struct {
+		username string
+		password string
+		want     string
+	}{
+		"generate auth": {
+			username: "test-user",
+			password: "test-password",
+			want:     "dGVzdC11c2VyOnRlc3QtcGFzc3dvcmQ=",
+		},
+	}
+	for name, tt := range tests {
+		t.Run(name, func(t *testing.T) {
+			got := GenerateDockerAuth([]byte(tt.username), []byte(tt.password))
+			if tt.want != got {
+				t.Errorf("generate failed")
+			}
+		})
+	}
+}
