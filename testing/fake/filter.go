@@ -23,6 +23,7 @@ import (
 
 	"github.com/emicklei/go-restful/v3"
 	kerrors "github.com/katanomi/pkg/errors"
+	"knative.dev/pkg/logging"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
@@ -31,6 +32,7 @@ import (
 // and modifies the response based on the policy's evaluation results.
 func (h *PolicyHandler) Filter(req *restful.Request, resp *restful.Response, chain *restful.FilterChain) {
 	ctx := req.Request.Context()
+	logger := logging.FromContext(ctx)
 
 	policy, err := h.Store.Get(ctx, IDFromRequest(req))
 	if client.IgnoreNotFound(err) != nil {
@@ -41,6 +43,7 @@ func (h *PolicyHandler) Filter(req *restful.Request, resp *restful.Response, cha
 	}
 
 	if policy == nil {
+		logger.Debugw("no fake policy, skip")
 		chain.ProcessFilter(req, resp)
 		return
 	}
@@ -52,6 +55,8 @@ func (h *PolicyHandler) Filter(req *restful.Request, resp *restful.Response, cha
 		kerrors.HandleError(req, resp, err)
 		return
 	}
+
+	logger.Debugw("eval fake policy", "input", input)
 	if err = policy.Eval(ctx, input); err != nil {
 		kerrors.HandleError(req, resp, err)
 		return
