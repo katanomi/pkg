@@ -20,6 +20,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"hash/fnv"
 	"net/http"
 	"strings"
 	"text/template"
@@ -80,10 +81,22 @@ func (b *Builder) Status(status int) *Builder {
 
 // Result sets the HTTP response body expected in the policy rule.
 func (b *Builder) Result(result interface{}) *Builder {
+	if v, ok := result.([]byte); ok {
+		result = string(v)
+	}
+
 	switch v := result.(type) {
 	// result type is Input, uses the specific value at the key from input
 	case Input:
 		b.result = fmt.Sprintf("input.%s", string(v))
+	case string:
+		m := map[string]interface{}{}
+		if err := json.Unmarshal([]byte(v), &m); err == nil {
+			b.result = v
+		} else {
+			resultBytes, _ := json.Marshal(result)
+			b.result = string(resultBytes)
+		}
 	// others, use the original result
 	default:
 		resultBytes, _ := json.Marshal(result)
@@ -106,7 +119,9 @@ var tmpl string
 // It uses a template to generate the policy based on the set conditions.
 func (b *Builder) Complete() (*opa.Policy, error) {
 	policy := &opa.Policy{
-		ID: IDFromMethodPath(b.method, b.path),
+		Method: b.method,
+		Path:   b.path,
+		ID:     IDFromMethodPath(b.method, b.path),
 	}
 
 	data := templateData{
@@ -133,21 +148,16 @@ func (b *Builder) Complete() (*opa.Policy, error) {
 
 // IDFromMethodPath generates a unique ID for the policy based on the method and path.
 func IDFromMethodPath(method string, path string) string {
-	// replace characters unsupported by ConfigMap key
-	path = strings.ReplaceAll(path, "/", "-")
-	path = strings.ReplaceAll(path, "{", "_")
-	path = strings.ReplaceAll(path, "}", "_")
-	path = strings.ReplaceAll(path, ":*", "")
+	path = strings.TrimPrefix(path, "/")
+	f := fnv.New32()
+	_, _ = f.Write([]byte(fmt.Sprintf("%s.%s", method, path)))
 
-	return fmt.Sprintf("%s-%s", strings.ToLower(method), strings.TrimPrefix(path, "-"))
+	return fmt.Sprintf("%x", f.Sum32())
 }
-func IDFromRequest(req *restful.Request) string {
-	path := req.SelectedRoutePath()
-	if path == "" {
-		path = req.Request.URL.Path
-	}
 
-	return IDFromMethodPath(req.Request.Method, path)
+// IDFromRequest generates a unique ID for the policy based on request
+func IDFromRequest(req *restful.Request) string {
+	return IDFromMethodPath(req.Request.Method, req.Request.URL.Path)
 }
 
 // Create sends the constructed policy to the specified client.

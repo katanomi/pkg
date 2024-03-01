@@ -18,6 +18,7 @@ package fake
 
 import (
 	"context"
+	"encoding/json"
 	"testing"
 
 	"github.com/katanomi/pkg/testing/fake/opa"
@@ -49,6 +50,28 @@ func TestPolicyBuilderResult(t *testing.T) {
 			result: "123",
 			resultFunc: func(policy *opa.Policy) interface{} {
 				return policy.StringResult("data.fake.result")
+			},
+		},
+		"object string": {
+			result: `{"abc":"def"}`,
+			resultFunc: func(policy *opa.Policy) interface{} {
+				v := policy.MapResult("data.fake.result")
+				result, _ := json.Marshal(v)
+				return string(result)
+			},
+		},
+		"bytes": {
+			result: []byte("123"),
+			resultFunc: func(policy *opa.Policy) interface{} {
+				return []byte(policy.StringResult("data.fake.result"))
+			},
+		},
+		"object bytes": {
+			result: []byte(`{"abc":"def"}`),
+			resultFunc: func(policy *opa.Policy) interface{} {
+				v := policy.MapResult("data.fake.result")
+				result, _ := json.Marshal(v)
+				return result
 			},
 		},
 	}

@@ -29,6 +29,10 @@ import (
 // For more information about OPA and Rego, visit: https://www.openpolicyagent.org/docs/latest/
 type Policy struct {
 	ID string `json:"id"`
+	// Method http method to be matched
+	Method string `json:"method"`
+	// Path http path to be matched
+	Path string `json:"path"`
 	// Policy contains the actual Rego policy as a string.
 	Policy string `json:"policy"`
 	// Query holds a set of Queries to be evaluated against the policy.
