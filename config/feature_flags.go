@@ -67,6 +67,9 @@ const (
 	// ClusterTaskDisabledKey specifies the key for the clustertask feature gate configuration.
 	// When set to true, the clustertasks is disabled, cannot create new clustertasks.
 	ClusterTaskDisabledKey = "clustertask.disabled"
+
+	// KatanomiSystemNamespaceKey specifies the key for the katanomi system namespace
+	KatanomiSystemNamespaceKey = "katanomi.system.namespace"
 )
 
 const (
@@ -127,6 +130,9 @@ const (
 
 	// DefaultClusterTaskDisabled stores the default value "true" for the "clustertask.disabled" feature.
 	DefaultClusterTaskDisabled FeatureValue = True
+
+	// DefaultKatanomiSystemNamespace defines the default namespace for katanomi system
+	DefaultKatanomiSystemNamespace = "katanomi-system"
 )
 
 // defaultFeatureValue defines the default value for the feature switch.
@@ -146,6 +152,7 @@ var defaultFeatureValue = map[string]FeatureValue{
 	IntegrationSyncPeriodKey:               DefaultIntegrationsSyncPeriod,
 	PprofEnabledKey:                        DefaultPprofEnabled,
 	ClusterTaskDisabledKey:                 DefaultClusterTaskDisabled,
+	KatanomiSystemNamespaceKey:             DefaultKatanomiSystemNamespace,
 }
 
 // FeatureFlags holds the features configurations
