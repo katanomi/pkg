@@ -63,20 +63,30 @@ const (
 
 	// PprofEnabledKey indicates the configuration key of the /debug/pprof debugging api/
 	PprofEnabledKey = "pprof.enabled"
+
+	// ClusterTaskDisabledKey specifies the key for the clustertask feature gate configuration.
+	// When set to true, the clustertasks is disabled, cannot create new clustertasks.
+	ClusterTaskDisabledKey = "clustertask.disabled"
 )
 
 const (
+	// True represents the value "true" for the feature switch.
+	True FeatureValue = "true"
+
+	// False represents the value "false" for the feature switch.
+	False FeatureValue = "false"
+
 	// DefaultVersionEnabled indicates the default value of the version feature gate.
 	// If the corresponding key does not exist, the default value is returned.
-	DefaultVersionEnabled FeatureValue = "false"
+	DefaultVersionEnabled FeatureValue = False
 
 	// DefaultProxyEnabled indicates the default value of the proxy feature gate.
 	// If the corresponding key does not exist, the default value is returned.
-	DefaultProxyEnabled FeatureValue = "false"
+	DefaultProxyEnabled FeatureValue = False
 
 	// DefaultInitializeAllowLocalRequests indicates the configuration key of.
 	// If the corresponding key does not exist, the default value is returned.
-	DefaultInitializeAllowLocalRequests FeatureValue = "true"
+	DefaultInitializeAllowLocalRequests FeatureValue = True
 
 	// DefaultPrunerDelayAfterCompleted represent default duration for delay taskRun
 	// If the corresponding key does not exist, the default value is returned.
@@ -90,7 +100,7 @@ const (
 	DefaultMRCheckTimeout FeatureValue = "10m"
 
 	// DefaultMRCheckTimeoutContinue represent default timeout continue for merge request status check
-	DefaultMRCheckTimeoutContinue FeatureValue = "true"
+	DefaultMRCheckTimeoutContinue FeatureValue = True
 
 	// DefaultTemplateRenderCheckTimeout represent default timeout for templaterender check
 	DefaultTemplateRenderCheckTimeout FeatureValue = "30s"
@@ -103,7 +113,7 @@ const (
 
 	// DefaultPolicyCheckEnabled indicates the default value of the policy check feature gate.
 	// If the corresponding key does not exist, the default value is returned.
-	DefaultPolicyCheckEnabled FeatureValue = "true"
+	DefaultPolicyCheckEnabled FeatureValue = True
 
 	// DefaultClusterIntegrationSyncPeriod defines the default time interval of clusterintegration synchronization
 	DefaultClusterIntegrationSyncPeriod = "5m"
@@ -113,7 +123,10 @@ const (
 
 	// DefaultPprofEnabled stores the default value "false" for the "pprof.enabled" /debug/pprof debugging api.
 	// If the corresponding key does not exist, the default value is returned.
-	DefaultPprofEnabled FeatureValue = "false"
+	DefaultPprofEnabled FeatureValue = False
+
+	// DefaultClusterTaskDisabled stores the default value "true" for the "clustertask.disabled" feature.
+	DefaultClusterTaskDisabled FeatureValue = True
 )
 
 // defaultFeatureValue defines the default value for the feature switch.
@@ -132,6 +145,7 @@ var defaultFeatureValue = map[string]FeatureValue{
 	ClusterIntegrationSyncPeriodKey:        DefaultClusterIntegrationSyncPeriod,
 	IntegrationSyncPeriodKey:               DefaultIntegrationsSyncPeriod,
 	PprofEnabledKey:                        DefaultPprofEnabled,
+	ClusterTaskDisabledKey:                 DefaultClusterTaskDisabled,
 }
 
 // FeatureFlags holds the features configurations
