@@ -19,7 +19,10 @@ package testing
 import (
 	"fmt"
 
+	"k8s.io/apimachinery/pkg/api/meta"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/runtime/schema"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
@@ -31,4 +34,35 @@ func DefaultConvertRuntimeToClientobjectFunc(runtimeObj runtime.Object) (obj cli
 		err = fmt.Errorf("Unsupported gvk: %s", runtimeObj.GetObjectKind().GroupVersionKind())
 	}
 	return
+}
+
+// ConvertTypeMetaToGroupVersionResource converts type meta to group version resource
+func ConvertTypeMetaToGroupVersionResource(typeMeta metav1.TypeMeta) schema.GroupVersionResource {
+	gv, _ := schema.ParseGroupVersion(typeMeta.APIVersion)
+	gvk := gv.WithKind(typeMeta.Kind)
+	plural, _ := meta.UnsafeGuessKindToResource(gvk)
+	return plural
+}
+
+// SliceToRuntimeOjbect convert slice to runtime.Object
+func SliceToRuntimeOjbect[T any](s []T) []runtime.Object {
+	r := make([]runtime.Object, 0, len(s))
+	for _, v := range s {
+		if o, ok := any(v).(runtime.Object); ok {
+			r = append(r, o)
+		}
+	}
+	if len(r) == 0 {
+		return nil
+	}
+	return r
+}
+
+// SliceToInterfaceSlice convert a slice to a slice of interface
+func SliceToInterfaceSlice[T any](s []T) []interface{} {
+	r := make([]interface{}, len(s))
+	for i, v := range s {
+		r[i] = v
+	}
+	return r
 }
