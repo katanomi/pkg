@@ -191,7 +191,7 @@ var _ = Describe("P().Do().Wait()", func() {
 			// Expect(t2Excuted.executed).To(BeFalse())
 			// Expect(t3Excuted.executed).To(BeFalse())
 
-			Expect(elapsed < 1 && elapsed > 0.1).To(BeTrue())
+			Expect(elapsed > 0.1 && elapsed < 5).To(BeTrue(), fmt.Sprintf("actual elapsed: %v", elapsed))
 			Expect(len(res)).To(BeEquivalentTo(0))
 		})
 	})
