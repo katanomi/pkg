@@ -70,6 +70,12 @@ const (
 
 	// KatanomiSystemNamespaceKey specifies the key for the katanomi system namespace
 	KatanomiSystemNamespaceKey = "katanomi.system.namespace"
+
+	// GitSourceResolverFeatureKey indicates the configuration key of the gitsource resolver feature gate.
+	GitSourceResolverFeatureKey = "gitsourceResolver.enabled"
+
+	// HubResolverFeatureKey indicates the configuration key of the hub resolver feature gate.
+	HubResolverFeatureKey = "hubResolver.enabled"
 )
 
 const (
@@ -133,6 +139,12 @@ const (
 
 	// DefaultKatanomiSystemNamespace defines the default namespace for katanomi system
 	DefaultKatanomiSystemNamespace = "katanomi-system"
+
+	// DefaultGitSourceResolverEnabled defines the default value "true" for the "gitsourceResolver.enabled" feature.
+	DefaultGitSourceResolverEnabled = True
+
+	// DefaultHubResolverEnabled defines the default value "true" for the "hubResolver.enabled" feature.
+	DefaultHubResolverEnabled = True
 )
 
 // defaultFeatureValue defines the default value for the feature switch.
@@ -153,6 +165,8 @@ var defaultFeatureValue = map[string]FeatureValue{
 	PprofEnabledKey:                        DefaultPprofEnabled,
 	ClusterTaskDisabledKey:                 DefaultClusterTaskDisabled,
 	KatanomiSystemNamespaceKey:             DefaultKatanomiSystemNamespace,
+	GitSourceResolverFeatureKey:            DefaultGitSourceResolverEnabled,
+	HubResolverFeatureKey:                  DefaultHubResolverEnabled,
 }
 
 // FeatureFlags holds the features configurations
