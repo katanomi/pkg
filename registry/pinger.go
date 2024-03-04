@@ -59,7 +59,12 @@ pathLoop:
 	for _, path := range []string{"/", "/healthz"} {
 		registryURL, err = TryProtocolsWithRegistryURL(ctx, registry, drp.Insecure, func(u url.URL) error {
 			u.Path = path
-			healthResponse, err := drp.Client.Get(u.String())
+			req, err := http.NewRequest(http.MethodGet, u.String(), nil)
+			if err != nil {
+				return err
+			}
+			req = req.WithContext(ctx)
+			healthResponse, err := drp.Client.Do(req)
 			if err != nil {
 				return err
 			}
