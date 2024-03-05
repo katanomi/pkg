@@ -45,10 +45,10 @@ func TestFeatureFlags_FeatureValue(t *testing.T) {
 			flag: "notfound.flag",
 			want: "",
 		},
-		"the default clustertask creation disabled flag is true": {
+		"the default clustertask creation disabled flag is false": {
 			featureFlags: &FeatureFlags{},
-			flag:         ClusterTaskDisabledKey,
-			want:         DefaultClusterTaskDisabled,
+			flag:         ClusterTaskCreationEnabledKey,
+			want:         DefaultClusterTaskCreationEnabledKey,
 		},
 	}
 	for name, tt := range tests {

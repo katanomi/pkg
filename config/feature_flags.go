@@ -64,9 +64,12 @@ const (
 	// PprofEnabledKey indicates the configuration key of the /debug/pprof debugging api/
 	PprofEnabledKey = "pprof.enabled"
 
-	// ClusterTaskDisabledKey specifies the key for the clustertask feature gate configuration.
-	// When set to true, the clustertasks is disabled, cannot create new clustertasks.
-	ClusterTaskDisabledKey = "clustertask.disabled"
+	// ClusterTaskDisabledKey specifies the key for the clustertask creation feature.
+	// When set to false, the creation of clustertasks is disabled and new clustertasks cannot be created and can only be updated.
+	ClusterTaskCreationEnabledKey = "clustertask.creation.enabled"
+
+	// ClusterTaskMigrationEnabledKey specifies the key for the clustertask migration feature.
+	ClusterTaskMigrationEnabledKey = "clustertask.migration.enabled"
 
 	// KatanomiSystemNamespaceKey specifies the key for the katanomi system namespace
 	KatanomiSystemNamespaceKey = "katanomi.system.namespace"
@@ -134,8 +137,11 @@ const (
 	// If the corresponding key does not exist, the default value is returned.
 	DefaultPprofEnabled FeatureValue = False
 
-	// DefaultClusterTaskDisabled stores the default value "true" for the "clustertask.disabled" feature.
-	DefaultClusterTaskDisabled FeatureValue = True
+	// DefaultClusterTaskCreationEnabledKey stores the default value "false" for the feature.
+	DefaultClusterTaskCreationEnabledKey FeatureValue = False
+
+	// DefaultClusterTaskMigrationEnabledKey stores the default value "false" for the feature.
+	DefaultClusterTaskMigrationEnabledKey FeatureValue = False
 
 	// DefaultKatanomiSystemNamespace defines the default namespace for katanomi system
 	DefaultKatanomiSystemNamespace = "katanomi-system"
@@ -163,7 +169,8 @@ var defaultFeatureValue = map[string]FeatureValue{
 	ClusterIntegrationSyncPeriodKey:        DefaultClusterIntegrationSyncPeriod,
 	IntegrationSyncPeriodKey:               DefaultIntegrationsSyncPeriod,
 	PprofEnabledKey:                        DefaultPprofEnabled,
-	ClusterTaskDisabledKey:                 DefaultClusterTaskDisabled,
+	ClusterTaskCreationEnabledKey:          DefaultClusterTaskCreationEnabledKey,
+	ClusterTaskMigrationEnabledKey:         DefaultClusterTaskMigrationEnabledKey,
 	KatanomiSystemNamespaceKey:             DefaultKatanomiSystemNamespace,
 	GitSourceResolverFeatureKey:            DefaultGitSourceResolverEnabled,
 	HubResolverFeatureKey:                  DefaultHubResolverEnabled,
