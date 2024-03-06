@@ -17,11 +17,26 @@ limitations under the License.
 package warnings
 
 import (
+	"context"
 	"testing"
 
+	"github.com/go-logr/zapr"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	uberzap "go.uber.org/zap"
+	logf "sigs.k8s.io/controller-runtime/pkg/log"
+	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 )
+
+var logger *uberzap.SugaredLogger
+
+var _ = BeforeSuite(func(ctx context.Context) {
+	logf.SetLogger(zap.New(zap.WriteTo(GinkgoWriter), zap.UseDevMode(true)))
+	logger = zap.NewRaw(zap.WriteTo(GinkgoWriter), zap.UseDevMode(true)).Sugar()
+	rawlogger := zap.NewRaw(zap.WriteTo(GinkgoWriter), zap.UseDevMode(true))
+	logf.SetLogger(zapr.NewLogger(rawlogger))
+	logger = rawlogger.Sugar()
+})
 
 func TestWarnings(t *testing.T) {
 	RegisterFailHandler(Fail)

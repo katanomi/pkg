@@ -17,6 +17,13 @@ limitations under the License.
 // Package warnings contains useful functions to manage warnings in the status
 package warnings
 
+import "knative.dev/pkg/apis"
+
+const (
+	// WarningConditionType represents a warning condition
+	WarningConditionType apis.ConditionType = "Warning"
+)
+
 const (
 	// MultipleWarningsReason represent contains multiple warnings
 	MultipleWarningsReason = "MultipleWarnings"

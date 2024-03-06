@@ -17,31 +17,77 @@ limitations under the License.
 package warnings
 
 import (
+	"knative.dev/pkg/apis"
 	duckv1 "knative.dev/pkg/apis/duck/v1"
 )
 
-// GetStatusWarnings retrieves warnings from a given status annotation.
-func GetStatusWarnings(status *duckv1.Status, annotationKey string) []WarningRecord {
-	if status == nil || status.Annotations == nil {
-		return nil
-	}
-	return deserializeWarnings(status.Annotations[annotationKey])
+// StatusWithWarning is a wrapper around duckv1.Status to provide a way to add warnings to the status.
+type StatusWithWarning struct {
+	*duckv1.Status
+	warningAnnotationKey string
 }
 
-// EnsureStatusWarning ensures the warning is in the status.
-// If the warning already exists, it will be ignored.
-func EnsureStatusWarning(status *duckv1.Status, annotationKey string, warning *WarningRecord) []WarningRecord {
-	if status == nil || warning == nil {
-		return nil
+// NewStatusWithWarning creates a new StatusWithWarning with the given status and warning annotation key.
+func NewStatusWithWarning(status *duckv1.Status, warningAnnotationKey string) *StatusWithWarning {
+	if status == nil {
+		status = &duckv1.Status{}
+	} else {
+		// Make a deep copy of the status to avoid modifying the original status.
+		status = status.DeepCopy()
 	}
-	warnings := GetStatusWarnings(status, annotationKey)
-	warnings = AddWarningIfNotPresent(warnings, warning)
-	warningStr := serializeWarnings(warnings)
-	if len(warningStr) != 0 {
-		if status.Annotations == nil {
-			status.Annotations = make(map[string]string)
-		}
-		status.Annotations[annotationKey] = warningStr
+	return &StatusWithWarning{
+		Status:               status,
+		warningAnnotationKey: warningAnnotationKey,
 	}
-	return warnings
+}
+
+// GetStatus retrieves the status.
+func (s *StatusWithWarning) GetStatus() *duckv1.Status {
+	return s.Status
+}
+
+// GetStatusWarnings retrieves warnings from the status.
+func (s *StatusWithWarning) GetStatusWarnings() *WarningRecords {
+	return NewWarningRecordsFromJSON(s.getRawWarning())
+}
+
+// getRawWarning returns the raw warning string from the annotations.
+func (s *StatusWithWarning) getRawWarning() string {
+	return s.Status.Annotations[s.warningAnnotationKey]
+}
+
+// setStatusWarnings sets the warnings to the status.
+func (s *StatusWithWarning) setStatusWarnings(warnings *WarningRecords) *StatusWithWarning {
+	if warnings == nil {
+		delete(s.Status.Annotations, s.warningAnnotationKey)
+		return s
+	}
+	if s.Status.Annotations == nil {
+		s.Status.Annotations = make(map[string]string)
+	}
+	s.Status.Annotations[s.warningAnnotationKey] = warnings.Serialize()
+	return s
+}
+
+// AddWarning adds a warning to the status.
+func (s *StatusWithWarning) AddWarning(warning *WarningRecord) *StatusWithWarning {
+	if warning == nil {
+		return s
+	}
+	ws := s.GetStatusWarnings().Add(warning)
+	return s.setStatusWarnings(ws)
+}
+
+// AddWarningIfNotPresent adds a warning to the status if it is not already present.
+func (s *StatusWithWarning) AddWarningIfNotPresent(warning *WarningRecord) *StatusWithWarning {
+	if warning == nil {
+		return s
+	}
+	ws := s.GetStatusWarnings().AddIfNotPresent(warning)
+	return s.setStatusWarnings(ws)
+}
+
+// MakeWarningCondition creates a condition from the warning.
+func (s *StatusWithWarning) MakeWarningCondition() *apis.Condition {
+	return s.GetStatusWarnings().MakeCondition()
 }

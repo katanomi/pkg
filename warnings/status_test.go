@@ -19,56 +19,191 @@ package warnings
 import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	"knative.dev/pkg/apis"
 	duckv1 "knative.dev/pkg/apis/duck/v1"
 )
 
-var _ = Describe("Test.GetStatusWarnings.EnsureStatusWarning", func() {
+var _ = Describe("Test.StatusWithWarning", func() {
 	var (
-		status           *duckv1.Status
-		key              = "key"
-		warning          *WarningRecord
-		actual, expected []WarningRecord
+		status                *duckv1.Status
+		statusWithWarning     *StatusWithWarning
+		existingWarningRecord *WarningRecord
+		warning               *WarningRecord
+		warnings              *WarningRecords
+		warningAnnotationKey  string
+		existingWarningString string
+		existingWarningJSON   string
+		newWarningJSON        string
 	)
 
 	BeforeEach(func() {
-		// warning = &WarningRecord{}
-		status = &duckv1.Status{}
-	})
-	JustBeforeEach(func() {
-		actual = EnsureStatusWarning(status, key, warning)
-		get := GetStatusWarnings(status, key)
-		Expect(actual).To(Equal(get))
+		warningAnnotationKey = "warning-annotation-key"
+		existingWarningRecord = newWarning("DeprecatedClusterTask", "Existing Warning")
+		existingWarningJSON = `{"reason":"DeprecatedClusterTask","message":"Existing Warning"}`
+		existingWarningString = "[" + existingWarningJSON + "]"
+		//
+		warning = newWarning("DeprecatedClusterTask", "New Warning")
+		newWarningJSON = `{"reason":"DeprecatedClusterTask","message":"New Warning"}`
+		//
+		status = &duckv1.Status{
+			Annotations: map[string]string{
+				warningAnnotationKey: existingWarningString,
+			},
+		}
+		statusWithWarning = NewStatusWithWarning(status, warningAnnotationKey)
 	})
 
-	When("warning is nil", func() {
-		It("should not add the warning", func() {
-			Expect(actual).To(HaveLen(0))
+	Describe("#GetStatus", func() {
+		It("should return the status", func() {
+			Expect(statusWithWarning.GetStatus()).To(Equal(status))
 		})
 	})
 
-	When("warning is not present", func() {
+	Describe("#GetStatusWarnings", func() {
+		Context("when status is not nil", func() {
+			It("should return the warning records", func() {
+				Expect(statusWithWarning.GetStatusWarnings().Serialize()).To(Equal(existingWarningString))
+			})
+		})
+	})
+
+	Describe("#getRawWarning", func() {
+		Context("when status is not nil", func() {
+			It("should return the raw warning string", func() {
+				Expect(statusWithWarning.getRawWarning()).To(Equal(existingWarningString))
+			})
+		})
+	})
+
+	Describe("#setStatusWarnings", func() {
+		var (
+			expectedStatus *duckv1.Status
+		)
+
 		BeforeEach(func() {
-			warning = newWarning("warning 1")
-			expected = []WarningRecord{*warning}
-		})
-		It("should add the warning", func() {
-			Expect(actual).To(HaveLen(1))
-			Expect(actual).To(Equal(expected))
-		})
-	})
-
-	When("warning is present", func() {
-		BeforeEach(func() {
-			warning = newWarning("warning 1")
-			expected = []WarningRecord{*warning}
-			status.Annotations = map[string]string{
-				key: serializeWarnings(expected),
+			warnings = NewWarningRecords(existingWarningRecord)
+			expectedStatus = &duckv1.Status{
+				Annotations: map[string]string{
+					warningAnnotationKey: existingWarningString,
+				},
 			}
 		})
-		It("should not add the warning", func() {
-			Expect(actual).To(HaveLen(1))
-			Expect(actual).To(Equal(expected))
+
+		Context("when warnings is nil", func() {
+			BeforeEach(func() {
+				statusWithWarning.Status = &duckv1.Status{
+					Annotations: map[string]string{
+						warningAnnotationKey: existingWarningString,
+					},
+				}
+			})
+
+			It("should delete the annotation from the status", func() {
+				delete(expectedStatus.Annotations, warningAnnotationKey)
+				Expect(statusWithWarning.setStatusWarnings(nil).GetStatus()).To(Equal(expectedStatus))
+			})
 		})
+
+		Context("when status annotations is nil", func() {
+			BeforeEach(func() {
+				statusWithWarning.Status = &duckv1.Status{}
+				warnings = NewWarningRecords(existingWarningRecord)
+				expectedStatus.Annotations = map[string]string{
+					warningAnnotationKey: existingWarningString,
+				}
+			})
+
+			It("should set the warning annotation in the status", func() {
+				Expect(statusWithWarning.setStatusWarnings(warnings).GetStatus()).To(Equal(expectedStatus))
+			})
+		})
+
+		Context("when status annotations is not nil", func() {
+			BeforeEach(func() {
+				statusWithWarning.Status = &duckv1.Status{
+					Annotations: map[string]string{},
+				}
+			})
+
+			It("should set the warning annotation in the status", func() {
+				Expect(statusWithWarning.setStatusWarnings(warnings).GetStatus()).To(Equal(expectedStatus))
+			})
+		})
+	})
+
+	Describe("#AddWarning", func() {
+		var (
+			expectedStatus   *duckv1.Status
+			expectedWarnings *WarningRecords
+		)
+
+		BeforeEach(func() {
+			expectedStatus = &duckv1.Status{
+				Annotations: map[string]string{
+					warningAnnotationKey: "[" + existingWarningJSON + "," + newWarningJSON + "]",
+				},
+			}
+			expectedWarnings = NewWarningRecords(existingWarningRecord, warning)
+		})
+
+		Context("when warning is nil", func() {
+			It("should return itself and not modify anything", func() {
+				Expect(statusWithWarning.AddWarning(nil)).To(Equal(statusWithWarning))
+				Expect(statusWithWarning.Status).To(Equal(status))
+			})
+		})
+
+		Context("when status is not nil and warning is not nil", func() {
+			It("should add a new warning to the status", func() {
+				Expect(statusWithWarning.AddWarning(warning).GetStatus()).To(Equal(expectedStatus))
+				Expect(statusWithWarning.GetStatusWarnings()).To(Equal(expectedWarnings))
+			})
+		})
+	})
+
+	Describe("#AddWarningIfNotPresent", func() {
+		var (
+			expectedStatus   *duckv1.Status
+			expectedWarnings *WarningRecords
+		)
+
+		BeforeEach(func() {
+			expectedStatus = &duckv1.Status{
+				Annotations: map[string]string{
+					warningAnnotationKey: "[" + existingWarningJSON + "," + newWarningJSON + "]",
+				},
+			}
+			expectedWarnings = NewWarningRecords(existingWarningRecord, warning)
+		})
+
+		Context("when warning is nil", func() {
+			It("should return itself and not modify anything", func() {
+				Expect(statusWithWarning.AddWarningIfNotPresent(nil)).To(Equal(statusWithWarning))
+				Expect(statusWithWarning.Status).To(Equal(status))
+			})
+		})
+
+		Context("when status is not nil and warning is not nil", func() {
+			It("should add a new warning to the status if it is not already present", func() {
+				Expect(statusWithWarning.AddWarningIfNotPresent(warning).GetStatus()).To(Equal(expectedStatus))
+				Expect(statusWithWarning.GetStatusWarnings()).To(Equal(expectedWarnings))
+			})
+		})
+	})
+
+	Describe("#MakeWarningCondition", func() {
+		Context("when status is not nil", func() {
+			It("should return a warning condition", func() {
+				Expect(statusWithWarning.MakeWarningCondition()).To(Equal(&apis.Condition{
+					Type:     "Warning",
+					Status:   "True",
+					Severity: "Warning",
+					Reason:   "DeprecatedClusterTask",
+					Message:  "Existing Warning",
+				}))
+			})
+		})
+
 	})
 
 })

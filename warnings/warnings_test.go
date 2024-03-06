@@ -19,31 +19,128 @@ package warnings
 import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	corev1 "k8s.io/api/core/v1"
+	"knative.dev/pkg/apis"
 )
 
-func newWarning(message string) *WarningRecord {
+var (
+	w1 = newWarning("reason", "warning-1")
+	w2 = newWarning("reason", "warning-2")
+	w3 = newWarning("reason", "warning-3")
+)
+
+func newWarning(reason, message string) *WarningRecord {
 	return &WarningRecord{
+		Reason:  reason,
 		Message: message,
 	}
 }
 
-var _ = Describe("Test.AddWarningIfNotPresent", func() {
-	var (
-		tips1 = *newWarning("warning 1")
-		tips2 = *newWarning("warning 2")
-		tips3 = *newWarning("warning 3")
+type warningRecordTableEntry struct {
+	name           string
+	warningRecords *WarningRecords
+	other          *WarningRecord
+	expectedResult *WarningRecords
+}
+
+var _ = Describe("Test.WarningRecords", func() {
+
+	DescribeTable("Add",
+		func(entry warningRecordTableEntry) {
+			actualResult := entry.warningRecords.Add(entry.other)
+			Expect(actualResult).To(Equal(entry.expectedResult))
+			Expect(entry.warningRecords.Has(entry.other)).To(BeTrue())
+		},
+		Entry("Add when the warning record already exists", warningRecordTableEntry{
+			name:           "add a warning record to the list if it already exists",
+			warningRecords: NewWarningRecords(w1, w2, w3),
+			other:          w3,
+			expectedResult: NewWarningRecords(w1, w2, w3, w3),
+		}),
+		Entry("Add when the warning record does not exist", warningRecordTableEntry{
+			name:           "Add a warning record to the list if it does not exist",
+			warningRecords: NewWarningRecords(w1, w2),
+			other:          w3,
+			expectedResult: NewWarningRecords(w1, w2, w3),
+		}),
 	)
 
-	DescribeTable("should add a warning if not present",
-		func(warnings []WarningRecord, add *WarningRecord, expected []WarningRecord) {
-			actual := AddWarningIfNotPresent(warnings, add)
-			Expect(actual).To(Equal(expected))
+	DescribeTable("AddIfNotPresent",
+		func(entry warningRecordTableEntry) {
+			actualResult := entry.warningRecords.AddIfNotPresent(entry.other)
+			Expect(actualResult).To(Equal(entry.expectedResult))
+			Expect(entry.warningRecords.Has(entry.other)).To(BeTrue())
 		},
-		Entry("when the warning is nil",
-			[]WarningRecord{tips1}, nil, []WarningRecord{tips1}),
-		Entry("when the warning is not present",
-			[]WarningRecord{tips1}, &tips2, []WarningRecord{tips1, tips2}),
-		Entry("when the warning is present",
-			[]WarningRecord{tips1, tips2, tips3}, &tips3, []WarningRecord{tips1, tips2, tips3}),
+		Entry("AddIfNotPresent when the warning record already exists", warningRecordTableEntry{
+			name:           "Do not add a warning record to the list if it already exists",
+			warningRecords: NewWarningRecords(w1, w2, w3),
+			other:          w3,
+			expectedResult: NewWarningRecords(w1, w2, w3),
+		}),
+		Entry("AddIfNotPresent when the warning record does not exist", warningRecordTableEntry{
+			name:           "Add a warning record to the list if it does not exist",
+			warningRecords: NewWarningRecords(w1, w2),
+			other:          w3,
+			expectedResult: NewWarningRecords(w1, w2, w3),
+		}),
 	)
+
+	Describe("Serialize", func() {
+		It("serializes the warnings to a JSON string", func() {
+			warningRecords := NewWarningRecords(&WarningRecord{Reason: "reason", Message: "message"})
+			expectedRaw := `[{"reason":"reason","message":"message"}]`
+			actualRaw := warningRecords.Serialize()
+
+			Expect(actualRaw).To(Equal(expectedRaw))
+		})
+	})
+
+	Describe("NewWarningRecordsFromJSON", func() {
+		It("deserializes the warnings from a raw JSON string", func() {
+			expectedWarningRecords := NewWarningRecords(w1)
+			raw := `[{"reason":"reason","message":"warning-1"}]`
+			actualWarningRecords := NewWarningRecordsFromJSON(raw)
+
+			Expect(actualWarningRecords).To(Equal(expectedWarningRecords))
+		})
+
+		It("returns an empty list if the raw JSON string is empty", func() {
+			warningRecords := NewWarningRecords()
+			raw := ``
+			actualWarningRecords := NewWarningRecordsFromJSON(raw)
+
+			Expect(actualWarningRecords).To(Equal(warningRecords))
+		})
+	})
+
+	DescribeTable("ToCondition",
+		func(records *WarningRecords, expectedCondition *apis.Condition) {
+			result := records.MakeCondition()
+			Expect(result).To(Equal(expectedCondition))
+		},
+		Entry("empty slice", nil, nil),
+		Entry(
+			"single warning",
+			NewWarningRecords(w1),
+			&apis.Condition{
+				Type:     WarningConditionType,
+				Status:   corev1.ConditionTrue,
+				Severity: apis.ConditionSeverityWarning,
+				Reason:   "reason",
+				Message:  "warning-1",
+			},
+		),
+		Entry(
+			"multiple warnings",
+			NewWarningRecords(w1, w2, w3),
+			&apis.Condition{
+				Type:     WarningConditionType,
+				Status:   corev1.ConditionTrue,
+				Severity: apis.ConditionSeverityWarning,
+				Reason:   MultipleWarningsReason,
+				Message:  "1. warning-1\n2. warning-2\n3. warning-3",
+			},
+		),
+	)
+
 })
