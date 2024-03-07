@@ -1,5 +1,5 @@
 /*
-Copyright 2022 The Katanomi Authors.
+Copyright 2024 The Katanomi Authors.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -14,14 +14,20 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package substitution
+// Package warnings contains useful functions to manage warnings in the status
+package warnings
 
-import "github.com/katanomi/pkg/maps"
+import "knative.dev/pkg/apis"
 
-// MergeMap merges the right map into left map overwritting any matching keys
-// Deprecated: use maps.MergeMap instead
-var MergeMap = maps.MergeMap
+const (
+	// WarningConditionType represents a warning condition
+	WarningConditionType apis.ConditionType = "Warning"
+)
 
-// MergeMapSlice merges the right map into left map overwritting any matching keys
-// Deprecated: use maps.MergeMapSlice instead
-var MergeMapSlice = maps.MergeMapSlice
+const (
+	// MultipleWarningsReason represent contains multiple warnings
+	MultipleWarningsReason = "MultipleWarnings"
+
+	// DeprecatedClusterTaskReason indicates usage of deprecated ClusterTask
+	DeprecatedClusterTaskReason = "DeprecatedClusterTask"
+)
