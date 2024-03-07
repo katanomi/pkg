@@ -43,10 +43,15 @@ func (b *BuildGitBranchStatus) AssignByGitBranch(gitBranch *GitBranch) *BuildGit
 	if gitBranch.Spec.Protected != nil {
 		b.Protected = *gitBranch.Spec.Protected
 	}
+	b.WebURL = gitBranch.Spec.WebURL
 	if gitBranch.Spec.Properties != nil && gitBranch.Spec.Properties.Raw != nil {
 		var content map[string]string
 		json.Unmarshal(gitBranch.Spec.Properties.Raw, &content)
-		b.WebURL = content["webURL"]
+		// this is a fallback for when spec does not have the data
+		// or properties are overwritting this
+		if content["webURL"] != "" {
+			b.WebURL = content["webURL"]
+		}
 	}
 	return b
 }
@@ -80,6 +85,7 @@ func (b *BuildGitCommitStatus) AssignByGitCommit(gitCommit *GitCommit) *BuildGit
 	if gitCommit.Spec.Address != nil && gitCommit.Spec.Address.URL != nil {
 		b.WebURL = gitCommit.Spec.Address.URL.String()
 	}
+	b.PushedAt = &gitCommit.Spec.CreatedAt
 
 	if gitCommit.Spec.Properties != nil && gitCommit.Spec.Properties.Raw != nil {
 		propertiesInfo := &CommitProperties{}
