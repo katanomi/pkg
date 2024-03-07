@@ -18,8 +18,10 @@ package substitution
 
 import "github.com/katanomi/pkg/maps"
 
+// MergeMap merges the right map into left map overwritting any matching keys
 // Deprecated: use maps.MergeMap instead
 var MergeMap = maps.MergeMap
 
+// MergeMapSlice merges the right map into left map overwritting any matching keys
 // Deprecated: use maps.MergeMapSlice instead
 var MergeMapSlice = maps.MergeMapSlice
