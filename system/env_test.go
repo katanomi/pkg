@@ -39,5 +39,27 @@ func TestClusterName(t *testing.T) {
 		res := ClusterName()
 		g.Expect(res).To(Equal(tt.result))
 	}
+}
 
+func TestBaseDomain(t *testing.T) {
+	testCases := []struct {
+		value  string
+		result string
+	}{
+		{
+			value:  "",
+			result: "katanomi.dev",
+		},
+		{
+			value:  "testCluster",
+			result: "testCluster",
+		},
+	}
+	g := NewGomegaWithT(t)
+	for _, tt := range testCases {
+		os.Unsetenv(BaseDomainEnvKey)
+		os.Setenv(BaseDomainEnvKey, tt.value)
+		res := BaseDomain()
+		g.Expect(res).To(Equal(tt.result))
+	}
 }
