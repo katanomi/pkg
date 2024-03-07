@@ -38,9 +38,10 @@ func newWarning(reason, message string) *WarningRecord {
 
 type warningRecordTableEntry struct {
 	name           string
-	warningRecords *WarningRecords
+	warningRecords WarningRecords
 	other          *WarningRecord
-	expectedResult *WarningRecords
+	expectedResult WarningRecords
+	has            bool
 }
 
 var _ = Describe("Test.WarningRecords", func() {
@@ -49,19 +50,21 @@ var _ = Describe("Test.WarningRecords", func() {
 		func(entry warningRecordTableEntry) {
 			actualResult := entry.warningRecords.Add(entry.other)
 			Expect(actualResult).To(Equal(entry.expectedResult))
-			Expect(entry.warningRecords.Has(entry.other)).To(BeTrue())
+			Expect(entry.warningRecords.Has(entry.other)).To(Equal(entry.has))
 		},
 		Entry("Add when the warning record already exists", warningRecordTableEntry{
 			name:           "add a warning record to the list if it already exists",
 			warningRecords: NewWarningRecords(w1, w2, w3),
 			other:          w3,
 			expectedResult: NewWarningRecords(w1, w2, w3, w3),
+			has:            true,
 		}),
 		Entry("Add when the warning record does not exist", warningRecordTableEntry{
 			name:           "Add a warning record to the list if it does not exist",
 			warningRecords: NewWarningRecords(w1, w2),
 			other:          w3,
 			expectedResult: NewWarningRecords(w1, w2, w3),
+			has:            false,
 		}),
 	)
 
@@ -69,19 +72,21 @@ var _ = Describe("Test.WarningRecords", func() {
 		func(entry warningRecordTableEntry) {
 			actualResult := entry.warningRecords.AddIfNotPresent(entry.other)
 			Expect(actualResult).To(Equal(entry.expectedResult))
-			Expect(entry.warningRecords.Has(entry.other)).To(BeTrue())
+			Expect(entry.warningRecords.Has(entry.other)).To(Equal(entry.has))
 		},
 		Entry("AddIfNotPresent when the warning record already exists", warningRecordTableEntry{
 			name:           "Do not add a warning record to the list if it already exists",
 			warningRecords: NewWarningRecords(w1, w2, w3),
 			other:          w3,
 			expectedResult: NewWarningRecords(w1, w2, w3),
+			has:            true,
 		}),
 		Entry("AddIfNotPresent when the warning record does not exist", warningRecordTableEntry{
 			name:           "Add a warning record to the list if it does not exist",
 			warningRecords: NewWarningRecords(w1, w2),
 			other:          w3,
 			expectedResult: NewWarningRecords(w1, w2, w3),
+			has:            false,
 		}),
 	)
 
@@ -113,8 +118,26 @@ var _ = Describe("Test.WarningRecords", func() {
 		})
 	})
 
-	DescribeTable("ToCondition",
-		func(records *WarningRecords, expectedCondition *apis.Condition) {
+	DescribeTable("Has",
+		func(entry warningRecordTableEntry) {
+			Expect(entry.warningRecords.Has(entry.other)).To(Equal(entry.has))
+		},
+		Entry("Has when the warning record exists", warningRecordTableEntry{
+			name:           "return true if the warning record exists",
+			warningRecords: NewWarningRecords(w1, w2, w3),
+			other:          w3,
+			has:            true,
+		}),
+		Entry("Has when the warning record does not exist", warningRecordTableEntry{
+			name:           "return false if the warning record does not exist",
+			warningRecords: NewWarningRecords(w1, w2),
+			other:          w3,
+			has:            false,
+		}),
+	)
+
+	DescribeTable("MakeCondition",
+		func(records WarningRecords, expectedCondition *apis.Condition) {
 			result := records.MakeCondition()
 			Expect(result).To(Equal(expectedCondition))
 		},

@@ -47,57 +47,57 @@ type WarningRecord struct {
 }
 
 // NewWarningRecords creates a new warning record
-func NewWarningRecords(warnings ...*WarningRecord) *WarningRecords {
-	w := &WarningRecords{}
+func NewWarningRecords(warnings ...*WarningRecord) WarningRecords {
+	w := WarningRecords{}
 	return w.Add(warnings...)
 }
 
 // NewWarningRecordsFromJSON creates a new warning record from a json string
-func NewWarningRecordsFromJSON(raw string) *WarningRecords {
-	w := &WarningRecords{}
+func NewWarningRecordsFromJSON(raw string) WarningRecords {
+	w := WarningRecords{}
 	w = w.Deserialize(raw)
 	return w
 }
 
 // Add adds a warning to the list
-func (w *WarningRecords) Add(others ...*WarningRecord) *WarningRecords {
+func (w WarningRecords) Add(others ...*WarningRecord) WarningRecords {
 	for _, o := range others {
 		w = w.add(o)
 	}
 	return w
 }
 
-func (w *WarningRecords) add(other *WarningRecord) *WarningRecords {
+func (w WarningRecords) add(other *WarningRecord) WarningRecords {
 	if other == nil {
 		return w
 	}
-	*w = append(*w, *other)
+	w = append(w, *other)
 	return w
 }
 
 // AddIfNotPresent adds a warning to the list if it is not already present
-func (w *WarningRecords) AddIfNotPresent(others ...*WarningRecord) *WarningRecords {
+func (w WarningRecords) AddIfNotPresent(others ...*WarningRecord) WarningRecords {
 	for _, o := range others {
 		w = w.addIfNotPresent(o)
 	}
 	return w
 }
 
-func (w *WarningRecords) addIfNotPresent(other *WarningRecord) *WarningRecords {
+func (w WarningRecords) addIfNotPresent(other *WarningRecord) WarningRecords {
 	if other == nil {
 		return w
 	}
 	if w.Has(other) {
 		return w
 	}
-	*w = append(*w, *other)
+	w = append(w, *other)
 	return w
 }
 
 // Has checks if the warning already exists
-func (w *WarningRecords) Has(other *WarningRecord) bool {
-	for i := range *w {
-		if reflect.DeepEqual(&(*w)[i], other) {
+func (w WarningRecords) Has(other *WarningRecord) bool {
+	for i := range w {
+		if reflect.DeepEqual(&w[i], other) {
 			return true
 		}
 	}
@@ -105,7 +105,7 @@ func (w *WarningRecords) Has(other *WarningRecord) bool {
 }
 
 // Serialize serializes the warnings to a json string
-func (w *WarningRecords) Serialize() string {
+func (w WarningRecords) Serialize() string {
 	raw, err := json.Marshal(w)
 	if err != nil {
 		logging.FromContext(context.TODO()).Errorw("Failed to serialize warning records", "warnings", w, "error", err)
@@ -114,12 +114,12 @@ func (w *WarningRecords) Serialize() string {
 }
 
 // Deserialize deserializes the warnings from the raw json string
-func (w *WarningRecords) Deserialize(raw string) *WarningRecords {
+func (w WarningRecords) Deserialize(raw string) WarningRecords {
 	if len(raw) == 0 {
 		return w
 	}
-	*w = []WarningRecord{}
-	err := json.Unmarshal([]byte(raw), w)
+	w = []WarningRecord{}
+	err := json.Unmarshal([]byte(raw), &w)
 	if err != nil {
 		logging.FromContext(context.TODO()).Errorw("Failed to deserialize warning records", "raw", raw, "error", err)
 	}
@@ -130,22 +130,22 @@ func (w *WarningRecords) Deserialize(raw string) *WarningRecords {
 // Example:
 //
 //	&apis.Condition{
-//		Type:     WarningConditionType,
-//		Status:   corev1.ConditionTrue,
-//		Severity: apis.ConditionSeverityWarning,
+//		Type:     "Warning",
+//		Status:   "True",
+//		Severity: "Warning",
 //		Reason:   "DeprecatedClusterTask",
 //		Message:  "ClusterTask is deprecated\n",
 //	}
 //
 //	&apis.Condition{
-//		Type:     WarningConditionType,
-//		Status:   corev1.ConditionTrue,
-//		Severity: apis.ConditionSeverityWarning,
+//		Type:     "Warning",
+//		Status:   "True",
+//		Severity: "Warning",
 //		Reason:   "MultipleWarnings",
 //		Message:  "1. Warning 1\n2. Warning 2",
 //	}
-func (w *WarningRecords) MakeCondition() (condition *apis.Condition) {
-	if w == nil || len(*w) == 0 {
+func (w WarningRecords) MakeCondition() (condition *apis.Condition) {
+	if len(w) == 0 {
 		return
 	}
 
@@ -155,19 +155,19 @@ func (w *WarningRecords) MakeCondition() (condition *apis.Condition) {
 		Severity: apis.ConditionSeverityWarning,
 	}
 
-	if len(*w) == 1 {
-		condition.Reason = (*w)[0].Reason
-		condition.Message = (*w)[0].Message
+	if len(w) == 1 {
+		condition.Reason = w[0].Reason
+		condition.Message = w[0].Message
 		return
 	}
 
 	var message strings.Builder
-	for i := range *w {
-		val := &(*w)[i]
+	for i := range w {
+		warning := &w[i]
 		if i > 0 {
 			message.WriteByte('\n')
 		}
-		fmt.Fprintf(&message, "%d. %s", i+1, val.Message)
+		fmt.Fprintf(&message, "%d. %s", i+1, warning.Message)
 	}
 
 	condition.Reason = MultipleWarningsReason

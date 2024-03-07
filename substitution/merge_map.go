@@ -16,22 +16,10 @@ limitations under the License.
 
 package substitution
 
-func MergeMap(left, right map[string]string) map[string]string {
-	if left == nil {
-		left = make(map[string]string)
-	}
-	for k, v := range right {
-		left[k] = v
-	}
-	return left
-}
+import "github.com/katanomi/pkg/maps"
 
-func MergeMapSlice(left, right map[string][]string) map[string][]string {
-	if left == nil {
-		left = make(map[string][]string)
-	}
-	for k, v := range right {
-		left[k] = v
-	}
-	return left
-}
+// Deprecated: use maps.MergeMap instead
+var MergeMap = maps.MergeMap
+
+// Deprecated: use maps.MergeMapSlice instead
+var MergeMapSlice = maps.MergeMapSlice
