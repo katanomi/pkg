@@ -14,29 +14,24 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package warnings
+package record
 
 import (
 	"context"
 	"testing"
 
-	"github.com/go-logr/zapr"
-	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	uberzap "go.uber.org/zap"
-	logf "sigs.k8s.io/controller-runtime/pkg/log"
-	"sigs.k8s.io/controller-runtime/pkg/log/zap"
+	"k8s.io/client-go/tools/record"
 )
 
-var logger *uberzap.SugaredLogger
+func TestRecordContext(t *testing.T) {
+	g := NewGomegaWithT(t)
+	ctx := context.TODO()
 
-var _ = BeforeSuite(func(ctx context.Context) {
-	rawlogger := zap.NewRaw(zap.WriteTo(GinkgoWriter), zap.UseDevMode(true))
-	logf.SetLogger(zapr.NewLogger(rawlogger))
-	logger = rawlogger.Sugar()
-})
+	clt := FromContext(ctx)
+	g.Expect(clt).To(BeNil())
 
-func TestWarnings(t *testing.T) {
-	RegisterFailHandler(Fail)
-	RunSpecs(t, "Warnings Suite")
+	fakeRecorder := &record.FakeRecorder{}
+	ctx = WithRecorder(ctx, fakeRecorder)
+	g.Expect(FromContext(ctx)).To(Equal(fakeRecorder))
 }
