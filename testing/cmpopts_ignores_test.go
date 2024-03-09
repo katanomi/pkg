@@ -1,0 +1,56 @@
+/*
+Copyright 2024 The Katanomi Authors.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
+
+package testing
+
+import (
+	"github.com/google/go-cmp/cmp"
+	. "github.com/onsi/ginkgo/v2"
+	. "github.com/onsi/gomega"
+	"knative.dev/pkg/apis"
+)
+
+var _ = Describe("Test.IgnoreVolatileTime", func() {
+	var (
+		a *apis.Condition
+		b *apis.Condition
+	)
+
+	When("only volatileTime is different", func() {
+		BeforeEach(func() {
+			a = &apis.Condition{}
+			b = &apis.Condition{}
+			MustLoadYaml("./testdata/cmp.ignore.volatiletime.yaml", &a)
+			MustLoadYaml("./testdata/cmp.ignore.volatiletime.diff.time.yaml", &b)
+		})
+		It("should ignore apis.VolatileTime", func() {
+			Expect(cmp.Diff(a, b, IgnoreVolatileTime)).To(BeEmpty())
+		})
+	})
+
+	When("volatileTime and reason is different", func() {
+		BeforeEach(func() {
+			a = &apis.Condition{}
+			b = &apis.Condition{}
+			MustLoadYaml("./testdata/cmp.ignore.volatiletime.yaml", &a)
+			MustLoadYaml("./testdata/cmp.ignore.volatiletime.diff.time.reason.yaml", &b)
+		})
+		It("should ignore apis.VolatileTime", func() {
+			diff := cmp.Diff(a, b, IgnoreVolatileTime)
+			Expect(diff).To(ContainSubstring("Reason"))
+		})
+	})
+})
