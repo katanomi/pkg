@@ -115,4 +115,25 @@ var _ = Describe("Test.MarkAndRecordWarning", func() {
 		})
 	})
 
+	When("warning already exists but with different type", func() {
+		BeforeEach(func() {
+			c2 := &apis.Condition{
+				Type:    "type-2",
+				Reason:  warning.Reason,
+				Message: warning.Message,
+			}
+			managerMock.EXPECT().GetWarningCondition().Return(c2).Times(1)
+			managerMock.EXPECT().GetWarningCondition().Return(c).Times(1)
+			managerMock.EXPECT().MarkUniqueWarning(gomock.Any()).Times(1)
+		})
+		When("context has recorder", func() {
+			It("should record warning", func() {
+				Expect(fakeRecorder.Events).To(HaveLen(1))
+				msg := <-fakeRecorder.Events
+				expectedMsg := "Warning reason message"
+				Expect(msg).To(Equal(expectedMsg), msg)
+			})
+		})
+	})
+
 })

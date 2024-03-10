@@ -34,4 +34,7 @@ var _ = Describe("Test.InitGinkgoWithLogger", func() {
 	It("should return a logger", func() {
 		Expect(logger).NotTo(BeNil())
 	})
+	It("should return a logger with a prefix", func() {
+		Expect(GetDefaultLogger()).NotTo(BeNil())
+	})
 })

@@ -36,26 +36,21 @@ func InitializeGinkgoConfig() {
 
 // NewGinkgoLogger creates a new logger for Ginkgo tests.
 func NewGinkgoLogger() *uberzap.SugaredLogger {
-	rawlogger := zap.NewRaw(zap.WriteTo(GinkgoWriter), zap.UseDevMode(true))
-	logf.SetLogger(zapr.NewLogger(rawlogger))
-	logger := rawlogger.Sugar()
-	return logger
+	return zap.NewRaw(zap.WriteTo(GinkgoWriter), zap.UseDevMode(true)).Sugar()
+}
+
+// GetDefaultLogger returns the default logger for testing
+func GetDefaultLogger() *uberzap.SugaredLogger {
+	return NewGinkgoLogger()
 }
 
 // InitGinkgoWithLogger initializes Ginkgo and returns a logger.
 func InitGinkgoWithLogger() *uberzap.SugaredLogger {
 	InitializeGinkgoConfig()
+
+	// set the logger for the controller-runtime package.
+	rawlogger := zap.NewRaw(zap.WriteTo(GinkgoWriter), zap.UseDevMode(true))
+	logf.SetLogger(zapr.NewLogger(rawlogger))
+
 	return NewGinkgoLogger()
-}
-
-func init() {
-	defaultLogger = InitGinkgoWithLogger()
-}
-
-// defaultLogger is the default logger for testing
-var defaultLogger *uberzap.SugaredLogger
-
-// GetDefaultLogger returns the default logger for testing
-func GetDefaultLogger() *uberzap.SugaredLogger {
-	return defaultLogger
 }

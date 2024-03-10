@@ -19,9 +19,8 @@ package condition
 
 import (
 	"context"
+	"reflect"
 
-	"github.com/google/go-cmp/cmp"
-	"github.com/google/go-cmp/cmp/cmpopts"
 	krecord "github.com/katanomi/pkg/record"
 	"github.com/katanomi/pkg/warnings"
 	corev1 "k8s.io/api/core/v1"
@@ -68,6 +67,13 @@ func MarkAndRecordWarning(ctx context.Context, manager WarningConditionManager, 
 
 // hasConditionChanged returns true if the condition has changed, ignore the LastTransitionTime field
 func hasConditionChanged(before, after *apis.Condition) bool {
-	ignoreVolatileTime := cmpopts.IgnoreTypes(apis.VolatileTime{})
-	return cmp.Diff(before, after, ignoreVolatileTime) != ""
+	if before == after {
+		return false
+	}
+	if before == nil || after == nil {
+		return true
+	}
+	beforeCopy := before.DeepCopy()
+	beforeCopy.LastTransitionTime = after.LastTransitionTime
+	return !reflect.DeepEqual(beforeCopy, after)
 }
