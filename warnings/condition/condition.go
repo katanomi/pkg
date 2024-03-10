@@ -19,11 +19,11 @@ package condition
 
 import (
 	"context"
-	"reflect"
 
 	krecord "github.com/katanomi/pkg/record"
 	"github.com/katanomi/pkg/warnings"
 	corev1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/conversion"
 	"knative.dev/pkg/apis"
 	"knative.dev/pkg/logging"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -67,13 +67,11 @@ func MarkAndRecordWarning(ctx context.Context, manager WarningConditionManager, 
 
 // hasConditionChanged returns true if the condition has changed, ignore the LastTransitionTime field
 func hasConditionChanged(before, after *apis.Condition) bool {
-	if before == after {
-		return false
-	}
-	if before == nil || after == nil {
-		return true
-	}
-	beforeCopy := before.DeepCopy()
-	beforeCopy.LastTransitionTime = after.LastTransitionTime
-	return !reflect.DeepEqual(beforeCopy, after)
+	// ignore the LastTransitionTime field
+	equalities := conversion.EqualitiesOrDie(
+		func(a, b apis.VolatileTime) bool {
+			return true
+		},
+	)
+	return !equalities.DeepEqual(before, after)
 }

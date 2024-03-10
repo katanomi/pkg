@@ -49,8 +49,8 @@ func InitGinkgoWithLogger() *uberzap.SugaredLogger {
 	InitializeGinkgoConfig()
 
 	// set the logger for the controller-runtime package.
-	rawlogger := zap.NewRaw(zap.WriteTo(GinkgoWriter), zap.UseDevMode(true))
-	logf.SetLogger(zapr.NewLogger(rawlogger))
+	logger := NewGinkgoLogger()
+	logf.SetLogger(zapr.NewLogger(logger.Desugar()))
 
 	return NewGinkgoLogger()
 }

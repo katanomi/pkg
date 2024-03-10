@@ -18,6 +18,7 @@ package condition
 
 import (
 	"context"
+	"time"
 
 	"github.com/golang/mock/gomock"
 	krecord "github.com/katanomi/pkg/record"
@@ -26,6 +27,7 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/tools/record"
 	"knative.dev/pkg/apis"
 )
@@ -134,6 +136,46 @@ var _ = Describe("Test.MarkAndRecordWarning", func() {
 				Expect(msg).To(Equal(expectedMsg), msg)
 			})
 		})
+	})
+
+})
+
+var _ = Describe("Test.HasConditionChanged", func() {
+	var (
+		before *apis.Condition
+		after  *apis.Condition
+	)
+
+	BeforeEach(func() {
+		before = &apis.Condition{
+			Type:    "type",
+			Status:  "status",
+			Reason:  "reason",
+			Message: "message",
+			LastTransitionTime: apis.VolatileTime{
+				Inner: metav1.Time{
+					Time: time.Now(),
+				},
+			},
+		}
+		after = &apis.Condition{
+			Type:               "type",
+			Status:             "status",
+			Reason:             "reason",
+			Message:            "message",
+			LastTransitionTime: apis.VolatileTime{},
+		}
+	})
+
+	It("should return false if the condition has not changed, ignore the LastTransitionTime field", func() {
+		result := hasConditionChanged(before, after)
+		Expect(result).To(BeFalse())
+	})
+
+	It("should return true if the condition has changed", func() {
+		after.Status = "status2"
+		result := hasConditionChanged(before, after)
+		Expect(result).To(BeTrue())
 	})
 
 })
