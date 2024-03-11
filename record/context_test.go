@@ -1,5 +1,5 @@
 /*
-Copyright 2022 The Katanomi Authors.
+Copyright 2024 The Katanomi Authors.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -14,30 +14,24 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package testing_test
+package record
 
 import (
+	"context"
 	"testing"
 
-	ktesting "github.com/katanomi/pkg/testing"
-	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	"go.uber.org/zap"
+	"k8s.io/client-go/tools/record"
 )
 
-// defaultLogger is the default logger for testing
-var defaultLogger *zap.SugaredLogger
+func TestRecordContext(t *testing.T) {
+	g := NewGomegaWithT(t)
+	ctx := context.TODO()
 
-func init() {
-	defaultLogger = ktesting.InitGinkgoWithLogger()
-}
+	clt := FromContext(ctx)
+	g.Expect(clt).To(BeNil())
 
-// GetDefaultLogger returns the default logger for testing
-func GetDefaultLogger() *zap.SugaredLogger {
-	return defaultLogger
-}
-
-func TestTesting(t *testing.T) {
-	RegisterFailHandler(Fail)
-	RunSpecs(t, "Testing Suite")
+	fakeRecorder := &record.FakeRecorder{}
+	ctx = WithRecorder(ctx, fakeRecorder)
+	g.Expect(FromContext(ctx)).To(Equal(fakeRecorder))
 }

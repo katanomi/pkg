@@ -83,7 +83,7 @@ func convertToSetNamespace(namespace string) testing.ConvertRuntimeObjctToClient
 	}
 }
 
-// LoadKubeResources will load kubernetes resources from file
+// LoadKubeResourcesToCtx will load kubernetes resources from file
 // it will use client in ctx and set namespace as ctx.Namespace if namespace is empty in file
 // if you set namespace in file, it will just use it and ignore ctx.Namespace
 // you can set converts to change some extra fields before create in kubernetes
@@ -106,14 +106,14 @@ func convertToSetNamespace(namespace string) testing.ConvertRuntimeObjctToClient
 //		}
 //		return configmap, nil
 //	})
-func LoadKubeResources(ctx *TestContext, file string, converts ...testing.ConvertRuntimeObjctToClientObjectFunc) (err error) {
+func LoadKubeResourcesToCtx(ctx *TestContext, file string, converts ...testing.ConvertRuntimeObjctToClientObjectFunc) (err error) {
 	converts = append(converts, convertToSetNamespace(ctx.Namespace))
 	return testing.LoadKubeResources(file, ctx.Client, converts...)
 }
 
-// MustLoadKubeResources similar with LoadKubeResources but panic if LoadKubeResources error
-func MustLoadKubeResources(ctx *TestContext, file string, converts ...testing.ConvertRuntimeObjctToClientObjectFunc) {
-	err := LoadKubeResources(ctx, file, converts...)
+// MustLoadKubeResourcesToCtx similar with LoadKubeResources but panic if LoadKubeResources error
+func MustLoadKubeResourcesToCtx(ctx *TestContext, file string, converts ...testing.ConvertRuntimeObjctToClientObjectFunc) {
+	err := LoadKubeResourcesToCtx(ctx, file, converts...)
 	if err != nil {
 		panic(fmt.Sprintf("load yaml file failed, file path: %s, err: %s", file, err))
 	}

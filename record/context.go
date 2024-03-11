@@ -14,29 +14,24 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package warnings
+// Package record has all client logic for recording and reporting
+package record
 
 import (
 	"context"
-	"testing"
 
-	"github.com/go-logr/zapr"
-	. "github.com/onsi/ginkgo/v2"
-	. "github.com/onsi/gomega"
-	uberzap "go.uber.org/zap"
-	logf "sigs.k8s.io/controller-runtime/pkg/log"
-	"sigs.k8s.io/controller-runtime/pkg/log/zap"
+	"k8s.io/client-go/tools/record"
 )
 
-var logger *uberzap.SugaredLogger
+type recordCtxKey struct{}
 
-var _ = BeforeSuite(func(ctx context.Context) {
-	rawlogger := zap.NewRaw(zap.WriteTo(GinkgoWriter), zap.UseDevMode(true))
-	logf.SetLogger(zapr.NewLogger(rawlogger))
-	logger = rawlogger.Sugar()
-})
+// WithRecorder adds a recorder to the context
+func WithRecorder(ctx context.Context, r record.EventRecorder) context.Context {
+	return context.WithValue(ctx, recordCtxKey{}, r)
+}
 
-func TestWarnings(t *testing.T) {
-	RegisterFailHandler(Fail)
-	RunSpecs(t, "Warnings Suite")
+// FromContext gets a record from the context
+func FromContext(ctx context.Context) record.EventRecorder {
+	r, _ := ctx.Value(recordCtxKey{}).(record.EventRecorder)
+	return r
 }

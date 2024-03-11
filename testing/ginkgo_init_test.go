@@ -1,5 +1,5 @@
 /*
-Copyright 2022 The Katanomi Authors.
+Copyright 2024 The Katanomi Authors.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -14,30 +14,27 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package testing_test
+package testing
 
 import (
-	"testing"
-
-	ktesting "github.com/katanomi/pkg/testing"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	"github.com/onsi/gomega/format"
 	"go.uber.org/zap"
 )
 
-// defaultLogger is the default logger for testing
-var defaultLogger *zap.SugaredLogger
-
-func init() {
-	defaultLogger = ktesting.InitGinkgoWithLogger()
-}
-
-// GetDefaultLogger returns the default logger for testing
-func GetDefaultLogger() *zap.SugaredLogger {
-	return defaultLogger
-}
-
-func TestTesting(t *testing.T) {
-	RegisterFailHandler(Fail)
-	RunSpecs(t, "Testing Suite")
-}
+var _ = Describe("Test.InitGinkgoWithLogger", func() {
+	var logger *zap.SugaredLogger
+	BeforeEach(func() {
+		logger = InitGinkgoWithLogger()
+	})
+	It("should disable string length limit in Gomega", func() {
+		Expect(format.MaxLength).To(Equal(0))
+	})
+	It("should return a logger", func() {
+		Expect(logger).NotTo(BeNil())
+	})
+	It("should return a logger with a prefix", func() {
+		Expect(GetDefaultLogger()).NotTo(BeNil())
+	})
+})

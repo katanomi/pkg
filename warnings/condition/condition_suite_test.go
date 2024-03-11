@@ -1,5 +1,5 @@
 /*
-Copyright 2022 The Katanomi Authors.
+Copyright 2024 The Katanomi Authors.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -14,30 +14,29 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package testing_test
+package condition
 
 import (
+	"context"
 	"testing"
 
-	ktesting "github.com/katanomi/pkg/testing"
+	"github.com/go-logr/zapr"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	"go.uber.org/zap"
+	uberzap "go.uber.org/zap"
+	logf "sigs.k8s.io/controller-runtime/pkg/log"
+	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 )
 
-// defaultLogger is the default logger for testing
-var defaultLogger *zap.SugaredLogger
+var logger *uberzap.SugaredLogger
 
-func init() {
-	defaultLogger = ktesting.InitGinkgoWithLogger()
-}
+var _ = BeforeSuite(func(ctx context.Context) {
+	rawlogger := zap.NewRaw(zap.WriteTo(GinkgoWriter), zap.UseDevMode(true))
+	logf.SetLogger(zapr.NewLogger(rawlogger))
+	logger = rawlogger.Sugar()
+})
 
-// GetDefaultLogger returns the default logger for testing
-func GetDefaultLogger() *zap.SugaredLogger {
-	return defaultLogger
-}
-
-func TestTesting(t *testing.T) {
+func TestCondition(t *testing.T) {
 	RegisterFailHandler(Fail)
-	RunSpecs(t, "Testing Suite")
+	RunSpecs(t, "Condition Suite")
 }

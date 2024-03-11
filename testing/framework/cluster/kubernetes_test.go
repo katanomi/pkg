@@ -105,7 +105,7 @@ var _ = Describe("LoadKubeResources", func() {
 		converts = []ktesting.ConvertRuntimeObjctToClientObjectFunc{}
 	})
 	JustBeforeEach(func() {
-		err = LoadKubeResources(&TestContext{Namespace: "default-e2e", Client: clt}, file, converts...)
+		err = LoadKubeResourcesToCtx(&TestContext{Namespace: "default-e2e", Client: clt}, file, converts...)
 	})
 
 	When("file is a kubernetes object that not set namespace", func() {
@@ -165,6 +165,6 @@ func TestLoadKubeResources(t *testing.T) {
 
 	g := NewGomegaWithT(t)
 	g.Expect(func() {
-		MustLoadKubeResources(&TestContext{Namespace: "default", Client: clt}, "./testdata/LoadKubeResources_invalid.yaml")
+		MustLoadKubeResourcesToCtx(&TestContext{Namespace: "default", Client: clt}, "./testdata/LoadKubeResources_invalid.yaml")
 	}).Should(Panic())
 }
