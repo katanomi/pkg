@@ -48,14 +48,7 @@ func (a *ApprovalSpec) GetApprovalUsers() []rbacv1.Subject {
 
 // IsApproved return input approved status.
 func (a *UserApprovalInput) IsApproved() bool {
-	if a == nil {
-		return false
-	}
-
-	if a.Approved != nil && *a.Approved {
-		return true
-	}
-	return false
+	return a != nil && a.Approved != nil && *a.Approved
 }
 
 // SetApproved set approved field with param.

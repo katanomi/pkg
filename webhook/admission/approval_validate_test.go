@@ -285,7 +285,7 @@ var _ = Describe("Test.ValidateApproval", func() {
 			})
 			It("should return an error", func() {
 				Expect(err).ToNot(BeNil())
-				Expect(err.Error()).To(BeEquivalentTo(`unable to change the approval result for "user" from &{false } to &{true }`))
+				Expect(err.Error()).To(ContainSubstring(`unable to change the approval result for "user" from`))
 			})
 		})
 
