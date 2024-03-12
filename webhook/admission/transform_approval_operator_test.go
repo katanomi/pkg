@@ -37,6 +37,7 @@ var _ = Describe("Test.addApprovalOperator", func() {
 		checkList        []PairOfOldNewCheck
 		old, new         metav1alpha1.UserApprovals
 		ctx              context.Context
+		tmpDenied        = false
 	)
 
 	JustBeforeEach(func() {
@@ -59,7 +60,7 @@ var _ = Describe("Test.addApprovalOperator", func() {
 				new = []metav1alpha1.UserApproval{
 					{
 						Subject: rbacv1.Subject{Name: "user", Kind: rbacv1.UserKind},
-						Input:   &metav1alpha1.UserApprovalInput{Approved: false},
+						Input:   &metav1alpha1.UserApprovalInput{Approved: &tmpDenied},
 						Operator: &rbacv1.Subject{
 							Name: "user",
 							Kind: rbacv1.UserKind,
@@ -82,7 +83,7 @@ var _ = Describe("Test.addApprovalOperator", func() {
 				new = []metav1alpha1.UserApproval{
 					{
 						Subject: rbacv1.Subject{Name: "user", Kind: rbacv1.UserKind},
-						Input:   &metav1alpha1.UserApprovalInput{Approved: false},
+						Input:   &metav1alpha1.UserApprovalInput{Approved: &tmpDenied},
 						Operator: &rbacv1.Subject{
 							Name: "user",
 							Kind: rbacv1.UserKind,
@@ -108,7 +109,7 @@ var _ = Describe("Test.addApprovalOperator", func() {
 				new = []metav1alpha1.UserApproval{
 					{
 						Subject: rbacv1.Subject{Name: "user", Kind: rbacv1.UserKind},
-						Input:   &metav1alpha1.UserApprovalInput{Approved: false},
+						Input:   &metav1alpha1.UserApprovalInput{Approved: &tmpDenied},
 					},
 				}
 			})
@@ -132,7 +133,7 @@ var _ = Describe("Test.addApprovalOperator", func() {
 				new = []metav1alpha1.UserApproval{
 					{
 						Subject: rbacv1.Subject{Name: "user", Kind: rbacv1.UserKind},
-						Input:   &metav1alpha1.UserApprovalInput{Approved: false},
+						Input:   &metav1alpha1.UserApprovalInput{Approved: &tmpDenied},
 					},
 				}
 			})

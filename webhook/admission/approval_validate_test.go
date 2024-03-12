@@ -58,13 +58,16 @@ var _ = Describe("Test.ValidateApproval", func() {
 		requiresDifferentApprover bool
 		approvalSpecUsers         []rbacv1.Subject
 
-		userSubject   = generateUserSubject("user")
-		adminSubject  = generateUserSubject("admin")
-		approvedInput = &metav1alpha1.UserApprovalInput{Approved: true}
-		rejectedInput = &metav1alpha1.UserApprovalInput{Approved: false}
+		userSubject  = generateUserSubject("user")
+		adminSubject = generateUserSubject("admin")
+
+		approvedInput = &metav1alpha1.UserApprovalInput{}
+		rejectedInput = &metav1alpha1.UserApprovalInput{}
 	)
 
 	BeforeEach(func() {
+		approvedInput.SetApproved(true)
+		rejectedInput.SetApproved(false)
 		triggeredBy = &metav1alpha1.TriggeredBy{}
 		approvalPolicy = metav1alpha1.ApprovalPolicyAny
 		requiresDifferentApprover = false
@@ -282,7 +285,7 @@ var _ = Describe("Test.ValidateApproval", func() {
 			})
 			It("should return an error", func() {
 				Expect(err).ToNot(BeNil())
-				Expect(err.Error()).To(BeEquivalentTo(`unable to change the approval result for "user" from &{false } to &{true }`))
+				Expect(err.Error()).To(ContainSubstring(`unable to change the approval result for "user" from`))
 			})
 		})
 

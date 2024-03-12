@@ -88,7 +88,7 @@ func CheckApprovalResults(ctx context.Context, approvalSpec *metav1alpha1.Approv
 	approvedMessage := "Approved by"
 	for i, user := range checkUsers {
 		if user.Input != nil {
-			if user.Input.Approved {
+			if user.Input.IsApproved() {
 				if approvedCnt > 0 {
 					approvedMessage += ","
 				}

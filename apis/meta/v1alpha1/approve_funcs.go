@@ -45,3 +45,13 @@ func (a *ApprovalSpec) GetApprovalUsers() []rbacv1.Subject {
 	}
 	return a.Users
 }
+
+// IsApproved return input approved status.
+func (a *UserApprovalInput) IsApproved() bool {
+	return a != nil && a.Approved != nil && *a.Approved
+}
+
+// SetApproved set approved field with param.
+func (a *UserApprovalInput) SetApproved(approved bool) {
+	a.Approved = &approved
+}
