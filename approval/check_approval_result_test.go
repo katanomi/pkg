@@ -46,14 +46,16 @@ var _ = Describe("Test.CheckApprovalResults", func() {
 		check       *metav1alpha1.Check
 		checkStatus *metav1alpha1.ApprovalCheckStatus
 
-		ApprovedInput = &metav1alpha1.UserApprovalInput{Approved: true}
-		DeniedInput   = &metav1alpha1.UserApprovalInput{Approved: false}
+		ApprovedInput = &metav1alpha1.UserApprovalInput{}
+		DeniedInput   = &metav1alpha1.UserApprovalInput{}
 
 		approvalTime = &metav1.Time{Time: time.Now()}
 	)
 
 	BeforeEach(func() {
 		ctx = logging.WithLogger(context.TODO(), logger)
+		ApprovedInput.SetApproved(true)
+		DeniedInput.SetApproved(false)
 		approved, denied = false, false
 		message = ""
 		newCheckStatus = nil

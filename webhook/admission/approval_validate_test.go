@@ -58,13 +58,16 @@ var _ = Describe("Test.ValidateApproval", func() {
 		requiresDifferentApprover bool
 		approvalSpecUsers         []rbacv1.Subject
 
-		userSubject   = generateUserSubject("user")
-		adminSubject  = generateUserSubject("admin")
-		approvedInput = &metav1alpha1.UserApprovalInput{Approved: true}
-		rejectedInput = &metav1alpha1.UserApprovalInput{Approved: false}
+		userSubject  = generateUserSubject("user")
+		adminSubject = generateUserSubject("admin")
+
+		approvedInput = &metav1alpha1.UserApprovalInput{}
+		rejectedInput = &metav1alpha1.UserApprovalInput{}
 	)
 
 	BeforeEach(func() {
+		approvedInput.SetApproved(true)
+		rejectedInput.SetApproved(false)
 		triggeredBy = &metav1alpha1.TriggeredBy{}
 		approvalPolicy = metav1alpha1.ApprovalPolicyAny
 		requiresDifferentApprover = false

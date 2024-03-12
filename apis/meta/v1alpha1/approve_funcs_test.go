@@ -82,3 +82,37 @@ var _ = Describe("Test.ApprovalSpec", func() {
 		),
 	)
 })
+
+var _ = Describe("Test.UserApprovalInput", func() {
+	DescribeTable("UserApprovalInput.UserApprovalInput.IsApproved",
+		func(input *UserApprovalInput, expected bool) {
+			Expect(input.IsApproved()).To(Equal(expected))
+		},
+		Entry("nil input",
+			nil,
+			false,
+		),
+		Entry("nil approved",
+			&UserApprovalInput{
+				Approved: nil,
+			},
+			false,
+		),
+		Entry("approved is true",
+			func() *UserApprovalInput {
+				result := &UserApprovalInput{}
+				result.SetApproved(true)
+				return result
+			}(),
+			true,
+		),
+		Entry("approved is false",
+			func() *UserApprovalInput {
+				result := &UserApprovalInput{}
+				result.SetApproved(false)
+				return result
+			}(),
+			false,
+		),
+	)
+})

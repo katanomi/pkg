@@ -88,7 +88,7 @@ type UserApproval struct {
 type UserApprovalInput struct {
 	// Approved user approval decision
 	// +optional
-	Approved bool `json:"approved,omitempty"`
+	Approved *bool `json:"approved,omitempty"`
 
 	// Description for given deicision
 	// +optional
