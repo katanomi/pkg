@@ -23,6 +23,7 @@ import (
 	"testing"
 	"time"
 
+	"knative.dev/pkg/logging"
 	. "github.com/katanomi/pkg/testing/framework/base"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
@@ -57,6 +58,7 @@ func (f *Framework) init() {
 		panic(err)
 	}
 	f.SugaredLogger = logger.Sugar()
+	f.Context = logging.WithLogger(f.Context, f.SugaredLogger)
 }
 
 // MRun main testing.M run
