@@ -22,6 +22,8 @@ import (
 	metav1alpha1 "github.com/katanomi/pkg/apis/meta/v1alpha1"
 )
 
+//go:generate mockgen -package=types -destination=../../testing/mock/github.com/katanomi/pkg/plugin/types/project.go github.com/katanomi/pkg/plugin/types ProjectLister,ProjectGetter,SubtypeProjectGetter,ProjectCreator,ProjectDeleter
+
 // ProjectLister list project api
 type ProjectLister interface {
 	Interface
