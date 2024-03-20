@@ -22,6 +22,8 @@ import (
 	metav1alpha1 "github.com/katanomi/pkg/apis/meta/v1alpha1"
 )
 
+//go:generate mockgen -package=types -destination=../../testing/mock/github.com/katanomi/pkg/plugin/types/pull_request.go github.com/katanomi/pkg/plugin/types GitPullRequestCommentCreator,GitPullRequestCommentUpdater,GitPullRequestCommentLister,GitPullRequestHandler,GitPullRequestLister,GitPullRequestGetter,GitPullRequestCreator
+
 // GitPullRequestCommentCreator create pull request comment functions
 type GitPullRequestCommentCreator interface {
 	Interface
