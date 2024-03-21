@@ -50,6 +50,9 @@ type LevelManager struct {
 	Locker             *sync.Mutex
 	Name               string
 
+	// customObservers is a list of custom observers that will be invoked when the log config is updated
+	customObservers []func(map[string]string)
+
 	*zap.SugaredLogger
 }
 
@@ -147,6 +150,17 @@ func (l *LevelManager) Update() func(configMap *corev1.ConfigMap) {
 				v.Level.SetLevel(level)
 			}
 		}
+
+		for _, observer := range l.customObservers {
+			func() {
+				defer func() {
+					if invokeErr := recover(); invokeErr != nil {
+						l.Errorw("failed to invoke log config updater", "err", err)
+					}
+				}()
+				observer(configMap.Data)
+			}()
+		}
 	}
 }
 
@@ -161,4 +175,11 @@ func (l *LevelManager) Get(name string) zap.AtomicLevel {
 		}
 	}
 	return l.ControllerLevelMap[name].Level
+}
+
+// AddCustomObserver add a custom observer to the level manager
+func (l *LevelManager) AddCustomObserver(f func(map[string]string)) {
+	l.Locker.Lock()
+	defer l.Locker.Unlock()
+	l.customObservers = append(l.customObservers, f)
 }

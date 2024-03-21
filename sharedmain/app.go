@@ -32,9 +32,10 @@ import (
 	cloudevents "github.com/cloudevents/sdk-go/v2"
 	cloudeventsv2client "github.com/cloudevents/sdk-go/v2/client"
 	metav1alpha1 "github.com/katanomi/pkg/apis/meta/v1alpha1"
-
 	"github.com/katanomi/pkg/config"
 	storageroute "github.com/katanomi/pkg/plugin/storage/route"
+	"go.uber.org/zap/zapcore"
+	"k8s.io/klog/v2"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	utilyaml "k8s.io/apimachinery/pkg/util/yaml"
@@ -320,6 +321,21 @@ func (a *AppBuilder) Log() *AppBuilder {
 	a.Logger = a.Logger.Desugar().WithOptions(zap.UpdateCore(a.LevelManager.Get(a.Name), *a.ZapConfig)).Sugar()
 	a.Context = logging.WithLogger(a.Context, a.Logger)
 	lvlMGR.SetLogger(a.Logger)
+
+	// dynamically set klog level based on configmap configuration
+	lvlMGR.AddCustomObserver(func(m map[string]string) {
+		level := klogging.GetKlogLevelFromConfigMapData(m)
+		var klogLevel klog.Level
+		_ = klogLevel.Set(level)
+	})
+
+	// Set zap log level to -10 to avoid zap log level check.
+	// This means that klog has full control over whether to output logs.
+	// For more information: https://github.com/go-logr/zapr?tab=readme-ov-file#increasing-verbosity
+	zc := *a.ZapConfig
+	zc.Level = zap.NewAtomicLevelAt(zapcore.Level(-10))
+	z, _ := zc.Build()
+	klog.SetLogger(zapr.NewLogger(z))
 
 	// this logger will not respect the automatic level update feature
 	// and should not be used
