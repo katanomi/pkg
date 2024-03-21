@@ -1,0 +1,31 @@
+apiVersion: v1
+data:
+    _example_: 'supported: debug | info | warn | error | dpanic | panic | fatal'
+    klog.level: "9"
+    loglevel.test_info: "info"
+    loglevel.test_warn: "warn"
+    loglevel.test_error: "error"
+    zap-logger-config: |
+        {
+          "level": "info",
+          "development": false,
+          "outputPaths": ["stdout"],
+          "errorOutputPaths": ["stderr"],
+          "encoding": "json",
+          "encoderConfig": {
+            "timeKey": "ts",
+            "levelKey": "level",
+            "nameKey": "logger",
+            "callerKey": "caller",
+            "messageKey": "msg",
+            "stacktraceKey": "stacktrace",
+            "lineEnding": "",
+            "levelEncoder": "",
+            "timeEncoder": "iso8601",
+            "durationEncoder": "",
+            "callerEncoder": ""
+          }
+        }
+kind: ConfigMap
+metadata:
+    name: katanomi-config-logging
