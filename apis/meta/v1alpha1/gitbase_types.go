@@ -57,6 +57,14 @@ func (in *GitRepo) ProjectID() string {
 	if in == nil {
 		return ""
 	}
+	return in.String()
+}
+
+// String prints the GitRepo data in a user friendly format
+// Example:
+//  For Project "abc" and repository "xyz" the output is "abc/xyz"
+// Compatible with %s format and other string printing methods
+func (in GitRepo) String() string {
 	return fmt.Sprintf("%s/%s", in.Project, in.Repository)
 }
 

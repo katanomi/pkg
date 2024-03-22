@@ -18,6 +18,9 @@ package v1alpha1
 
 import (
 	"testing"
+
+	. "github.com/onsi/ginkgo/v2"
+	. "github.com/onsi/gomega"
 )
 
 func TestGitRepo_Validate(t *testing.T) {
@@ -92,3 +95,11 @@ func TestGitRepo_ProjectID(t *testing.T) {
 		})
 	}
 }
+
+var _ = DescribeTable("GitRepo.String", func(project, repository, expected string) {
+	repo := GitRepo{Project: project, Repository: repository}
+	Expect(repo.String()).To(Equal(expected), "for project %s and repository %s the expected value was %s", project, repository, expected)
+},
+	Entry("abc org using xyz repo", "abc", "xyz", "abc/xyz"),
+	Entry("root org using my-repo repo", "root", "my-repo", "root/my-repo"),
+)
