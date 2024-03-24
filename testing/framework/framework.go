@@ -23,12 +23,12 @@ import (
 	"testing"
 	"time"
 
-	"knative.dev/pkg/logging"
 	. "github.com/katanomi/pkg/testing/framework/base"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
+	"knative.dev/pkg/logging"
 )
 
 // fmw global variable to used by different test cases

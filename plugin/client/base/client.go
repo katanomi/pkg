@@ -19,6 +19,7 @@ package base
 import (
 	"context"
 	"fmt"
+	"net/url"
 	"strings"
 
 	"github.com/emicklei/go-restful/v3"
@@ -231,5 +232,25 @@ func GetSubResourcesOptionsFromRequest(req *restful.Request) (opts metav1alpha1.
 	if strings.TrimSpace(subResourcesHeader) != "" {
 		opts.SubResources = strings.Split(subResourcesHeader, ",")
 	}
+	return
+}
+
+// GetGitRepoInfo try to get the project and repository from the git address.
+func GetGitRepoInfo(gitAddress string) (host string, gitRepo metav1alpha1.GitRepo, err error) {
+	gitAddress = strings.TrimSuffix(gitAddress, ".git")
+	URL, err := url.Parse(gitAddress)
+	if err != nil {
+		return
+	}
+
+	projectRepo := strings.Split(strings.Trim(URL.Path, "/"), "/")
+	if len(projectRepo) < 2 {
+		err = fmt.Errorf("invaild git address %s which should have project and repository", gitAddress)
+		return
+	}
+
+	host = fmt.Sprintf("%s://%s", URL.Scheme, URL.Host)
+	gitRepo.Project = strings.Join(projectRepo[:len(projectRepo)-1], "/")
+	gitRepo.Repository = projectRepo[len(projectRepo)-1]
 	return
 }
