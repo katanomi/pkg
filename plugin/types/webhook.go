@@ -26,6 +26,8 @@ import (
 	"knative.dev/pkg/apis"
 )
 
+//go:generate mockgen -package=types -destination=../../testing/mock/github.com/katanomi/pkg/plugin/types/webhook.go github.com/katanomi/pkg/plugin/types WebhookRegister,WebhookCreator,WebhookUpdater,WebhookDeleter,WebhookLister,WebhookResourceDiffer,WebhookReceiver
+
 // WebhookRegister used to register and manage webhooks
 type WebhookRegister interface {
 	WebhookCreator

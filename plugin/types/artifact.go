@@ -23,6 +23,8 @@ import (
 	metav1alpha1 "github.com/katanomi/pkg/apis/meta/v1alpha1"
 )
 
+//go:generate mockgen -package=types -destination=../../testing/mock/github.com/katanomi/pkg/plugin/types/artifact.go github.com/katanomi/pkg/plugin/types ArtifactLister,ArtifactGetter,ArtifactDeleter,ProjectArtifactLister,ProjectArtifactGetter,ProjectArtifactDeleter,ProjectArtifactUploader,ProjectArtifactFileGetter,ArtifactTagDeleter,ArtifactTriggerRegister
+
 // ArtifactLister list artifact
 type ArtifactLister interface {
 	Interface

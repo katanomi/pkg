@@ -65,6 +65,7 @@ require (
 	github.com/spf13/pflag v1.0.5
 	github.com/tektoncd/pipeline v0.56.0
 	github.com/tidwall/gjson v1.14.4
+	go.uber.org/mock v0.4.0
 	golang.org/x/exp v0.0.0-20230425010034-47ecfdc1ba53
 	golang.org/x/net v0.22.0
 	k8s.io/apiextensions-apiserver v0.26.10

@@ -22,6 +22,8 @@ import (
 	metav1alpha1 "github.com/katanomi/pkg/apis/meta/v1alpha1"
 )
 
+//go:generate mockgen -package=types -destination=../../testing/mock/github.com/katanomi/pkg/plugin/types/test_module.go github.com/katanomi/pkg/plugin/types TestModuleLister
+
 // TestModuleLister list a test module
 type TestModuleLister interface {
 	Interface

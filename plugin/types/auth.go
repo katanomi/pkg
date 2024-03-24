@@ -22,6 +22,8 @@ import (
 	metav1alpha1 "github.com/katanomi/pkg/apis/meta/v1alpha1"
 )
 
+//go:generate mockgen -package=types -destination=../../testing/mock/github.com/katanomi/pkg/plugin/types/auth.go github.com/katanomi/pkg/plugin/types AuthChecker,AuthTokenGenerator
+
 // AuthChecker implements an authorization check method for plugins
 type AuthChecker interface {
 	AuthCheck(ctx context.Context, option metav1alpha1.AuthCheckOptions) (*metav1alpha1.AuthCheck, error)

@@ -22,6 +22,8 @@ import (
 	metav1alpha1 "github.com/katanomi/pkg/apis/meta/v1alpha1"
 )
 
+//go:generate mockgen -package=types -destination=../../testing/mock/github.com/katanomi/pkg/plugin/types/code_quality.go github.com/katanomi/pkg/plugin/types CodeQualityGetter
+
 type CodeQualityGetter interface {
 	Interface
 	GetCodeQuality(ctx context.Context, projectKey string) (*metav1alpha1.CodeQuality, error)
