@@ -19,6 +19,8 @@ package v1alpha1
 import (
 	"testing"
 
+	. "github.com/katanomi/pkg/testing"
+	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	authv1 "k8s.io/api/authorization/v1"
 )
@@ -37,3 +39,43 @@ func TestGitBranchResourceAttributes(t *testing.T) {
 		g.Expect(attr, branchAttr)
 	})
 }
+
+var _ = Describe("Test.GitBranch.IsProtected.IsDefault", func() {
+	var (
+		gitBranch *GitBranch
+	)
+
+	BeforeEach(func() {
+		gitBranch = &GitBranch{}
+	})
+
+	When("git branch is nil", func() {
+		BeforeEach(func() {
+			gitBranch = nil
+		})
+		It("should be false", func() {
+			Expect(gitBranch.IsProtected()).To(BeFalse())
+			Expect(gitBranch.IsDefault()).To(BeFalse())
+		})
+	})
+
+	When("git branch is not nil and value is false", func() {
+		BeforeEach(func() {
+			MustLoadYaml("./testdata/gitbranch/gitbranch_false.yaml", &gitBranch)
+		})
+		It("should be false", func() {
+			Expect(gitBranch.IsProtected()).To(BeFalse())
+			Expect(gitBranch.IsDefault()).To(BeFalse())
+		})
+	})
+
+	When("git branch is not nil and value is true", func() {
+		BeforeEach(func() {
+			MustLoadYaml("./testdata/gitbranch/gitbranch_true.yaml", &gitBranch)
+		})
+		It("should be true", func() {
+			Expect(gitBranch.IsProtected()).To(BeTrue())
+			Expect(gitBranch.IsDefault()).To(BeTrue())
+		})
+	})
+})
