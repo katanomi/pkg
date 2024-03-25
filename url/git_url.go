@@ -17,8 +17,11 @@ limitations under the License.
 package url
 
 import (
+	"fmt"
+	"net/url"
 	"strings"
 
+	metav1alpha1 "github.com/katanomi/pkg/apis/meta/v1alpha1"
 	"knative.dev/pkg/apis"
 )
 
@@ -61,4 +64,24 @@ func MatchGitURLPrefix(gitURL, target *apis.URL) bool {
 	}
 	// determine if the prefix matches
 	return strings.HasPrefix(sPath, tPath)
+}
+
+// GetGitRepoInfo try to get the project and repository from the git address.
+func GetGitRepoInfo(gitAddress string) (host string, gitRepo metav1alpha1.GitRepo, err error) {
+	gitAddress = strings.TrimSuffix(gitAddress, ".git")
+	URL, err := url.Parse(gitAddress)
+	if err != nil {
+		return
+	}
+
+	projectRepo := strings.Split(strings.Trim(URL.Path, "/"), "/")
+	if len(projectRepo) < 2 {
+		err = fmt.Errorf("invaild git address %s which should have project and repository", gitAddress)
+		return
+	}
+
+	host = fmt.Sprintf("%s://%s", URL.Scheme, URL.Host)
+	gitRepo.Project = strings.Join(projectRepo[:len(projectRepo)-1], "/")
+	gitRepo.Repository = projectRepo[len(projectRepo)-1]
+	return
 }

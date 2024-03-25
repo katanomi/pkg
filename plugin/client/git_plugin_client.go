@@ -27,8 +27,8 @@ import (
 
 	metav1alpha1 "github.com/katanomi/pkg/apis/meta/v1alpha1"
 	kclient "github.com/katanomi/pkg/client"
-	"github.com/katanomi/pkg/plugin/client/base"
 	ksecret "github.com/katanomi/pkg/secret"
+	purl "github.com/katanomi/pkg/url"
 )
 
 // GitPluginClient client for plugins
@@ -88,7 +88,7 @@ func GenerateGitPluginClient(ctx context.Context, secretRef *corev1.ObjectRefere
 		pclient = pclient.WithClassAddress(classAddress)
 	}
 
-	gitAddress, gitRepo, err := base.GetGitRepoInfo(gitRepoURL)
+	gitAddress, gitRepo, err := purl.GetGitRepoInfo(gitRepoURL)
 	if err != nil {
 		err = fmt.Errorf("get git repo info failed: %w", err)
 		return
@@ -107,5 +107,5 @@ func GenerateGitPluginClient(ctx context.Context, secretRef *corev1.ObjectRefere
 }
 
 // GetGitRepoInfo get git repo info, such as host, project
-// Deprecated: use `github.com/katanomi/pkg/plugin/client/base` instead
-var GetGitRepoInfo = base.GetGitRepoInfo
+// Deprecated: use `github.com/katanomi/pkg/url` instead
+var GetGitRepoInfo = purl.GetGitRepoInfo
