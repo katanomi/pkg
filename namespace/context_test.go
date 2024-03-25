@@ -43,3 +43,23 @@ func TestNamespaceContext(t *testing.T) {
 	g.Expect(ok).To(BeTrue())
 	g.Expect(ns).To(Equal("abc"))
 }
+
+func TestGlobalCredentialsNamespaceContext(t *testing.T) {
+	g := NewGomegaWithT(t)
+	ctrl := gomock.NewController(t)
+
+	defer ctrl.Finish()
+
+	ctx := context.TODO()
+
+	ns, ok := GlobalCredentialsNamespaceFrom(ctx)
+	g.Expect(ok).To(BeFalse())
+	g.Expect(ns).To(BeEmpty())
+
+	ctx = WithGlobalCredentialsNamespace(ctx, "abc")
+
+	g.Expect(GlobalCredentialsNamespaceValue(ctx)).To(Equal("abc"))
+	ns, ok = GlobalCredentialsNamespaceFrom(ctx)
+	g.Expect(ok).To(BeTrue())
+	g.Expect(ns).To(Equal("abc"))
+}

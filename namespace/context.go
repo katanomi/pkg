@@ -39,3 +39,22 @@ func NamespaceValue(ctx context.Context) string {
 	namespace, _ := NamespaceFrom(ctx)
 	return namespace
 }
+
+type globalCredentialsNamespaceKey struct{}
+
+// WithGlobalCredentialsNamespace returns a copy of parent in which the global credentials namespace value is set
+func WithGlobalCredentialsNamespace(parent context.Context, globalNamespace string) context.Context {
+	return context.WithValue(parent, globalCredentialsNamespaceKey{}, globalNamespace)
+}
+
+// GlobalCredentialsNamespaceFrom returns the value of the global credentials namespace key on the ctx
+func GlobalCredentialsNamespaceFrom(ctx context.Context) (string, bool) {
+	globalCredentialsNamespace, ok := ctx.Value(globalCredentialsNamespaceKey{}).(string)
+	return globalCredentialsNamespace, ok
+}
+
+// GlobalCredentialsNamespaceValue returns the value of the global credentials namespace key on the ctx, or the empty string if none
+func GlobalCredentialsNamespaceValue(ctx context.Context) string {
+	globalCredentialsNamespaceFrom, _ := GlobalCredentialsNamespaceFrom(ctx)
+	return globalCredentialsNamespaceFrom
+}
