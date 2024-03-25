@@ -22,6 +22,8 @@ import (
 	metav1alpha1 "github.com/katanomi/pkg/apis/meta/v1alpha1"
 )
 
+//go:generate mockgen -package=types -destination=../../testing/mock/github.com/katanomi/pkg/plugin/types/git_repository_file.go github.com/katanomi/pkg/plugin/types GitRepoFileGetter,GitRepoFileCreator,GitRepositoryFileTreeGetter
+
 // GitRepoFileGetter used to get a file content
 type GitRepoFileGetter interface {
 	Interface

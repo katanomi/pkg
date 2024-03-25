@@ -22,6 +22,8 @@ import (
 	metav1alpha1 "github.com/katanomi/pkg/apis/meta/v1alpha1"
 )
 
+//go:generate mockgen -package=types -destination=../../testing/mock/github.com/katanomi/pkg/plugin/types/issue.go github.com/katanomi/pkg/plugin/types IssueLister,IssueGetter,IssueBranchLister,IssueBranchCreator,IssueBranchDeleter,IssueAttributeGetter
+
 // IssueLister issue lister
 type IssueLister interface {
 	Interface

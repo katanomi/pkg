@@ -19,8 +19,6 @@ package client
 import (
 	"context"
 	"fmt"
-	"net/url"
-	"strings"
 
 	corev1 "k8s.io/api/core/v1"
 	duckv1 "knative.dev/pkg/apis/duck/v1"
@@ -30,6 +28,7 @@ import (
 	metav1alpha1 "github.com/katanomi/pkg/apis/meta/v1alpha1"
 	kclient "github.com/katanomi/pkg/client"
 	ksecret "github.com/katanomi/pkg/secret"
+	purl "github.com/katanomi/pkg/url"
 )
 
 // GitPluginClient client for plugins
@@ -89,7 +88,7 @@ func GenerateGitPluginClient(ctx context.Context, secretRef *corev1.ObjectRefere
 		pclient = pclient.WithClassAddress(classAddress)
 	}
 
-	gitAddress, gitRepo, err := GetGitRepoInfo(gitRepoURL)
+	gitAddress, gitRepo, err := purl.GetGitRepoInfo(gitRepoURL)
 	if err != nil {
 		err = fmt.Errorf("get git repo info failed: %w", err)
 		return
@@ -107,22 +106,6 @@ func GenerateGitPluginClient(ctx context.Context, secretRef *corev1.ObjectRefere
 	return gpclient, nil
 }
 
-// GetGitRepoInfo try to get the project and repository from the git address.
-func GetGitRepoInfo(gitAddress string) (host string, gitRepo metav1alpha1.GitRepo, err error) {
-	gitAddress = strings.TrimSuffix(gitAddress, ".git")
-	URL, err := url.Parse(gitAddress)
-	if err != nil {
-		return
-	}
-
-	projectRepo := strings.Split(strings.Trim(URL.Path, "/"), "/")
-	if len(projectRepo) < 2 {
-		err = fmt.Errorf("invaild git address %s which should have project and repository", gitAddress)
-		return
-	}
-
-	host = fmt.Sprintf("%s://%s", URL.Scheme, URL.Host)
-	gitRepo.Project = strings.Join(projectRepo[:len(projectRepo)-1], "/")
-	gitRepo.Repository = projectRepo[len(projectRepo)-1]
-	return
-}
+// GetGitRepoInfo get git repo info, such as host, project
+// Deprecated: use `github.com/katanomi/pkg/url` instead
+var GetGitRepoInfo = purl.GetGitRepoInfo

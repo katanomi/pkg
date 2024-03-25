@@ -22,6 +22,8 @@ import (
 	metav1alpha1 "github.com/katanomi/pkg/apis/meta/v1alpha1"
 )
 
+//go:generate mockgen -package=types -destination=../../testing/mock/github.com/katanomi/pkg/plugin/types/project_user.go github.com/katanomi/pkg/plugin/types ProjectUserLister
+
 type ProjectUserLister interface {
 	Interface
 	ListProjectUsers(ctx context.Context, params metav1alpha1.UserOptions, option metav1alpha1.ListOptions) (*metav1alpha1.UserList, error)

@@ -25,6 +25,8 @@ import (
 	"knative.dev/pkg/apis"
 )
 
+//go:generate mockgen -package=types -destination=../../testing/mock/github.com/katanomi/pkg/plugin/types/plugin.go github.com/katanomi/pkg/plugin/types Interface,PluginRegister,PluginAddressable,DependentResourceGetter,AdditionalWebhookRegister,ResourcePathFormatter,PluginDisplayColumns,PluginAttributes,PluginVersionAttributes,LivenessChecker,Initializer,ToolMetadataGetter
+
 // Interface base interface for plugins
 type Interface interface {
 	Path() string

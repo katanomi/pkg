@@ -77,3 +77,19 @@ func GitBranchResourceAttributes(verb string) authv1.ResourceAttributes {
 		Verb:     verb,
 	}
 }
+
+// IsProtected returns true if the branch is protected
+func (r *GitBranch) IsProtected() bool {
+	if r != nil && r.Spec.Protected != nil {
+		return *r.Spec.Protected
+	}
+	return false
+}
+
+// IsDefault returns true if the branch is default
+func (r *GitBranch) IsDefault() bool {
+	if r != nil && r.Spec.Default != nil {
+		return *r.Spec.Default
+	}
+	return false
+}

@@ -22,6 +22,8 @@ import (
 	metav1alpha1 "github.com/katanomi/pkg/apis/meta/v1alpha1"
 )
 
+//go:generate mockgen -package=types -destination=../../testing/mock/github.com/katanomi/pkg/plugin/types/git_tag.go github.com/katanomi/pkg/plugin/types GitRepositoryTagCreator,GitRepositoryTagGetter,GitRepositoryTagLister
+
 // GitRepositoryTagCreator create git repository tag
 type GitRepositoryTagCreator interface {
 	Interface

@@ -1,0 +1,10 @@
+apiVersion: "meta.katanomi.dev/v1alpha1"
+kind: "GitBranch"
+metadata:
+  name: "branch"
+spec:
+  name: "main"
+  project: "default"
+  repository: "katanomi"
+  protected: false
+  default: false
