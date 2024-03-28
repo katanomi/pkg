@@ -19,6 +19,7 @@ package cluster
 import (
 	"strings"
 
+	"github.com/katanomi/pkg/testing/assertions"
 	"github.com/katanomi/pkg/testing/framework/base"
 
 	"github.com/katanomi/pkg/multicluster"
@@ -38,6 +39,13 @@ type TestContext struct {
 	Namespace string
 
 	MultiClusterClient multicluster.Interface
+}
+
+var _ assertions.TestContexter = &TestContext{}
+
+// GetClient returns a client to access kubernetes resources
+func (ctx *TestContext) GetClient() client.Client {
+	return ctx.Client
 }
 
 // TestContextOption options for building TestContext

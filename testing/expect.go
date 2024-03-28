@@ -17,10 +17,9 @@ limitations under the License.
 package testing
 
 import (
-	"fmt"
 	"time"
 
-	"github.com/onsi/gomega/format"
+	"github.com/katanomi/pkg/testing/assertions"
 
 	ctrlclient "sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -39,6 +38,11 @@ import (
 //		object.(*corev1.Pod).Status = corev1.PodStatus{} // do not compare Status
 //		return object
 //	}).Should(BeEmpty())
+//
+// Deprecated: should use regular Expect with assertions.DiffEqual instead
+// Example:
+//
+//	Expect(obj).To(DiffEqual(expected, cmpopts.IgnoreTypes(v1.TypeMeta{}, v1.PodStatus{})))
 func ExpectDiff(actual interface{}, expected interface{}, diffCleanFuncs ...func(object interface{}) interface{}) gomega.Assertion {
 	cleanFuncs := []func(object interface{}) interface{}{}
 	if len(diffCleanFuncs) == 0 {
@@ -61,6 +65,8 @@ func ExpectDiff(actual interface{}, expected interface{}, diffCleanFuncs ...func
 //   - ResourceVersion
 //   - Generation
 //   - SelfLink
+//
+// Deprecated: use assertions.DiffEqual and assertions.IgnoreObjectMetaFields instead
 func KubeObjectDiffClean(object interface{}) interface{} {
 
 	k8sObject, ok := object.(ctrlclient.Object)
@@ -81,48 +87,10 @@ func KubeObjectDiffClean(object interface{}) interface{} {
 
 // DiffEqualTo will use github.com/google/go-cmp/cmp.Diff to compare
 // you can use diffCleanFuncs to change object in order to clean some fields that you don't want to compare
+// Deprecated: use assertions.DiffEqual instead
 func DiffEqualTo(expected interface{}, diffCleanFuncs ...func(object interface{}) interface{}) gomega.OmegaMatcher {
-	return &DiffEqualMatcher{Expected: expected, DiffCleanFunc: diffCleanFuncs}
-}
-
-// DiffEqualMatcher will use github.com/google/go-cmp/cmp.Diff to compare
-// you can use diffCleanFuncs to change object in order to clean some fields that you don't want to compare
-type DiffEqualMatcher struct {
-	Expected      interface{}
-	DiffCleanFunc []func(object interface{}) interface{}
-
-	diff string
-}
-
-func (matcher *DiffEqualMatcher) Match(actual interface{}) (success bool, err error) {
-	if actual == nil && matcher.Expected == nil {
-		return false, fmt.Errorf("Both actual and expected must not be nil.")
+	if len(diffCleanFuncs) == 0 {
+		diffCleanFuncs = append(diffCleanFuncs, KubeObjectDiffClean)
 	}
-
-	cleanFuncs := []func(object interface{}) interface{}{}
-	if len(matcher.DiffCleanFunc) == 0 {
-		cleanFuncs = append(cleanFuncs, KubeObjectDiffClean)
-	}
-	cleanFuncs = append(cleanFuncs, matcher.DiffCleanFunc...)
-
-	for _, cleanF := range cleanFuncs {
-		matcher.Expected = cleanF(matcher.Expected)
-		actual = cleanF(actual)
-	}
-
-	diff := cmp.Diff(actual, matcher.Expected)
-	matcher.diff = diff
-	if diff == "" {
-		return true, nil
-	}
-
-	return false, nil
-}
-
-func (matcher *DiffEqualMatcher) FailureMessage(_ interface{}) (message string) {
-	return format.Message(matcher.diff, "to be equivalent to", "")
-}
-
-func (matcher *DiffEqualMatcher) NegatedFailureMessage(_ interface{}) (message string) {
-	return format.Message(matcher.diff, "not to be equivalent to", "")
+	return &assertions.DiffEqualMatcher{Expected: expected, DiffCleanFunc: diffCleanFuncs}
 }
