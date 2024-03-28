@@ -29,6 +29,16 @@ type TestContext struct {
 	*zap.SugaredLogger
 }
 
+// GetLogger returns a logger
+func (ctx *TestContext) GetLogger() *zap.SugaredLogger {
+	return ctx.SugaredLogger
+}
+
+// GetContext returns the context for TestContext
+func (ctx *TestContext) GetContext() context.Context {
+	return ctx.Context
+}
+
 // TestContextGetter interface to get test context
 type TestContextGetter interface {
 	// GetTestContext get test case context
