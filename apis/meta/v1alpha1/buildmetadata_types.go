@@ -155,4 +155,6 @@ type BuildGitPullRequestStatus struct {
 	HasConflicts bool `json:"hasConflicts" variable:"example=false"`
 	// MergedBy indicates pr was merged by user use email
 	MergedBy GitUserBaseInfo `json:"mergedBy,omitempty" variable:"example=joedoe@example.com"`
+	// MergedAt indicates when the pr was merged
+	MergedAt *metav1.Time `json:"mergedAt,omitempty" variable:"-"`
 }

@@ -119,6 +119,9 @@ func (b *BuildGitPullRequestStatus) AssignByGitPullRequest(gitPullRequest *GitPu
 		b.WebURL = content["webURL"]
 	}
 	b.MergedBy = gitPullRequest.Spec.MergedBy
+	if gitPullRequest.Spec.MergeLog != nil {
+		b.MergedAt = gitPullRequest.Spec.MergeLog.Time
+	}
 	return b
 }
 
