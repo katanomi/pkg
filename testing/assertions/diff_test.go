@@ -38,7 +38,7 @@ var _ = Describe("DiffEqual", func() {
 
 	When("asserting using clean function", func() {
 		It("should use diff clean function", func() {
-			data := map[string]string{"a":"b"}
+			data := map[string]string{"a": "b"}
 			matcher := &DiffEqualMatcher{Expected: data, DiffCleanFunc: []func(obj interface{}) interface{}{
 				func(obj interface{}) interface{} {
 					if dict, ok := obj.(map[string]string); ok {

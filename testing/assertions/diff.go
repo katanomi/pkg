@@ -30,6 +30,7 @@ import (
 	"github.com/onsi/gomega"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime"
 )
 
 // DiffEqual will use github.com/google/go-cmp/cmp.Diff to compare
@@ -113,3 +114,9 @@ func IgnoreObjectMetaFields(fields ...string) cmp.Option {
 
 // DefaultIgnoreObjectMetaFields common fields to ignore in metav1.ObjectMeta using cmp.Diff method
 var DefaultIgnoreObjectMetaFields = []string{"CreationTimestamp", "DeletionTimestamp", "DeletionGracePeriodSeconds", "Finalizers", "UID", "Generation", "ManagedFields", "ResourceVersion", "SelfLink", "UID"}
+
+// IgnoreTypeMeta will ignore the fields in metav1.TypeMeta in a cmp.Diff comparison
+var IgnoreTypeMeta = cmpopts.IgnoreTypes(metav1.TypeMeta{})
+
+// IgnoreRawExtension will ignore the fields in runtime.RawExtension in a cmp.Diff comparison
+var IgnoreRawExtension = cmpopts.IgnoreTypes(runtime.RawExtension{})
