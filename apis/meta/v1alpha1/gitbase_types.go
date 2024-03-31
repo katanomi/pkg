@@ -33,6 +33,7 @@ type GitUserBaseInfo struct {
 	Email string `json:"email"  variable:"example=joedoe@example.com"`
 }
 
+// ConvertToWithoutVariable convert GitUserBaseInfo to GitUserBaseInfoWithoutVariable
 func (g GitUserBaseInfo) ConvertToWithoutVariable() GitUserBaseInfoWithoutVariable {
 	return GitUserBaseInfoWithoutVariable{
 		Name:  g.Name,
@@ -40,7 +41,8 @@ func (g GitUserBaseInfo) ConvertToWithoutVariable() GitUserBaseInfoWithoutVariab
 	}
 }
 
-// GitUserBaseInfoWithoutVariable user base info without variable
+// GitUserBaseInfoWithoutVariable user base info without variable avoiding for
+// variable parse
 type GitUserBaseInfoWithoutVariable struct {
 	// Name is the login Name
 	Name string `json:"name" variable:"-"`
