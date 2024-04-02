@@ -51,6 +51,11 @@ func (n *Node) AddAdditionalLabels(labels Labels) {
 	n.additionalLabels = append(n.additionalLabels, labels...)
 }
 
+// AdditionalLabels return the additional labels of the node
+func (n *Node) AdditionalLabels() Labels {
+	return n.additionalLabels
+}
+
 // RegisterTestCase iterate over the node tree, register all the test case to ginkgo
 func (n *Node) RegisterTestCase() {
 	n.registerTestCase()
@@ -87,7 +92,8 @@ func (n *Node) clone(original *Node) *Node {
 		}
 	}
 
-	clone.additionalLabels = Labels{}
+	clone.additionalLabels = make(Labels, len(original.additionalLabels))
+	copy(clone.additionalLabels, original.additionalLabels)
 	return &clone
 }
 

@@ -18,8 +18,11 @@ package conformance
 
 import (
 	"context"
+
+	. "github.com/onsi/ginkgo/v2"
 )
 
+// NewTestCase a construct new test case
 func NewTestCase(name string) *testCase {
 	return &testCase{node: NewNode(TestCaseLevel, name)}
 }
@@ -30,6 +33,17 @@ type testCase struct {
 	testPoints []*testPoint
 }
 
+// AddLabels add custom labels for the test case
+func (t *testCase) AddLabels(labels ...Labels) *testCase {
+	var list Labels
+	for _, item := range labels {
+		list = append(list, item...)
+	}
+	t.node.AddAdditionalLabels(list)
+	return t
+}
+
+// Build construct a `CaseSetFactory` with the `caseRegister`
 func (t *testCase) Build(caseRegister func(ctx context.Context)) CaseSetFactory {
 	return NewCaseProxy(t).Build(caseRegister)
 }

@@ -108,6 +108,27 @@ var _ = Describe("test for node clone", func() {
 			compareNode(clonedNode.SubNodes[0], subNode)
 		})
 	})
+
+	When("with custom labels", func() {
+		var subNode *Node
+		BeforeEach(func() {
+			subNode = NewNode(FunctionLevel, "sub")
+			subNode.AddAdditionalLabels(Labels{"custom:label"})
+			subNode.LinkParentNode(node)
+		})
+		It("should be cloned with custom labels", func() {
+			checkTopNode(clonedNode)
+			compareNode(clonedNode, node)
+
+			clonedSubNode := clonedNode.SubNodes[0]
+			Expect(clonedSubNode.additionalLabels).To(HaveLen(1))
+			Expect(clonedSubNode.additionalLabels[0]).To(Equal("custom:label"))
+
+			By("update the original node should not affect the cloned node")
+			subNode.additionalLabels[0] = "updated"
+			Expect(clonedSubNode.additionalLabels[0]).To(Equal("custom:label"))
+		})
+	})
 })
 
 func TestNode_Equal(t *testing.T) {
