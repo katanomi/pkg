@@ -69,6 +69,10 @@ type TestCaseBuilder struct {
 	// Scheme the scheme for initializing the k8s client
 	Scheme *runtime.Scheme
 
+	// ObjectLists the list of objects to be reported in the test case
+	// whenever a test case fails
+	ObjectLists []client.ObjectList
+
 	testSpecFunc TestSpecFunc
 }
 
@@ -167,12 +171,34 @@ func (b *TestCaseBuilder) checkCondition(testContext *TestContext) (skip bool, e
 	return
 }
 
+// WithObjectListReport will add a list of objects to be reported just after each test case
+// if the test case fails.
+// Can be used with testing.ListByGVK() to quickly create an ObjectList.
+// Example:
+// var _ = P0Case("test case").
+//
+//	Cluster().
+//	WithObjectListReport(testing.ListByGVK(schema.GroupVersionKind{
+//	  Group:   "tekton.dev",
+//	  Version: "v1beta1",
+//	  Kind:    "PipelineRunList",
+//	}, &corev1.ConfigMapList{}).DoWithContext(ctx)
+//
+// Note that multiple ObjectList can be added to the same test case.
+func (b *TestCaseBuilder) WithObjectListReport(objectList ...client.ObjectList) *TestCaseBuilder {
+	b.ObjectLists = append(b.ObjectLists, objectList...)
+	return b
+}
+
 // WithFunc replaces the function with another given function
 func (b *TestCaseBuilder) WithFunc(tc TestSpecFunc) *TestCaseBuilder {
 	b.testSpecFunc = tc
 	return b
 }
 
+// DoWithContext runs the test case builder with the given context.
+// It sets up the test context, checks test conditions, adds object reporting,
+// and runs the test spec function if provided.
 func (b *TestCaseBuilder) DoWithContext(ctx context.Context) bool {
 	fullName := b.baseBuilder.CaseName()
 	return Describe(fullName, Ordered, Labels(b.baseBuilder.Labels), func() {
@@ -193,6 +219,12 @@ func (b *TestCaseBuilder) DoWithContext(ctx context.Context) bool {
 				}
 			}
 		})
+
+		if len(b.ObjectLists) > 0 {
+			JustAfterEach(func() {
+				ReportObjectsLists(testCtx, b.ObjectLists...)
+			})
+		}
 
 		if b.testSpecFunc != nil {
 			b.testSpecFunc(testCtx)
