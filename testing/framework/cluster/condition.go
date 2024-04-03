@@ -183,10 +183,11 @@ func MustRollback(testCtx *TestContext, obj client.Object, opts ...client.Delete
 
 // WaitRollback Wait for the delete object behavior to complete
 func WaitRollback(testCtx *TestContext, obj client.Object) {
+	var err error
 	key := types.NamespacedName{Namespace: obj.GetNamespace(), Name: obj.GetName()}
 	Eventually(func(g Gomega) error {
-		err := testCtx.Client.Get(testCtx.Context, key, obj)
+		err = testCtx.Client.Get(testCtx.Context, key, obj)
 		g.Expect(errors.IsNotFound(err)).To(BeTrue())
 		return nil
-	}).WithPolling(time.Second).WithTimeout(time.Minute).Should(Succeed())
+	}).WithPolling(time.Second).WithTimeout(time.Minute).Should(Succeed(), "should delete object %s of kind %s but got err: %s", key, obj.GetObjectKind(), err)
 }
