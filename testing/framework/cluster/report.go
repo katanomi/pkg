@@ -31,9 +31,17 @@ import (
 //	  ReportObjectsLists(ctx, &corev1.ConfigMapList{}, &corev1.PodList{})
 //	})
 func ReportObjectsLists(ctx *TestContext, objects ...ctrlclient.ObjectList) {
+	// Adding InNamespace option will make test reports clear
+	// and will avoid extra noise from unrelated namespaces.
+	// For Cluster scoped resources this will have no effect and
+	// will return all resources in the cluster.
+	options := []ctrlclient.ListOption{}
+	if ctx.Namespace != "" {
+		options = append(options, ctrlclient.InNamespace(ctx.Namespace))
+	}
 	for _, _item := range objects {
 		item := _item
-		ReportObjectListWithOptions(ctx, item)
+		ReportObjectListWithOptions(ctx, item, options...)
 	}
 }
 
