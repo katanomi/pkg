@@ -38,7 +38,11 @@ type testPoint struct {
 	node *Node
 
 	// additionalAssertions each feature can have a custom assertion
-	additionalAssertions map[FeatureCaseLabeler]interface{}
+	additionalAssertions map[*featureCase]interface{}
+
+	// lazyFeatureCaseBinder is a lazy binder for custom assertion
+	// It is used to lazily bind the feature case to the custom assertion
+	lazyFeatureCaseBinder *lazyFeatureCaseBind
 }
 
 // Labels returns all the labels for the test point
@@ -78,26 +82,47 @@ func (t *testPoint) CheckExternalAssertion(args ...interface{}) {
 }
 
 // Bind alias of AddAssertion
-func (t *testPoint) Bind(feature FeatureCaseLabeler) CustomAssertion {
-	return AddAssertionFunc(func(f interface{}) *testPoint {
-		return t.AddAssertion(feature, f)
-	})
+// Deprecated: use AddAssertion instead
+// retain this method for compatibility
+func (t *testPoint) Bind(_ *featureCase) CustomAssertion {
+	return t
 }
 
-// AddAssertion add a custom assertion to the test point for a special feature
-// func (t *testPoint) AddAssertion(feature *featureCase, assertFunc interface{}) *testPoint {
-func (t *testPoint) AddAssertion(feature FeatureCaseLabeler, assertFunc interface{}) *testPoint {
+// AddAssertion add a custom assertion to the test point for a special feature.
+// When the method is called, it will create a lazyFeatureCaseBinder to bind the
+// custom assertion to the feature case later.
+//
+// Example:
+//
+//	auth.TestPointOauth2.AddAssertion(func(statusCode int) {
+//	  Expect(statusCode >= 200).To(BeTrue())
+//	}),
+func (t *testPoint) AddAssertion(assertFunc interface{}) *testPoint {
 	// check assertFunc is a function
 	val := reflect.ValueOf(assertFunc)
 	if val.Kind() != reflect.Func || val.Type().NumIn() == 0 {
 		panic("assertFunc must be a function with at least one argument")
 	}
-	if t.additionalAssertions == nil {
-		t.additionalAssertions = make(map[FeatureCaseLabeler]interface{})
+
+	if t.lazyFeatureCaseBinder != nil {
+		panic("assertion function should finish binding before adding new assertion")
 	}
 
-	t.additionalAssertions[feature] = assertFunc
+	t.lazyFeatureCaseBinder = &lazyFeatureCaseBind{assertFunc: assertFunc}
 	return t
+}
+
+// bindFeature bind the feature case to the current test point
+// Now it used to bind the custom assertion to the feature case.
+func (t *testPoint) bindFeature(feature *featureCase) {
+	if t.lazyFeatureCaseBinder == nil {
+		return
+	}
+	if t.additionalAssertions == nil {
+		t.additionalAssertions = make(map[*featureCase]interface{})
+	}
+	t.additionalAssertions[feature] = t.lazyFeatureCaseBinder.assertFunc
+	t.lazyFeatureCaseBinder = nil
 }
 
 // invokeFunction invokes the function with the given parameters

@@ -1,3 +1,5 @@
+//go:build e2e
+
 /*
 Copyright 2023 The Katanomi Authors.
 
@@ -46,9 +48,11 @@ var _ = func() bool {
 			auth.CaseSet.New().Focus(
 				auth.TestPointBasicAuth.Bind(authFeature).AddAssertion(func(statusCode int) {
 					GinkgoWriter.Println("run customize assertion")
+					Expect(statusCode >= 200).To(BeFalse())
+				}),
+				auth.TestPointOauth2.AddAssertion(func(statusCode int) {
 					Expect(statusCode >= 200).To(BeTrue())
 				}),
-				auth.TestPointOauth2,
 			),
 		),
 		NewFeatureCase("feature2",

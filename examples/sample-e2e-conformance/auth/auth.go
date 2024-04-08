@@ -46,6 +46,7 @@ var caseAuthCheck = P0Case("plugin authentication").
 		statusCode := 200
 		It("should be authenticated successful", func() {
 			Expect(statusCode).To(Equal(200))
+			TestPointOauth2.CheckExternalAssertion(statusCode)
 		})
 	})
 

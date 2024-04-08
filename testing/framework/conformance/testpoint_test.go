@@ -40,9 +40,10 @@ var _ = Describe("Test_testPoint_CheckExternalAssertion", func() {
 	Context("Registered custom assertions", func() {
 		var feature = NewFeatureCase("test-feature")
 		BeforeEach(func() {
-			testPoint.AddAssertion(feature, func(intVal int, stringVal string) {
+			testPoint.AddAssertion(func(intVal int, stringVal string) {
 				panic("test panic")
 			})
+			testPoint.bindFeature(feature)
 		})
 
 		When("the testcase contains the same labels as the feature", feature.node.Labels(), func() {
