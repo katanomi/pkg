@@ -51,6 +51,13 @@ func (m *caseProxy) LinkParentNode(node *Node) {
 	m.proxyNode.caseRegister = m.RegisterTestCase
 }
 
+// bindFeature Bind the testcase and all testpoints to the feature case.
+func (m *caseProxy) bindFeature(feature *featureCase) {
+	for _, item := range m.focusedTestPoints {
+		item.bindFeature(feature)
+	}
+}
+
 // RegisterTestCase register all the test cases
 func (m *caseProxy) RegisterTestCase() {
 	if m.caseRegister == nil {

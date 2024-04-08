@@ -16,10 +16,6 @@ limitations under the License.
 
 package conformance
 
-import (
-	. "github.com/onsi/ginkgo/v2"
-)
-
 // CaseSetFactory factory to create a case set
 type CaseSetFactory interface {
 	// New construct a new case set
@@ -30,6 +26,8 @@ type CaseSetFactory interface {
 type CaseSet interface {
 	CaseLinker
 
+	featureBinder
+
 	// Focus specify the test points to be executed
 	Focus(testPoints ...*testPoint) CaseSet
 
@@ -37,15 +35,7 @@ type CaseSet interface {
 	Optional() CaseSet
 }
 
-// FeatureCaseLabeler is an interface that provides methods to
-// retrieve the labels associated with the feature case.
-//
-// Labels returns the labels associated with the feature case.
-type FeatureCaseLabeler interface {
-	Labels() Labels
-}
-
-// CaseLinker describe a interface to link test case to parent node
+// CaseLinker describe an interface to link test case to parent node
 type CaseLinker interface {
 	// LinkParentNode link test case to parent node
 	LinkParentNode(node *Node)
@@ -55,6 +45,12 @@ type CaseLinker interface {
 type CustomAssertion interface {
 	// AddAssertion add a custom assertion
 	AddAssertion(f interface{}) *testPoint
+}
+
+// featureBinder is an interface that provides method
+// to bind something to a feature case
+type featureBinder interface {
+	bindFeature(feature *featureCase)
 }
 
 // AddAssertionFunc helper function to make a implementation of CustomAssertion interface

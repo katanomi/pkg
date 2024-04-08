@@ -51,12 +51,6 @@ func (m *moduleCase) AddFeatureCase(featureCases ...*featureCase) {
 	m.AddFunctionCase(virtualFunctionCase)
 }
 
-// GetFeatureCase get feature case by name
-// to be used when binding to a test point and adding custom assertion
-func (m *moduleCase) GetFeatureCase(name string) FeatureCaseLabeler {
-	return NewLazyFeatureCaseLabeler(name, m)
-}
-
 func (m *moduleCase) RegisterTestCase() {
 	m.node.RegisterTestCase()
 }
@@ -103,6 +97,7 @@ type featureCase struct {
 func (f *featureCase) AddTestCaseSet(caseSets ...CaseSet) *featureCase {
 	for _, caseSet := range caseSets {
 		caseSet.LinkParentNode(f.node)
+		caseSet.bindFeature(f)
 	}
 	return f
 }
@@ -112,30 +107,18 @@ func (f *featureCase) Labels() Labels {
 	return f.node.Labels()
 }
 
-// NewLazyFeatureCaseLabeler creates a new FeatureCaseLabeler that lazily fetches the labels
-// from the SubNodes of moduleCase when Labels method is called
-// If no subFeature case with the given name exists, it will return empty labels
-func NewLazyFeatureCaseLabeler(name string, module *moduleCase) FeatureCaseLabeler {
-	return &lazyFeatureCaseBuilder{
-		name:   name,
-		module: module,
-	}
+// lazyFeatureCaseBind is a struct used to lazily bind custom assertion to a feature case
+type lazyFeatureCaseBind struct {
+	feature    *featureCase
+	assertFunc interface{}
 }
 
-// lazyFeatureCaseBuilder is a struct that lazily fetches the labels
-// from the SubNodes of moduleCase when Labels method is called.
-// If no subFeature case with the given name exists, it will return empty labels.
-type lazyFeatureCaseBuilder struct {
-	name   string
-	module *moduleCase
-}
-
-// Labels returns the labels associated with the featureCase. If no subFeature case with the given name exists, it will return an empty slice of labels.
-func (l *lazyFeatureCaseBuilder) Labels() Labels {
-	for _, f := range l.module.node.SubNodes {
-		if f.Name == l.name {
-			return f.Labels()
-		}
+// Labels returns the labels associated with the featureCase.
+// If there is no associated feature case, it will return an empty slice of labels.
+func (c *lazyFeatureCaseBind) Labels() Labels {
+	if c.feature == nil {
+		return Labels{}
 	}
-	return []string{}
+
+	return c.feature.Labels()
 }
