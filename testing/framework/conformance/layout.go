@@ -16,6 +16,10 @@ limitations under the License.
 
 package conformance
 
+import (
+	. "github.com/onsi/ginkgo/v2"
+)
+
 // currently, only support 3 levels of hierarchy(module -> function -> feature).
 // But it can be extended to support more levels of hierarchy easily.
 
@@ -45,6 +49,12 @@ func (m *moduleCase) AddFunctionCase(functionCases ...*functionCase) {
 func (m *moduleCase) AddFeatureCase(featureCases ...*featureCase) {
 	virtualFunctionCase := NewFunctionCase(m.node.Name, featureCases...)
 	m.AddFunctionCase(virtualFunctionCase)
+}
+
+// GetFeatureCase get feature case by name
+// to be used when binding to a test point and adding custom assertion
+func (m *moduleCase) GetFeatureCase(name string) FeatureCaseLabeler {
+	return NewLazyFeatureCaseLabeler(name, m)
 }
 
 func (m *moduleCase) RegisterTestCase() {
@@ -83,6 +93,8 @@ func NewFeatureCase(featureName string, caseSets ...CaseSet) *featureCase {
 	return fCase
 }
 
+// featureCase represents a test case for a specific feature.
+// It contains a node that represents the feature in the test hierarchy.
 type featureCase struct {
 	node *Node
 }
@@ -93,4 +105,37 @@ func (f *featureCase) AddTestCaseSet(caseSets ...CaseSet) *featureCase {
 		caseSet.LinkParentNode(f.node)
 	}
 	return f
+}
+
+// Labels returns the labels associated with the featureCase.
+func (f *featureCase) Labels() Labels {
+	return f.node.Labels()
+}
+
+// NewLazyFeatureCaseLabeler creates a new FeatureCaseLabeler that lazily fetches the labels
+// from the SubNodes of moduleCase when Labels method is called
+// If no subFeature case with the given name exists, it will return empty labels
+func NewLazyFeatureCaseLabeler(name string, module *moduleCase) FeatureCaseLabeler {
+	return &lazyFeatureCaseBuilder{
+		name:   name,
+		module: module,
+	}
+}
+
+// lazyFeatureCaseBuilder is a struct that lazily fetches the labels
+// from the SubNodes of moduleCase when Labels method is called.
+// If no subFeature case with the given name exists, it will return empty labels.
+type lazyFeatureCaseBuilder struct {
+	name   string
+	module *moduleCase
+}
+
+// Labels returns the labels associated with the featureCase. If no subFeature case with the given name exists, it will return an empty slice of labels.
+func (l *lazyFeatureCaseBuilder) Labels() Labels {
+	for _, f := range l.module.node.SubNodes {
+		if f.Name == l.name {
+			return f.Labels()
+		}
+	}
+	return []string{}
 }
