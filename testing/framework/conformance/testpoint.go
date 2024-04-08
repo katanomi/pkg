@@ -38,7 +38,7 @@ type testPoint struct {
 	node *Node
 
 	// additionalAssertions each feature can have a custom assertion
-	additionalAssertions map[*featureCase]interface{}
+	additionalAssertions map[FeatureCaseLabeler]interface{}
 }
 
 // Labels returns all the labels for the test point
@@ -56,7 +56,7 @@ func (t *testPoint) Labels(ctx context.Context) Labels {
 func (t *testPoint) CheckExternalAssertion(args ...interface{}) {
 	contextLabel := CurrentSpecReport().Labels()
 	for feature, assertFunc := range t.additionalAssertions {
-		featureLabel := strings.Join(feature.node.Labels(), "#")
+		featureLabel := strings.Join(feature.Labels(), "#")
 		if !slices.Contains(contextLabel, featureLabel) {
 			continue
 		}
@@ -78,21 +78,22 @@ func (t *testPoint) CheckExternalAssertion(args ...interface{}) {
 }
 
 // Bind alias of AddAssertion
-func (t *testPoint) Bind(feature *featureCase) CustomAssertion {
+func (t *testPoint) Bind(feature FeatureCaseLabeler) CustomAssertion {
 	return AddAssertionFunc(func(f interface{}) *testPoint {
 		return t.AddAssertion(feature, f)
 	})
 }
 
 // AddAssertion add a custom assertion to the test point for a special feature
-func (t *testPoint) AddAssertion(feature *featureCase, assertFunc interface{}) *testPoint {
+// func (t *testPoint) AddAssertion(feature *featureCase, assertFunc interface{}) *testPoint {
+func (t *testPoint) AddAssertion(feature FeatureCaseLabeler, assertFunc interface{}) *testPoint {
 	// check assertFunc is a function
 	val := reflect.ValueOf(assertFunc)
 	if val.Kind() != reflect.Func || val.Type().NumIn() == 0 {
 		panic("assertFunc must be a function with at least one argument")
 	}
 	if t.additionalAssertions == nil {
-		t.additionalAssertions = make(map[*featureCase]interface{})
+		t.additionalAssertions = make(map[FeatureCaseLabeler]interface{})
 	}
 
 	t.additionalAssertions[feature] = assertFunc
