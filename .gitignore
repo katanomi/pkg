@@ -26,3 +26,5 @@ bin
 test.json
 cover.out
 go.work
+trivy-report.json
+vulncheck.txt
