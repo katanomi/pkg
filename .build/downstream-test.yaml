@@ -28,7 +28,7 @@ spec:
       when: []
       params:
         - name: tools-image
-          value: registry.alauda.cn:60080/devops/builder-go:1.19-bullseye-75424cc5
+          value: registry.alauda.cn:60080/devops/builder-go:1.21-bullseye-9dcd2518
         - name: test-command
           value: |
             export GOPROXY=https://build-nexus.alauda.cn/repository/golang/,direct

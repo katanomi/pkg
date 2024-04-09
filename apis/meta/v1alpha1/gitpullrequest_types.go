@@ -17,6 +17,8 @@ limitations under the License.
 package v1alpha1
 
 import (
+	"slices"
+
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 )
@@ -30,6 +32,20 @@ var (
 
 // MergeStatus is the status of a merge request
 type MergeStatus string
+
+// IsValid returns true if the MergeStatus is one of the possible values.
+func (t MergeStatus) IsValid() bool {
+	return slices.Contains(possibleMergeStatus, t)
+}
+
+// possibleMergeStatus is a list of valid MergeStatus values.
+// This list is used to validate the MergeStatus type.
+var possibleMergeStatus = []MergeStatus{
+	MergeStatusChecking,
+	MergeStatusUnknown,
+	MergeStatusCanBeMerged,
+	MergeStatusCannotBeMerged,
+}
 
 const (
 	// MergeStatusChecking indicates that the merge request is being checked
