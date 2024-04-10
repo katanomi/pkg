@@ -87,6 +87,33 @@ E2E_OPTIONS ?=
 e2e: ginkgo ##@Testing Executes e2e tests inside test/e2e folder
 	$(GINKGO) -progress -v -tags $(GO_VET_TAGS) $(E2E_OPTIONS) ./test/e2e
 
+VULNCHECK_DB ?= https://vuln.go.dev
+VULNCHECK_MODE ?= source
+VULNCHECK_PATH ?= ./...
+VULNCHECK_OUTPUT ?= vulncheck.txt
+vulncheck: govulncheck ##@Development Run govulncheck against code. Check base.mk file for available envvars
+	$(GOVULNCHECK) -db=$(VULNCHECK_DB) -mode=$(VULNCHECK_MODE) -tags $(GO_VET_TAGS) $(VULNCHECK_PATH) | tee $(VULNCHECK_OUTPUT)
+
+TRIVY_DB_REPO ?= ghcr.io/aquasecurity/trivy-db
+TRIVY_CACHE ?= $(HOME)/.cache/trivy
+TRIVY_FORMAT ?= table
+TRIVY_REPORT_OUTPUT ?= trivy-report.json
+TRIVY_SCANNERS ?= vuln
+TRIVY_SEVERITY ?= UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL
+TRIVY_EXTRA_OPTIONS ?= --ignore-unfixed
+trivy-repo-scan: trivy ##@Development Run trivy against code. Check base.mk file for available envvars
+	$(TRIVY) repo  --vuln-type library \
+		--db-repository=$(TRIVY_DB_REPO) \
+		--cache-dir=$(TRIVY_CACHE) \
+		--format=json \
+		--output=$(TRIVY_REPORT_OUTPUT) \
+		--scanners=$(TRIVY_SCANNERS) \
+		--exit-code=0 \
+		$(TRIVY_EXTRA_OPTIONS) .
+	$(TRIVY) convert --format=$(TRIVY_FORMAT) \
+		--severity=$(TRIVY_SEVERITY)  \
+		--exit-code=1 $(TRIVY_REPORT_OUTPUT)
+
 CONTROLLER_GEN = $(TOOLBIN)/controller-gen
 controller-gen: ##@Setup Download controller-gen locally if necessary.
 	## this is a necessary evil already reported by knative community https://github.com/kubernetes-sigs/controller-tools/ issue 560
@@ -119,11 +146,21 @@ yq: ##@Setup Download yq locally if necessary.
 	$(call go-get-tool,$(YQ),github.com/mikefarah/yq/v4@v4.25.2)
 
 GOMOCK = $(TOOLBIN)/mockgen
-gomock: ## Download gomock locally if necessary.
+gomock: ##@Setup Download gomock locally if necessary.
 	$(call go-get-tool,$(GOMOCK),github.com/golang/mock/mockgen@v1.6.0)
 
-apiserver-runtime-gen:
-	$(call go-get-tool,$(GOMOCK),sigs.k8s.io/apiserver-runtime/tools/apiserver-runtime-gen@v1.1.1)
+APISERVER_RUNTIME_GEN = $(TOOLBIN)/apiserver-runtime-gen
+apiserver-runtime-gen: ##@Setup Download apiserver-runtime-gen locally if necessary
+	$(call go-get-tool,$(APISERVER_RUNTIME_GEN),sigs.k8s.io/apiserver-runtime/tools/apiserver-runtime-gen@v1.1.1)
+
+GOVULNCHECK = $(TOOLBIN)/govulncheck
+govulncheck: ##@Setup Download govulncheck locally if necessary.
+# using master until 1.0.5 is released, https://github.com/golang/go/issues/66139
+	$(call go-get-tool,$(GOVULNCHECK),golang.org/x/vuln/cmd/govulncheck@master)
+
+TRIVY = $(TOOLBIN)/trivy
+trivy: ##@Setup Download trivy locally if necessary.
+	$(call download-trivy,$(TRIVY))
 
 githook: precommit ##@Development Install git pre-commit hook
 	pre-commit install
@@ -140,14 +177,30 @@ GOBIN=$(TOOLBIN) go install $(2) ;\
 }
 endef
 
+# go-get will 'go get' any package $2 and install it to $1.
+define go-get
+@[ -f $(1) ] || { \
+set -e ;\
+GOBIN=$(TOOLBIN) go get -u $(2) ;\
+}
+endef
+
+
 # go-get-fork is a "go-get-tool" like command to get temporary module forks.
+# if revision is not specified, it clones the default branch
 define go-get-fork
 @[ -f $(1) ] || { \
 set -e ;\
 TMP_DIR=$$(mktemp -d) ;\
 cd $$TMP_DIR ;\
-echo "Cloning $(2)" ;\
-git clone $(2) $(4) ;\
+echo "Cloning $(2) $(5)" ;\
+revision=${5:-}; \
+if [ -z "$${revision}" ]; then \
+  git clone $(2) $(4) ;\
+else \
+  git clone --branch $(5) --single-branch $(2) $(4) ;\
+  cd $(4) && git checkout $(5) ;\
+fi ;\
 cd $(4) ;\
 GOBIN=$(TOOLBIN) go install ./$(3);\
 rm -rf $$TMP_DIR ;\
@@ -163,3 +216,26 @@ kubectl -n $(1) rollout status deploy/$(3) --timeout=10m ;\
 }
 endef
 
+# given a part url given in $(2) with combination of current os and architecture to complete
+# the download link, downlads and extracts its contents and move to $(1)
+define download-trivy
+@[ -f $(1) ] || { \
+set -e ;\
+TMP_DIR=$$(mktemp -d) ;\
+cd $$TMP_DIR ;\
+case $(shell uname -s) in \
+  Darwin) 						OS=macOS ;; \
+  Linux) 						OS=linux ;; \
+  *) echo "Unsupported OS" >&2; exit 1 ;; \
+esac ;\
+case $(shell uname -m) in \
+  arm64) ARCH=ARM64 ;; \
+  x86_64) ARCH=64bit ;; \
+  *) echo "Unsupported ARCH" >&2; exit 1 ;; \
+esac ;\
+curl -L https://github.com/aquasecurity/trivy/releases/download/v0.48.3/trivy_0.48.3_$${OS}-$${ARCH}.tar.gz > download.tgz ;\
+tar xzf download.tgz ;\
+mv trivy $(1) ;\
+rm -rf $$TMP_DIR ;\
+}
+endef
