@@ -21,7 +21,6 @@ import (
 	"net/http"
 
 	"github.com/go-resty/resty/v2"
-	"github.com/golang/mock/gomock"
 	"github.com/google/go-cmp/cmp"
 	"github.com/katanomi/pkg/apis/storage/v1alpha1"
 	v1alpha13 "github.com/katanomi/pkg/plugin/storage/capabilities/filestore/v1alpha1"
@@ -30,6 +29,7 @@ import (
 	filestorev1alpha1 "github.com/katanomi/pkg/testing/mock/github.com/katanomi/pkg/plugin/storage/client/versioned/filestore/v1alpha1"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	"go.uber.org/mock/gomock"
 )
 
 var _ = Describe("Test.Fileobject", func() {

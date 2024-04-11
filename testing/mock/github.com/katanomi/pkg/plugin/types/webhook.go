@@ -10,7 +10,7 @@ import (
 
 	event "github.com/cloudevents/sdk-go/v2/event"
 	restful "github.com/emicklei/go-restful/v3"
-	gomock "github.com/golang/mock/gomock"
+	gomock "go.uber.org/mock/gomock"
 	v1alpha1 "github.com/katanomi/pkg/apis/meta/v1alpha1"
 	zap "go.uber.org/zap"
 	v1 "k8s.io/api/core/v1"

@@ -19,12 +19,12 @@ package v1alpha1_test
 import (
 	"net/http"
 
-	"github.com/golang/mock/gomock"
 	"github.com/katanomi/pkg/apis/storage/v1alpha1"
 	v1alpha12 "github.com/katanomi/pkg/plugin/storage/client/versioned/filestore/v1alpha1"
 	"github.com/katanomi/pkg/testing"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	"go.uber.org/mock/gomock"
 )
 
 var _ = Describe("Test.Fileobject", func() {

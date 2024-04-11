@@ -20,12 +20,12 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/golang/mock/gomock"
 	mockopt "github.com/katanomi/pkg/testing/mock/k8s.io/cli-runtime/pkg/genericclioptions"
 	mockclientcmd "github.com/katanomi/pkg/testing/mock/k8s.io/client-go/tools/clientcmd"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	"github.com/spf13/cobra"
+	"go.uber.org/mock/gomock"
 	"k8s.io/client-go/rest"
 )
 

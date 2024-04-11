@@ -26,10 +26,10 @@ import (
 	"testing"
 
 	"github.com/emicklei/go-restful/v3"
-	"github.com/golang/mock/gomock"
 	"github.com/katanomi/pkg/testing/fake/opa"
 	"github.com/katanomi/pkg/testing/mock/testing/fake"
 	. "github.com/onsi/gomega"
+	"go.uber.org/mock/gomock"
 )
 
 func TestPolicyHandlerFilter(t *testing.T) {

@@ -10,7 +10,7 @@ import (
 	reflect "reflect"
 	time "time"
 
-	gomock "github.com/golang/mock/gomock"
+	gomock "go.uber.org/mock/gomock"
 	minio "github.com/minio/minio-go/v7"
 	tags "github.com/minio/minio-go/v7/pkg/tags"
 )

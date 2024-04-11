@@ -19,11 +19,11 @@ package v1alpha1
 import (
 	"testing"
 
-	"github.com/golang/mock/gomock"
 	"github.com/google/go-cmp/cmp"
 	ktesting "github.com/katanomi/pkg/testing"
 	mockmetav1alpha1 "github.com/katanomi/pkg/testing/mock/github.com/katanomi/pkg/apis/meta/v1alpha1"
 	. "github.com/onsi/gomega"
+	"go.uber.org/mock/gomock"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"knative.dev/pkg/apis"

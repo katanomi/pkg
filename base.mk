@@ -52,6 +52,7 @@ lint: golangcilint ##@Development Run golangci-lint against code.
 	$(GOLANGCILINT) run $(GOLANGCILINT_CONFIG)
 
 ENVTEST_ASSETS_DIR=$(TOOLBIN)/testbin
+KUBEBUILDER_ASSETS=$(TOOLBIN)/testbin
 COVER_PROFILE ?= cover.out
 TEST_FILE ?= test.json
 GO_TEST_FLAGS ?= -v -json

@@ -26,9 +26,9 @@ import (
 	authnv1 "k8s.io/api/authentication/v1"
 
 	"github.com/emicklei/go-restful/v3"
-	"github.com/golang/mock/gomock"
 	mockfakeclient "github.com/katanomi/pkg/testing/mock/sigs.k8s.io/controller-runtime/pkg/client"
 	. "github.com/onsi/gomega"
+	"go.uber.org/mock/gomock"
 	authv1 "k8s.io/api/authorization/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"

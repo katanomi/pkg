@@ -24,9 +24,9 @@ import (
 	"testing"
 
 	"github.com/emicklei/go-restful/v3"
-	"github.com/golang/mock/gomock"
 	"github.com/katanomi/pkg/multicluster"
 	multiclustermock "github.com/katanomi/pkg/testing/mock/github.com/katanomi/pkg/multicluster"
+	"go.uber.org/mock/gomock"
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
 
 	// . "github.com/onsi/ginkgo/v2"

@@ -20,12 +20,12 @@ import (
 	"context"
 	"time"
 
-	"github.com/golang/mock/gomock"
 	krecord "github.com/katanomi/pkg/record"
 	conditionmock "github.com/katanomi/pkg/testing/mock/github.com/katanomi/pkg/warnings/condition"
 	"github.com/katanomi/pkg/warnings"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	"go.uber.org/mock/gomock"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/tools/record"
