@@ -79,6 +79,7 @@ spec:
             fi
 
             go mod download
+
             make test
         - name: test-report-path
           value: ./test.json
@@ -88,7 +89,7 @@ spec:
           value:
             - passed-tests-rate=100
         - name: tool-image
-          value: registry.alauda.cn:60080/devops/builder-go:1.21-bullseye-9dcd2518
+          value: registry.alauda.cn:60080/devops/builder-go:1.21
     - name: golangci-lint
       timeout: 30m
       retries: 0
@@ -102,7 +103,7 @@ spec:
           workspace: cache
       params:
         - name: tool-image
-          value: registry.alauda.cn:60080/devops/builder-go:1.21-bullseye-9dcd2518
+          value: registry.alauda.cn:60080/devops/builder-go:1.21
         - name: command
           value: >
             export GOPROXY=https://build-nexus.alauda.cn/repository/golang/,direct
@@ -165,7 +166,7 @@ spec:
           - "./bin/vulncheck.txt"
 
         - name: tool-image
-          value: registry.alauda.cn:60080/devops/builder-go:1.21-bullseye-9dcd2518
+          value: registry.alauda.cn:60080/devops/builder-go:1.21
     ### security scan
     - name: trivy-repo-scan
       timeout: 30m
@@ -205,7 +206,7 @@ spec:
           value:
           - "./bin/trivy-report.json"
         - name: tool-image
-          value: registry.alauda.cn:60080/devops/builder-go:1.21-bullseye-9dcd2518
+          value: registry.alauda.cn:60080/devops/builder-go:1.21
   runTemplate:
     spec:
       taskRunSpecs:
