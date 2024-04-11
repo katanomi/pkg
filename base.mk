@@ -72,12 +72,12 @@ uninstall: manifests kustomize ##@Deployment Uninstall CRDs from the K8s cluster
 deploy: manifests kustomize ko certmanager ##@Deployment Deploy controller to the K8s cluster specified in ~/.kube/config.
 	$(KUSTOMIZE) build config/default | $(KO) apply -P ${LOCAL} -f -
 
-wait: manifests kustomize yq ##@Deployment Wait for deployment to complete
+wait: manifests kustomize ko yq ##@Deployment Wait for deployment to complete
 	$(KUSTOMIZE) build config/default | $(YQ) 'select(.kind == "Deployment") | .metadata | {.namespace:.name}' | grep -v -- --- | awk -F ': ' '{print "kubectl -n "$$1" rollout status deploy "$$2}' | sh
 
 deploy-wait: deploy wait ##@Deployment Deploy controller to the K8s cluster and wait for completion
 
-undeploy: ##@Deployment Undeploy controller from the K8s cluster specified in ~/.kube/config.
+undeploy: kustomize ko ##@Deployment Undeploy controller from the K8s cluster specified in ~/.kube/config.
 	$(KUSTOMIZE) build config/default | $(KO) delete -f -
 
 certmanager: ##@Deployment Install certmanager v1.4.0 from github manifest to the K8s cluster specified in ~/.kube/config.
@@ -114,53 +114,64 @@ trivy-repo-scan: trivy ##@Development Run trivy against code. Check base.mk file
 		--severity=$(TRIVY_SEVERITY)  \
 		--exit-code=1 $(TRIVY_REPORT_OUTPUT)
 
-CONTROLLER_GEN = $(TOOLBIN)/controller-gen
+CONTROLLER_TOOLS_VERSION ?= v0.14.0
+CONTROLLER_GEN = $(TOOLBIN)/controller-gen-$(CONTROLLER_TOOLS_VERSION)
 controller-gen: ##@Setup Download controller-gen locally if necessary.
-	## this is a necessary evil already reported by knative community https://github.com/kubernetes-sigs/controller-tools/ issue 560
-	## once the issue is fixed we can move to use the original package. the original line uses go-get-tools with sigs.k8s.io/controller-tools/cmd/controller-gen@v0.4.1
-	$(call go-get-fork,$(CONTROLLER_GEN),https://github.com/danielfbm/controller-tools,cmd/controller-gen,controller-gen)
+	$(call go-install-tool,$(CONTROLLER_GEN),sigs.k8s.io/controller-tools/cmd/controller-gen,$(CONTROLLER_TOOLS_VERSION))
 
-KUSTOMIZE = $(TOOLBIN)/kustomize
+KUSTOMIZE_VERSION ?= v5.3.0
+KUSTOMIZE = $(TOOLBIN)/kustomize-$(KUSTOMIZE_VERSION)
 kustomize: ##@Setup Download kustomize locally if necessary.
-	$(call go-get-tool,$(KUSTOMIZE),sigs.k8s.io/kustomize/kustomize/v4@v4.5.7)
+	$(call go-install-tool,$(KUSTOMIZE),sigs.k8s.io/kustomize/kustomize/v5,$(KUSTOMIZE_VERSION))
 
-KO = $(TOOLBIN)/ko
+KO_VERSION ?= v0.15.2
+KO = $(TOOLBIN)/ko-$(KO_VERSION)
 ko: ##@Setup Download ko locally if necessary.
-	$(call go-get-tool,$(KO),github.com/google/ko@v0.12.0)
+	$(call go-install-tool,$(KO),github.com/google/ko,$(KO_VERSION))
 
-GOIMPORTS = $(TOOLBIN)/goimports
+GOIMPORTS_VERSION ?= v0.20.0
+GOIMPORTS = $(TOOLBIN)/goimports-$(GOIMPORTS_VERSION)
 goimports: ##@Setup Download goimports locally if necessary.
-	$(call go-get-tool,$(GOIMPORTS),golang.org/x/tools/cmd/goimports@v0.1.10)
+	$(call go-install-tool,$(GOIMPORTS),golang.org/x/tools/cmd/goimports,$(GOIMPORTS_VERSION))
 	$(GOIMPORTS) -w -l $(shell find . -path '.git' -prune -path './vendor' -prune -o -path './examples' -prune -o -name '*.pb.go' -prune -o -type f -name '*.go' -print)
 
-GINKGO = $(TOOLBIN)/ginkgo
+GINKGO_VERSION ?= v2.17.1
+GINKGO = $(TOOLBIN)/ginkgo-$(GINKGO_VERSION)
 ginkgo: ##@Setup Download ginkgo locally if necessary
-	$(call go-get-tool,$(GINKGO),github.com/onsi/ginkgo/v2/ginkgo@v2.15.0)
+	$(call go-install-tool,$(GINKGO),github.com/onsi/ginkgo/v2/ginkgo,$(GINKGO_VERSION))
 
-GOLANGCILINT = $(TOOLBIN)/golangci-lint
+GOLANGCILINT_VERSION ?= v1.56.2
+GOLANGCILINT = $(TOOLBIN)/golangci-lint-$(GOLANGCILINT_VERSION)
 golangcilint: ##@Setup Download golangci-lint locally if necessary
-	$(call go-get-tool,$(GOLANGCILINT),github.com/golangci/golangci-lint/cmd/golangci-lint@v1.45.2)
+	$(call go-install-tool,$(GOLANGCILINT),github.com/golangci/golangci-lint/cmd/golangci-lint,$(GOLANGCILINT_VERSION))
 
-YQ = $(TOOLBIN)/yq
+YQ_VERSION ?= v4.43.1
+YQ = $(TOOLBIN)/yq-$(YQ_VERSION)
 yq: ##@Setup Download yq locally if necessary.
-	$(call go-get-tool,$(YQ),github.com/mikefarah/yq/v4@v4.25.2)
+	$(call go-install-tool,$(YQ),github.com/mikefarah/yq/v4,$(YQ_VERSION))
 
-GOMOCK = $(TOOLBIN)/mockgen
+GOMOCK_VERSION ?= v1.6.0
+GOMOCK = $(TOOLBIN)/mockgen-$(GOMOCK_VERSION)
+GOMOCK_ALIAS = $(TOOLBIN)/mockgen
 gomock: ##@Setup Download gomock locally if necessary.
-	$(call go-get-tool,$(GOMOCK),github.com/golang/mock/mockgen@v1.6.0)
+	$(call go-install-tool,$(GOMOCK),github.com/golang/mock/mockgen,$(GOMOCK_VERSION),$(GOMOCK_ALIAS))
+	$(shell ln -s $(GOMOCK) $(GOMOCK_ALIAS))
 
-APISERVER_RUNTIME_GEN = $(TOOLBIN)/apiserver-runtime-gen
+APISERVER_RUNTIME_GEN_VERSION ?= v1.1.1
+APISERVER_RUNTIME_GEN = $(TOOLBIN)/apiserver-runtime-gen-$(APISERVER_RUNTIME_GEN_VERSION)
 apiserver-runtime-gen: ##@Setup Download apiserver-runtime-gen locally if necessary
-	$(call go-get-tool,$(APISERVER_RUNTIME_GEN),sigs.k8s.io/apiserver-runtime/tools/apiserver-runtime-gen@v1.1.1)
+	$(call go-install-tool,$(APISERVER_RUNTIME_GEN),sigs.k8s.io/apiserver-runtime/tools/apiserver-runtime-gen,$(APISERVER_RUNTIME_GEN_VERSION))
 
-GOVULNCHECK = $(TOOLBIN)/govulncheck
+GOVULNCHECK_VERSION ?= master
+GOVULNCHECK = $(TOOLBIN)/govulncheck-$(GOVULNCHECK_VERSION)
 govulncheck: ##@Setup Download govulncheck locally if necessary.
 # using master until 1.0.5 is released, https://github.com/golang/go/issues/66139
-	$(call go-get-tool,$(GOVULNCHECK),golang.org/x/vuln/cmd/govulncheck@master)
+	$(call go-install-tool,$(GOVULNCHECK),golang.org/x/vuln/cmd/govulncheck,$(GOVULNCHECK_VERSION))
 
-TRIVY = $(TOOLBIN)/trivy
+TRIVY_VERSION ?= 0.50.1
+TRIVY = $(TOOLBIN)/trivy-$(TRIVY_VERSION)
 trivy: ##@Setup Download trivy locally if necessary.
-	$(call download-trivy,$(TRIVY))
+	$(call download-trivy,$(TRIVY),$(TRIVY_VERSION))
 
 githook: precommit ##@Development Install git pre-commit hook
 	pre-commit install
@@ -168,44 +179,22 @@ githook: precommit ##@Development Install git pre-commit hook
 precommit: ##@Setup Download pre-commit locally if necessary.
 	pip install pre-commit
 
-# go-get-tool will 'go get' any package $2 and install it to $1.
 PROJECT_DIR := $(shell dirname $(abspath $(lastword $(MAKEFILE_LIST))))
-define go-get-tool
+
+# go-install-tool will 'go install' any package with custom target and name of binary, if it doesn't exist
+# $1 - target path with name of binary (ideally with version)
+# $2 - package url which can be installed
+# $3 - specific version of package
+define go-install-tool
 @[ -f $(1) ] || { \
-set -e ;\
-GOBIN=$(TOOLBIN) go install $(2) ;\
+set -e; \
+package=$(2)@$(3) ;\
+echo "Downloading $${package} into $(TOOLBIN) as $(1)" ;\
+GOBIN=$(TOOLBIN) go install $${package} ;\
+mv "$$(echo "$(1)" | sed "s/-$(3)$$//")" $(1) ;\
 }
 endef
 
-# go-get will 'go get' any package $2 and install it to $1.
-define go-get
-@[ -f $(1) ] || { \
-set -e ;\
-GOBIN=$(TOOLBIN) go get -u $(2) ;\
-}
-endef
-
-
-# go-get-fork is a "go-get-tool" like command to get temporary module forks.
-# if revision is not specified, it clones the default branch
-define go-get-fork
-@[ -f $(1) ] || { \
-set -e ;\
-TMP_DIR=$$(mktemp -d) ;\
-cd $$TMP_DIR ;\
-echo "Cloning $(2) $(5)" ;\
-revision=${5:-}; \
-if [ -z "$${revision}" ]; then \
-  git clone $(2) $(4) ;\
-else \
-  git clone --branch $(5) --single-branch $(2) $(4) ;\
-  cd $(4) && git checkout $(5) ;\
-fi ;\
-cd $(4) ;\
-GOBIN=$(TOOLBIN) go install ./$(3);\
-rm -rf $$TMP_DIR ;\
-}
-endef
 
 # installyaml will check if a given namespace is present, if not will apply a yaml file and wait for a deployment to rollout
 define installyaml
@@ -216,8 +205,9 @@ kubectl -n $(1) rollout status deploy/$(3) --timeout=10m ;\
 }
 endef
 
-# given a part url given in $(2) with combination of current os and architecture to complete
-# the download link, downlads and extracts its contents and move to $(1)
+# finds and downloads the binary for trivy from github releases
+# $1 - target path to binary
+# $2 - version without v i.e 0.50.1
 define download-trivy
 @[ -f $(1) ] || { \
 set -e ;\
@@ -233,7 +223,8 @@ case $(shell uname -m) in \
   x86_64) ARCH=64bit ;; \
   *) echo "Unsupported ARCH" >&2; exit 1 ;; \
 esac ;\
-curl -L https://github.com/aquasecurity/trivy/releases/download/v0.48.3/trivy_0.48.3_$${OS}-$${ARCH}.tar.gz > download.tgz ;\
+echo "Downloading trivy $(2)" ;\
+curl -L https://github.com/aquasecurity/trivy/releases/download/v$(2)/trivy_$(2)_$${OS}-$${ARCH}.tar.gz > download.tgz ;\
 tar xzf download.tgz ;\
 mv trivy $(1) ;\
 rm -rf $$TMP_DIR ;\
