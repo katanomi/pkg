@@ -79,7 +79,6 @@ spec:
             fi
 
             go mod download
-            sleep 1d
             make test
         - name: test-report-path
           value: ./test.json
