@@ -114,6 +114,18 @@ trivy-repo-scan: trivy ##@Development Run trivy against code. Check base.mk file
 		--severity=$(TRIVY_SEVERITY)  \
 		--exit-code=1 $(TRIVY_REPORT_OUTPUT)
 
+CRD_DOCS_SOURCE_PATH ?= pkg/apis
+CRD_DOCS_OUTPUT_PATH ?= crd-docs
+CRD_DOCS_MAX_DEPTH ?= 15
+CRD_DOCS_CONFIG ?= .crd-docs.yaml
+crd-docs: crd-ref-docs
+	mkdir -p $(CRD_DOCS_OUTPUT_PATH)
+	$(CRDREFDOCS) --config=$(CRD_DOCS_CONFIG) --source-path=$(CRD_DOCS_SOURCE_PATH) \
+		--output-path=$(CRD_DOCS_OUTPUT_PATH) \
+		--renderer=markdown \
+		--output-mode=group \
+		--max-depth=$(CRD_DOCS_MAX_DEPTH)
+
 CONTROLLER_TOOLS_VERSION ?= v0.14.0
 CONTROLLER_GEN = $(TOOLBIN)/controller-gen-$(CONTROLLER_TOOLS_VERSION)
 controller-gen: ##@Setup Download controller-gen locally if necessary.
@@ -172,6 +184,11 @@ TRIVY_VERSION ?= 0.50.1
 TRIVY = $(TOOLBIN)/trivy-$(TRIVY_VERSION)
 trivy: ##@Setup Download trivy locally if necessary.
 	$(call download-trivy,$(TRIVY),$(TRIVY_VERSION))
+
+CRDREFDOCS_VERSION ?= v0.0.12
+CRDREFDOCS = $(TOOLBIN)/crd-ref-docs
+crd-ref-docs: ##@Setup Download crd-ref-docs locally if necessary.
+	$(call go-install-tool,$(CRDREFDOCS),github.com/elastic/crd-ref-docs,$(CRDREFDOCS_VERSION))
 
 githook: precommit ##@Development Install git pre-commit hook
 	pre-commit install
