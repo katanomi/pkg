@@ -14,9 +14,6 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-// Package assertions contains all the assertions that can be used in tests
-// for general testing. All methods are Gomega compatible and can be used
-// directly with gomega library
 package assertions
 
 import (
