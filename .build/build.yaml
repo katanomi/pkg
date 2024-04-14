@@ -89,7 +89,7 @@ spec:
           value:
             - passed-tests-rate=100
         - name: tool-image
-          value: registry.alauda.cn:60080/devops/builder-go:1.21
+          value: registry.alauda.cn:60080/devops/builder-go-121:latest
     - name: golangci-lint
       timeout: 30m
       retries: 0
@@ -103,7 +103,7 @@ spec:
           workspace: cache
       params:
         - name: tool-image
-          value: registry.alauda.cn:60080/devops/builder-go:1.21
+          value: registry.alauda.cn:60080/devops/builder-go-121:latest
         - name: command
           value: >
             export GOPROXY=https://build-nexus.alauda.cn/repository/golang/,direct
@@ -166,7 +166,7 @@ spec:
           - "./bin/vulncheck.txt"
 
         - name: tool-image
-          value: registry.alauda.cn:60080/devops/builder-go:1.21
+          value: registry.alauda.cn:60080/devops/builder-go-121:latest
     ### security scan
     - name: trivy-repo-scan
       timeout: 30m
@@ -206,7 +206,7 @@ spec:
           value:
           - "./bin/trivy-report.json"
         - name: tool-image
-          value: registry.alauda.cn:60080/devops/builder-go:1.21
+          value: registry.alauda.cn:60080/devops/builder-go-121:latest
   runTemplate:
     spec:
       taskRunSpecs:
