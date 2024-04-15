@@ -66,6 +66,26 @@ type GitPullRequest struct {
 	Spec GitPullRequestSpec `json:"spec"`
 }
 
+// PullRequestState defines the state type for a git pull request
+type PullRequestState string
+
+const (
+	// PullRequestOpenedState indicates that the pull request is open and under consideration.
+	PullRequestOpenedState PullRequestState = "opened"
+
+	// PullRequestClosedState indicates that the pull request has been closed without being merged.
+	// Note: This state is not supported for filtering in pull request lists.
+	PullRequestClosedState PullRequestState = "closed"
+
+	// PullRequestMergedState indicates that the pull request has been successfully merged into the target branch.
+	// Note: This state is not supported for filtering in pull request lists.
+	PullRequestMergedState PullRequestState = "merged"
+
+	// PullRequestAllState is not an actual state of a pull request.
+	// It is used to select pull requests of all states, including open, closed.
+	PullRequestAllState PullRequestState = "all"
+)
+
 // GitPullRequestSpec spec for pull request
 type GitPullRequestSpec struct {
 	GitRepo
@@ -76,7 +96,7 @@ type GitPullRequestSpec struct {
 	// Title pr title
 	Title string `json:"title"`
 	// State pr state (different between platforms)
-	State string `json:"state"`
+	State PullRequestState `json:"state"`
 	// CreatedAt pr create time
 	CreatedAt metav1.Time `json:"createdAt"`
 	// UpdateAt pr latest update time
