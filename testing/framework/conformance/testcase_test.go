@@ -17,6 +17,7 @@ limitations under the License.
 package conformance
 
 import (
+	"context"
 	"testing"
 
 	. "github.com/onsi/ginkgo/v2"
@@ -50,4 +51,21 @@ func Test_testCase_AddLabels(t *testing.T) {
 			g.Expect(testcase.node.additionalLabels).To(Equal(tt.want))
 		})
 	}
+}
+
+func Test_testCase_Build(t *testing.T) {
+	g := NewGomegaWithT(t)
+
+	testCaseRegister := func(ctx context.Context) {
+		return
+	}
+
+	tc := NewTestCase("test")
+	g.Expect(func() {
+		tc.Build(testCaseRegister)
+	}).ShouldNot(Panic(), "should not panic for first build")
+
+	g.Expect(func() {
+		tc.Build(testCaseRegister)
+	}).Should(PanicWith("each testcase can only be built once."), "should panic for second build")
 }

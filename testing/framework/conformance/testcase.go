@@ -31,6 +31,9 @@ type testCase struct {
 	node *Node
 
 	testPoints []*testPoint
+
+	// buildFlag is used to check whether the testcase has been built
+	buildFlag bool
 }
 
 // AddLabels add custom labels for the test case
@@ -45,6 +48,10 @@ func (t *testCase) AddLabels(labels ...Labels) *testCase {
 
 // Build construct a `CaseSetFactory` with the `caseRegister`
 func (t *testCase) Build(caseRegister func(ctx context.Context)) CaseSetFactory {
+	if t.buildFlag {
+		panic("each testcase can only be built once.")
+	}
+	t.buildFlag = true
 	return NewCaseProxy(t).Build(caseRegister)
 }
 
