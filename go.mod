@@ -11,7 +11,7 @@ require (
 	github.com/emicklei/go-restful-openapi/v2 v2.3.0
 	github.com/emicklei/go-restful/v3 v3.10.2
 	github.com/go-logr/logr v1.4.1
-	github.com/go-logr/zapr v1.2.3
+	github.com/go-logr/zapr v1.3.0
 	github.com/go-openapi/spec v0.20.8 // indirect
 	github.com/go-resty/resty/v2 v2.6.0
 	github.com/golang/mock v1.6.0
@@ -24,7 +24,7 @@ require (
 	github.com/prometheus/client_golang v1.16.0
 	github.com/uber/jaeger-client-go v2.29.1+incompatible
 	github.com/uber/jaeger-lib v2.4.1+incompatible
-	go.uber.org/zap v1.26.0
+	go.uber.org/zap v1.27.0
 	golang.org/x/sync v0.6.0
 	golang.org/x/time v0.5.0
 	k8s.io/api v0.27.1
@@ -157,7 +157,6 @@ require (
 	go.starlark.net v0.0.0-20200306205701-8dd3e2ee1dd5 // indirect
 	go.uber.org/atomic v1.10.0 // indirect
 	go.uber.org/automaxprocs v1.5.3 // indirect
-	go.uber.org/goleak v1.2.1 // indirect
 	go.uber.org/multierr v1.10.0 // indirect
 	golang.org/x/crypto v0.21.0 // indirect
 	golang.org/x/oauth2 v0.16.0 // indirect
@@ -191,7 +190,7 @@ require (
 )
 
 replace (
-	go.uber.org/zap => github.com/katanomi/zap v1.18.2 // indirect
+	go.uber.org/zap => github.com/katanomi/zap v1.27.0-katanomi // indirect
 	knative.dev/pkg => github.com/katanomi/knative-pkg v0.0.0-20240409030957-1aad1aa6fd94
 )
 
