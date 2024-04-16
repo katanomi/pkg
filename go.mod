@@ -192,7 +192,7 @@ require (
 
 replace (
 	go.uber.org/zap => github.com/katanomi/zap v1.18.2 // indirect
-	knative.dev/pkg => github.com/katanomi/knative-pkg v0.0.0-20240111123040-cfe2d21e1b20
+	knative.dev/pkg => github.com/katanomi/knative-pkg v0.0.0-20240409030957-1aad1aa6fd94
 )
 
 //  TODO: Remove this once https://github.com/knative/pkg/issues/2759 is fixed
