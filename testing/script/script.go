@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package testing
+package script
 
 import (
 	"bytes"
@@ -27,11 +27,9 @@ import (
 )
 
 // DefaultScriptOutputPrefix the prefix of script output
-// Deprecated: move to testing/script DefaultScriptOutputPrefix
 const DefaultScriptOutputPrefix = "##output##"
 
 // RestoreDirectories restore directories from embed.FS to targetDir
-// Deprecated: move to testing/script RestoreDirectories
 func RestoreDirectories(fs embed.FS, dirName string, targetDir string) {
 	entries, err := fs.ReadDir(dirName)
 	if err != nil {
@@ -54,13 +52,11 @@ func RestoreDirectories(fs embed.FS, dirName string, targetDir string) {
 }
 
 // ExecBashScript exec bash script with params
-// Deprecated: move to testing/script ExecBashScript
 func ExecBashScript(script string, params ...string) *ScriptResult {
 	return ExecScript("bash", append([]string{script}, params...)...)
 }
 
 // ExecScript exec script with params
-// Deprecated: move to testing/script ExecScript
 func ExecScript(name string, arg ...string) *ScriptResult {
 	c := exec.Command(name, arg...)
 
@@ -85,7 +81,6 @@ func ExecScript(name string, arg ...string) *ScriptResult {
 }
 
 // ScriptResult the result of script execution
-// Deprecated: move to testing/script ScriptResult
 type ScriptResult struct {
 	stdout    bytes.Buffer
 	stderr    bytes.Buffer
