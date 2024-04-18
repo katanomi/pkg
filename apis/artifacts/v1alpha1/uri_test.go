@@ -91,6 +91,31 @@ func TestParseURI(t *testing.T) {
 				Raw:       "docker.io/katanomi/pkg@sha256:asdf",
 			},
 		},
+		{
+			desc: "with diff protocol",
+			uri:  "docker://docker.io/katanomi/pkg@sha256:asdf",
+			t:    ArtifactTypeHelmChart,
+			u: URI{
+				Host:      "docker.io",
+				Protocol:  string(ProtocolDocker),
+				Path:      "katanomi/pkg",
+				Digest:    "asdf",
+				Algorithm: "sha256",
+				Raw:       "docker://docker.io/katanomi/pkg@sha256:asdf",
+			},
+		},
+		{
+			desc: "default protocol is docker",
+			uri:  "docker.io/katanomi/pkg@sha256:asdf",
+			u: URI{
+				Host:      "docker.io",
+				Protocol:  string(ProtocolDocker),
+				Path:      "katanomi/pkg",
+				Digest:    "asdf",
+				Algorithm: "sha256",
+				Raw:       "docker.io/katanomi/pkg@sha256:asdf",
+			},
+		},
 	}
 
 	for _, item := range data {

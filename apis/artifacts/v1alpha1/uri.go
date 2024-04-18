@@ -53,6 +53,12 @@ var (
 
 	digestRegexp = regexp.MustCompile(`(?P<algo>sha256):(?P<hash>[a-z0-9]{64})`)
 
+	// protocolRegexp check the protocol
+	// example: docker,
+	protocolRegexp = regexp.MustCompile(`^[a-zA-Z][a-zA-Z\-]*[a-zA-Z]$`)
+
+	ErrInvalidProtocol = "invalid protocol format"
+
 	ErrInvalidReference = "invalid reference"
 )
 
@@ -152,20 +158,21 @@ func ParseURI(uri string, t ArtifactType) (URI, error) {
 	str := uri
 
 	protocolIndex := strings.Index(uri, "://")
-	if protocolIndex <= 0 {
-		u.Protocol = string(ProtocolDocker)
-	} else {
+	if protocolIndex > 0 {
 		u.Protocol = uri[0:protocolIndex]
 		str = str[protocolIndex+len("://"):]
 	}
 
-	switch t {
-	case ArtifactTypeHelmChart:
-		u.Protocol = string(ProtocolHelmChart)
-	case ArtifactTypeContainerImage:
-		u.Protocol = string(ProtocolDocker)
-	default:
-		// no-op
+	if u.Protocol == "" {
+		switch t {
+		case ArtifactTypeHelmChart:
+			u.Protocol = string(ProtocolHelmChart)
+		case ArtifactTypeContainerImage:
+			u.Protocol = string(ProtocolDocker)
+		default:
+			// when protocol is empty, set default docker
+			u.Protocol = string(ProtocolDocker)
+		}
 	}
 
 	hostIndex := strings.Index(str, "/")
@@ -198,6 +205,14 @@ func ParseURI(uri string, t ArtifactType) (URI, error) {
 	}
 
 	return u, nil
+}
+
+// ValidateProtocol validates the protocol.
+func (u URI) ValidateProtocol() error {
+	if u.Protocol != "" && !protocolRegexp.MatchString(u.Protocol) {
+		return fmt.Errorf("%s: invalid protocol %s", ErrInvalidProtocol, u.Path)
+	}
+	return nil
 }
 
 // ValidateHost validates the host.
@@ -234,6 +249,10 @@ func (u URI) ValidateDigest() error {
 
 // Validate returns an error if the uri is invalid, otherwise returns empty.
 func (u URI) Validate() error {
+	if err := u.ValidateProtocol(); err != nil {
+		return err
+	}
+
 	if err := u.ValidateHost(); err != nil {
 		return err
 	}
