@@ -57,18 +57,10 @@ type GitPullRequestOption struct {
 	Index int `json:"Index"`
 }
 
-type PullRequestState string
-
-const (
-	PullRequestOpenedState PullRequestState = "opened"
-	PullRequestClosedState PullRequestState = "closed"
-	PullRequestMergedState PullRequestState = "merged"
-	PullRequestAllState    PullRequestState = "all"
-)
-
 type GitPullRequestListOption struct {
 	GitRepo
-	// State indicattes pullrequest state
+	// State indicattes pullrequest state.
+	// Note that only opened and all are supported here, as enum values may vary across different tools.
 	State *PullRequestState `json:"state,omitempty"`
 	// Commit will filter pullrequest that just associate to this commit
 	Commit string `json:"commit,omitempty"`
