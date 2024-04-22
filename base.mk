@@ -42,7 +42,7 @@ check: fmt vet lint test ##@Development Run check against code
 fmt: ##@Development Run go fmt against code.
 	go fmt ./...
 
-GO_VET_TAGS ?= e2e,containers_image_openpgp
+GO_VET_TAGS ?= integration,containers_image_openpgp
 vet: ##@Development Run go vet against code.
 	go vet -tags $(GO_VET_TAGS) ./...
 
@@ -83,9 +83,9 @@ undeploy: kustomize ko ##@Deployment Undeploy controller from the K8s cluster sp
 certmanager: ##@Deployment Install certmanager v1.4.0 from github manifest to the K8s cluster specified in ~/.kube/config.
 	$(call installyaml,cert-manager,https://github.com/jetstack/cert-manager/releases/download/v1.4.0/cert-manager.yaml,cert-manager)
 
-E2E_OPTIONS ?=
-e2e: ginkgo ##@Testing Executes e2e tests inside test/e2e folder
-	$(GINKGO) -progress -v -tags $(GO_VET_TAGS) $(E2E_OPTIONS) ./test/e2e
+INTEGRATION_OPTIONS ?=
+integration: ginkgo ##@Testing Executes integration tests inside test/integration folder
+	$(GINKGO) -progress -v -tags $(GO_VET_TAGS) $(INTEGRATION_OPTIONS) ./test/integration
 
 VULNCHECK_DB ?= https://vuln.go.dev
 VULNCHECK_MODE ?= source
