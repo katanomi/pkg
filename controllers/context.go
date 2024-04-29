@@ -55,3 +55,17 @@ func ReconcileRequestCtx(ctx context.Context) ctrl.Request {
 	}
 	return val.(ctrl.Request)
 }
+
+// numRequeuesCtxKey returns back how many failures the item has had
+type numRequeuesCtxKey struct{}
+
+// WithNumRequeues adds the numRequeues to the context
+func WithNumRequeues(ctx context.Context, num int) context.Context {
+	return context.WithValue(ctx, numRequeuesCtxKey{}, num)
+}
+
+// GetNumRequeues gets numRequeue from the context
+func GetNumRequeues(ctx context.Context) int {
+	num, _ := ctx.Value(numRequeuesCtxKey{}).(int)
+	return num
+}
