@@ -46,11 +46,13 @@ type VulnScanOption struct {
 
 	QualityGateOption
 	QualityGateRulesOption
+	VulnScanMetricsOption
 }
 
 // AddFlags add flags to options
 func (c *VulnScanOption) AddFlags(flags *pflag.FlagSet) {
 	c.QualityGateOption.AddFlags(flags)
+	c.VulnScanMetricsOption.AddFlags(flags)
 }
 
 // Setup init quality gate rules from args
@@ -73,6 +75,7 @@ func (c *VulnScanOption) Validate(path *field.Path) (errs field.ErrorList) {
 		}
 		errs = append(errs, validator.ValidateStringEnums(base, gateRuleVulnSeverity, availableSeverities...)...)
 	}
+	errs = append(errs, c.VulnScanMetricsOption.Validate(path)...)
 	return errs
 }
 
@@ -98,8 +101,9 @@ func (c *VulnScanOption) WriteMetricsResult(err error, w io.Writer) {
 		return
 	}
 	result := c.VulnScanResult
-	if len(result.Targets) > 3 {
-		result.Targets = result.Targets[:3]
+	resultLimit := c.VulnScanMetricsOption.ResultLimit
+	if len(result.Targets) > resultLimit {
+		result.Targets = result.Targets[:resultLimit]
 	}
 	data := encoding.NewJsonPath().Encode(map[string]interface{}{
 		"targets": result.ToVulnScanResultShadow().Targets,
