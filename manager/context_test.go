@@ -22,8 +22,8 @@ import (
 	"context"
 	"testing"
 
-	"github.com/golang/mock/gomock"
 	. "github.com/onsi/gomega"
+	"go.uber.org/mock/gomock"
 
 	mockmgr "github.com/katanomi/pkg/testing/mock/sigs.k8s.io/controller-runtime/pkg/manager"
 )

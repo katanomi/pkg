@@ -14,7 +14,6 @@ require (
 	github.com/go-logr/zapr v1.3.0
 	github.com/go-openapi/spec v0.20.8 // indirect
 	github.com/go-resty/resty/v2 v2.6.0
-	github.com/golang/mock v1.6.0
 	github.com/google/go-cmp v0.6.0
 	github.com/jarcoal/httpmock v1.0.8
 	github.com/onsi/ginkgo/v2 v2.17.0

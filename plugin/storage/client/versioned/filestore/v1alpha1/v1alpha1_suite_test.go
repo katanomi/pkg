@@ -20,12 +20,12 @@ import (
 	"context"
 	"testing"
 
-	"github.com/golang/mock/gomock"
 	filestorev1alpha1 "github.com/katanomi/pkg/plugin/storage/capabilities/filestore/v1alpha1"
 	v1alpha13 "github.com/katanomi/pkg/plugin/storage/client/versioned/filestore/v1alpha1"
 	v1alpha1 "github.com/katanomi/pkg/testing/mock/github.com/katanomi/pkg/plugin/storage/client"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	"go.uber.org/mock/gomock"
 )
 
 var (

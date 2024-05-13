@@ -26,10 +26,10 @@ import (
 	"testing"
 
 	"github.com/emicklei/go-restful/v3"
-	"github.com/golang/mock/gomock"
 	"github.com/katanomi/pkg/testing/mock/github.com/katanomi/pkg/multicluster"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	"go.uber.org/mock/gomock"
 	"k8s.io/apimachinery/pkg/api/meta"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apiserver/pkg/authentication/user"

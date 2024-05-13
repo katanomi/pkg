@@ -20,10 +20,10 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/golang/mock/gomock"
 	pkgscheme "github.com/katanomi/pkg/scheme"
 	pkgtesting "github.com/katanomi/pkg/testing"
 	multiclustertesting "github.com/katanomi/pkg/testing/mock/github.com/katanomi/pkg/multicluster"
+	"go.uber.org/mock/gomock"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"

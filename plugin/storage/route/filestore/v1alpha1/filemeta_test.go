@@ -23,7 +23,6 @@ import (
 	"net/http/httptest"
 
 	"github.com/emicklei/go-restful/v3"
-	"github.com/golang/mock/gomock"
 	"github.com/google/go-cmp/cmp"
 	storagev1alpha1 "github.com/katanomi/pkg/apis/storage/v1alpha1"
 	pkgclient "github.com/katanomi/pkg/client"
@@ -33,6 +32,7 @@ import (
 	mockClient "github.com/katanomi/pkg/testing/mock/sigs.k8s.io/controller-runtime/pkg/client"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	"go.uber.org/mock/gomock"
 	v1 "k8s.io/api/authorization/v1"
 	apiserveruser "k8s.io/apiserver/pkg/authentication/user"
 	apiserverrequest "k8s.io/apiserver/pkg/endpoints/request"

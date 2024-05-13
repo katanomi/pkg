@@ -7,7 +7,7 @@ package warnings
 import (
 	reflect "reflect"
 
-	gomock "github.com/golang/mock/gomock"
+	gomock "go.uber.org/mock/gomock"
 	warnings "github.com/katanomi/pkg/warnings"
 	apis "knative.dev/pkg/apis"
 	client "sigs.k8s.io/controller-runtime/pkg/client"

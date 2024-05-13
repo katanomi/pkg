@@ -42,7 +42,7 @@ import (
 	authv1 "k8s.io/api/authorization/v1"
 	ctrlclient "sigs.k8s.io/controller-runtime/pkg/client"
 
-	"github.com/golang/mock/gomock"
+	"go.uber.org/mock/gomock"
 
 	"k8s.io/apimachinery/pkg/runtime/schema"
 
