@@ -1,0 +1,54 @@
+processor:
+  ignoreTypes: []
+  ignoreFields:
+    - "status$"
+    - "TypeMeta$"
+
+render:
+  kubernetesVersion: 1.25
+  knownTypes:
+    # apimachinery https://pkg.go.dev/k8s.io/apimachinery/pkg/apis/meta/v1
+    - name: TypeMeta
+      package: k8s.io/apimachinery/pkg/apis/meta/v1
+      link: https://pkg.go.dev/k8s.io/apimachinery/pkg/apis/meta/v1#TypeMeta
+    - name: ObjectMeta
+      package: k8s.io/apimachinery/pkg/apis/meta/v1
+      link: https://pkg.go.dev/k8s.io/apimachinery/pkg/apis/meta/v1#ObjectMeta
+    - name: LabelSelector
+      package: k8s.io/apimachinery/pkg/apis/meta/v1
+      link: https://pkg.go.dev/k8s.io/apimachinery/pkg/apis/meta/v1#LabelSelector
+    - name: RawExtension
+      package: k8s.io/apimachinery/pkg/runtime
+      link: https://pkg.go.dev/k8s.io/apimachinery/pkg/runtime#RawExtension
+
+    # core https://pkg.go.dev/k8s.io/api/core/v1
+    - name: ObjectReference
+      package: k8s.io/api/core/v1
+      link: https://pkg.go.dev/k8s.io/api/core/v1#ObjectReference
+
+    # knative https://pkg.go.dev/knative.dev/pkg/apis
+    - name: URL
+      package: knative.dev/pkg/apis
+      link: https://pkg.go.dev/knative.dev/pkg/apis#URL
+    - name: Addressable
+      package: knative.dev/pkg/apis/duck/v1
+      link: https://pkg.go.dev/knative.dev/pkg/apis/duck/v1#Addressable
+    - name: Status
+      package: knative.dev/pkg/apis/duck/v1
+      link: https://pkg.go.dev/knative.dev/pkg/apis/duck/v1#Status
+    - name: Conditions
+      package: knative.dev/pkg/apis/duck/v1
+      link: https://pkg.go.dev/knative.dev/pkg/apis/duck/v1#Conditions
+    - name: Destination
+      package: knative.dev/pkg/apis/duck/v1
+      link: https://pkg.go.dev/knative.dev/pkg/apis/duck/v1#Destination
+
+    # tekton https://pkg.go.dev/github.com/tektoncd/pipeline/pkg/apis/pipeline/v1beta1
+    - name: Param
+      package: github.com/tektoncd/pipeline/pkg/apis/pipeline/v1beta1
+      link: https://pkg.go.dev/github.com/tektoncd/pipeline/pkg/apis/pipeline/v1beta1#Param
+    - name: ParamSpec
+      package: github.com/tektoncd/pipeline/pkg/apis/pipeline/v1beta1
+      link: https://pkg.go.dev/github.com/tektoncd/pipeline/pkg/apis/pipeline/v1beta1#ParamSpec
+
+

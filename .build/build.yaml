@@ -89,8 +89,7 @@ spec:
           value:
             - passed-tests-rate=100
         - name: tool-image
-        # WARNING: Temporary fix for core using PR built image. SHOULD CHANGE THIS TO A STABLE VERSION
-          value: registry.alauda.cn:60080/devops/builder-go:1.19-bullseye-75424cc5
+          value: registry.alauda.cn:60080/devops/builder-go-121:latest
     - name: golangci-lint
       timeout: 30m
       retries: 0
@@ -104,8 +103,7 @@ spec:
           workspace: cache
       params:
         - name: tool-image
-          # WARNING: Temporary fix for core using PR built image. SHOULD CHANGE THIS TO A STABLE VERSION
-          value: registry.alauda.cn:60080/devops/builder-go:1.19-bullseye-75424cc5
+          value: registry.alauda.cn:60080/devops/builder-go-121:latest
         - name: command
           value: >
             export GOPROXY=https://build-nexus.alauda.cn/repository/golang/,direct
@@ -131,6 +129,93 @@ spec:
       params:
         - name: server
           value: https://build-sonar.alauda.cn
+    ### security scan
+    - name: govulncheck
+      timeout: 30m
+      retries: 0
+      taskRef:
+        kind: ClusterTask
+        name: go-build
+      workspaces:
+        - name: source
+          workspace: source
+        - name: cache
+          workspace: cache
+      when:
+      - input: $(build.git.revision.type)
+        operator: in
+        values:
+        - "PullRequest"
+      params:
+        - name: command
+          value: |
+            export GOPROXY=https://build-nexus.alauda.cn/repository/golang/,direct
+            export GOMAXPROCS=4
+            if [ "$GOCACHE" != "" ]; then
+              export TOOLBIN=$GOCACHE/../toolbin
+              mkdir -p $TOOLBIN
+              ls -la $TOOLBIN
+            fi
+
+            mkdir -p bin
+            export VULNCHECK_OUTPUT=bin/vulncheck.txt
+            # do not throw an error here immediately, but check whether it should fail in the subsequent logic
+            make vulncheck || true
+            # count means the line number which contains 'Fixed in' and has fix version
+            count=$(grep 'Fixed in' "$VULNCHECK_OUTPUT" | grep -v 'Fixed in: N/A' | wc -l)
+            if [ "$count" -gt 0 ]; then
+            echo "==> ❌ there are $count vulnerability need to be fixed"
+            exit 1
+            else
+            echo "==> ✅ there is no vulnerability need to be fixed"
+            fi
+            # TODO: Add report back to PR
+        - name: build-outputs-path
+          value:
+          - "./bin/vulncheck.txt"
+
+        - name: tool-image
+          value: registry.alauda.cn:60080/devops/builder-go-121:latest
+    ### security scan
+    - name: trivy-repo-scan
+      timeout: 30m
+      retries: 0
+      taskRef:
+        kind: ClusterTask
+        name: go-build
+      workspaces:
+        - name: source
+          workspace: source
+        - name: cache
+          workspace: cache
+      when:
+      - input: $(build.git.revision.type)
+        operator: in
+        values:
+        - "PullRequest"
+      params:
+        - name: command
+          value: |
+            export GOPROXY=https://build-nexus.alauda.cn/repository/golang/,direct
+            export GOMAXPROCS=4
+            if [ "$GOCACHE" != "" ]; then
+              export TOOLBIN=$GOCACHE/../toolbin
+              mkdir -p $TOOLBIN
+              ls -la $TOOLBIN
+            fi
+
+            mkdir -p bin
+            export TRIVY_CACHE=$GOCACHE/trivydb
+            export TRIVY_DB_REPO=build-harbor.alauda.cn/ops/aquasecurity/trivy-db
+            export TRIVY_REPORT_OUTPUT=bin/trivy-report.json
+            export TRIVY_SEVERITY=UNKNOWN,MEDIUM,HIGH,CRITICAL
+            make trivy-repo-scan
+            # TODO: Add report back to PR
+        - name: build-outputs-path
+          value:
+          - "./bin/trivy-report.json"
+        - name: tool-image
+          value: registry.alauda.cn:60080/devops/builder-go-121:latest
   runTemplate:
     spec:
       taskRunSpecs:
@@ -160,4 +245,23 @@ spec:
                 requests:
                   cpu: 50m
                   memory: 50Mi
-
+        - pipelineTaskName: govulncheck
+          stepOverrides:
+            - name: go-build
+              resources:
+                requests:
+                  cpu: "4"
+                  memory: 6Gi
+                limits:
+                  cpu: "4"
+                  memory: 6Gi
+        - pipelineTaskName: trivy-repo-scan
+          stepOverrides:
+            - name: go-build
+              resources:
+                requests:
+                  cpu: "1"
+                  memory: 1Gi
+                limits:
+                  cpu: "1"
+                  memory: 1Gi
