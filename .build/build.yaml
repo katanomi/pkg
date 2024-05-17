@@ -89,8 +89,7 @@ spec:
           value:
             - passed-tests-rate=100
         - name: tool-image
-        # WARNING: Temporary fix for core using PR built image. SHOULD CHANGE THIS TO A STABLE VERSION
-          value: registry.alauda.cn:60080/devops/builder-go:1.19-bullseye-75424cc5
+          value: registry.alauda.cn:60080/devops/builder-go-121:latest
     - name: golangci-lint
       timeout: 30m
       retries: 0
@@ -104,8 +103,7 @@ spec:
           workspace: cache
       params:
         - name: tool-image
-          # WARNING: Temporary fix for core using PR built image. SHOULD CHANGE THIS TO A STABLE VERSION
-          value: registry.alauda.cn:60080/devops/builder-go:1.19-bullseye-75424cc5
+          value: registry.alauda.cn:60080/devops/builder-go-121:latest
         - name: command
           value: >
             export GOPROXY=https://build-nexus.alauda.cn/repository/golang/,direct
