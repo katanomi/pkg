@@ -57,6 +57,8 @@ type Query struct {
 	Conditions []Condition `json:"conditions,omitempty"`
 	// Fields is the fields which will be returned
 	Fields []Field `json:"fields,omitempty"`
+	// Indexs is the indexs which will be used
+	Indexs []Index `json:"indexs,omitempty"`
 }
 
 // Condition describe a query condition
@@ -139,4 +141,10 @@ type Field struct {
 	Name string `json:"name"`
 	// Alias is the field alias
 	Alias string `json:"alias"`
+}
+
+// Index describe the index
+type Index struct {
+	// Name is the index name
+	Name string `json:"name"`
 }
