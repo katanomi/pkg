@@ -30,7 +30,7 @@ import (
 
 var _ = Describe("taskRunSortDESCByCompleted", func() {
 	var (
-		taskRunEarly, taskRun, taskRunLate pipelinev1beta1.TaskRun
+		taskRunEarly, taskRun, taskRunLater, taskRunLaterDiffName pipelinev1beta1.TaskRun
 
 		taskRunList pipelinev1beta1.TaskRunList
 
@@ -55,20 +55,23 @@ var _ = Describe("taskRunSortDESCByCompleted", func() {
 
 		taskRunEarly = taskRunConstruct("early", metav1.Time{Time: completeTimeEarly})
 		taskRun = taskRunConstruct("now", metav1.Time{Time: completeTime})
-		taskRunLate = taskRunConstruct("late", metav1.Time{Time: completeTimeLate})
+		taskRunLater = taskRunConstruct("later", metav1.Time{Time: completeTimeLate})
+		taskRunLaterDiffName = taskRunConstruct("later-different-name", metav1.Time{Time: completeTimeLate})
 
 		taskRunList.Items = append(taskRunList.Items, taskRunEarly)
-		taskRunList.Items = append(taskRunList.Items, taskRunLate)
 		taskRunList.Items = append(taskRunList.Items, taskRun)
+		taskRunList.Items = append(taskRunList.Items, taskRunLater)
+		taskRunList.Items = append(taskRunList.Items, taskRunLaterDiffName)
 
 	})
 
 	Context("should return taskRun list", func() {
 		It("by completedTime desc", func() {
 			SortTaskRunByCompletion(&taskRunList)
-			Expect(taskRunList.Items[0].Name).To(Equal("late"))
-			Expect(taskRunList.Items[1].Name).To(Equal("now"))
-			Expect(taskRunList.Items[2].Name).To(Equal("early"))
+			Expect(taskRunList.Items[0].Name).To(Equal("later-different-name"))
+			Expect(taskRunList.Items[1].Name).To(Equal("later"))
+			Expect(taskRunList.Items[2].Name).To(Equal("now"))
+			Expect(taskRunList.Items[3].Name).To(Equal("early"))
 		})
 	})
 
