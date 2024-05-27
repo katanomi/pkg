@@ -17,6 +17,7 @@ limitations under the License.
 package tekton
 
 import (
+	"fmt"
 	"sort"
 
 	"github.com/tektoncd/pipeline/pkg/apis/pipeline/v1beta1"
@@ -37,6 +38,14 @@ func (s *TaskRunListSortByCompletion) Len() int {
 func (s *TaskRunListSortByCompletion) Less(i, j int) bool {
 	iTime := s.Items[i].Status.CompletionTime
 	jTime := s.Items[j].Status.CompletionTime
+
+	// if the time is the same then sort by namespace/name for the stable sort
+	// sorted by namespace/name because taskRun may come from different namespace
+	if jTime.Equal(iTime) {
+		iName := fmt.Sprintf("%s/%s", s.Items[i].Namespace, s.Items[i].Name)
+		jName := fmt.Sprintf("%s/%s", s.Items[j].Namespace, s.Items[j].Name)
+		return iName > jName
+	}
 	return jTime.Before(iTime)
 }
 
