@@ -19,6 +19,9 @@ package sharedmain
 import (
 	"testing"
 
+	corev1 "k8s.io/api/core/v1"
+	"sigs.k8s.io/controller-runtime/pkg/client"
+
 	"github.com/google/go-cmp/cmp"
 	"github.com/katanomi/pkg/apis/meta/v1alpha1"
 	. "github.com/onsi/gomega"
@@ -118,5 +121,37 @@ func TestAppBuilder_PluginDisplayColumns(t *testing.T) {
 			},
 		}})
 		g.Expect(diff).To(BeEmpty())
+	})
+}
+
+func TestAppWithFieldIndexer(t *testing.T) {
+	t.Run("append one field indexer ", func(t *testing.T) {
+		g := NewGomegaWithT(t)
+		a := App("test").WithFieldIndexer(FieldIndexer{
+			Obj:   &corev1.ConfigMap{},
+			Field: "data.key",
+			ExtractValue: func(object client.Object) []string {
+				return []string{object.(*corev1.ConfigMap).Data["key"]}
+			},
+		})
+		g.Expect(a.fieldIndexeres).Should(HaveLen(1))
+	})
+	t.Run("append more than one field indexer", func(t *testing.T) {
+		g := NewGomegaWithT(t)
+
+		a := App("test").WithFieldIndexer(FieldIndexer{
+			Obj:   &corev1.ConfigMap{},
+			Field: "data.key",
+			ExtractValue: func(object client.Object) []string {
+				return []string{object.(*corev1.ConfigMap).Data["key"]}
+			},
+		}).WithFieldIndexer(FieldIndexer{
+			Obj:   &corev1.ConfigMap{},
+			Field: "data.name",
+			ExtractValue: func(object client.Object) []string {
+				return []string{object.(*corev1.ConfigMap).Data["name"]}
+			},
+		})
+		g.Expect(a.fieldIndexeres).Should(HaveLen(2))
 	})
 }

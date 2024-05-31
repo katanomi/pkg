@@ -112,7 +112,8 @@ type AppBuilder struct {
 	LevelManager *klogging.LevelManager
 
 	// Controllers
-	Manager ctrl.Manager
+	Manager        ctrl.Manager
+	fieldIndexeres []FieldIndexer
 
 	// ConfigWatch
 	ConfigMapWatcher DefaultingWatcherWithOnChange
@@ -139,6 +140,16 @@ type AppBuilder struct {
 
 	// newResourceLock override the default resourcelock of controller-runtime.
 	newResourceLock kmanager.ResourceLockFunc
+}
+
+// FieldIndexer holds data when index fields into InformerCache
+type FieldIndexer struct {
+	// Obj indicates which object would be indexed
+	Obj ctrlclient.Object
+	// Field indicates field path, eg: .spec.name
+	Field string
+	// ExtractValue indexer func to return value from Obj
+	ExtractValue ctrlclient.IndexerFunc
 }
 
 // ParseFlag parse flag needed for App
@@ -373,6 +384,16 @@ func (a *AppBuilder) MultiClusterClient(client multicluster.Interface) *AppBuild
 	return a
 }
 
+// WithFieldIndexer will append field indexer in to Controller Manager Cluster
+func (a *AppBuilder) WithFieldIndexer(fieldIndexer FieldIndexer) *AppBuilder {
+	if a.fieldIndexeres == nil {
+		a.fieldIndexeres = []FieldIndexer{}
+	}
+
+	a.fieldIndexeres = append(a.fieldIndexeres, fieldIndexer)
+	return a
+}
+
 // Controllers adds controllers to the app, will start a manager under the hood
 func (a *AppBuilder) Controllers(ctors ...controllers.SetupChecker) *AppBuilder {
 	a.init()
@@ -417,6 +438,12 @@ func (a *AppBuilder) Controllers(ctors ...controllers.SetupChecker) *AppBuilder 
 	// a manager implements all cluster.Cluster methods
 	a.Context = kclient.WithCluster(a.Context, a.Manager)
 	a.initClient(a.Manager.GetClient())
+
+	if len(a.fieldIndexeres) != 0 {
+		for _, item := range a.fieldIndexeres {
+			a.Manager.GetFieldIndexer().IndexField(a.Context, item.Obj, item.Field, item.ExtractValue)
+		}
+	}
 
 	// TODO: make this interval setup configurable
 	lazyLoader := controllers.NewLazyLoader(a.Context, time.Minute)
@@ -618,12 +645,12 @@ func (a *AppBuilder) Profiling() *AppBuilder {
 	// there is already pprof for webservices, maybe just need to solve
 	// how do controllers do metrics?
 
-	// profilingHandler := profiling.NewHandler(a.Logger, false)
-	// a.ProfilingServer = profiling.NewServer(profilingHandler)
-	// sharedmain.WatchObservabilityConfigOrDie(a.Context, a.ConfigMapWatcher, profilingHandler, a.Logger, a.Name)
-	// a.startFunc = append(a.startFunc, func(ctx context.Context) error {
-	// 	return a.ProfilingServer.ListenAndServe()
-	// })
+	//profilingHandler := profiling.NewHandler(a.Logger, false)
+	//a.ProfilingServer = profiling.NewServer(profilingHandler)
+	//sharedmain.WatchObservabilityConfigOrDie(a.Context, a.ConfigMapWatcher.(*cminformer.InformedWatcher), profilingHandler, a.Logger, a.Name)
+	//a.startFunc = append(a.startFunc, func(ctx context.Context) error {
+	//	return a.ProfilingServer.ListenAndServe()
+	//})
 
 	return a
 }

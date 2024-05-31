@@ -61,6 +61,10 @@ const (
 	// IntegrationSyncPeriodKey indicates the configuration key for integration synchronization.
 	IntegrationSyncPeriodKey = "integration.syncPeriod"
 
+	// IntegrationResourcesSyncPeriodKey indicates the configuration key for integration resources synchronization.
+	// if the values is zero , it indicates never requeue in period
+	IntegrationResourcesSyncPeriodKey = "integration.resources.syncPeriod"
+
 	// PprofEnabledKey indicates the configuration key of the /debug/pprof debugging api/
 	PprofEnabledKey = "pprof.enabled"
 
