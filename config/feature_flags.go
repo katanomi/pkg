@@ -137,6 +137,9 @@ const (
 	// DefaultIntegrationsSyncPeriod defines the default time interval of integration synchronization
 	DefaultIntegrationsSyncPeriod = "15m"
 
+	// DefaultIntegrationsResourcesSyncPeriod defines the default time interval of integration synchronization for resources
+	DefaultIntegrationsResourcesSyncPeriod = "2h"
+
 	// DefaultPprofEnabled stores the default value "false" for the "pprof.enabled" /debug/pprof debugging api.
 	// If the corresponding key does not exist, the default value is returned.
 	DefaultPprofEnabled FeatureValue = False
@@ -172,6 +175,7 @@ var defaultFeatureValue = map[string]FeatureValue{
 	PolicyCheckEnabledFeatureKey:           DefaultPolicyCheckEnabled,
 	ClusterIntegrationSyncPeriodKey:        DefaultClusterIntegrationSyncPeriod,
 	IntegrationSyncPeriodKey:               DefaultIntegrationsSyncPeriod,
+	IntegrationResourcesSyncPeriodKey:      DefaultIntegrationsResourcesSyncPeriod,
 	PprofEnabledKey:                        DefaultPprofEnabled,
 	ClusterTaskCreationEnabledKey:          DefaultClusterTaskCreationEnabledKey,
 	ClusterTaskMigrationEnabledKey:         DefaultClusterTaskMigrationEnabledKey,

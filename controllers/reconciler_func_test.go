@@ -47,6 +47,10 @@ func TestSyncPeriodResultFunc(t *testing.T) {
 			syncPeriod: "1m",
 			duration:   1 * time.Minute,
 		},
+		"zero value": {
+			syncPeriod: "0",
+			duration:   0 * time.Minute,
+		},
 	}
 
 	for name, item := range tests {

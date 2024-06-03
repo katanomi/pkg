@@ -441,7 +441,10 @@ func (a *AppBuilder) Controllers(ctors ...controllers.SetupChecker) *AppBuilder 
 
 	if len(a.fieldIndexeres) != 0 {
 		for _, item := range a.fieldIndexeres {
-			a.Manager.GetFieldIndexer().IndexField(a.Context, item.Obj, item.Field, item.ExtractValue)
+			err := a.Manager.GetFieldIndexer().IndexField(a.Context, item.Obj, item.Field, item.ExtractValue)
+			if err != nil {
+				a.Logger.Fatalw("unable to set index field", "err", err)
+			}
 		}
 	}
 
@@ -645,12 +648,12 @@ func (a *AppBuilder) Profiling() *AppBuilder {
 	// there is already pprof for webservices, maybe just need to solve
 	// how do controllers do metrics?
 
-	//profilingHandler := profiling.NewHandler(a.Logger, false)
-	//a.ProfilingServer = profiling.NewServer(profilingHandler)
-	//sharedmain.WatchObservabilityConfigOrDie(a.Context, a.ConfigMapWatcher.(*cminformer.InformedWatcher), profilingHandler, a.Logger, a.Name)
-	//a.startFunc = append(a.startFunc, func(ctx context.Context) error {
-	//	return a.ProfilingServer.ListenAndServe()
-	//})
+	// profilingHandler := profiling.NewHandler(a.Logger, false)
+	// a.ProfilingServer = profiling.NewServer(profilingHandler)
+	// sharedmain.WatchObservabilityConfigOrDie(a.Context, a.ConfigMapWatcher, profilingHandler, a.Logger, a.Name)
+	// a.startFunc = append(a.startFunc, func(ctx context.Context) error {
+	// 	return a.ProfilingServer.ListenAndServe()
+	// })
 
 	return a
 }
