@@ -27,12 +27,20 @@ import (
 // minSyncPeriod defines the minimum synchronization period
 const minSyncPeriod = 30 * time.Second
 
+// SyncPeriodResultFunc contruct reconcile.Result to requeue automatically
+// the RequeueAfter value is set by configKey in `FeatureFlag`
 func SyncPeriodResultFunc(manager *config.Manager, configKey string) ResultFunc {
 	return func(_ context.Context, _ reconcile.Request, result *reconcile.Result) error {
 		syncPeriod, err := manager.GetFeatureFlag(configKey).AsDuration()
 		if err != nil {
 			return err
 		}
+
+		// do not requeue when sync period is less than or equal to 0
+		if syncPeriod.Nanoseconds() <= 0 {
+			return nil
+		}
+
 		if syncPeriod < minSyncPeriod {
 			syncPeriod = minSyncPeriod
 		}

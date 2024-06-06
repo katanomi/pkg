@@ -61,6 +61,10 @@ const (
 	// IntegrationSyncPeriodKey indicates the configuration key for integration synchronization.
 	IntegrationSyncPeriodKey = "integration.syncPeriod"
 
+	// IntegrationResourcesSyncPeriodKey indicates the configuration key for integration resources synchronization.
+	// if the values is zero , it indicates never requeue in period
+	IntegrationResourcesSyncPeriodKey = "integration.resources.syncPeriod"
+
 	// PprofEnabledKey indicates the configuration key of the /debug/pprof debugging api/
 	PprofEnabledKey = "pprof.enabled"
 
@@ -133,6 +137,9 @@ const (
 	// DefaultIntegrationsSyncPeriod defines the default time interval of integration synchronization
 	DefaultIntegrationsSyncPeriod = "15m"
 
+	// DefaultIntegrationsResourcesSyncPeriod defines the default time interval of integration synchronization for resources
+	DefaultIntegrationsResourcesSyncPeriod = "2h"
+
 	// DefaultPprofEnabled stores the default value "false" for the "pprof.enabled" /debug/pprof debugging api.
 	// If the corresponding key does not exist, the default value is returned.
 	DefaultPprofEnabled FeatureValue = False
@@ -168,6 +175,7 @@ var defaultFeatureValue = map[string]FeatureValue{
 	PolicyCheckEnabledFeatureKey:           DefaultPolicyCheckEnabled,
 	ClusterIntegrationSyncPeriodKey:        DefaultClusterIntegrationSyncPeriod,
 	IntegrationSyncPeriodKey:               DefaultIntegrationsSyncPeriod,
+	IntegrationResourcesSyncPeriodKey:      DefaultIntegrationsResourcesSyncPeriod,
 	PprofEnabledKey:                        DefaultPprofEnabled,
 	ClusterTaskCreationEnabledKey:          DefaultClusterTaskCreationEnabledKey,
 	ClusterTaskMigrationEnabledKey:         DefaultClusterTaskMigrationEnabledKey,
