@@ -25,6 +25,7 @@ import (
 	"github.com/katanomi/pkg/restclient"
 	"github.com/robfig/cron/v3"
 	"go.uber.org/zap"
+	"knative.dev/pkg/logging"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 )
 
@@ -82,6 +83,10 @@ func (cw *CronWorker) Setup(ctx context.Context, manager manager.Manager, logger
 		return errors.ErrNilPointer
 	}
 
+	cw.cron = cron.New()
+	cw.SugaredLogger = logger.With("component", cw.Name())
+	ctx = logging.WithLogger(ctx, logger)
+
 	for _, j := range cw.Runners {
 		err := j.Setup(ctx, manager.GetClient(), restClient)
 		if err != nil {
@@ -93,8 +98,6 @@ func (cw *CronWorker) Setup(ctx context.Context, manager manager.Manager, logger
 		})
 	}
 
-	cw.cron = cron.New()
-	cw.SugaredLogger = logger.With("component", cw.Name())
 	if kMgr := config.KatanomiConfigManager(ctx); kMgr != nil {
 		kMgr.AddWatcher(config.NewConfigWatcher(ConfigWatcherFunc(cw)))
 	}
