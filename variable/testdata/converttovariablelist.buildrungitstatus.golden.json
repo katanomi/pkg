@@ -93,18 +93,6 @@
             "example": "false"
         },
         {
-            "name": "pullRequest.mergedBy",
-            "example": "joedoe@example.com"
-        },
-        {
-            "name": "pullRequest.mergedBy.name",
-            "example": "joedoe"
-        },
-        {
-            "name": "pullRequest.mergedBy.email",
-            "example": "joedoe@example.com"
-        },
-        {
             "name": "branch",
             "example": "main"
         },

@@ -27,3 +27,4 @@ spec:
     revision: refs/pull/1/head
     webURL: https://github.com/kubernetes/kubernetes/pull/1
   hasConflicts: false
+  mergeAt: "2022-08-02T10:08:24Z"
