@@ -83,6 +83,9 @@ const (
 
 	// HubResolverFeatureKey indicates the configuration key of the hub resolver feature gate.
 	HubResolverFeatureKey = "hubResolver.enabled"
+
+	// GlobalCredentialNamespaceKey is the key of the global credentials namespace
+	GlobalCredentialNamespaceKey = "globalCredentials.namespace"
 )
 
 const (
