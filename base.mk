@@ -84,11 +84,12 @@ certmanager: ##@Deployment Install certmanager v1.4.0 from github manifest to th
 e2e: ginkgo ##@Testing Executes e2e tests inside test/e2e folder
 	$(GINKGO) -progress -v -tags $(GO_VET_TAGS) ./test/e2e
 
-CONTROLLER_GEN = $(TOOLBIN)/controller-gen
+CONTROLLER_TOOLS_VERSION ?= 9c561aa
+CONTROLLER_GEN = $(TOOLBIN)/controller-gen-$(CONTROLLER_TOOLS_VERSION)
 controller-gen: ##@Setup Download controller-gen locally if necessary.
 	## this is a necessary evil already reported by knative community https://github.com/kubernetes-sigs/controller-tools/ issue 560
 	## once the issue is fixed we can move to use the original package. the original line uses go-get-tools with sigs.k8s.io/controller-tools/cmd/controller-gen@v0.4.1
-	$(call go-get-fork,$(CONTROLLER_GEN),https://github.com/danielfbm/controller-tools,cmd/controller-gen,controller-gen)
+	$(call go-get-fork,$(CONTROLLER_GEN),https://github.com/danielfbm/controller-tools,cmd/controller-gen,controller-gen,$(CONTROLLER_TOOLS_VERSION))
 
 KUSTOMIZE = $(TOOLBIN)/kustomize
 kustomize: ##@Setup Download kustomize locally if necessary.
@@ -146,7 +147,9 @@ cd $$TMP_DIR ;\
 echo "Cloning $(2)" ;\
 git clone $(2) $(4) ;\
 cd $(4) ;\
+git checkout $(5);\
 GOBIN=$(TOOLBIN) go install ./$(3);\
+mv "$$(echo "$(1)" | sed "s/-$(5)$$//")" $(1) ;\
 rm -rf $$TMP_DIR ;\
 }
 endef
