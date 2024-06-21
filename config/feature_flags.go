@@ -68,6 +68,9 @@ const (
 	// PprofEnabledKey indicates the configuration key of the /debug/pprof debugging api/
 	PprofEnabledKey = "pprof.enabled"
 
+	// OpenapiDocEnabledKey indicates the configuration key of the /openapi.json debugging api/
+	OpenapiDocEnabledKey = "openapidoc.enabled"
+
 	// ClusterTaskDisabledKey specifies the key for the clustertask creation feature.
 	// When set to false, the creation of clustertasks is disabled and new clustertasks cannot be created and can only be updated.
 	ClusterTaskCreationEnabledKey = "clustertask.creation.enabled"

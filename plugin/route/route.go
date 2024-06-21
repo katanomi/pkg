@@ -23,6 +23,7 @@ import (
 
 	restfulspec "github.com/emicklei/go-restful-openapi/v2"
 	"github.com/emicklei/go-restful/v3"
+	"github.com/katanomi/pkg/config"
 	"github.com/katanomi/pkg/plugin/client"
 	"github.com/katanomi/pkg/plugin/component/metrics"
 	"github.com/katanomi/pkg/plugin/component/tracing"
@@ -522,11 +523,24 @@ func NewDefaultService(ctx context.Context) *restful.WebService {
 	return ws
 }
 
-// NewDocService go restful api doc
-func NewDocService(webservices ...*restful.WebService) *restful.WebService {
+// NewDocServiceWithCtx go restful api doc
+func NewDocServiceWithCtx(ctx context.Context, webservices ...*restful.WebService) *restful.WebService {
+	configManager := config.KatanomiConfigManager(ctx)
+
+	configFilter := NoOpFilter
+	if ctx != nil && configManager != nil {
+		configFilter = config.ConfigFilter(ctx, configManager, config.OpenapiDocEnabledKey, config.ConfigFilterNotFoundWhenNotTrue)
+	}
+
 	config := restfulspec.Config{
 		WebServices: webservices,
 		APIPath:     "/openapi.json",
 	}
-	return restfulspec.NewOpenAPIService(config)
+	return restfulspec.NewOpenAPIService(config).Filter(configFilter)
+}
+
+// NewDocService go restful api doc
+// Deprecated: use NewDocServiceWithCtx instead
+func NewDocService(webservices ...*restful.WebService) *restful.WebService {
+	return NewDocServiceWithCtx(context.Background(), webservices...)
 }
