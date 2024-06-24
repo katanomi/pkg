@@ -679,7 +679,7 @@ func (a *AppBuilder) Run(startFuncs ...func(context.Context) error) error {
 		a.container.Add(route.NewDefaultService(a.Context))
 
 		if len(a.container.RegisteredWebServices()) > 0 {
-			a.container.Add(route.NewDocService(a.container.RegisteredWebServices()...))
+			a.container.Add(route.NewDocServiceWithCtx(a.Context, a.container.RegisteredWebServices()...))
 		}
 
 		a.startFunc = append(a.startFunc, func(ctx context.Context) error {
