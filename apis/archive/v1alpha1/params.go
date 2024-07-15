@@ -66,7 +66,7 @@ func ConvertMedataSelectorToConditions(metadataSelectorStr string) ([]Condition,
 			if req.Values().Len() > 0 {
 				val := req.Values().List()[0]
 				if strings.HasPrefix(val, LikeValuePrefixForEqualOperator) {
-					conditions = append(conditions, Like(MetadataKey(req.Key()), strings.TrimPrefix(val, "like--")))
+					conditions = append(conditions, Like(MetadataKey(req.Key()), strings.TrimPrefix(val, LikeValuePrefixForEqualOperator)))
 				} else {
 					conditions = append(conditions, Equal(MetadataKey(req.Key()), val))
 				}
