@@ -205,3 +205,12 @@ func ToInterfaceSlice(value interface{}) []interface{} {
 	}
 	return values
 }
+
+// Exist generate condition with Exist operator
+func Exist(key string) Condition {
+	return Condition{
+		Key:      key,
+		Operator: ConditionOperatorExist,
+		Value:    "",
+	}
+}

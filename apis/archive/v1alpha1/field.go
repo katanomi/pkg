@@ -70,5 +70,5 @@ const (
 
 // MetadataKey returns the metadata key
 func MetadataKey(key string) string {
-	return MetadataFiled + "." + key
+	return MetadataFiled + "." + "\"" + key + "\""
 }
