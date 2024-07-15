@@ -24,6 +24,11 @@ import (
 	"k8s.io/apimachinery/pkg/selection"
 )
 
+const (
+	// LikeValuePrefixForEqualOperator Like operator value prefix
+	LikeValuePrefixForEqualOperator = "like--"
+)
+
 // AggregateParams params for aggregating archive data
 type AggregateParams struct {
 	Query   AggregateQuery `json:"query,omitempty"`
@@ -42,6 +47,12 @@ type DeleteParams struct {
 	Options    *DeleteOption `json:"options,omitempty"`
 }
 
+// ConvertMedataSelectorToConditions convert a string representing a metadata selector and returns Condition array
+// The input will cause an error if it does not follow this form:
+// 'in' operator: key in (value1,value2,value3)
+// 'equal' operator: key=value
+// 'exist' operator: key
+// You can join multi operator, example: "key in (value1,value2,value3),key=value,key2"
 func ConvertMedataSelectorToConditions(metadataSelectorStr string) ([]Condition, error) {
 	requirements, err := convertMedataSelectorToRequirements(metadataSelectorStr)
 	if err != nil {
@@ -54,7 +65,7 @@ func ConvertMedataSelectorToConditions(metadataSelectorStr string) ([]Condition,
 		case selection.Equals:
 			if req.Values().Len() > 0 {
 				val := req.Values().List()[0]
-				if strings.HasPrefix(val, "like--") {
+				if strings.HasPrefix(val, LikeValuePrefixForEqualOperator) {
 					conditions = append(conditions, Like(MetadataKey(req.Key()), strings.TrimPrefix(val, "like--")))
 				} else {
 					conditions = append(conditions, Equal(MetadataKey(req.Key()), val))
@@ -83,7 +94,7 @@ func convertMedataSelectorToRequirements(selectorStr string) (labels.Requirement
 
 	requirements, selectable := selector.Requirements()
 	if !selectable {
-		return nil, err
+		return nil, fmt.Errorf("%s doesn't want to select anything", selectorStr)
 	}
 
 	return requirements, nil
