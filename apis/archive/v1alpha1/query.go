@@ -32,6 +32,8 @@ const (
 	ConditionOperatorOr ConditionOperator = "or"
 	// ConditionOperatorIn is the operator for in
 	ConditionOperatorIn ConditionOperator = "in"
+	// ConditionOperatorExist is the operator for exist
+	ConditionOperatorExist ConditionOperator = "exist"
 
 	// ConditionOperatorEqual is the operator for equal
 	ConditionOperatorEqual ConditionOperator = "eq"
