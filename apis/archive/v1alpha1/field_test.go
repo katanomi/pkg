@@ -24,5 +24,5 @@ import (
 
 func TestMetadataKey(t *testing.T) {
 	g := gomega.NewGomegaWithT(t)
-	g.Expect(MetadataKey("test")).To(gomega.Equal("metadata.test"))
+	g.Expect(MetadataKey("test.cpaas.io")).To(gomega.Equal("metadata.\"test.cpaas.io\""))
 }
