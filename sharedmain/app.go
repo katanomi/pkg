@@ -29,6 +29,8 @@ import (
 	"sync"
 	"time"
 
+	"github.com/katanomi/pkg/plugin/client/base"
+
 	cloudevents "github.com/cloudevents/sdk-go/v2"
 	cloudeventsv2client "github.com/cloudevents/sdk-go/v2/client"
 	metav1alpha1 "github.com/katanomi/pkg/apis/meta/v1alpha1"
@@ -369,7 +371,38 @@ func (a *AppBuilder) Log() *AppBuilder {
 	// adds filter for logger
 	a.filters = append(a.filters, klogging.Filter(a.Logger))
 
+	// it only works when app first start
+	if a.Logger.Level().Enabled(zapcore.DebugLevel) {
+		restyClient := restclient.RESTClient(a.Context)
+		restyClient.SetDebug(true)
+		restyClient.SetDebugBodyLimit(2048)
+		restyClient.OnRequestLog(func(requestLog *resty.RequestLog) error {
+			requestLog.Header = redactHeader(requestLog.Header)
+			return nil
+		})
+		a.Context = restclient.WithRESTClient(a.Context, restyClient)
+	}
+
 	return a
+}
+
+func redactHeader(header http.Header) http.Header {
+	if header == nil {
+		return nil
+	}
+
+	redactKeys := []string{
+		kclient.AuthorizationHeader,
+		base.PluginSecretHeader,
+	}
+
+	for _, key := range redactKeys {
+		if v := header.Get(key); v != "" {
+			header.Set(key, "******")
+		}
+	}
+
+	return header
 }
 
 // RESTClient injects a RESTClient
