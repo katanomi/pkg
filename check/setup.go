@@ -37,7 +37,12 @@ func InstalledTekton(ctx context.Context, clt client.Client) bool {
 	// Even if the resource does not exist, it's fine.
 	// Although the list operation won't fail, an error will still occur when importing resources.
 	// It also won't trigger the issue where client-go's cache fails to list the Task resource.
-	return InstallCheck(ctx, clt, &pipev1beta1.TaskList{}, &client.ListOptions{})
+	installed := InstallCheck(ctx, clt, &pipev1beta1.TaskList{}, &client.ListOptions{})
+	if !installed {
+		return false
+	}
+	// If the PipelineRun does not exist, it is likely that the TaskRun does not exist either.
+	return InstallCheck(ctx, clt, &pipev1beta1.PipelineRunList{}, &client.ListOptions{})
 }
 
 // InstallCheck common check component installed method.
