@@ -25,20 +25,30 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
-const (
-	// NotExistNamespace returns not exist namespace name.
-	NotExistNamespace = "not exist namespace"
-)
-
 // InstalledTekton Check if tekton is installed
 func InstalledTekton(ctx context.Context, clt client.Client) bool {
-	return InstallCheck(ctx, clt, &pipev1beta1.PipelineRunList{})
+	// Checks whether the task resource exists in the cluster.
+
+	// Since the new version of Tekton defaults to storing tasks in v1 version,
+	// fetching tasks in v1beta1 version requires a conversion.
+	// If the conversion fails, it also indicates that Tekton does not exist.
+
+	// In the new version, when katanomi is deployed, the Task resource will be automatically imported, so the resource should exist.
+	// Even if the resource does not exist, it's fine.
+	// Although the list operation won't fail, an error will still occur when importing resources.
+	// It also won't trigger the issue where client-go's cache fails to list the Task resource.
+	installed := InstallCheck(ctx, clt, &pipev1beta1.TaskList{}, &client.ListOptions{})
+	if !installed {
+		return false
+	}
+	// If the PipelineRun does not exist, it is likely that the TaskRun does not exist either.
+	return InstallCheck(ctx, clt, &pipev1beta1.PipelineRunList{}, &client.ListOptions{})
 }
 
 // InstallCheck common check component installed method.
-func InstallCheck(ctx context.Context, clt client.Client, value client.ObjectList) bool {
+func InstallCheck(ctx context.Context, clt client.Client, value client.ObjectList, opts ...client.ListOption) bool {
 	log := logging.FromContext(ctx)
-	if err := clt.List(ctx, value, client.InNamespace(NotExistNamespace)); err != nil {
+	if err := clt.List(ctx, value, opts...); err != nil {
 		log.Debugw("list operation failed", "err", err)
 		return false
 	}
