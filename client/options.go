@@ -59,3 +59,63 @@ func (opt *GetOptions) Build() *client.GetOptions {
 func GetCachedOptions() *client.GetOptions {
 	return NewGetOptions().WithCached().Build()
 }
+
+// ListOptions is a wrapper for client.ListOptions
+type ListOptions struct {
+	client.ListOptions
+}
+
+// NewListOptions returns a new ListOptions
+func NewListOptions() *ListOptions {
+	return &ListOptions{}
+}
+
+// init returns a new ListOptions if opt is nil or opt.Raw is nil
+func (opt *ListOptions) init() *ListOptions {
+	if opt != nil && opt.ListOptions.Raw != nil {
+		return opt
+	}
+	return &ListOptions{
+		ListOptions: client.ListOptions{
+			Raw: &metav1.ListOptions{},
+		},
+	}
+}
+
+// WithCached set the ResourceVersion to 0
+func (opt *ListOptions) WithCached() *ListOptions {
+	opt = opt.init()
+	opt.Raw.ResourceVersion = "0"
+	return opt
+}
+
+// WithCached set the ResourceVersion to 0
+func (opt *ListOptions) WithLimit(limit int64) *ListOptions {
+	opt = opt.init()
+	opt.Limit = limit
+	return opt
+}
+
+// WithCached set the ResourceVersion to 0
+func (opt *ListOptions) WithNamespace(namespace string) *ListOptions {
+	opt = opt.init()
+	opt.Namespace = namespace
+	return opt
+}
+
+func (opt *ListOptions) WithUnsafeDisableDeepCopy() *ListOptions {
+	opt = opt.init()
+	True := true
+	opt.UnsafeDisableDeepCopy = &True
+	return opt
+}
+
+// Build returns the client.ListOptions
+func (opt *ListOptions) Build() *client.ListOptions {
+	return &opt.ListOptions
+}
+
+// ListCachedOptions returns ListOptions with ResourceVersion set to 0
+func ListCachedOptions() *client.ListOptions {
+	return NewListOptions().WithCached().Build()
+}

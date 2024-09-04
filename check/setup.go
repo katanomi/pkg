@@ -19,10 +19,13 @@ package check
 
 import (
 	"context"
+	"time"
 
+	pkgclient "github.com/katanomi/pkg/client"
 	pipev1beta1 "github.com/tektoncd/pipeline/pkg/apis/pipeline/v1beta1"
 	"knative.dev/pkg/logging"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/client/apiutil"
 )
 
 // InstalledTekton Check if tekton is installed
@@ -37,20 +40,40 @@ func InstalledTekton(ctx context.Context, clt client.Client) bool {
 	// Even if the resource does not exist, it's fine.
 	// Although the list operation won't fail, an error will still occur when importing resources.
 	// It also won't trigger the issue where client-go's cache fails to list the Task resource.
-	installed := InstallCheck(ctx, clt, &pipev1beta1.TaskList{}, &client.ListOptions{})
+	installed := InstallationCheck(ctx, clt, &pipev1beta1.TaskList{}, &client.ListOptions{})
 	if !installed {
 		return false
 	}
+
 	// If the PipelineRun does not exist, it is likely that the TaskRun does not exist either.
-	return InstallCheck(ctx, clt, &pipev1beta1.PipelineRunList{}, &client.ListOptions{})
+	return InstallationCheck(ctx, clt, &pipev1beta1.PipelineRunList{}, &client.ListOptions{})
 }
 
-// InstallCheck common check component installed method.
-func InstallCheck(ctx context.Context, clt client.Client, value client.ObjectList, opts ...client.ListOption) bool {
+// InstallationCheck common check component installed method.
+func InstallationCheck(ctx context.Context, clt client.Client, value client.ObjectList, opts ...client.ListOption) bool {
 	log := logging.FromContext(ctx)
+
+	defer func(startTime time.Time) {
+		log.Debugw("Installation check", "gvk", value.GetObjectKind().GroupVersionKind(), "UsedTime", time.Since(startTime))
+	}(time.Now())
+
+	// Set the group version kind to the object, otherwise the log will not display the correct GVK.
+	gvk, err := apiutil.GVKForObject(value, clt.Scheme())
+	if err == nil {
+		value.GetObjectKind().SetGroupVersionKind(gvk)
+	}
+
+	// We only need to check the first one to determine whether the crd exists and the component is ready.
+	// If set `resourceVersion` to 0, it will ignore the `limit` option.
+	opts = append(opts, pkgclient.NewListOptions().WithLimit(1).WithUnsafeDisableDeepCopy().Build())
+
 	if err := clt.List(ctx, value, opts...); err != nil {
-		log.Debugw("list operation failed", "err", err)
+		log.Infow("list operation failed", "err", err)
 		return false
+	}
+
+	if prList, ok := value.(*pipev1beta1.PipelineRunList); ok && prList != nil {
+		log.Debugw("list PipelineRun success", "count", len(prList.Items))
 	}
 	return true
 }
