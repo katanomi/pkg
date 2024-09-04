@@ -57,12 +57,6 @@ func InstallationCheck(ctx context.Context, clt client.Client, value client.Obje
 		log.Debugw("Installation check", "gvk", value.GetObjectKind().GroupVersionKind(), "UsedTime", time.Since(startTime))
 	}(time.Now())
 
-	// Set the group version kind to the object, otherwise the log will not display the correct GVK.
-	gvk, err := apiutil.GVKForObject(value, clt.Scheme())
-	if err == nil {
-		value.GetObjectKind().SetGroupVersionKind(gvk)
-	}
-
 	// We only need to check the first one to determine whether the crd exists and the component is ready.
 	// If set `resourceVersion` to 0, it will ignore the `limit` option.
 	opts = append(opts, pkgclient.NewListOptions().WithLimit(1).WithUnsafeDisableDeepCopy().Build())
@@ -75,5 +69,13 @@ func InstallationCheck(ctx context.Context, clt client.Client, value client.Obje
 	if prList, ok := value.(*pipev1beta1.PipelineRunList); ok && prList != nil {
 		log.Debugw("list PipelineRun success", "count", len(prList.Items))
 	}
+
+	// Set the group version kind to the object, otherwise the log will not show the GVK.
+	gvk, err := apiutil.GVKForObject(value, clt.Scheme())
+	if err != nil {
+		log.Errorw("get GVK failed", "err", err)
+	}
+	value.GetObjectKind().SetGroupVersionKind(gvk)
+
 	return true
 }
