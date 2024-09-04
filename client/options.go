@@ -89,20 +89,21 @@ func (opt *ListOptions) WithCached() *ListOptions {
 	return opt
 }
 
-// WithCached set the ResourceVersion to 0
+// WithLimit set the limit
 func (opt *ListOptions) WithLimit(limit int64) *ListOptions {
 	opt = opt.init()
 	opt.Limit = limit
 	return opt
 }
 
-// WithCached set the ResourceVersion to 0
+// WithNamespace set the namespace
 func (opt *ListOptions) WithNamespace(namespace string) *ListOptions {
 	opt = opt.init()
 	opt.Namespace = namespace
 	return opt
 }
 
+// WithUnsafeDisableDeepCopy set the UnsafeDisableDeepCopy to true
 func (opt *ListOptions) WithUnsafeDisableDeepCopy() *ListOptions {
 	opt = opt.init()
 	True := true
