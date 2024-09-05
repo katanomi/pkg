@@ -77,3 +77,77 @@ var _ = Describe("GetCachedOptions", func() {
 		Expect(options.Raw).To(Equal(&metav1.GetOptions{ResourceVersion: "0"}))
 	})
 })
+
+var _ = Describe("Test.ListOptions", func() {
+	var (
+		opts *ListOptions
+	)
+
+	BeforeEach(func() {
+		opts = NewListOptions()
+	})
+
+	Describe("init", func() {
+		Context("when ListOptions is not nil and Raw is not nil", func() {
+			It("should return the input ListOptions", func() {
+				raw := &metav1.ListOptions{}
+				opt := &ListOptions{
+					ListOptions: client.ListOptions{
+						Raw: raw,
+					},
+				}
+				Expect(opt.init()).To(Equal(opt))
+			})
+		})
+
+		Context("when ListOptions is nil or Raw is nil", func() {
+			It("should return a new ListOptions with Raw set to a new instance of metav1.ListOptions", func() {
+				Expect(opts.init()).To(Equal(&ListOptions{
+					ListOptions: client.ListOptions{
+						Raw: &metav1.ListOptions{},
+					},
+				}))
+			})
+		})
+	})
+
+	Describe("WithCached", func() {
+		It("should set the ResourceVersion to '0'", func() {
+			Expect(opts.WithCached().Build().Raw.ResourceVersion).To(Equal("0"))
+		})
+	})
+
+	Describe("WithLimit", func() {
+		It("should set the Limit", func() {
+			Expect(opts.WithLimit(10).Build().Limit).To(Equal(int64(10)))
+		})
+	})
+
+	Describe("WithNamespace", func() {
+		It("should set the Namespace", func() {
+			Expect(opts.WithNamespace("NS").Build().Namespace).To(Equal("NS"))
+		})
+	})
+
+	Describe("WithUnsafeDisableDeepCopy", func() {
+		It("should set the UnsafeDisableDeepCopy to true", func() {
+			Expect(opts.WithUnsafeDisableDeepCopy().Build().UnsafeDisableDeepCopy).NotTo(BeNil())
+			Expect(*opts.WithUnsafeDisableDeepCopy().Build().UnsafeDisableDeepCopy).To(BeTrue())
+		})
+	})
+
+	Describe("Build", func() {
+		It("should return a pointer to the underlying client.ListOptions", func() {
+			Expect(opts.Build()).To(BeIdenticalTo(&opts.ListOptions))
+		})
+	})
+
+})
+
+var _ = Describe("ListCachedOptions", func() {
+	It("should return client.ListOptions with ResourceVersion 0", func() {
+		options := ListCachedOptions()
+		Expect(options).ToNot(BeNil())
+		Expect(options.Raw).To(Equal(&metav1.ListOptions{ResourceVersion: "0"}))
+	})
+})
