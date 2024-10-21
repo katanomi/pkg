@@ -22,7 +22,6 @@ import (
 	"github.com/katanomi/pkg/testing/assertions"
 	"github.com/katanomi/pkg/testing/framework/base"
 
-	"github.com/katanomi/pkg/multicluster"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/util/rand"
 	"k8s.io/client-go/rest"
@@ -37,8 +36,6 @@ type TestContext struct {
 	Scheme    *runtime.Scheme
 	Client    client.Client
 	Namespace string
-
-	MultiClusterClient multicluster.Interface
 }
 
 var _ assertions.TestContexter = &TestContext{}

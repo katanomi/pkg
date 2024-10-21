@@ -31,9 +31,8 @@ import (
 
 	cloudevents "github.com/cloudevents/sdk-go/v2"
 	cloudeventsv2client "github.com/cloudevents/sdk-go/v2/client"
-	metav1alpha1 "github.com/katanomi/pkg/apis/meta/v1alpha1"
 	"github.com/katanomi/pkg/config"
-	storageroute "github.com/katanomi/pkg/plugin/storage/route"
+	"github.com/katanomi/pkg/route"
 	"go.uber.org/zap/zapcore"
 	"k8s.io/klog/v2"
 
@@ -50,9 +49,6 @@ import (
 	"github.com/katanomi/pkg/controllers"
 	klogging "github.com/katanomi/pkg/logging"
 	kmanager "github.com/katanomi/pkg/manager"
-	"github.com/katanomi/pkg/multicluster"
-	"github.com/katanomi/pkg/plugin/client"
-	"github.com/katanomi/pkg/plugin/route"
 	"github.com/katanomi/pkg/restclient"
 	kscheme "github.com/katanomi/pkg/scheme"
 	"github.com/katanomi/pkg/tracing"
@@ -123,12 +119,6 @@ type AppBuilder struct {
 
 	// client manager
 	ClientManager *kclient.Manager
-
-	// plugins
-	plugins []client.Interface
-
-	// storage plugins
-	storagePlugins []client.Interface
 
 	// restful container
 	container *restful.Container
@@ -210,12 +200,6 @@ func (a *AppBuilder) init() {
 		a.startFunc = append(a.startFunc, func(ctx context.Context) error {
 			return a.ConfigMapWatcher.Start(ctx.Done())
 		})
-
-		multiCluster := multicluster.NewClusterRegistryClientOrDie(a.Config,
-			multicluster.ClusterProxyOption(ClusterProxyHost, ClusterProxyPath),
-			multicluster.ClusterProxyInsecure(InsecureSkipVerify),
-		)
-		a.Context = multicluster.WithMultiCluster(a.Context, multiCluster)
 
 		a.container = restful.NewContainer()
 		a.container.Router(restful.RouterJSR311{})
@@ -378,12 +362,6 @@ func (a *AppBuilder) RESTClient(client *resty.Client) *AppBuilder {
 	return a
 }
 
-// MultiClusterClient injects a multi cluster client into the context
-func (a *AppBuilder) MultiClusterClient(client multicluster.Interface) *AppBuilder {
-	a.Context = multicluster.WithMultiCluster(a.Context, client)
-	return a
-}
-
 // WithFieldIndexer will append field indexer in to Controller Manager Cluster
 func (a *AppBuilder) WithFieldIndexer(fieldIndexer FieldIndexer) *AppBuilder {
 	if a.fieldIndexeres == nil {
@@ -539,86 +517,6 @@ func (a *AppBuilder) Webservices(webServices ...WebService) *AppBuilder {
 	return a
 }
 
-// Plugins adds plugins to this app
-func (a *AppBuilder) Plugins(plugins ...client.Interface) *AppBuilder {
-	a.init()
-
-	// will init a client if not already initiated
-	a.initClient(nil)
-	a.plugins = plugins
-	for _, plugin := range a.plugins {
-		if err := plugin.Setup(a.Context, a.Logger); err != nil {
-			a.Logger.Fatalw("plugin could not be setup correctly", "err", err, "plugin", plugin.Path())
-		}
-		// MetaFilter and AuthFilter are dedicated to plugin api,
-		// so register the filters when the service is initialized.
-		ws, err := route.NewService(plugin, client.MetaFilter, client.AuthFilter)
-		if err != nil {
-			a.Logger.Fatalw("plugin could not start correctly", "err", err, "plugin", plugin.Path())
-		}
-		a.container.Add(ws)
-	}
-	return a
-}
-
-// StoragePlugins adds storage plugins to this app
-func (a *AppBuilder) StoragePlugins(plugins ...client.Interface) *AppBuilder {
-	a.init()
-
-	// will init a client if not already initiated
-	a.initClient(nil)
-	a.storagePlugins = plugins
-	for _, plugin := range a.storagePlugins {
-		if err := plugin.Setup(a.Context, a.Logger); err != nil {
-			a.Logger.Fatalw("plugin could not be setup correctly", "err", err, "plugin", plugin.Path())
-		}
-		filters, _ := a.ClientManager.Filters(a.Context)
-		wss, err := storageroute.NewServicesWithContext(a.Context, plugin, filters...)
-		if err != nil {
-			a.Logger.Fatalw("plugin could not start correctly", "err", err, "plugin", plugin.Path())
-		}
-
-		for _, ws := range wss {
-			a.container.Add(ws)
-		}
-
-	}
-	return a
-}
-
-// PluginDisplayColumns set plugin displayColumns from yaml file
-func (a *AppBuilder) PluginDisplayColumns(plugin client.PluginDisplayColumns, file string) *AppBuilder {
-	attributes := make(map[string]metav1alpha1.DisplayColumns)
-	a.readAttributes(file, &attributes)
-	for key, values := range attributes {
-		plugin.SetDisplayColumns(key, values...)
-	}
-
-	return a
-}
-
-// PluginAttributes set plugin attributes from yaml file
-func (a *AppBuilder) PluginAttributes(plugin client.PluginAttributes, file string) *AppBuilder {
-	attributes := make(map[string][]string)
-	a.readAttributes(file, &attributes)
-	for key, value := range attributes {
-		plugin.SetAttribute(key, value...)
-	}
-
-	return a
-}
-
-// PluginVersionAttributes set plugin attributes from yaml file
-func (a *AppBuilder) PluginVersionAttributes(plugin client.PluginVersionAttributes, file string) *AppBuilder {
-	attributes := make(map[string]map[string][]string)
-	a.readAttributes(file, &attributes)
-	for key, value := range attributes {
-		plugin.SetVersionAttributes(key, value)
-	}
-
-	return a
-}
-
 func (a *AppBuilder) readAttributes(file string, attributes interface{}) {
 	data, err := os.ReadFile(file)
 	if err != nil {
@@ -677,10 +575,6 @@ func (a *AppBuilder) Run(startFuncs ...func(context.Context) error) error {
 	if a.container != nil {
 		// adds profiling and health checks
 		a.container.Add(route.NewDefaultService(a.Context))
-
-		if len(a.container.RegisteredWebServices()) > 0 {
-			a.container.Add(route.NewDocServiceWithCtx(a.Context, a.container.RegisteredWebServices()...))
-		}
 
 		a.startFunc = append(a.startFunc, func(ctx context.Context) error {
 			// TODO: find a better way to get this configuration

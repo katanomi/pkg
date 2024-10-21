@@ -110,13 +110,6 @@ func Test_GetDurationConfig(t *testing.T) {
 			defaultTime: time.Hour,
 			expect:      time.Hour,
 		},
-		{
-			description: "return default config duration",
-			context:     WithKatanomiConfigManager(context.Background(), &Manager{}),
-			key:         TemplateRenderRetentionTimeKey,
-			defaultTime: time.Hour,
-			expect:      30 * time.Minute,
-		},
 	} {
 		t.Logf("<=== starting %s...", c.description)
 		Expect(GetDurationConfig(c.context, c.key, c.defaultTime)).To(Equal(c.expect))

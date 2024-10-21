@@ -25,7 +25,7 @@ import (
 	"github.com/katanomi/pkg/maps"
 
 	kclient "github.com/katanomi/pkg/client"
-	"github.com/katanomi/pkg/storage/configmap"
+	"github.com/katanomi/pkg/configmap"
 	"github.com/katanomi/pkg/watcher"
 	"go.uber.org/zap"
 	corev1 "k8s.io/api/core/v1"

@@ -20,7 +20,6 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/katanomi/pkg/multicluster"
 	"github.com/katanomi/pkg/testing"
 	"github.com/katanomi/pkg/testing/framework/base"
 	. "github.com/onsi/ginkgo/v2"
@@ -135,14 +134,6 @@ func (b *TestCaseBuilder) setupTestContext() *TestContext {
 			panic(err)
 		}
 		ctx.Client = c
-	}
-
-	if ctx.MultiClusterClient == nil {
-		mc, err := multicluster.NewClusterRegistryClient(ctx.Config)
-		if err != nil {
-			panic(err)
-		}
-		ctx.MultiClusterClient = mc
 	}
 
 	return ctx

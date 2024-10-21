@@ -1,6 +1,0 @@
-[
-    "index.docker.io/katanomi/controller:v1.2.3@sha256:88008bc80503efb3d6c0a8c76fbda9e89067fc57c400c89901519984fc80ad93",
-    "index.docker.io/katanomi/controller:latest",
-    "docker.io/katanomi/another@sha256:88008bc80503efb3d6c0a8c76fbda9e89067fc57c400c89901519984fc80ad93"
-
-]

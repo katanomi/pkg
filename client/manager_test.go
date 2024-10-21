@@ -25,8 +25,6 @@ import (
 
 	"github.com/emicklei/go-restful/v3"
 	"github.com/golang/mock/gomock"
-	"github.com/katanomi/pkg/multicluster"
-	multiclustermock "github.com/katanomi/pkg/testing/mock/github.com/katanomi/pkg/multicluster"
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
 
 	// . "github.com/onsi/ginkgo/v2"
@@ -52,7 +50,6 @@ func TestManagerFilter(t *testing.T) {
 		ctx := context.TODO()
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
-		dynamic := multiclustermock.NewMockInterface(ctrl)
 
 		mgr := NewManager(ctx, FromBearerToken, func() (*rest.Config, error) {
 			return &rest.Config{
@@ -60,7 +57,7 @@ func TestManagerFilter(t *testing.T) {
 				Username: "abc",
 				Password: "def",
 			}, nil
-		}, func(config *rest.Config) (multicluster.Interface, error) { return dynamic, nil })
+		})
 		ws := new(restful.WebService)
 		ws.Consumes(restful.MIME_JSON)
 		clt := fake.NewClientBuilder().Build()
@@ -78,8 +75,6 @@ func TestManagerFilter(t *testing.T) {
 
 		config := injection.GetConfig(req.Request.Context())
 		g.Expect(config).ToNot(BeNil())
-		dynamicClient := multicluster.MultiCluster(req.Request.Context())
-		g.Expect(dynamicClient).ToNot(BeNil())
 		g.Expect(resp.StatusCode()).ToNot(Equal(http.StatusInternalServerError))
 		g.Expect(config.BearerToken).To(Equal(mockToken))
 	})
@@ -90,8 +85,6 @@ func TestManagerFilter(t *testing.T) {
 		mgr := NewManager(ctx, FromBearerToken, func() (*rest.Config, error) {
 			// will return an error
 			return &rest.Config{}, nil
-		}, func(c *rest.Config) (multicluster.Interface, error) {
-			return nil, nil
 		})
 		req := restful.NewRequest(httptest.NewRequest(http.MethodGet, "http://example.com", nil))
 		req.Request = req.Request.WithContext(ctx)
@@ -100,8 +93,6 @@ func TestManagerFilter(t *testing.T) {
 		g.Expect(resp.StatusCode()).To(Equal(http.StatusNotAcceptable))
 		config := injection.GetConfig(req.Request.Context())
 		g.Expect(config).To(BeNil())
-		dynamic := multicluster.MultiCluster(req.Request.Context())
-		g.Expect(dynamic).To(BeNil())
 	})
 }
 
