@@ -33,50 +33,6 @@ import (
 // using a context, an object and a request
 type TransformFunc func(context.Context, runtime.Object, admission.Request)
 
-// WithTriggeredBy adds a triggeredBy annotation to the object using the request information
-// when an object already has the triggeredBy annotation it will only increment missing data
-func WithTriggeredBy() TransformFunc {
-	return func(ctx context.Context, obj runtime.Object, req admission.Request) {
-		metaobj, ok := obj.(metav1.Object)
-		if !ok {
-			return
-		}
-		log := logging.FromContext(ctx)
-		annotations := metaobj.GetAnnotations()
-		if annotations == nil {
-			annotations = map[string]string{}
-		}
-
-		var err error
-		triggeredBy := &mv1alpha1.TriggeredBy{}
-		triggeredBy, err = triggeredBy.FromAnnotation(annotations)
-		if err != nil {
-			log.Warnw("cannot unmarshal annotation value into triggeredBy struct", "err", err)
-		}
-		if triggeredBy == nil {
-			triggeredBy = &mv1alpha1.TriggeredBy{}
-		}
-
-		if triggeredBy.User == nil || triggeredBy.User.Name == "" {
-			triggeredBy.User = SubjectFromRequest(req)
-		}
-		if triggeredBy.TriggeredTimestamp.IsZero() {
-			creation := metaobj.GetCreationTimestamp()
-			// if creation is not set, we set it to the current time.
-			if creation.IsZero() {
-				creation = metav1.Now()
-			}
-			triggeredBy.TriggeredTimestamp = &creation
-		}
-		annotations, err = triggeredBy.SetIntoAnnotation(annotations)
-		if err != nil {
-			log.Warnw("cannot marshal triggeredBy struct to json ", "err", err, "struct", triggeredBy)
-		} else {
-			metaobj.SetAnnotations(annotations)
-		}
-	}
-}
-
 // WithCreatedBy adds a createdBy annotation to the object using the request information
 // when an object already has the createdBy annotation it will only increment missing data
 func WithCreatedBy() TransformFunc {
@@ -149,33 +105,6 @@ func WithUpdatedBy() TransformFunc {
 	}
 }
 
-// WithCancelledBy adds a cancelled annotation to the object using the request information
-// when an object already has the cancelled annotation it will only increment missing data
-func WithCancelledBy(scheme *runtime.Scheme, isCancelled func(oldObj runtime.Object, newObj runtime.Object) bool) TransformFunc {
-	return func(ctx context.Context, obj runtime.Object, req admission.Request) {
-		logger := logging.FromContext(ctx)
-		if req.Operation != admissionv1.Update {
-			return
-		}
-		decoder, err := admission.NewDecoder(scheme)
-		if err != nil {
-			return
-		}
-
-		old := obj.DeepCopyObject()
-		if err := decoder.DecodeRaw(req.OldObject, old); err != nil {
-			logger.Errorw("failed to decode for old object", "error", err)
-			return
-		}
-
-		if !isCancelled(old, obj) {
-			return
-		}
-
-		setCancelledBy(ctx, obj, req)
-	}
-}
-
 // WithUpdateTime adds a updateTime annotation to the object
 func WithUpdateTime() TransformFunc {
 	return func(ctx context.Context, obj runtime.Object, req admission.Request) {
@@ -189,39 +118,5 @@ func WithUpdateTime() TransformFunc {
 		}
 		annotations[mv1alpha1.UpdatedTimeAnnotationKey] = time.Now().Format(time.RFC3339)
 		newObj.SetAnnotations(annotations)
-	}
-}
-
-// setCancelledBy will set obj annotation base on the request information
-func setCancelledBy(ctx context.Context, obj runtime.Object, req admission.Request) {
-	logger := logging.FromContext(ctx)
-
-	metaobj, ok := obj.(metav1.Object)
-	if !ok {
-		return
-	}
-
-	annotations := metaobj.GetAnnotations()
-	if annotations == nil {
-		annotations = map[string]string{}
-	}
-
-	cancelledBy := &mv1alpha1.CancelledBy{}
-	cancelledBy, err := cancelledBy.FromAnnotationCancelledBy(annotations)
-	if err != nil {
-		logger.Warnw("cannot unmarshal annotation value into createdBy struct", "err", err)
-	}
-	if cancelledBy == nil {
-		cancelledBy = &mv1alpha1.CancelledBy{}
-	}
-
-	if cancelledBy.User == nil || cancelledBy.User.Name == "" {
-		cancelledBy.User = SubjectFromRequest(req)
-	}
-	annotations, err = cancelledBy.SetIntoAnnotationCancelledBy(annotations)
-	if err != nil {
-		logger.Warnw("cannot marshal createdBy struct to json ", "err", err, "struct", cancelledBy)
-	} else {
-		metaobj.SetAnnotations(annotations)
 	}
 }

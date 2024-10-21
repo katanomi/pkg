@@ -1,6 +1,0 @@
-runRefs:
-  - apiVersion: builds.katanomi.dev/v1alpha1
-    kind: BuildRun
-    name: test-656z7
-    uid: 6d516b5a-d6d2-4643-9e5d-337ecead1798
-    namespace: devops

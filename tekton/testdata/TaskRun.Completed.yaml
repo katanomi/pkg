@@ -1,9 +1,0 @@
-apiVersion: tekton.dev/v1beta1
-kind: TaskRun
-status:
-  completionTime: "2022-09-05T09:55:17Z"
-  conditions:
-  - message: All Steps have completed executing
-    reason: Succeeded
-    status: "True"
-    type: Succeeded

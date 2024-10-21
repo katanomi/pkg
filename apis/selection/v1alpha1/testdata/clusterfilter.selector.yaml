@@ -1,7 +1,0 @@
-namespace: default
-filter:
-  exact:
-    $(kind): Cluster
-selector:
-  matchlabels:
-    key-1: value-1

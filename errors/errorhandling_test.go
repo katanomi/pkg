@@ -44,19 +44,6 @@ func TestAsAPIError(t *testing.T) {
 	g.Expect(errors.ReasonForError(err)).To(Equal(metav1.StatusReasonBadRequest))
 }
 
-func TestCustomError(t *testing.T) {
-	g := NewGomegaWithT(t)
-	message := "message"
-
-	g.Expect(IsCredentialNotProvided(NewCredentialNotProvided(message))).To(BeTrue())
-	g.Expect(IsFileNotFound(NewFileNotFound(message))).To(BeTrue())
-	g.Expect(IsGitRevisionNotFound(NewGitRevisionNotFound(message))).To(BeTrue())
-
-	nExist, nReason := Reason(fmt.Errorf("not k8s api status error"))
-	g.Expect(nExist).To(Equal(false))
-	g.Expect(nReason).To(Equal(metav1.StatusReasonUnknown))
-}
-
 func TestAsStatusCode(t *testing.T) {
 	g := NewGomegaWithT(t)
 

@@ -1,8 +1,0 @@
-coverage:
-  lines: 23%
-  branches: 45%
-testResults:
-  passed: 1
-  failed: 2
-  skipped: 3
-  passedTestRate: 100%

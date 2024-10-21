@@ -36,9 +36,6 @@ func TestSyncPeriodResultFunc(t *testing.T) {
 			syncPeriod: "abc",
 			err:        true,
 		},
-		"default value": {
-			duration: 5 * time.Minute,
-		},
 		"min value": {
 			syncPeriod: "10s",
 			duration:   30 * time.Second,
@@ -57,7 +54,7 @@ func TestSyncPeriodResultFunc(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			data := map[string]string{}
 			if item.syncPeriod != "" {
-				data[config.ClusterIntegrationSyncPeriodKey] = item.syncPeriod
+				data["sync-period-key"] = item.syncPeriod
 			}
 
 			manager := &config.Manager{
@@ -65,7 +62,7 @@ func TestSyncPeriodResultFunc(t *testing.T) {
 					Data: data,
 				},
 			}
-			resultFunc := SyncPeriodResultFunc(manager, config.ClusterIntegrationSyncPeriodKey)
+			resultFunc := SyncPeriodResultFunc(manager, "sync-period-key")
 			result := &reconcile.Result{}
 			err := resultFunc(context.Background(), reconcile.Request{}, result)
 

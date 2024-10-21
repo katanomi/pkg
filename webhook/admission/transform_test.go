@@ -18,7 +18,6 @@ package admission
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"testing"
 	"time"
@@ -27,75 +26,11 @@ import (
 	. "github.com/onsi/gomega"
 	"github.com/onsi/gomega/matchers"
 	v1 "k8s.io/api/admission/v1"
-	authenticationv1 "k8s.io/api/authentication/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/webhook/admission"
 )
-
-func TestSetCancelledBy(t *testing.T) {
-	RegisterTestingT(t)
-
-	ctx := context.Background()
-	obj := &corev1.Pod{
-		TypeMeta: metav1.TypeMeta{
-			APIVersion: "v1",
-			Kind:       "Pod",
-		},
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      "pod",
-			Namespace: "default",
-			UID:       types.UID("abc"),
-		},
-	}
-	req := admission.Request{
-		AdmissionRequest: v1.AdmissionRequest{
-			UserInfo: authenticationv1.UserInfo{
-				Username: "admin@xxxx.io",
-			},
-		},
-	}
-	t.Run("setCancelledBy", func(t *testing.T) {
-		setCancelledBy(ctx, obj, req)
-		Expect(len(obj.Annotations)).To(Equal(1))
-		Expect(obj.Annotations[v1alpha1.CancelledByAnnotationKey]).To(Equal(`{"user":{"kind":"User","name":"admin@xxxx.io"}}`))
-	})
-
-}
-
-func TestWithCancelledBy(t *testing.T) {
-	RegisterTestingT(t)
-
-	pod := &corev1.Pod{
-		ObjectMeta: metav1.ObjectMeta{
-			Name: "test",
-		},
-	}
-	result, err := json.Marshal(pod)
-	Expect(err).To(BeNil())
-
-	schema := runtime.NewScheme()
-	corev1.AddToScheme(schema)
-	cancelledBy := WithCancelledBy(schema, func(runtime.Object, runtime.Object) bool { return true })
-	request := admission.Request{
-		AdmissionRequest: v1.AdmissionRequest{
-			UserInfo: authenticationv1.UserInfo{
-				Username: "admin",
-			},
-			Operation: v1.Update,
-			OldObject: runtime.RawExtension{
-				Raw: result,
-			},
-		},
-	}
-	ctx := context.Background()
-
-	cancelledBy(ctx, pod, request)
-	Expect(pod.Annotations[v1alpha1.CancelledByAnnotationKey]).To(Equal(`{"user":{"kind":"User","name":"admin"}}`))
-
-}
 
 func TestWithUpdateTime(t *testing.T) {
 	g := NewGomegaWithT(t)

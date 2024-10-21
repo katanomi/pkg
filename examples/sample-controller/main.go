@@ -25,7 +25,6 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"knative.dev/pkg/logging"
 
-	"github.com/katanomi/pkg/multicluster"
 	"github.com/katanomi/pkg/sharedmain"
 	"github.com/katanomi/pkg/webhook/admission"
 	"go.uber.org/zap"
@@ -126,8 +125,6 @@ type Controller struct {
 	*zap.SugaredLogger
 
 	ctrlclient.Client
-
-	MultiCluster multicluster.Interface
 }
 
 func (c *Controller) Name() string {
@@ -141,7 +138,6 @@ func (c *Controller) Setup(ctx context.Context, mgr manager.Manager, logger *zap
 	logger.Errorw("setup.error", "ctrl", c.Name())
 	c.SugaredLogger = logger
 	c.Client = mgr.GetClient()
-	c.MultiCluster = multicluster.MultiCluster(ctx)
 
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&corev1.ConfigMap{}).

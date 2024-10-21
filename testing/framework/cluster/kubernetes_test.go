@@ -19,7 +19,8 @@ package cluster
 import (
 	"testing"
 
-	"github.com/docker/distribution/context"
+	"context"
+
 	ktesting "github.com/katanomi/pkg/testing"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
