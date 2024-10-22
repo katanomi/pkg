@@ -19,6 +19,7 @@ package controllers
 import (
 	"sigs.k8s.io/controller-runtime/pkg/builder"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
+	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
@@ -34,7 +35,7 @@ var _ = Describe("Test.ApplyControllerBuilderOptions", func() {
 
 	BeforeEach(func() {
 		builderFuncs = append(builderFuncs, WithBuilderOptions(controller.Options{
-			RateLimiter: DefaultRateLimiter(),
+			RateLimiter: DefaultTypedRateLimiter[reconcile.Request](),
 		}))
 	})
 

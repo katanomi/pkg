@@ -19,6 +19,8 @@ package test
 import (
 	"context"
 
+	"sigs.k8s.io/controller-runtime/pkg/reconcile"
+
 	"k8s.io/client-go/tools/record"
 
 	"k8s.io/apimachinery/pkg/runtime"
@@ -101,6 +103,6 @@ func (r *FooBarReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&testv1alpha1.FooBar{}).
 		WithOptions(controller.Options{
-			RateLimiter: pkgctrl.DefaultRateLimiter(),
+			RateLimiter: pkgctrl.DefaultTypedRateLimiter[reconcile.Request](),
 		}).Complete(r)
 }

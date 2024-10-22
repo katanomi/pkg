@@ -25,10 +25,21 @@ import (
 
 // DefaultRateLimiter returns a workqueue rate limiter with a starting value of 2 seconds
 // opposed to controller-runtime's default one of 1 millisecond
+// Deprecated: DefaultRateLimiter is deprecated, use DefaultTypedRateLimiter instead.
 func DefaultRateLimiter() workqueue.RateLimiter {
 	return workqueue.NewMaxOfRateLimiter(
 		workqueue.NewItemExponentialFailureRateLimiter(2*time.Second, 1000*time.Second),
 		// 10 qps, 100 bucket size.  This is only for retry speed and its only the overall factor (not per item)
 		&workqueue.BucketRateLimiter{Limiter: rate.NewLimiter(rate.Limit(10), 100)},
+	)
+}
+
+// DefaultTypedRateLimiter returns a workqueue rate limiter with a starting value of 2 seconds
+// opposed to controller-runtime's default one of 1 millisecond
+func DefaultTypedRateLimiter[T comparable]() workqueue.TypedRateLimiter[T] {
+	return workqueue.NewTypedMaxOfRateLimiter(
+		workqueue.NewTypedItemExponentialFailureRateLimiter[T](2*time.Second, 1000*time.Second),
+		// 10 qps, 100 bucket size.  This is only for retry speed and its only the overall factor (not per item)
+		&workqueue.TypedBucketRateLimiter[T]{Limiter: rate.NewLimiter(rate.Limit(10), 100)},
 	)
 }

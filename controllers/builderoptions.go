@@ -17,8 +17,9 @@ limitations under the License.
 package controllers
 
 import (
+	"k8s.io/client-go/util/workqueue"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
-	"sigs.k8s.io/controller-runtime/pkg/ratelimiter"
+	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 )
 
 // DefaultMaxConcurrentReconciles is the default number of max concurrent reconciles
@@ -41,7 +42,7 @@ func BuilderOptions(opts ...BuilderOptionFunc) controller.Options {
 func DefaultOptions() controller.Options {
 	return controller.Options{
 		MaxConcurrentReconciles: DefaultMaxConcurrentReconciles,
-		RateLimiter:             DefaultRateLimiter(),
+		RateLimiter:             DefaultTypedRateLimiter[reconcile.Request](),
 	}
 }
 
@@ -54,7 +55,7 @@ func MaxConCurrentReconciles(num int) BuilderOptionFunc {
 }
 
 // RateLimiter sets the rate limiter
-func RateLimiter(rl ratelimiter.RateLimiter) BuilderOptionFunc {
+func RateLimiter(rl workqueue.TypedRateLimiter[reconcile.Request]) BuilderOptionFunc {
 	return func(options controller.Options) controller.Options {
 		options.RateLimiter = rl
 		return options

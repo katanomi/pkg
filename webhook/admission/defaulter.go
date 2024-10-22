@@ -21,6 +21,8 @@ import (
 	"encoding/json"
 	"net/http"
 
+	kscheme "github.com/katanomi/pkg/scheme"
+
 	"go.uber.org/zap"
 	admissionv1 "k8s.io/api/admission/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -41,6 +43,7 @@ type Defaulter interface {
 func DefaultingWebhookFor(ctx context.Context, defaulter Defaulter, transforms ...TransformFunc) *admission.Webhook {
 	return &admission.Webhook{
 		Handler: &mutatingHandler{
+			decoder:       admission.NewDecoder(kscheme.Scheme(ctx)),
 			defaulter:     defaulter,
 			transforms:    transforms,
 			SugaredLogger: logging.FromContext(ctx),
@@ -50,18 +53,10 @@ func DefaultingWebhookFor(ctx context.Context, defaulter Defaulter, transforms .
 
 type mutatingHandler struct {
 	defaulter  Defaulter
-	decoder    *admission.Decoder
+	decoder    admission.Decoder
 	transforms []TransformFunc
 
 	*zap.SugaredLogger
-}
-
-var _ admission.DecoderInjector = &mutatingHandler{}
-
-// InjectDecoder injects the decoder into a mutatingHandler.
-func (h *mutatingHandler) InjectDecoder(d *admission.Decoder) error {
-	h.decoder = d
-	return nil
 }
 
 // Handle handles admission requests.

@@ -35,8 +35,12 @@ var _ = Describe("ParseFlag", func() {
 			Expect(QPS).To(Equal(float64(DefaultQPS)))
 			Expect(Burst).To(Equal(DefaultBurst))
 			Expect(Timeout).To(Equal(DefaultTimeout))
-			Expect(ConfigFile).To(Equal(""))
 			Expect(InsecureSkipVerify).To(Equal(false))
+			Expect(MetricsAddr).To(Equal(":8080"))
+			Expect(EnableLeaderElection).To(Equal(true))
+			Expect(LeaderElectionRetryPeriod).To(Equal(2 * time.Second))
+			Expect(LeaderElectionLeaseDuration).To(Equal(15 * time.Second))
+			Expect(LeaderElectionRenewDeadline).To(Equal(10 * time.Second))
 		})
 	})
 
@@ -46,16 +50,24 @@ var _ = Describe("ParseFlag", func() {
 				"--kube-api-timeout", "20s",
 				"--kube-api-qps", "80",
 				"--kube-api-burst", "90",
-				"--config", "config",
-				"--insecure-skip-tls-verify", "true",
+				"--insecure-skip-tls-verify",
+				"--metrics-bind-address", "0.0.0.0:8081",
+				"--leader-elect",
+				"--retry-period", "30s",
+				"--lease-duration", "10s",
+				"--renew-deadline", "1s",
 			})
 		})
 		It("return configured values", func() {
 			Expect(QPS).To(Equal(float64(80)))
 			Expect(Burst).To(Equal(90))
 			Expect(Timeout).To(Equal(20 * time.Second))
-			Expect(ConfigFile).To(Equal("config"))
 			Expect(InsecureSkipVerify).To(Equal(true))
+			Expect(MetricsAddr).To(Equal("0.0.0.0:8081"))
+			Expect(EnableLeaderElection).To(Equal(true))
+			Expect(LeaderElectionRetryPeriod).To(Equal(30 * time.Second))
+			Expect(LeaderElectionLeaseDuration).To(Equal(10 * time.Second))
+			Expect(LeaderElectionRenewDeadline).To(Equal(1 * time.Second))
 		})
 	})
 
