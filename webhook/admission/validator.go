@@ -21,6 +21,8 @@ import (
 	goerrors "errors"
 	"net/http"
 
+	kscheme "github.com/katanomi/pkg/scheme"
+
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"go.uber.org/zap"
@@ -45,6 +47,7 @@ type Validator interface {
 func ValidatingWebhookFor(ctx context.Context, validator Validator, creates []ValidateCreateFunc, updates []ValidateUpdateFunc, deletes []ValidateDeleteFunc) *admission.Webhook {
 	return &admission.Webhook{
 		Handler: &validatingHandler{
+			decoder:       admission.NewDecoder(kscheme.Scheme(ctx)),
 			validator:     validator,
 			creates:       creates,
 			updates:       updates,
@@ -57,20 +60,12 @@ func ValidatingWebhookFor(ctx context.Context, validator Validator, creates []Va
 // a internal handler for an extended validation webhook methods
 type validatingHandler struct {
 	validator Validator
-	decoder   *admission.Decoder
+	decoder   admission.Decoder
 	creates   []ValidateCreateFunc
 	updates   []ValidateUpdateFunc
 	deletes   []ValidateDeleteFunc
 
 	*zap.SugaredLogger
-}
-
-var _ admission.DecoderInjector = &mutatingHandler{}
-
-// InjectDecoder injects the decoder into a mutatingHandler.
-func (h *validatingHandler) InjectDecoder(d *admission.Decoder) error {
-	h.decoder = d
-	return nil
 }
 
 // Handle handles admission requests.

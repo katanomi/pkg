@@ -21,6 +21,7 @@ import (
 	. "github.com/onsi/gomega"
 	"k8s.io/client-go/util/workqueue"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
+	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 )
 
 var _ = Describe("Test.BuilderOptions", func() {
@@ -43,7 +44,7 @@ var _ = Describe("Test.BuilderOptions", func() {
 	})
 
 	Context("builderoptions with custom rate limiter", func() {
-		customRateLimiter := workqueue.NewMaxOfRateLimiter()
+		customRateLimiter := workqueue.NewTypedMaxOfRateLimiter[reconcile.Request]()
 
 		BeforeEach(func() {
 			buildOptFuns = append(buildOptFuns, RateLimiter(customRateLimiter))

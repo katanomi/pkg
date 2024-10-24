@@ -23,6 +23,7 @@ import (
 	"errors"
 	"flag"
 	"fmt"
+	"hash/fnv"
 	"log"
 	"net/http"
 	"os"
@@ -67,6 +68,7 @@ import (
 	ctrlcluster "sigs.k8s.io/controller-runtime/pkg/cluster"
 	"sigs.k8s.io/controller-runtime/pkg/healthz"
 	ctrllog "sigs.k8s.io/controller-runtime/pkg/log"
+	metricsserver "sigs.k8s.io/controller-runtime/pkg/metrics/server"
 )
 
 const (
@@ -82,6 +84,13 @@ var (
 	Burst          int
 	QPS            float64
 	ConfigFile     string
+
+	MetricsAddr                 string
+	EnableLeaderElection        bool
+	LeaderElectionRetryPeriod   time.Duration
+	LeaderElectionLeaseDuration time.Duration
+	LeaderElectionRenewDeadline time.Duration
+	ProbeAddr                   string
 
 	WebServerPort      int
 	InsecureSkipVerify bool
@@ -153,10 +162,24 @@ func ParseFlag() {
 	flag.IntVar(&Burst, "kube-api-burst", DefaultBurst,
 		"Maximum burst for throttle."+
 			"If it's zero, the created RESTClient will use DefaultBurst: 60.")
-	flag.StringVar(&ConfigFile, "config", "",
-		"The controller will load its initial configuration from this file. "+
-			"Omit this flag to use the default configuration values. "+
-			"Command-line flags override configuration from this file.")
+	// controller-runtime is not support ControllerManager Config https://github.com/kubernetes-sigs/controller-runtime/issues/895
+	//flag.StringVar(&ConfigFile, "config", "",
+	//	"The controller will load its initial configuration from this file. "+
+	//		"Omit this flag to use the default configuration values. "+
+	//		"Command-line flags override configuration from this file.")
+	flag.StringVar(&MetricsAddr, "metrics-bind-address", ":8080", "The address the metrics endpoint binds to. "+
+		"Use :8443 for HTTPS or :8080 for HTTP, or leave as 0 to disable the metrics service.")
+	flag.StringVar(&ProbeAddr, "health-probe-bind-address", ":8081", "The address the probe endpoint binds to.")
+	flag.BoolVar(&EnableLeaderElection, "leader-elect", true,
+		"Enable leader election for controller manager. "+
+			"Enabling this will ensure there is only one active controller manager.")
+	flag.DurationVar(&LeaderElectionRetryPeriod, "retry-period", 2*time.Second,
+		"retry period is the duration the LeaderElector clients should wait between tries of actions.")
+	flag.DurationVar(&LeaderElectionLeaseDuration, "lease-duration", 15*time.Second,
+		"lease duration is the duration that non-leader candidates will wait to force acquire leadership.")
+	flag.DurationVar(&LeaderElectionRenewDeadline, "renew-deadline", 10*time.Second,
+		"renew deadline is the duration that the acting controlplane will retry refreshing leadership before giving up.")
+
 	flag.BoolVar(&InsecureSkipVerify, "insecure-skip-tls-verify", false,
 		"skip TLS verification and disable cert checking (default: false)")
 	flag.StringVar(&ClusterProxyHost, "cluster-proxy-host", "",
@@ -372,19 +395,30 @@ func (a *AppBuilder) WithFieldIndexer(fieldIndexer FieldIndexer) *AppBuilder {
 	return a
 }
 
+func getLeaderElectionID(name, domain string) string {
+	hasher := fnv.New32a()
+	// Hash.Write never returns an error
+	_, _ = hasher.Write([]byte(name))
+	return fmt.Sprintf("%x.%s", hasher.Sum(nil), domain)
+}
+
 // Controllers adds controllers to the app, will start a manager under the hood
 func (a *AppBuilder) Controllers(ctors ...controllers.SetupChecker) *AppBuilder {
 	a.init()
 
 	var err error
-	options := ctrl.Options{Scheme: a.scheme}
-	if ConfigFile != "" {
-		options, err = options.AndFrom(ctrl.ConfigFile().AtPath(ConfigFile))
-		if err != nil {
-			a.Logger.Fatalw("unable to load the config file", "err", err)
-		}
+	options := ctrl.Options{
+		Scheme: a.scheme,
+		Metrics: metricsserver.Options{
+			BindAddress: MetricsAddr,
+		},
+		HealthProbeBindAddress: ProbeAddr,
+		LeaderElection:         EnableLeaderElection,
+		LeaseDuration:          &LeaderElectionLeaseDuration,
+		RetryPeriod:            &LeaderElectionRetryPeriod,
+		RenewDeadline:          &LeaderElectionRenewDeadline,
+		LeaderElectionID:       getLeaderElectionID(a.Name, "katanomi.dev"),
 	}
-	options.Scheme = a.scheme
 	// If the value is empty, the default behavior will still be used.
 	// Ref: https://github.com/kubernetes-sigs/controller-runtime/blob/b9219528d95974cb4f5b06f86c9b1c9b7d3045a5/pkg/manager/manager.go#L551
 	// make the struct as an interface to check if it implements the other interface
