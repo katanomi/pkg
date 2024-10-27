@@ -7,6 +7,7 @@ ignore_files:
   - .golangci.yaml
   - .build/*
   - catalog.yaml
+  - hack/patches/*
 
 # https://docs.getwoke.tech/ignore/
 rules:
