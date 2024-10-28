@@ -1,16 +1,16 @@
-From 44f2e345150f8b0f4538722e51c16850deb32a9f Mon Sep 17 00:00:00 2001
+From b7aefbaf9dbab97e6b3b7e13eaa311404756055a Mon Sep 17 00:00:00 2001
 From: jtcheng <jtcheng@alauda.io>
-Date: Mon, 28 Oct 2024 12:05:11 +0800
+Date: Mon, 28 Oct 2024 19:15:39 +0800
 Subject: [PATCH] remove unused param logic based on tekton definition
 
 Signed-off-by: jtcheng <jtcheng@alauda.io>
 ---
- apis/meta/v1alpha1/param_types.go      | 398 +----------------
+ apis/meta/v1alpha1/param_types.go      | 408 +-----------------
  apis/meta/v1alpha1/param_types_test.go | 564 +++++--------------------
- 2 files changed, 125 insertions(+), 837 deletions(-)
+ 2 files changed, 131 insertions(+), 841 deletions(-)
 
 diff --git a/apis/meta/v1alpha1/param_types.go b/apis/meta/v1alpha1/param_types.go
-index c597354..0082e34 100644
+index c597354..f4c712c 100644
 --- a/apis/meta/v1alpha1/param_types.go
 +++ b/apis/meta/v1alpha1/param_types.go
 @@ -1,5 +1,5 @@
@@ -53,7 +53,7 @@ index c597354..0082e34 100644
  type ParamSpec struct {
  	// Name declares the name by which a parameter is referenced.
  	Name string `json:"name"`
-@@ -50,12 +43,10 @@ type ParamSpec struct {
+@@ -50,18 +43,17 @@ type ParamSpec struct {
  	// Properties is the JSON Schema properties to support key-value pairs parameter.
  	// +optional
  	Properties map[string]PropertySpec `json:"properties,omitempty"`
@@ -68,7 +68,14 @@ index c597354..0082e34 100644
  	// If Enum is not set, no input validation is performed for the param.
  	// +optional
  	Enum []string `json:"enum,omitempty"`
-@@ -111,7 +102,7 @@ func (pp *ParamSpec) setDefaultsForProperties() {
+ }
+
+ // ParamSpecs is a list of ParamSpec
++// +listType=atomic
+ type ParamSpecs []ParamSpec
+
+ // PropertySpec defines the struct for object keys
+@@ -111,7 +103,7 @@ func (pp *ParamSpec) setDefaultsForProperties() {
 
  // GetNames returns all the names of the declared parameters
  func (ps ParamSpecs) GetNames() []string {
@@ -77,7 +84,7 @@ index c597354..0082e34 100644
  	for _, p := range ps {
  		names = append(names, p.Name)
  	}
-@@ -147,15 +138,12 @@ func (ps ParamSpecs) ValidateNoDuplicateNames() *apis.FieldError {
+@@ -147,15 +139,12 @@ func (ps ParamSpecs) ValidateNoDuplicateNames() *apis.FieldError {
  }
 
  // validateParamEnum validates feature flag, duplication and allowed types for Param Enum
@@ -94,7 +101,7 @@ index c597354..0082e34 100644
  		if p.Type != ParamTypeString {
  			errs = errs.Also(apis.ErrGeneric("enum can only be set with string type param", "").ViaKey(p.Name))
  		}
-@@ -172,9 +160,9 @@ func (ps ParamSpecs) validateParamEnums(ctx context.Context) *apis.FieldError {
+@@ -172,9 +161,9 @@ func (ps ParamSpecs) validateParamEnums(ctx context.Context) *apis.FieldError {
  }
 
  // findDups returns the duplicate element in the given slice
@@ -107,7 +114,7 @@ index c597354..0082e34 100644
  	for _, val := range vals {
  		if seen.Has(val) {
  			dups.Insert(val)
-@@ -190,32 +178,9 @@ type Param struct {
+@@ -190,32 +179,9 @@ type Param struct {
  	Value ParamValue `json:"value"`
  }
 
@@ -142,7 +149,7 @@ index c597354..0082e34 100644
  	for _, p := range ps {
  		names.Insert(p.Name)
  	}
-@@ -244,224 +209,22 @@ func (ps Params) extractParamMapArrVals() map[string][]string {
+@@ -244,224 +210,23 @@ func (ps Params) extractParamMapArrVals() map[string][]string {
  	return paramsMap
  }
 
@@ -170,6 +177,7 @@ index c597354..0082e34 100644
 -}
 -
  // Params is a list of Param
++// +listType=atomic
  type Params []Param
 
 -// ExtractParamArrayLengths extract and return the lengths of all array params
@@ -370,7 +378,23 @@ index c597354..0082e34 100644
  // ParamType indicates the type of an input parameter;
  // Used to distinguish between a single string and an array of strings.
  type ParamType string
-@@ -544,64 +307,6 @@ func (paramValues ParamValue) MarshalJSON() ([]byte, error) {
+@@ -482,11 +247,11 @@ var AllParamTypes = []ParamType{ParamTypeString, ParamTypeArray, ParamTypeObject
+ // Used in JSON unmarshalling so that a single JSON field can accept
+ // either an individual string or an array of strings.
+ type ParamValue struct {
+-	Type      ParamType // Represents the stored type of ParamValues.
+-	StringVal string
++	Type      ParamType `json:"type"` // Represents the stored type of ParamValues.
++	StringVal string    `json:"stringVal"`
+ 	// +listType=atomic
+-	ArrayVal  []string
+-	ObjectVal map[string]string
++	ArrayVal  []string          `json:"arrayVal"`
++	ObjectVal map[string]string `json:"objectVal"`
+ }
+
+ // UnmarshalJSON implements the json.Unmarshaller interface.
+@@ -544,64 +309,6 @@ func (paramValues ParamValue) MarshalJSON() ([]byte, error) {
  	}
  }
 
@@ -435,7 +459,7 @@ index c597354..0082e34 100644
  // NewStructuredValues creates an ParamValues of type ParamTypeString or ParamTypeArray, based on
  // how many inputs are given (>1 input will create an array, not string).
  func NewStructuredValues(value string, values ...string) *ParamValue {
-@@ -624,72 +329,3 @@ func NewObject(pairs map[string]string) *ParamValue {
+@@ -624,72 +331,3 @@ func NewObject(pairs map[string]string) *ParamValue {
  		ObjectVal: pairs,
  	}
  }
