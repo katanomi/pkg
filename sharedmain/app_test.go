@@ -17,6 +17,7 @@ limitations under the License.
 package sharedmain
 
 import (
+	"net/http"
 	"testing"
 
 	corev1 "k8s.io/api/core/v1"
@@ -154,4 +155,51 @@ func TestAppWithFieldIndexer(t *testing.T) {
 		})
 		g.Expect(a.fieldIndexeres).Should(HaveLen(2))
 	})
+}
+
+func TestRedactHeader(t *testing.T) {
+	var data = []struct {
+		desc            string
+		headers         http.Header
+		expectedHeaders http.Header
+	}{
+		{
+			desc:            "header is empty",
+			headers:         http.Header{},
+			expectedHeaders: http.Header{},
+		},
+		{
+			desc:            "header is nil",
+			headers:         nil,
+			expectedHeaders: nil,
+		},
+		{
+			desc: "header not contains data need to redact",
+			headers: http.Header{
+				"abc": []string{"1"},
+			},
+			expectedHeaders: http.Header{
+				"abc": []string{"1"},
+			},
+		},
+		{
+			desc: "header contains data need to redact",
+			headers: http.Header{
+				"Authorization":   []string{"abc"},
+				"X-Plugin-Secret": []string{"123456", "qwer"},
+			},
+			expectedHeaders: http.Header{
+				"Authorization":   []string{"******"},
+				"X-Plugin-Secret": []string{"******"},
+			},
+		},
+	}
+
+	for _, item := range data {
+		t.Run(item.desc, func(t *testing.T) {
+			g := NewGomegaWithT(t)
+			actualHeader := redactHeader(item.headers)
+			g.Expect(actualHeader).Should(BeEquivalentTo(item.expectedHeaders))
+		})
+	}
 }
