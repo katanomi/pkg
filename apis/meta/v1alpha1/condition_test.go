@@ -223,6 +223,21 @@ func TestSetConditonByErrorReason(t *testing.T) {
 
 		SetConditionByErrorReason(conditionManager, apis.ConditionReady, err, reason)
 	})
+
+	t.Run("no error with reason", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+
+		conditionManager := apismock.NewMockConditionManager(ctrl)
+
+		conditionManager.EXPECT().GetCondition(apis.ConditionReady).Return(nil)
+
+		conditionManager.EXPECT().
+			MarkTrueWithReason(apis.ConditionReady, "Ready", "").
+			Times(1)
+
+		SetConditionByErrorReason(conditionManager, apis.ConditionReady, nil, "Ready")
+	})
 }
 
 func TestSetConditonByError(t *testing.T) {
@@ -356,7 +371,7 @@ func TestSetConditonByError(t *testing.T) {
 		conditionManager.EXPECT().GetCondition(apis.ConditionSucceeded).Return(nil)
 
 		conditionManager.EXPECT().
-			MarkTrue(apis.ConditionSucceeded).
+			MarkTrueWithReason(apis.ConditionSucceeded, "", "").
 			Times(1)
 
 		SetConditionByError(conditionManager, apis.ConditionSucceeded, nil)
@@ -374,7 +389,7 @@ func TestSetConditonByError(t *testing.T) {
 		})
 
 		conditionManager.EXPECT().
-			MarkTrue(apis.ConditionSucceeded).
+			MarkTrueWithReason(apis.ConditionSucceeded, "", "").
 			Times(1)
 
 		SetConditionByError(conditionManager, apis.ConditionSucceeded, nil)
@@ -414,7 +429,7 @@ func TestSetConditonByError(t *testing.T) {
 		})
 
 		conditionManager.EXPECT().
-			MarkTrue(apis.ConditionSucceeded).
+			MarkTrueWithReason(apis.ConditionSucceeded, "", "").
 			Times(0)
 
 		SetConditionByError(conditionManager, apis.ConditionSucceeded, nil)
@@ -432,7 +447,7 @@ func TestSetConditonByError(t *testing.T) {
 		})
 
 		conditionManager.EXPECT().
-			MarkTrue(apis.ConditionSucceeded).
+			MarkTrueWithReason(apis.ConditionSucceeded, "", "").
 			Times(1)
 
 		SetConditionByError(conditionManager, apis.ConditionSucceeded, nil)
