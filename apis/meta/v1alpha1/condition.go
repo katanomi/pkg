@@ -57,7 +57,7 @@ func SetConditionByErrorReason(conditionManager apis.ConditionManager, condition
 			conditionManager.MarkFalse(condition, reason, message)
 		}
 	} else {
-		if old == nil || !old.IsTrue() {
+		if old == nil || !old.IsTrue() || old.Reason != reason {
 			conditionManager.MarkTrueWithReason(condition, reason, "")
 		}
 	}
