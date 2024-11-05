@@ -185,7 +185,6 @@ func (p *ParallelTasks) releaseThreshold() {
 	if p.Options.ConcurrencyCount <= 0 {
 		return
 	}
-
 	<-p.threshold
 }
 
@@ -212,7 +211,7 @@ func (p *ParallelTasks) Do() *ParallelTasks {
 
 	for i, task := range p.tasks {
 		if !p.waitThreshold() {
-			return p
+			break
 		}
 
 		p.wg.Add(1)
@@ -250,6 +249,14 @@ func (p *ParallelTasks) Do() *ParallelTasks {
 		}(i, task)
 	}
 
+	// p.done() should be scheduled for execution here
+	// to ensure that doneChan is eventually released
+	// otherwise, it may lead to goroutine and channel leaks
+	go func() {
+		p.wg.Wait()
+		p.done(nil)
+	}()
+
 	return p
 }
 
@@ -276,11 +283,6 @@ func (p *ParallelTasks) Wait() ([]interface{}, error) {
 	if len(p.tasks) == 0 {
 		return nil, nil
 	}
-
-	go func() {
-		p.wg.Wait()
-		p.done(nil)
-	}()
 
 	p.Log.Debugw("waiting done.")
 	<-p.doneChan
