@@ -212,7 +212,7 @@ func (p *ParallelTasks) Do() *ParallelTasks {
 
 	for i, task := range p.tasks {
 		if !p.waitThreshold() {
-			return p
+			break
 		}
 
 		p.wg.Add(1)
@@ -249,7 +249,10 @@ func (p *ParallelTasks) Do() *ParallelTasks {
 
 		}(i, task)
 	}
-
+	go func() {
+		p.wg.Wait()
+		p.done(nil)
+	}()
 	return p
 }
 
@@ -276,11 +279,6 @@ func (p *ParallelTasks) Wait() ([]interface{}, error) {
 	if len(p.tasks) == 0 {
 		return nil, nil
 	}
-
-	go func() {
-		p.wg.Wait()
-		p.done(nil)
-	}()
 
 	p.Log.Debugw("waiting done.")
 	<-p.doneChan
