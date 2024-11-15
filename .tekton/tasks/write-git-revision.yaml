@@ -1,0 +1,93 @@
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: write-git-revision
+spec:
+  workspace:
+    - name: source
+  params:
+    - description: Git revision object with url, branch, commit, and pull-request-number.
+      name: git-revision
+      type: object
+      properties:
+        url: {}
+        branch: {}
+        commit: {}
+        pull-request-number: {}
+        pull-request-source: {}
+        pull-request-target: {}
+  results: []
+  steps:
+    - name: write-git-revision
+      image: docker-mirrors.alauda.cn/library/busybox:1.36
+      resources:
+        limits:
+          cpu: 50m
+          memory: 50Mi
+        requests:
+          cpu: 50m
+          memory: 50Mi
+      script: |
+        #!/bin/sh
+
+        set -e
+        revision_type="Commit"
+        revision_id="$(params.git-revision.commit)"
+        pull_request_number=""
+
+        revision="refs/heads/$(params.git-revision.branch)"
+        if [ "$(params.git-revision.pull-request-number)" != "{{ pull_request_number }}"  ]; then
+          revision="refs/pull/$(params.git-revision.pull-request-number)/head"
+          pull_request_number="$(params.git-revision.pull-request-number)"
+        fi
+
+        if [[ $revision == refs/heads/* ]]; then
+          revision_type="Branch"
+          revision_id="$(params.git-revision.branch)"
+        elif [[ $revision == refs/pull/* ]]; then
+          revision_type="PullRequest"
+          revision_id="$(params.git-revision.pull-request-number)"
+        elif [[ $revision == refs/tags/* ]]; then
+          revision_type="tag"
+        fi
+
+        cat > $(workspaces.source.path)/.git/katanomi.git.json <<EOF
+        {
+          "url": "$(params.git-revision.url)",
+          "revision": {
+            "raw": "${revision}",
+            "type": "${revision_type}",
+            "id": "${revision_id}"
+          },
+          "lastCommit": {
+            "shortID": "$(params.git-revision.commit)",
+            "id": "$(params.git-revision.commit)",
+            "title": "",
+            "message": "",
+            "authorEmail": "",
+            "webURL": ""
+          },
+          "branch": {
+            "name": "$(params.git-revision.branch)",
+            "protected": true,
+            "default": false,
+            "webURL": ""
+          },
+          "pullRequest": {
+            "id": "${pull_request_number}",
+            "title": "",
+            "source": "$(params.git-revision.pull-request-source)",
+            "target": "$(params.git-revision.pull-request-target)",
+            "webURL": "",
+            "hasConflicts": false
+          },
+          "target": {
+            "name": "$(params.git-revision.pull-request-target)",
+            "protected": true,
+            "default": false,
+            "webURL": ""
+          }
+        }
+        EOF
+
+        cat $(workspaces.source.path)/.git/katanomi.git.json

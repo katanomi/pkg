@@ -1,0 +1,87 @@
+apiVersion: tekton.dev/v1beta1
+kind: PipelineRun
+metadata:
+  name: alaudadevops-pkg
+  annotations:
+    pipelinesascode.tekton.dev/on-comment: "(/test-all)"
+    pipelinesascode.tekton.dev/on-cel-expression: |-
+      (target_branch == "main" || target_branch.startsWith("release-") || event == "pull_request" )
+    pipelinesascode.tekton.dev/pipeline: "[.tekton/pipelines/pipeline.yaml]"
+    pipelinesascode.tekton.dev/task: "[.tekton/tasks/calculate-revision.yaml, .tekton/tasks/write-git-revision.yaml]"
+    pipelinesascode.tekton.dev/max-keep-runs: "10"
+spec:
+  timeouts:
+    pipeline: "30m"
+    tasks: "15m"
+    finally: "5m"
+  pipelineRef:
+    name: alaudadevops-pkg
+  params:
+    - name: git-revision
+      value:
+        url: "{{ repo_url }}"
+        branch: "{{ source_branch }}"
+        commit: "{{ revision }}"
+        pull-request-source: "{{ source_branch }}"
+        pull-request-target: "{{ target_branch }}"
+        pull-request-number: "{{ pull_request_number }}"
+  workspaces:
+    - name: source
+      volumeClaimTemplate:
+        spec:
+          accessModes:
+            - ReadWriteMany
+          resources:
+            requests:
+              storage: 200Mi
+    - name: cache
+      persistentVolumeClaim:
+        claimName: build-cache
+      subPath: golang
+  taskRunSpecs:
+    - pipelineTaskName: test
+      stepOverrides:
+        - name: prepare
+          resources:
+            limits:
+              cpu: 100m
+              memory: 100Mi
+            requests:
+              cpu: 50m
+              memory: 50Mi
+        - name: test
+          resources:
+            requests:
+              cpu: "4"
+              memory: 3Gi
+            limits:
+              cpu: "4"
+              memory: 3Gi
+        - name: analysis
+          resources:
+            limits:
+              cpu: 100m
+              memory: 100Mi
+            requests:
+              cpu: 50m
+              memory: 50Mi
+    - pipelineTaskName: govulncheck
+      stepOverrides:
+        - name: go-build
+          resources:
+            requests:
+              cpu: "4"
+              memory: 6Gi
+            limits:
+              cpu: "4"
+              memory: 6Gi
+    - pipelineTaskName: trivy-repo-scan
+      stepOverrides:
+        - name: go-build
+          resources:
+            requests:
+              cpu: "1"
+              memory: 1Gi
+            limits:
+              cpu: "1"
+              memory: 1Gi

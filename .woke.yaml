@@ -8,6 +8,7 @@ ignore_files:
   - .build/*
   - catalog.yaml
   - hack/patches/*
+  - .tekton/*
 
 # https://docs.getwoke.tech/ignore/
 rules:
@@ -30,4 +31,3 @@ rules:
     alternatives:
       - Pull Request
       - pull request
-
