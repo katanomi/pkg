@@ -1,5 +1,5 @@
 /*
-Copyright 2021 The Katanomi Authors.
+Copyright 2021 The AlaudaDevops Authors.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -20,10 +20,10 @@ import (
 	"context"
 	"time"
 
-	kscheme "github.com/katanomi/pkg/scheme"
+	kscheme "github.com/AlaudaDevops/pkg/scheme"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
-	kerrors "github.com/katanomi/pkg/errors"
+	kerrors "github.com/AlaudaDevops/pkg/errors"
 
 	"k8s.io/client-go/dynamic"
 	"knative.dev/pkg/logging"

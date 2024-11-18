@@ -1,5 +1,5 @@
 /*
-Copyright 2024 The Katanomi Authors.
+Copyright 2024 The AlaudaDevops Authors.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -25,10 +25,10 @@ import (
 	"reflect"
 	"testing"
 
-	ktesting "github.com/katanomi/pkg/testing"
+	ktesting "github.com/AlaudaDevops/pkg/testing"
 
+	"github.com/AlaudaDevops/pkg/apis/meta/v1alpha1"
 	"github.com/google/go-cmp/cmp"
-	"github.com/katanomi/pkg/apis/meta/v1alpha1"
 	"k8s.io/apimachinery/pkg/util/sets"
 	"knative.dev/pkg/apis"
 )

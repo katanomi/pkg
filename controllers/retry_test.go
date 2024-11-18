@@ -1,5 +1,5 @@
 /*
-Copyright 2023 The Katanomi Authors.
+Copyright 2023 The AlaudaDevops Authors.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@ package controllers
 import (
 	"context"
 
-	"github.com/katanomi/pkg/testing"
+	"github.com/AlaudaDevops/pkg/testing"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	v1 "k8s.io/api/core/v1"

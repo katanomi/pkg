@@ -16,7 +16,7 @@ There are a few factors that motivate customizing new webhooks:
 A few changes are needed in the current objects in order to use this customized webhooks:
 
  1. Add `context.Context` to `ValidateCreate`, `ValidateUpdate`, `ValidateDelete` and `Default` methods as the first parameter. `Default` and/or `Validation` can be changed as necessary. If required, one or both can keep using regular webhooks.
- 1. Import `"github.com/katanomi/pkg/webhook/admission"` on your `<type>_webhook.go` files
+ 1. Import `"github.com/AlaudaDevops/pkg/webhook/admission"` on your `<type>_webhook.go` files
  1. Change the interface check from `var _ webhook.Defaulter = &Type{}` to  `var _ admission.Defaulter = &Type{}` the last one coming from this package. Do the same for `Validator`
  1. Use `"knative.dev/pkg/logging"` to fetch a logger from the context and `"knative.dev/pkg/apis"` methods like `apis.IsWithinCreate`
  1. Change one of the below methods to setup the webhook within the app

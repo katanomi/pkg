@@ -1,5 +1,5 @@
 /*
-Copyright 2023 The Katanomi Authors.
+Copyright 2023 The AlaudaDevops Authors.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -19,10 +19,10 @@ package workers
 import (
 	"context"
 
-	metav1alpha1 "github.com/katanomi/pkg/apis/meta/v1alpha1"
-	"github.com/katanomi/pkg/config"
-	"github.com/katanomi/pkg/errors"
-	"github.com/katanomi/pkg/restclient"
+	metav1alpha1 "github.com/AlaudaDevops/pkg/apis/meta/v1alpha1"
+	"github.com/AlaudaDevops/pkg/config"
+	"github.com/AlaudaDevops/pkg/errors"
+	"github.com/AlaudaDevops/pkg/restclient"
 	"github.com/robfig/cron/v3"
 	"go.uber.org/zap"
 	"knative.dev/pkg/logging"

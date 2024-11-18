@@ -1,5 +1,5 @@
 /*
-Copyright 2021 The Katanomi Authors.
+Copyright 2021 The AlaudaDevops Authors.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@ package v1alpha1
 import (
 	"context"
 
-	"github.com/katanomi/pkg/webhook/admission"
+	"github.com/AlaudaDevops/pkg/webhook/admission"
 	"k8s.io/apimachinery/pkg/runtime"
 	"knative.dev/pkg/logging"
 )

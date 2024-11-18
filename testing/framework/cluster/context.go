@@ -1,5 +1,5 @@
 /*
-Copyright 2023 The Katanomi Authors.
+Copyright 2023 The AlaudaDevops Authors.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -19,8 +19,8 @@ package cluster
 import (
 	"strings"
 
-	"github.com/katanomi/pkg/testing/assertions"
-	"github.com/katanomi/pkg/testing/framework/base"
+	"github.com/AlaudaDevops/pkg/testing/assertions"
+	"github.com/AlaudaDevops/pkg/testing/framework/base"
 
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/util/rand"

@@ -1,5 +1,5 @@
 /*
-Copyright 2023 The Katanomi Authors.
+Copyright 2023 The AlaudaDevops Authors.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -24,8 +24,8 @@ import (
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/util/validation/field"
 
-	kvalidation "github.com/katanomi/pkg/apis/validation"
-	. "github.com/katanomi/pkg/testing"
+	kvalidation "github.com/AlaudaDevops/pkg/apis/validation"
+	. "github.com/AlaudaDevops/pkg/testing"
 )
 
 var _ = Describe("Test.Replaces.ReplaceAllString", func() {

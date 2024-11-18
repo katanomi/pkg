@@ -1,5 +1,5 @@
 /*
-Copyright 2023 The Katanomi Authors.
+Copyright 2023 The AlaudaDevops Authors.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@ package references
 import (
 	"testing"
 
-	ktesting "github.com/katanomi/pkg/testing"
+	ktesting "github.com/AlaudaDevops/pkg/testing"
 	. "github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime/schema"

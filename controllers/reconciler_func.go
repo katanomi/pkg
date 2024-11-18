@@ -1,5 +1,5 @@
 /*
-Copyright 2023 The Katanomi Authors.
+Copyright 2023 The AlaudaDevops Authors.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@ import (
 	"context"
 	"time"
 
-	"github.com/katanomi/pkg/config"
+	"github.com/AlaudaDevops/pkg/config"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 )
 

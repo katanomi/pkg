@@ -1,5 +1,5 @@
 /*
-Copyright 2023 The Katanomi Authors.
+Copyright 2023 The AlaudaDevops Authors.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -19,8 +19,8 @@ package cluster
 import (
 	"context"
 
-	kclient "github.com/katanomi/pkg/client"
-	"github.com/katanomi/pkg/testing/framework/base"
+	kclient "github.com/AlaudaDevops/pkg/client"
+	"github.com/AlaudaDevops/pkg/testing/framework/base"
 	"k8s.io/apimachinery/pkg/runtime"
 	"knative.dev/pkg/injection"
 	ctrl "sigs.k8s.io/controller-runtime"

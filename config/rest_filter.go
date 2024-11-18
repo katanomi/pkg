@@ -1,5 +1,5 @@
 /*
-Copyright 2023 The Katanomi Authors.
+Copyright 2023 The AlaudaDevops Authors.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -21,8 +21,8 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/AlaudaDevops/pkg/errors"
 	restful "github.com/emicklei/go-restful/v3"
-	"github.com/katanomi/pkg/errors"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"knative.dev/pkg/logging"
 )

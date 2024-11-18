@@ -1,5 +1,5 @@
 /*
-Copyright 2024 The Katanomi Authors.
+Copyright 2024 The AlaudaDevops Authors.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@ package testing
 import (
 	"time"
 
-	"github.com/katanomi/pkg/testing/assertions"
+	"github.com/AlaudaDevops/pkg/testing/assertions"
 
 	ctrlclient "sigs.k8s.io/controller-runtime/pkg/client"
 

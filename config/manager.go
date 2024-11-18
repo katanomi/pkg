@@ -1,5 +1,5 @@
 /*
-Copyright 2022 The Katanomi Authors.
+Copyright 2022 The AlaudaDevops Authors.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -22,11 +22,11 @@ import (
 	"os"
 	"sync"
 
-	"github.com/katanomi/pkg/maps"
+	"github.com/AlaudaDevops/pkg/maps"
 
-	kclient "github.com/katanomi/pkg/client"
-	"github.com/katanomi/pkg/configmap"
-	"github.com/katanomi/pkg/watcher"
+	kclient "github.com/AlaudaDevops/pkg/client"
+	"github.com/AlaudaDevops/pkg/configmap"
+	"github.com/AlaudaDevops/pkg/watcher"
 	"go.uber.org/zap"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"

@@ -1,5 +1,5 @@
 /*
-Copyright 2021 The Katanomi Authors.
+Copyright 2021 The AlaudaDevops Authors.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -25,9 +25,9 @@ import (
 
 	authnv1 "k8s.io/api/authentication/v1"
 
+	mockfakeclient "github.com/AlaudaDevops/pkg/testing/mock/sigs.k8s.io/controller-runtime/pkg/client"
 	"github.com/emicklei/go-restful/v3"
 	"github.com/golang/mock/gomock"
-	mockfakeclient "github.com/katanomi/pkg/testing/mock/sigs.k8s.io/controller-runtime/pkg/client"
 	. "github.com/onsi/gomega"
 	authv1 "k8s.io/api/authorization/v1"
 	"k8s.io/apimachinery/pkg/api/errors"

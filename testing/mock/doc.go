@@ -1,5 +1,5 @@
 /*
-Copyright 2022 The Katanomi Authors.
+Copyright 2022 The AlaudaDevops Authors.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -21,4 +21,4 @@ package mock
 //go:generate mockgen -package=manager -destination=./sigs.k8s.io/controller-runtime/pkg/manager/manager.go sigs.k8s.io/controller-runtime/pkg/manager Manager
 //go:generate mockgen -package=apis -destination=./knative.dev/pkg/apis/condition_manager.go knative.dev/pkg/apis ConditionManager
 //go:generate mockgen -package=kubernetes -destination=./k8s.io/client-go/kubernetes/clientset.go k8s.io/client-go/kubernetes Interface
-//go:generate mockgen -package=sharedmain -destination=./github.com/katanomi/pkg/watcher.go github.com/katanomi/pkg/sharedmain DefaultingWatcherWithOnChange
+//go:generate mockgen -package=sharedmain -destination=./github.com/AlaudaDevops/pkg/watcher.go github.com/AlaudaDevops/pkg/sharedmain DefaultingWatcherWithOnChange

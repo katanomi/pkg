@@ -1,5 +1,5 @@
 /*
-Copyright 2021 The Katanomi Authors.
+Copyright 2021 The AlaudaDevops Authors.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -24,7 +24,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/katanomi/pkg/parallel"
+	"github.com/AlaudaDevops/pkg/parallel"
 	"go.uber.org/zap"
 	apierrors "k8s.io/apimachinery/pkg/util/errors"
 

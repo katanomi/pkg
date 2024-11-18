@@ -1,5 +1,5 @@
 /*
-Copyright 2021 The Katanomi Authors.
+Copyright 2021 The AlaudaDevops Authors.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@ import (
 	"knative.dev/pkg/configmap"
 	"knative.dev/pkg/system"
 
-	kconfigmap "github.com/katanomi/pkg/configmap"
+	kconfigmap "github.com/AlaudaDevops/pkg/configmap"
 )
 
 func defaultConfigMap(name string) *v1.ConfigMap {

@@ -16,7 +16,7 @@ index c597354..f4c712c 100644
 @@ -1,5 +1,5 @@
  /*
 -Copyright 2022 The Tekton Authors
-+Copyright 2024 The Katanomi Authors.
++Copyright 2024 The AlaudaDevops Authors.
 
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -539,7 +539,7 @@ index 7191439..874e3c1 100644
 @@ -1,5 +1,5 @@
  /*
 -Copyright 2022 The Tekton Authors.
-+Copyright 2024 The Katanomi Authors.
++Copyright 2024 The AlaudaDevops Authors.
 
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -558,13 +558,13 @@ index 7191439..874e3c1 100644
  	"reflect"
  	"testing"
 
-+	ktesting "github.com/katanomi/pkg/testing"
++	ktesting "github.com/AlaudaDevops/pkg/testing"
 +
  	"github.com/google/go-cmp/cmp"
 -	"github.com/google/go-cmp/cmp/cmpopts"
 -	v1 "github.com/tektoncd/pipeline/pkg/apis/pipeline/v1"
 -	"github.com/tektoncd/pipeline/test/diff"
-+	"github.com/katanomi/pkg/apis/meta/v1alpha1"
++	"github.com/AlaudaDevops/pkg/apis/meta/v1alpha1"
  	"k8s.io/apimachinery/pkg/util/sets"
  	"knative.dev/pkg/apis"
  )

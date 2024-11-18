@@ -1,5 +1,5 @@
 /*
-Copyright 2021 The Katanomi Authors.
+Copyright 2021 The AlaudaDevops Authors.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -25,8 +25,8 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"knative.dev/pkg/logging"
 
-	"github.com/katanomi/pkg/sharedmain"
-	"github.com/katanomi/pkg/webhook/admission"
+	"github.com/AlaudaDevops/pkg/sharedmain"
+	"github.com/AlaudaDevops/pkg/webhook/admission"
 	"go.uber.org/zap"
 	corev1 "k8s.io/api/core/v1"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
@@ -34,8 +34,8 @@ import (
 	ctrlclient "sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 
-	testv1alpha1 "github.com/katanomi/pkg/examples/sample-controller/apis/test/v1alpha1"
-	testcontrollers "github.com/katanomi/pkg/examples/sample-controller/controllers/test"
+	testv1alpha1 "github.com/AlaudaDevops/pkg/examples/sample-controller/apis/test/v1alpha1"
+	testcontrollers "github.com/AlaudaDevops/pkg/examples/sample-controller/controllers/test"
 	"k8s.io/apimachinery/pkg/runtime"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
 	"knative.dev/pkg/apis"

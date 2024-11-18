@@ -1,5 +1,5 @@
 /*
-Copyright 2023 The Katanomi Authors.
+Copyright 2023 The AlaudaDevops Authors.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@ limitations under the License.
 
 package framework
 
-import "github.com/katanomi/pkg/testing/framework/cluster"
+import "github.com/AlaudaDevops/pkg/testing/framework/cluster"
 
 // Cluster convert to cluster test case builder
 func (b *CaseBuilder) Cluster() *cluster.TestCaseBuilder {
