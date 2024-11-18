@@ -19,12 +19,12 @@ rules:
     alternatives:
       - allowlist
     # severity: warn # disabled to show that error is the default
-  - name: alauda
-    terms:
-      - alauda
-    alternatives:
-      - katanomi
-    severity: warn
+  # - name: alauda
+  #   terms:
+  #     - alauda
+  #   alternatives:
+  #     - katanomi
+  #   severity: warn
   - name: merge request
     terms:
       - Merge Request

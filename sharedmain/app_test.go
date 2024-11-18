@@ -1,5 +1,5 @@
 /*
-Copyright 2021 The Katanomi Authors.
+Copyright 2021 The AlaudaDevops Authors.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@ package sharedmain
 import (
 	"testing"
 
-	"github.com/katanomi/pkg/fieldindexer"
+	"github.com/AlaudaDevops/pkg/fieldindexer"
 
 	. "github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
