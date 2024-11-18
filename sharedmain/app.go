@@ -30,6 +30,8 @@ import (
 	"sync"
 	"time"
 
+	"github.com/katanomi/pkg/fieldindexer"
+
 	cloudevents "github.com/cloudevents/sdk-go/v2"
 	cloudeventsv2client "github.com/cloudevents/sdk-go/v2/client"
 	"github.com/katanomi/pkg/config"
@@ -118,7 +120,7 @@ type AppBuilder struct {
 
 	// Controllers
 	Manager        ctrl.Manager
-	fieldIndexeres []FieldIndexer
+	fieldIndexeres []fieldindexer.FieldIndexer
 
 	// ConfigWatch
 	ConfigMapWatcher DefaultingWatcherWithOnChange
@@ -139,16 +141,6 @@ type AppBuilder struct {
 
 	// newResourceLock override the default resourcelock of controller-runtime.
 	newResourceLock kmanager.ResourceLockFunc
-}
-
-// FieldIndexer holds data when index fields into InformerCache
-type FieldIndexer struct {
-	// Obj indicates which object would be indexed
-	Obj ctrlclient.Object
-	// Field indicates field path, eg: .spec.name
-	Field string
-	// ExtractValue indexer func to return value from Obj
-	ExtractValue ctrlclient.IndexerFunc
 }
 
 // ParseFlag parse flag needed for App
@@ -386,12 +378,12 @@ func (a *AppBuilder) RESTClient(client *resty.Client) *AppBuilder {
 }
 
 // WithFieldIndexer will append field indexer in to Controller Manager Cluster
-func (a *AppBuilder) WithFieldIndexer(fieldIndexer FieldIndexer) *AppBuilder {
+func (a *AppBuilder) WithFieldIndexer(fieldIndexer ...fieldindexer.FieldIndexer) *AppBuilder {
 	if a.fieldIndexeres == nil {
-		a.fieldIndexeres = []FieldIndexer{}
+		a.fieldIndexeres = []fieldindexer.FieldIndexer{}
 	}
 
-	a.fieldIndexeres = append(a.fieldIndexeres, fieldIndexer)
+	a.fieldIndexeres = append(a.fieldIndexeres, fieldIndexer...)
 	return a
 }
 
