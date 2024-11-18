@@ -1,0 +1,39 @@
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: calculate-revision
+spec:
+  params:
+    - description: the source branch
+      name: source-branch
+      type: string
+    - description: the pull request number
+      name: pull-request-number
+      type: string
+  results:
+    - description: revision calculated based on the event content
+      name: revision
+      type: string
+  steps:
+    - name: calculate
+      image: docker-mirrors.alauda.cn/library/busybox:1.36
+      resources:
+        limits:
+          cpu: 50m
+          memory: 50Mi
+        requests:
+          cpu: 50m
+          memory: 50Mi
+      script: |
+        #!/bin/sh
+        set -e
+
+        # Calculate the revision based on the event content.
+        # Pull Request has the highest priority and use the branch as a fallback.
+        revision="refs/heads/$(params.source-branch)"
+        if [ "$(params.pull-request-number)" != "{{ pull_request_number }}" ]; then
+          revision="refs/pull/$(params.pull-request-number)/head"
+        fi
+
+        echo ${revision}
+        echo -n ${revision} > $(results.revision.path)

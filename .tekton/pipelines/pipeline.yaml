@@ -1,0 +1,347 @@
+apiVersion: tekton.dev/v1beta1
+kind: Pipeline
+metadata:
+  name: alaudadevops-pkg
+spec:
+  params:
+    - name: git-revision
+      description: Git revision object with url, branch, commit, and pull-request-number.
+      type: object
+      properties:
+        url: {}
+        branch: {}
+        commit: {}
+        pull-request-number: {}
+        pull-request-source: {}
+        pull-request-target: {}
+  workspaces:
+    - description: >
+        This workspace is shared among all the pipeline tasks to read/write common resources
+      name: source
+  tasks:
+    - name: calculate-revision
+      params:
+        - name: source-branch
+          value: $(params.git-revision.branch)
+        - name: pull-request-number
+          value: $(params.git-revision.pull-request-number)
+      taskRef:
+        kind: Task
+        name: calculate-revision
+
+    - name: git-clone
+      timeout: 10m
+      retries: 0
+      runAfter:
+        - calculate-revision
+      taskRef:
+        resolver: katanomi.hub
+        params:
+          - name: kind
+            value: task
+          - name: name
+            value: katanomi-git-clone
+      params:
+        - name: url
+          value: $(params.git-revision.url)
+        - name: revision
+          value: $(tasks.calculate-revision.results.revision)
+        - name: commit
+          value: $(params.git-revision.commit)
+      workspaces:
+        - name: source
+          workspace: source
+
+    - name: write-git-revision
+      params:
+        - name: git-revision
+          value:
+            url: $(params.git-revision.url)
+            branch: $(params.git-revision.branch)
+            commit: $(params.git-revision.commit)
+            pull-request-number: $(params.git-revision.pull-request-number)
+            pull-request-source: $(params.git-revision.pull-request-source)
+            pull-request-target: $(params.git-revision.pull-request-target)
+      runAfter:
+        - git-clone
+      taskRef:
+        kind: Task
+        name: write-git-revision
+
+    - name: generate-version
+      params:
+        - name: repo-url
+          value: $(params.git-revision.url)
+        - name: repo-ref
+          value: $(tasks.calculate-revision.results.revision)
+      runAfter:
+        - git-clone
+      taskRef:
+        kind: ClusterTask
+        name: katanomi-generate-version
+      workspaces:
+        - name: source
+          workspace: source
+
+    - name: boilerplate
+      retries: 0
+      runAfter:
+        - git-clone
+      taskRef:
+        name: katanomi-boilerplate
+        kind: ClusterTask
+      workspaces:
+        - name: source
+          workspace: source
+      params:
+        - name: revision
+          value: $(tasks.calculate-revision.results.revision)
+
+    - name: donotsubmit
+      runAfter:
+        - boilerplate
+      retries: 0
+      taskRef:
+        kind: ClusterTask
+        name: katanomi-donotsubmit
+      workspaces:
+        - name: source
+          workspace: source
+      params:
+        - name: revision
+          value: $(tasks.calculate-revision.results.revision)
+
+    - name: knative-style
+      runAfter:
+        - donotsubmit
+      retries: 0
+      taskRef:
+        name: katanomi-knative-style
+        kind: ClusterTask
+      workspaces:
+        - name: source
+          workspace: source
+      params:
+        - name: ignore-filetypes
+          value: (\.png|\.drawio|\.DS_Store)$
+        - name: ignore-dirs
+          value: (^vendor/|^third_party/|^.git|kodata)
+        - name: revision
+          value: $(tasks.calculate-revision.results.revision)
+
+    - name: test
+      timeout: 30m
+      runAfter:
+        - git-clone
+      retries: 0
+      taskRef:
+        resolver: katanomi.hub
+        params:
+          - name: kind
+            value: task
+          - name: name
+            value: go-unit-test
+      workspaces:
+        - name: source
+          workspace: source
+        - name: cache
+          workspace: cache
+      params:
+        - name: command
+          value: |
+            export GOPROXY=https://build-nexus.alauda.cn/repository/golang/,direct
+            export GOMAXPROCS=4
+            if [ "$GOCACHE" != "" ]; then
+              export TOOLBIN=$GOCACHE/../toolbin
+              mkdir -p $TOOLBIN
+              ls -la $TOOLBIN
+            fi
+
+            make test
+            make htmlreport
+        - name: test-report-path
+          value: ./test.json
+        - name: coverage-report-path
+          value: ./cover.out
+        - name: quality-gate-rules
+          value:
+            - passed-tests-rate=100
+        - name: tool-image
+          value: registry.alauda.cn:60080/devops/builder-go:latest
+    - name: golangci-lint
+      timeout: 30m
+      runAfter:
+        - git-clone
+      retries: 0
+      taskRef:
+        resolver: katanomi.hub
+        params:
+          - name: kind
+            value: task
+          - name: name
+            value: golangci-lint
+      workspaces:
+        - name: source
+          workspace: source
+        - name: cache
+          workspace: cache
+      params:
+        - name: command
+          value: >
+            export GOPROXY=https://build-nexus.alauda.cn/repository/golang/,direct
+
+            golangci-lint run
+        - name: report-path
+          value: ./golangci-lint-report.txt
+        - name: quality-gate
+          value: "false"
+        - name: tool-image
+          value: registry.alauda.cn:60080/devops/builder-go:latest
+
+    - name: sonar-scan
+      runAfter:
+        - test
+        - golangci-lint
+        - write-git-revision
+      timeout: 30m
+      retries: 0
+      taskRef:
+        resolver: katanomi.hub
+        params:
+          - name: kind
+            value: task
+          - name: name
+            value: sonarqube-analysis
+      workspaces:
+        - name: source
+          workspace: source
+      params:
+        - name: server
+          value: https://build-sonar.alauda.cn
+
+    ### security scan
+    - name: govulncheck
+      timeout: 30m
+      retries: 0
+      runAfter:
+        - git-clone
+      taskRef:
+        resolver: katanomi.hub
+        params:
+          - name: kind
+            value: task
+          - name: name
+            value: go-build
+      workspaces:
+        - name: source
+          workspace: source
+        - name: cache
+          workspace: cache
+      when:
+        - input: $(params.git-revision.pull-request-number)
+          operator: notin
+          values:
+            - "{{ pull_request_number }}"
+      params:
+        - name: command
+          value: |
+            export GOPROXY=https://build-nexus.alauda.cn/repository/golang/,direct
+            export GOMAXPROCS=8
+            if [ "$GOCACHE" != "" ]; then
+              export TOOLBIN=$GOCACHE/../toolbin
+              mkdir -p $TOOLBIN
+              ls -la $TOOLBIN
+            fi
+
+            mkdir -p bin
+            export VULNCHECK_OUTPUT=bin/vulncheck.txt
+            # do not throw an error here immediately, but check whether it should fail in the subsequent logic
+            make vulncheck || true
+            # count means the line number which contains 'Fixed in' and has fix version
+            count=$(grep 'Fixed in' "$VULNCHECK_OUTPUT" | grep -v 'Fixed in: N/A' | wc -l)
+            if [ "$count" -gt 0 ]; then
+            echo "==> ❌ there are $count vulnerability need to be fixed"
+            exit 1
+            else
+            echo "==> ✅ there is no vulnerability need to be fixed"
+            fi
+            # TODO: Add report back to PR
+        - name: build-outputs-path
+          value:
+            - "./bin/vulncheck.txt"
+
+        - name: tool-image
+          value: registry.alauda.cn:60080/devops/builder-go:latest
+    ### security scan
+    - name: trivy-repo-scan
+      timeout: 30m
+      retries: 0
+      runAfter:
+        - git-clone
+      taskRef:
+        resolver: katanomi.hub
+        params:
+          - name: kind
+            value: task
+          - name: name
+            value: go-build
+      workspaces:
+        - name: source
+          workspace: source
+        - name: cache
+          workspace: cache
+      when:
+        - input: $(params.git-revision.pull-request-number)
+          operator: notin
+          values:
+            - "{{ pull_request_number }}"
+      params:
+        - name: command
+          value: |
+            export GOPROXY=https://build-nexus.alauda.cn/repository/golang/,direct
+            export GOMAXPROCS=4
+            if [ "$GOCACHE" != "" ]; then
+              export TOOLBIN=$GOCACHE/../toolbin
+              mkdir -p $TOOLBIN
+              ls -la $TOOLBIN
+            fi
+
+            mkdir -p bin
+            export TRIVY_CACHE=$GOCACHE/trivydb
+            export TRIVY_DB_REPO=build-harbor.alauda.cn/ops/aquasecurity/trivy-db
+            export TRIVY_REPORT_OUTPUT=bin/trivy-report.json
+            export TRIVY_SEVERITY=UNKNOWN,MEDIUM,HIGH,CRITICAL
+            make trivy-repo-scan
+            # TODO: Add report back to PR
+        - name: build-outputs-path
+          value:
+            - "./bin/trivy-report.json"
+        - name: tool-image
+          value: registry.alauda.cn:60080/devops/builder-go:latest
+  finally:
+    - name: upload-test-report
+      timeout: 30m
+      retries: 0
+      taskRef:
+        resolver: katanomi.hub
+        params:
+          - name: kind
+            value: task
+          - name: name
+            value: upload-files
+      workspaces:
+        - name: source
+          workspace: source
+      when: []
+      params:
+        - name: artifacts-path
+          value:
+            - $(workspaces.source.path)/test_report.html
+        - name: artifact-repository
+          value: https://build-nexus.alauda.cn/repository/alauda
+        - name: target-path
+          value: alaudadevops-pkg/reports/$(tasks.generate-version.results.branch)/$(tasks.generate-version.results.commit-short-id)/
+        - name: upload-pack
+          value: "false"
+        - name: checksum
+          value: "false"
