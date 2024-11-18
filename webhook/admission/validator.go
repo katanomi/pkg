@@ -21,6 +21,8 @@ import (
 	goerrors "errors"
 	"net/http"
 
+	kclient "github.com/katanomi/pkg/client"
+
 	kscheme "github.com/katanomi/pkg/scheme"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -53,6 +55,7 @@ func ValidatingWebhookFor(ctx context.Context, validator Validator, creates []Va
 			updates:       updates,
 			deletes:       deletes,
 			SugaredLogger: logging.FromContext(ctx),
+			ctx:           ctx,
 		},
 	}
 }
@@ -66,6 +69,7 @@ type validatingHandler struct {
 	deletes   []ValidateDeleteFunc
 
 	*zap.SugaredLogger
+	ctx context.Context
 }
 
 // Handle handles admission requests.
@@ -77,6 +81,7 @@ func (h *validatingHandler) Handle(ctx context.Context, req admission.Request) a
 	}
 	ctx = logging.WithLogger(ctx, h.SugaredLogger)
 	ctx = WithAdmissionRequest(ctx, req)
+	ctx = kclient.WithClient(ctx, kclient.Client(h.ctx))
 
 	if injector, ok := h.validator.(ContextInjector); ok {
 		ctx = injector.InjectContext(ctx)

@@ -19,6 +19,8 @@ package sharedmain
 import (
 	"testing"
 
+	"github.com/katanomi/pkg/fieldindexer"
+
 	. "github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -27,7 +29,7 @@ import (
 func TestAppWithFieldIndexer(t *testing.T) {
 	t.Run("append one field indexer ", func(t *testing.T) {
 		g := NewGomegaWithT(t)
-		a := App("test").WithFieldIndexer(FieldIndexer{
+		a := App("test").WithFieldIndexer(fieldindexer.FieldIndexer{
 			Obj:   &corev1.ConfigMap{},
 			Field: "data.key",
 			ExtractValue: func(object client.Object) []string {
@@ -39,13 +41,13 @@ func TestAppWithFieldIndexer(t *testing.T) {
 	t.Run("append more than one field indexer", func(t *testing.T) {
 		g := NewGomegaWithT(t)
 
-		a := App("test").WithFieldIndexer(FieldIndexer{
+		a := App("test").WithFieldIndexer(fieldindexer.FieldIndexer{
 			Obj:   &corev1.ConfigMap{},
 			Field: "data.key",
 			ExtractValue: func(object client.Object) []string {
 				return []string{object.(*corev1.ConfigMap).Data["key"]}
 			},
-		}).WithFieldIndexer(FieldIndexer{
+		}).WithFieldIndexer(fieldindexer.FieldIndexer{
 			Obj:   &corev1.ConfigMap{},
 			Field: "data.name",
 			ExtractValue: func(object client.Object) []string {
