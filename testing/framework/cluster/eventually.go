@@ -17,7 +17,7 @@ limitations under the License.
 package cluster
 
 import (
-	"github.com/katanomi/pkg/testing"
+	"github.com/AlaudaDevops/pkg/testing"
 	. "github.com/onsi/gomega"
 	"knative.dev/pkg/apis"
 	"sigs.k8s.io/controller-runtime/pkg/client"

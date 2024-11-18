@@ -1,4 +1,4 @@
-module github.com/katanomi/pkg
+module github.com/AlaudaDevops/pkg
 
 go 1.22.0
 

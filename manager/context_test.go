@@ -25,7 +25,7 @@ import (
 	"github.com/golang/mock/gomock"
 	. "github.com/onsi/gomega"
 
-	mockmgr "github.com/katanomi/pkg/testing/mock/sigs.k8s.io/controller-runtime/pkg/manager"
+	mockmgr "github.com/AlaudaDevops/pkg/testing/mock/sigs.k8s.io/controller-runtime/pkg/manager"
 )
 
 func TestManagerContext(t *testing.T) {

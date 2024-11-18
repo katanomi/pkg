@@ -20,7 +20,7 @@ import (
 	"context"
 	"testing"
 
-	kscheme "github.com/katanomi/pkg/scheme"
+	kscheme "github.com/AlaudaDevops/pkg/scheme"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 

@@ -21,8 +21,8 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/AlaudaDevops/pkg/errors"
 	restful "github.com/emicklei/go-restful/v3"
-	"github.com/katanomi/pkg/errors"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"knative.dev/pkg/logging"
 )

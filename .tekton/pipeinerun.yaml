@@ -12,7 +12,6 @@ metadata:
 spec:
   timeouts:
     pipeline: "30m"
-    tasks: "15m"
     finally: "5m"
   pipelineRef:
     name: alaudadevops-pkg

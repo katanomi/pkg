@@ -20,10 +20,10 @@ import (
 	"context"
 	"time"
 
-	kscheme "github.com/katanomi/pkg/scheme"
+	kscheme "github.com/AlaudaDevops/pkg/scheme"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
-	kerrors "github.com/katanomi/pkg/errors"
+	kerrors "github.com/AlaudaDevops/pkg/errors"
 
 	"k8s.io/client-go/dynamic"
 	"knative.dev/pkg/logging"

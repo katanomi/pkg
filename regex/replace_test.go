@@ -24,8 +24,8 @@ import (
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/util/validation/field"
 
-	kvalidation "github.com/katanomi/pkg/apis/validation"
-	. "github.com/katanomi/pkg/testing"
+	kvalidation "github.com/AlaudaDevops/pkg/apis/validation"
+	. "github.com/AlaudaDevops/pkg/testing"
 )
 
 var _ = Describe("Test.Replaces.ReplaceAllString", func() {

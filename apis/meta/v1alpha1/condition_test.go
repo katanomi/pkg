@@ -23,11 +23,11 @@ import (
 
 	"k8s.io/apimachinery/pkg/api/errors"
 
-	// ktesting "github.com/katanomi/pkg/testing"
+	// ktesting "github.com/AlaudaDevops/pkg/testing"
 	. "github.com/onsi/gomega"
 	// corev1 "k8s.io/api/core/v1"
+	apismock "github.com/AlaudaDevops/pkg/testing/mock/knative.dev/pkg/apis"
 	"github.com/golang/mock/gomock"
-	apismock "github.com/katanomi/pkg/testing/mock/knative.dev/pkg/apis"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"knative.dev/pkg/apis"

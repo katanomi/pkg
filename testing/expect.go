@@ -19,7 +19,7 @@ package testing
 import (
 	"time"
 
-	"github.com/katanomi/pkg/testing/assertions"
+	"github.com/AlaudaDevops/pkg/testing/assertions"
 
 	ctrlclient "sigs.k8s.io/controller-runtime/pkg/client"
 

@@ -17,7 +17,7 @@ limitations under the License.
 package sharedmain
 
 import (
-	"github.com/katanomi/pkg/watcher"
+	"github.com/AlaudaDevops/pkg/watcher"
 )
 
 // DefaultingWatcherWithOnChange is a configmap.DefaultingWatcher that also has an OnChange callback.

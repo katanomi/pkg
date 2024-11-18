@@ -25,13 +25,13 @@ import (
 
 	"k8s.io/apiserver/pkg/authentication/user"
 
+	"github.com/AlaudaDevops/pkg/tracing"
 	"github.com/golang-jwt/jwt"
-	"github.com/katanomi/pkg/tracing"
 	"k8s.io/client-go/dynamic"
 
+	kerrors "github.com/AlaudaDevops/pkg/errors"
+	kscheme "github.com/AlaudaDevops/pkg/scheme"
 	"github.com/emicklei/go-restful/v3"
-	kerrors "github.com/katanomi/pkg/errors"
-	kscheme "github.com/katanomi/pkg/scheme"
 	"go.uber.org/zap"
 	"k8s.io/client-go/rest"
 	"knative.dev/pkg/injection"

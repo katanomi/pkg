@@ -20,10 +20,10 @@ import (
 	"context"
 	"time"
 
+	krecord "github.com/AlaudaDevops/pkg/record"
+	conditionmock "github.com/AlaudaDevops/pkg/testing/mock/github.com/AlaudaDevops/pkg/warnings/condition"
+	"github.com/AlaudaDevops/pkg/warnings"
 	"github.com/golang/mock/gomock"
-	krecord "github.com/katanomi/pkg/record"
-	conditionmock "github.com/katanomi/pkg/testing/mock/github.com/katanomi/pkg/warnings/condition"
-	"github.com/katanomi/pkg/warnings"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"

@@ -19,7 +19,7 @@ package testing_test
 import (
 	"testing"
 
-	ktesting "github.com/katanomi/pkg/testing"
+	ktesting "github.com/AlaudaDevops/pkg/testing"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	"go.uber.org/zap"

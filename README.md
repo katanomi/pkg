@@ -1,4 +1,6 @@
-# katanomi common packages :package:
+# AlaudaDevOps common packages :package:
+
+> fork from katanomi/pkg, and use branch v2 as main
 
 All shared common packages and code across katanomi repos
 

@@ -20,7 +20,7 @@ import (
 	"context"
 	"time"
 
-	"github.com/katanomi/pkg/config"
+	"github.com/AlaudaDevops/pkg/config"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 )
 

@@ -24,7 +24,7 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
-	"github.com/katanomi/pkg/command/args"
+	"github.com/AlaudaDevops/pkg/command/args"
 )
 
 var _ = Describe("GetKeyValues", func() {

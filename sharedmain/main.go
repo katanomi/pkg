@@ -24,7 +24,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/katanomi/pkg/tracing"
+	"github.com/AlaudaDevops/pkg/tracing"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"knative.dev/pkg/configmap"
 
@@ -41,11 +41,11 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"yunion.io/x/pkg/util/wait"
 
-	kclient "github.com/katanomi/pkg/client"
-	klogging "github.com/katanomi/pkg/logging"
+	kclient "github.com/AlaudaDevops/pkg/client"
+	klogging "github.com/AlaudaDevops/pkg/logging"
 
-	// kmanager "github.com/katanomi/pkg/manager"
-	kscheme "github.com/katanomi/pkg/scheme"
+	// kmanager "github.com/AlaudaDevops/pkg/manager"
+	kscheme "github.com/AlaudaDevops/pkg/scheme"
 	ctrl "sigs.k8s.io/controller-runtime"
 )
 

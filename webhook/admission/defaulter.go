@@ -21,7 +21,7 @@ import (
 	"encoding/json"
 	"net/http"
 
-	kscheme "github.com/katanomi/pkg/scheme"
+	kscheme "github.com/AlaudaDevops/pkg/scheme"
 
 	"go.uber.org/zap"
 	admissionv1 "k8s.io/api/admission/v1"

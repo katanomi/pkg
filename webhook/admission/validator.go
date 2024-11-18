@@ -21,9 +21,9 @@ import (
 	goerrors "errors"
 	"net/http"
 
-	kclient "github.com/katanomi/pkg/client"
+	kclient "github.com/AlaudaDevops/pkg/client"
 
-	kscheme "github.com/katanomi/pkg/scheme"
+	kscheme "github.com/AlaudaDevops/pkg/scheme"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 

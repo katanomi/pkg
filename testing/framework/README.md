@@ -22,8 +22,8 @@ import (
 	"testing"
 
     // Adds test cases from other packages here
-	_ "github.com/katanomi/pkg/examples/sample-e2e/another"
-	"github.com/katanomi/pkg/testing/framework"
+	_ "github.com/AlaudaDevops/pkg/examples/sample-e2e/another"
+	"github.com/AlaudaDevops/pkg/testing/framework"
 )
 
 var fmw = framework.New("sample-e2e")
@@ -86,8 +86,8 @@ Test k8s cluster related features such as controller.
 package another
 
 import (
-	. "github.com/katanomi/pkg/testing/framework"
-	. "github.com/katanomi/pkg/testing/framework/cluster"
+	. "github.com/AlaudaDevops/pkg/testing/framework"
+	. "github.com/AlaudaDevops/pkg/testing/framework/cluster"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 )
@@ -124,8 +124,8 @@ Test normal features without deploy component to the cluster.
 package another
 
 import (
-	. "github.com/katanomi/pkg/testing/framework"
-	. "github.com/katanomi/pkg/testing/framework/base"
+	. "github.com/AlaudaDevops/pkg/testing/framework"
+	. "github.com/AlaudaDevops/pkg/testing/framework/base"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 )

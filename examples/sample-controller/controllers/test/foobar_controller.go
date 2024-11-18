@@ -26,9 +26,9 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
 
-	pkgctrl "github.com/katanomi/pkg/controllers"
-	testv1alpha1 "github.com/katanomi/pkg/examples/sample-controller/apis/test/v1alpha1"
-	"github.com/katanomi/pkg/sharedmain"
+	pkgctrl "github.com/AlaudaDevops/pkg/controllers"
+	testv1alpha1 "github.com/AlaudaDevops/pkg/examples/sample-controller/apis/test/v1alpha1"
+	"github.com/AlaudaDevops/pkg/sharedmain"
 	"go.uber.org/zap"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"

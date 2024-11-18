@@ -26,8 +26,8 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	cliengorecord "k8s.io/client-go/tools/record"
 
+	"github.com/AlaudaDevops/pkg/testing/mock/sigs.k8s.io/controller-runtime/pkg/manager"
 	"github.com/golang/mock/gomock"
-	"github.com/katanomi/pkg/testing/mock/sigs.k8s.io/controller-runtime/pkg/manager"
 )
 
 func TestGetEventRecorderFor(t *testing.T) {

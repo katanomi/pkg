@@ -22,7 +22,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/katanomi/pkg/apis/meta/v1alpha1"
+	"github.com/AlaudaDevops/pkg/apis/meta/v1alpha1"
 	. "github.com/onsi/gomega"
 	"github.com/onsi/gomega/matchers"
 	v1 "k8s.io/api/admission/v1"

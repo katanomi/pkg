@@ -19,7 +19,7 @@ package references
 import (
 	"testing"
 
-	ktesting "github.com/katanomi/pkg/testing"
+	ktesting "github.com/AlaudaDevops/pkg/testing"
 	. "github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime/schema"

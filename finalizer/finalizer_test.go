@@ -20,7 +20,7 @@ import (
 	"context"
 	"errors"
 
-	testing2 "github.com/katanomi/pkg/testing"
+	testing2 "github.com/AlaudaDevops/pkg/testing"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"

@@ -21,7 +21,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/katanomi/pkg/config"
+	"github.com/AlaudaDevops/pkg/config"
 	. "github.com/onsi/gomega"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 )

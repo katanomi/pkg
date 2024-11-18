@@ -19,8 +19,8 @@ package cluster
 import (
 	"strings"
 
-	"github.com/katanomi/pkg/testing/assertions"
-	"github.com/katanomi/pkg/testing/framework/base"
+	"github.com/AlaudaDevops/pkg/testing/assertions"
+	"github.com/AlaudaDevops/pkg/testing/framework/base"
 
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/util/rand"

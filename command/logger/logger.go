@@ -19,7 +19,7 @@ package logger
 import (
 	"context"
 
-	"github.com/katanomi/pkg/command/io"
+	"github.com/AlaudaDevops/pkg/command/io"
 	"knative.dev/pkg/logging"
 
 	"go.uber.org/zap"

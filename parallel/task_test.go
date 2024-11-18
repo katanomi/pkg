@@ -24,7 +24,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/katanomi/pkg/parallel"
+	"github.com/AlaudaDevops/pkg/parallel"
 	"go.uber.org/zap"
 	apierrors "k8s.io/apimachinery/pkg/util/errors"
 

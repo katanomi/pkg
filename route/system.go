@@ -25,7 +25,7 @@ import (
 	"github.com/emicklei/go-restful/v3"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 
-	"github.com/katanomi/pkg/config"
+	"github.com/AlaudaDevops/pkg/config"
 )
 
 type system struct {

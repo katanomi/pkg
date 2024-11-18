@@ -21,7 +21,7 @@ import (
 
 	"k8s.io/apimachinery/pkg/runtime"
 
-	"github.com/katanomi/pkg/testing"
+	"github.com/AlaudaDevops/pkg/testing"
 	. "github.com/onsi/gomega"
 	ctrlclient "sigs.k8s.io/controller-runtime/pkg/client"
 )

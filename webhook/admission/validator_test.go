@@ -22,7 +22,7 @@ import (
 	"net/http"
 	"testing"
 
-	kscheme "github.com/katanomi/pkg/scheme"
+	kscheme "github.com/AlaudaDevops/pkg/scheme"
 
 	"github.com/onsi/gomega"
 

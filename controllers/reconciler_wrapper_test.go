@@ -22,8 +22,8 @@ import (
 	"testing"
 	"time"
 
+	mockclient "github.com/AlaudaDevops/pkg/testing/mock/sigs.k8s.io/controller-runtime/pkg/client"
 	"github.com/golang/mock/gomock"
-	mockclient "github.com/katanomi/pkg/testing/mock/sigs.k8s.io/controller-runtime/pkg/client"
 	. "github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"

@@ -21,7 +21,7 @@ import (
 	"knative.dev/pkg/configmap"
 	"knative.dev/pkg/system"
 
-	kconfigmap "github.com/katanomi/pkg/configmap"
+	kconfigmap "github.com/AlaudaDevops/pkg/configmap"
 )
 
 func defaultConfigMap(name string) *v1.ConfigMap {

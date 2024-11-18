@@ -19,7 +19,7 @@ package base
 import (
 	"fmt"
 
-	"github.com/katanomi/pkg/testing"
+	"github.com/AlaudaDevops/pkg/testing"
 )
 
 // TestCaseLabel label for test case

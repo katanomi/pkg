@@ -20,8 +20,8 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/katanomi/pkg/testing"
-	. "github.com/katanomi/pkg/testing/framework/base"
+	"github.com/AlaudaDevops/pkg/testing"
+	. "github.com/AlaudaDevops/pkg/testing/framework/base"
 	. "github.com/onsi/ginkgo/v2"
 )
 

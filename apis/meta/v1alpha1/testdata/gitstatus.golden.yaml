@@ -1,4 +1,4 @@
-url: https://github.com/katanomi/pkg
+url: https://github.com/AlaudaDevops/pkg
 version: v1.2.3
 versionVariants:
   docker: v1.2.3
@@ -23,14 +23,14 @@ pullRequest:
   source: test-build
   target: master
   title: test-build ==> master
-  webURL: https://github.com/katanomi/pkg/merge_requests/1
+  webURL: https://github.com/AlaudaDevops/pkg/merge_requests/1
 branch:
   default: true
   name: test-build
   protected: true
-  webURL: https://github.com/katanomi/pkg/tree/test
+  webURL: https://github.com/AlaudaDevops/pkg/tree/test
 target:
   default: false
   name: release
   protected: true
-  webURL: https://github.com/katanomi/pkg/tree/release
+  webURL: https://github.com/AlaudaDevops/pkg/tree/release

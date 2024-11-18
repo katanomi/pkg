@@ -558,13 +558,13 @@ index 7191439..874e3c1 100644
  	"reflect"
  	"testing"
 
-+	ktesting "github.com/katanomi/pkg/testing"
++	ktesting "github.com/AlaudaDevops/pkg/testing"
 +
  	"github.com/google/go-cmp/cmp"
 -	"github.com/google/go-cmp/cmp/cmpopts"
 -	v1 "github.com/tektoncd/pipeline/pkg/apis/pipeline/v1"
 -	"github.com/tektoncd/pipeline/test/diff"
-+	"github.com/katanomi/pkg/apis/meta/v1alpha1"
++	"github.com/AlaudaDevops/pkg/apis/meta/v1alpha1"
  	"k8s.io/apimachinery/pkg/util/sets"
  	"knative.dev/pkg/apis"
  )

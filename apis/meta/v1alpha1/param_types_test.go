@@ -25,10 +25,10 @@ import (
 	"reflect"
 	"testing"
 
-	ktesting "github.com/katanomi/pkg/testing"
+	ktesting "github.com/AlaudaDevops/pkg/testing"
 
+	"github.com/AlaudaDevops/pkg/apis/meta/v1alpha1"
 	"github.com/google/go-cmp/cmp"
-	"github.com/katanomi/pkg/apis/meta/v1alpha1"
 	"k8s.io/apimachinery/pkg/util/sets"
 	"knative.dev/pkg/apis"
 )

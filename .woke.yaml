@@ -24,6 +24,7 @@ rules:
       - alauda
     alternatives:
       - katanomi
+    severity: warn
   - name: merge request
     terms:
       - Merge Request

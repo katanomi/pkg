@@ -19,7 +19,7 @@ package v1alpha1
 import (
 	"context"
 
-	"github.com/katanomi/pkg/webhook/admission"
+	"github.com/AlaudaDevops/pkg/webhook/admission"
 	"k8s.io/apimachinery/pkg/runtime"
 	"knative.dev/pkg/logging"
 )

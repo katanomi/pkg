@@ -26,8 +26,8 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/AlaudaDevops/pkg/command/io"
 	"github.com/davecgh/go-spew/spew"
-	"github.com/katanomi/pkg/command/io"
 	"github.com/onsi/gomega"
 	"k8s.io/apimachinery/pkg/util/rand"
 )

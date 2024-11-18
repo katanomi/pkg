@@ -23,7 +23,7 @@ import (
 	"testing"
 	"time"
 
-	. "github.com/katanomi/pkg/testing/framework/base"
+	. "github.com/AlaudaDevops/pkg/testing/framework/base"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	"go.uber.org/zap"

@@ -17,7 +17,7 @@ limitations under the License.
 // Package fake provide fake manager for config
 package fake
 
-import "github.com/katanomi/pkg/config"
+import "github.com/AlaudaDevops/pkg/config"
 
 var fake config.ManagerInterface = &FakeManager{}
 

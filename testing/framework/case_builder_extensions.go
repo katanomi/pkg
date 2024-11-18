@@ -16,7 +16,7 @@ limitations under the License.
 
 package framework
 
-import "github.com/katanomi/pkg/testing/framework/cluster"
+import "github.com/AlaudaDevops/pkg/testing/framework/cluster"
 
 // Cluster convert to cluster test case builder
 func (b *CaseBuilder) Cluster() *cluster.TestCaseBuilder {
