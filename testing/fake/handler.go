@@ -51,13 +51,13 @@ func (h *PolicyHandler) Setup(ctx context.Context, add sharedmain.AddToRestConta
 	}
 
 	ws := new(restful.WebService).
-		Path("mock").
+		Path("/mock").
 		Consumes(restful.MIME_JSON, restful.MIME_XML).
 		Produces(restful.MIME_JSON)
 
 	ws.Route(
 		// makes the path as: /plugins/v1alpha1/<plugin path>/mock/policy
-		ws.POST("policy").
+		ws.POST("/policy").
 			Reads(opa.Policy{}, "OPA Policy").
 			Returns(http.StatusCreated, "OPA policy Created", opa.Policy{}).
 			To(h.Handle),
