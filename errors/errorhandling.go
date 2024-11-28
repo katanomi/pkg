@@ -87,6 +87,11 @@ func AsStatusError(response *resty.Response, grs ...schema.GroupResource) error 
 		statusError.ErrStatus.Reason = status.Reason
 	}
 
+	// if the response is a metav1.status use it's reason directly
+	if s, ok := response.Error().(*metav1.Status); ok {
+		statusError.ErrStatus = *s
+	}
+
 	if err, ok := response.Error().(error); ok {
 		if originalErr := err.Error(); originalErr != "" {
 			statusError.ErrStatus.Message = originalErr

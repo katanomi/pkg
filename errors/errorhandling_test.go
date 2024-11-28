@@ -17,6 +17,7 @@ limitations under the License.
 package errors
 
 import (
+	"encoding/json"
 	goerrors "errors"
 	"fmt"
 	"net/http"
@@ -154,6 +155,27 @@ var _ = Describe("Test AsStatusError", func() {
 			statusError := AsStatusError(response).(*errors.StatusError)
 			Expect(int(statusError.ErrStatus.Code)).To(Equal(http.StatusInternalServerError))
 			Expect(statusError.ErrStatus.Message).To(ContainSubstring("an error on the server (\"\") has prevented the request from succeeding"))
+		})
+	})
+
+	When("server returns metav1.Status object", func() {
+		BeforeEach(func() {
+			newTestServer(func(w http.ResponseWriter, r *http.Request) {
+				status := errors.NewBadRequest("test")
+				w.WriteHeader(http.StatusBadRequest)
+				json.NewEncoder(w).Encode(status)
+			})
+			DeferCleanup(func() {
+				server.Close()
+			})
+		})
+
+		It("should properly parse Status object", func() {
+			Expect(response.StatusCode()).To(Equal(http.StatusBadRequest))
+			statusError := AsStatusError(response).(*errors.StatusError)
+			Expect(int(statusError.ErrStatus.Code)).To(Equal(http.StatusBadRequest))
+			Expect(statusError.ErrStatus.Message).To(Equal("test"))
+			Expect(statusError.ErrStatus.Reason).To(Equal(metav1.StatusReasonBadRequest))
 		})
 	})
 })

@@ -515,6 +515,16 @@ func (a *AppBuilder) Filters(filters ...restful.FilterFunction) *AppBuilder {
 	return a
 }
 
+// BuiltInFilters returns built-in filters for webservices
+func (a *AppBuilder) BuiltInFilters() []restful.FilterFunction {
+	return []restful.FilterFunction{disablePrettyPrintFilter}
+}
+
+func disablePrettyPrintFilter(request *restful.Request, response *restful.Response, chain *restful.FilterChain) {
+	response.PrettyPrint(false)
+	chain.ProcessFilter(request, response)
+}
+
 // Container adds a containers
 func (a *AppBuilder) Container(container *restful.Container) *AppBuilder {
 	a.container = container
