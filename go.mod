@@ -68,7 +68,7 @@ require (
 	github.com/tektoncd/pipeline v0.56.0
 	github.com/tidwall/gjson v1.14.4
 	golang.org/x/exp v0.0.0-20230905200255-921286631fa9
-	golang.org/x/net v0.28.0
+	golang.org/x/net v0.33.0
 	k8s.io/apiextensions-apiserver v0.26.10
 	k8s.io/cli-runtime v0.25.2
 	k8s.io/klog/v2 v2.100.1
