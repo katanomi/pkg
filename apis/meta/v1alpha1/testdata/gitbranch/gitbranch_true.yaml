@@ -1,4 +1,4 @@
-apiVersion: "meta.katanomi.dev/v1alpha1"
+apiVersion: "meta.alauda.io/v1alpha1"
 kind: "GitBranch"
 metadata:
   name: "branch"

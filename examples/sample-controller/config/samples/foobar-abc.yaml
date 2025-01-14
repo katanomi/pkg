@@ -1,4 +1,4 @@
-apiVersion: test.katanomi.dev/v1alpha1
+apiVersion: test.alauda.io/v1alpha1
 kind: FooBar
 metadata:
   name: sample-foobar-abc

@@ -109,7 +109,7 @@ var _ = Describe("ConfigFilter", func() {
 
 		It("should have a not found error as status code with api error in response body", func() {
 			Expect(recorder.Code).To(Equal(http.StatusNotFound))
-			Expect(strings.TrimSpace(recorder.Body.String())).To(Equal(`{"metadata":{},"status":"Failure","message":"the server could not find the requested resource ( API.katanomi.dev http://test.example/some/path)","reason":"NotFound","details":{"name":"http://test.example/some/path","group":"katanomi.dev","kind":"API"},"code":404}`))
+			Expect(strings.TrimSpace(recorder.Body.String())).To(Equal(`{"metadata":{},"status":"Failure","message":"the server could not find the requested resource ( API.alauda.io http://test.example/some/path)","reason":"NotFound","details":{"name":"http://test.example/some/path","group":"alauda.io","kind":"API"},"code":404}`))
 		})
 
 	})

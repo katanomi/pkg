@@ -8,4 +8,4 @@ webhook:
   port: 9443
 leaderElection:
   leaderElect: true
-  resourceName: samples.pkg.katanomi.dev
+  resourceName: samples.pkg.alauda.io

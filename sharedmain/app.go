@@ -409,7 +409,7 @@ func (a *AppBuilder) Controllers(ctors ...controllers.SetupChecker) *AppBuilder 
 		LeaseDuration:          &LeaderElectionLeaseDuration,
 		RetryPeriod:            &LeaderElectionRetryPeriod,
 		RenewDeadline:          &LeaderElectionRenewDeadline,
-		LeaderElectionID:       getLeaderElectionID(a.Name, "katanomi.dev"),
+		LeaderElectionID:       getLeaderElectionID(a.Name, "alauda.io"),
 	}
 	// If the value is empty, the default behavior will still be used.
 	// Ref: https://github.com/kubernetes-sigs/controller-runtime/blob/b9219528d95974cb4f5b06f86c9b1c9b7d3045a5/pkg/manager/manager.go#L551

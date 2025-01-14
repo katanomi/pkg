@@ -15,11 +15,11 @@ limitations under the License.
 */
 
 // Package v1alpha1 contains API Schema definitions for the types v1alpha1 API group
-// this group is a duck type only package that hosts common objects and interfaces in katanomi
+// this group is a duck type only package that hosts common objects and interfaces in alauda devops
 // very similar to knative.dev/pkg/apis/duck/v1 or k8s.io/apimachinery/pkg/apis/meta/v1
 // +kubebuilder:object:generate=true
 // +k8s:deepcopy-gen=package
-// +groupName=meta.katanomi.dev
+// +groupName=meta.alauda.io
 package v1alpha1
 
 import (
@@ -29,7 +29,7 @@ import (
 
 var (
 	// GroupVersion is group version used to register these objects
-	GroupVersion = schema.GroupVersion{Group: "meta.katanomi.dev", Version: "v1alpha1"}
+	GroupVersion = schema.GroupVersion{Group: "meta.alauda.io", Version: "v1alpha1"}
 
 	// SchemeBuilder is used to add go types to the GroupVersionKind scheme
 	SchemeBuilder = &scheme.Builder{GroupVersion: GroupVersion}

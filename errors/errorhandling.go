@@ -29,10 +29,10 @@ import (
 )
 
 // RESTClientGroupResource fake GroupResource to use errors api
-var RESTClientGroupResource = schema.GroupResource{Group: "katanomi.dev", Resource: "RESTfulClient"}
+var RESTClientGroupResource = schema.GroupResource{Group: "alauda.io", Resource: "RESTfulClient"}
 
 // RESTAPIGroupResource fake GroupResource to use errors api
-var RESTAPIGroupResource = schema.GroupResource{Group: "katanomi.dev", Resource: "API"}
+var RESTAPIGroupResource = schema.GroupResource{Group: "alauda.io", Resource: "API"}
 
 // AsAPIError returns an error as a apimachinary api error
 func AsAPIError(err error) error {

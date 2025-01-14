@@ -48,7 +48,7 @@ func TestRBACFilter(t *testing.T) {
 	attr := authv1.ResourceAttributes{
 		Namespace: "default",
 		Verb:      "update",
-		Group:     "meta.katanomi.dev",
+		Group:     "meta.alauda.io",
 		Version:   "v1alpha1",
 		Resource:  "artifacts",
 		Name:      "abc",

@@ -18,7 +18,7 @@ rules:
   - update
   - watch
 - apiGroups:
-  - test.katanomi.dev
+  - test.alauda.io
   resources:
   - '*'
   verbs:

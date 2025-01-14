@@ -17,7 +17,7 @@ webhooks:
   name: vfoobar.kb.io
   rules:
   - apiGroups:
-    - test.katanomi.dev
+    - test.alauda.io
     apiVersions:
     - v1alpha1
     operations:
@@ -45,7 +45,7 @@ webhooks:
   name: vfoobar.kb.io
   rules:
   - apiGroups:
-    - test.katanomi.dev
+    - test.alauda.io
     apiVersions:
     - v1alpha1
     operations:

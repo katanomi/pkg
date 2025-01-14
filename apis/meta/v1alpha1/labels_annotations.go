@@ -19,24 +19,24 @@ package v1alpha1
 // Common Annotations
 const (
 	// DisplayNameAnnotationKey display name for objects
-	DisplayNameAnnotationKey = "katanomi.dev/displayName"
+	DisplayNameAnnotationKey = "alauda.io/displayName"
 	// CreatedTimeAnnotationKey creation time for objects
-	CreatedTimeAnnotationKey = "katanomi.dev/creationTime"
+	CreatedTimeAnnotationKey = "alauda.io/creationTime"
 	// UpdatedTimeAnnotationKey update time for objects
-	UpdatedTimeAnnotationKey = "katanomi.dev/updateTime"
+	UpdatedTimeAnnotationKey = "alauda.io/updateTime"
 	// DeletedTimeAnnotationKey deletion time for objects
-	DeletedTimeAnnotationKey = "katanomi.dev/deletionTime"
+	DeletedTimeAnnotationKey = "alauda.io/deletionTime"
 
 	// NamespaceAnnotationKey namespace of objects
-	NamespaceAnnotationKey = "katanomi.dev/namespace"
+	NamespaceAnnotationKey = "alauda.io/namespace"
 
 	// CreatedByAnnotationKey annotation key to store resource creation username
-	CreatedByAnnotationKey = "katanomi.dev/createdBy"
+	CreatedByAnnotationKey = "alauda.io/createdBy"
 	// UpdatedByAnnotationKey annotation key to store resource update username
-	UpdatedByAnnotationKey = "katanomi.dev/updatedBy"
+	UpdatedByAnnotationKey = "alauda.io/updatedBy"
 	// DeletedByAnnotationKey annotation key to store resource update username
-	DeletedByAnnotationKey = "katanomi.dev/deletedBy"
+	DeletedByAnnotationKey = "alauda.io/deletedBy"
 
 	// UIDescriptorsAnnotationKey annotation for storing ui descriptors in resources
-	UIDescriptorsAnnotationKey = "ui.katanomi.dev/descriptors"
+	UIDescriptorsAnnotationKey = "ui.alauda.io/descriptors"
 )

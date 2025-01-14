@@ -58,7 +58,7 @@ func ReportObjectsLists(ctx *TestContext, objects ...ctrlclient.ObjectList) {
 //
 //	JustAfteEach(func() {
 //	  ReportObjectListWithOptions(ctx, ListByGVK(schema.GroupVersionKind{
-//	    Group:   "katanomi.dev",
+//	    Group:   "alauda.io",
 //	    Version: "v1alpha1",
 //	    Kind:    "ClusterRuleList",
 //	  }), client.InNamespace(ctx.Namespace))

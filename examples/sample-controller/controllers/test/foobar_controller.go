@@ -78,7 +78,7 @@ func (m *FooBarReconciler) DependentCrdInstalled(ctx context.Context, logger *za
 	return true, nil
 }
 
-//+kubebuilder:rbac:groups=test.katanomi.dev,resources=*,verbs=get;list;watch;update;patch;create;delete
+//+kubebuilder:rbac:groups=test.alauda.io,resources=*,verbs=get;list;watch;update;patch;create;delete
 //+kubebuilder:rbac:groups=``,resources=namespaces;configmaps;secrets,verbs=get;list;watch;update;patch
 
 // Reconcile for Trigger should be implemented in each plugin

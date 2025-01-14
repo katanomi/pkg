@@ -35,8 +35,8 @@ import (
 )
 
 const (
-	defaultConfig = "katanomi-config"
-	configNameEnv = "KATANOMI_CONFIG_NAME"
+	defaultConfig = "config"
+	configNameEnv = "CONFIG_NAME"
 )
 
 // Config store katanomi configuration

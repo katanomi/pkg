@@ -24,7 +24,7 @@ import (
 	"knative.dev/pkg/logging"
 )
 
-//+kubebuilder:webhook:path=/mutate-test-katanomi-dev-v1alpha1-foobar,mutating=true,failurePolicy=fail,groups=test.katanomi.dev,resources=foobars,verbs=create;update,versions=v1alpha1,name=vfoobar.kb.io,sideEffects=None,admissionReviewVersions={v1,v1beta1}
+//+kubebuilder:webhook:path=/mutate-test-katanomi-dev-v1alpha1-foobar,mutating=true,failurePolicy=fail,groups=test.alauda.io,resources=foobars,verbs=create;update,versions=v1alpha1,name=vfoobar.kb.io,sideEffects=None,admissionReviewVersions={v1,v1beta1}
 
 var _ admission.Defaulter = &FooBar{}
 
@@ -34,7 +34,7 @@ func (i *FooBar) Default(ctx context.Context) {
 	log.Debugw("running Default method for FooBar")
 }
 
-//+kubebuilder:webhook:path=/validate-test-katanomi-dev-v1alpha1-foobar,mutating=false,failurePolicy=fail,sideEffects=None,groups=test.katanomi.dev,resources=foobars,verbs=create;update,versions=v1alpha1,name=vfoobar.kb.io,admissionReviewVersions={v1,v1beta1}
+//+kubebuilder:webhook:path=/validate-test-katanomi-dev-v1alpha1-foobar,mutating=false,failurePolicy=fail,sideEffects=None,groups=test.alauda.io,resources=foobars,verbs=create;update,versions=v1alpha1,name=vfoobar.kb.io,admissionReviewVersions={v1,v1beta1}
 
 var _ admission.Validator = &FooBar{}
 
