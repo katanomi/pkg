@@ -67,7 +67,7 @@ type approvingHandler struct {
 	validateApproval ValidateApprovalFunc
 }
 
-var _ admission.DecoderInjector = &approvingHandler{}
+// var _ admission.DecoderInjector = &approvingHandler{}
 
 // InjectDecoder injects the decoder into a approvingHandler.
 func (h *approvingHandler) InjectDecoder(d *admission.Decoder) error {

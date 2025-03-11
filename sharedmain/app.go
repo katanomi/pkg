@@ -305,7 +305,7 @@ func (a *AppBuilder) ConfigManager() *AppBuilder {
 	a.init()
 
 	name := config.Name()
-	configMGR := config.NewManager(a.ConfigMapWatcher, a.Logger, name)
+	configMGR := config.NewManager(a.Manager, a.ConfigMapWatcher, a.Logger, name)
 	a.Context = config.WithKatanomiConfigManager(a.Context, configMGR)
 
 	return a

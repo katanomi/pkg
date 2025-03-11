@@ -47,7 +47,7 @@ func defaultFeatureChanged(new *FeatureFlags, old *FeatureFlags) bool {
 // WatchFeatureFlagChanged trigger reconcile when the function switch is changed.
 func (manager *Manager) WatchFeatureFlagChanged(ctx context.Context, listFunc ListByFeatureFlagChanged, featureChanged HasFeatureChangedFunc) (source.Source, handler.EventHandler, builder.WatchesOption) {
 
-	return &source.Kind{Type: &corev1.ConfigMap{}},
+	return source.Kind(manager.mgr.GetCache(), &corev1.ConfigMap{}),
 		handler.EnqueueRequestsFromMapFunc(enqueueRequestsConfigMapFunc(ctx, listFunc)),
 		// determine whether the function switch has changed, and return true when it changes.
 		builder.WithPredicates(predicate.Funcs{
@@ -55,8 +55,8 @@ func (manager *Manager) WatchFeatureFlagChanged(ctx context.Context, listFunc Li
 		})
 }
 
-func enqueueRequestsConfigMapFunc(ctx context.Context, listFunc ListByFeatureFlagChanged) func(client.Object) []reconcile.Request {
-	return func(obj client.Object) (reqs []reconcile.Request) {
+func enqueueRequestsConfigMapFunc(ctx context.Context, listFunc ListByFeatureFlagChanged) func(context.Context, client.Object) []reconcile.Request {
+	return func(ctx context.Context, obj client.Object) (reqs []reconcile.Request) {
 		reqs = []reconcile.Request{}
 		if listFunc == nil {
 			return

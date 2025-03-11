@@ -32,6 +32,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"knative.dev/pkg/system"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	pkgmanager "sigs.k8s.io/controller-runtime/pkg/manager"
 )
 
 const (
@@ -59,6 +60,7 @@ func (c Config) GetObject(key string, object interface{}) error {
 
 // Manager will manage katanomi configuration and store in Config
 type Manager struct {
+	mgr      pkgmanager.Manager
 	Informer watcher.DefaultingWatcherWithOnChange
 	Logger   *zap.SugaredLogger
 	lock     sync.RWMutex
@@ -71,8 +73,9 @@ type Manager struct {
 }
 
 // NewManager will instantiate a manager that watch configmap for core component configuration
-func NewManager(informer watcher.DefaultingWatcherWithOnChange, logger *zap.SugaredLogger, cmName string) *Manager {
+func NewManager(mgr pkgmanager.Manager, informer watcher.DefaultingWatcherWithOnChange, logger *zap.SugaredLogger, cmName string) *Manager {
 	manager := Manager{
+		mgr:      mgr,
 		Informer: informer,
 		Logger:   logger,
 		Config: &Config{
