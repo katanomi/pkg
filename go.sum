@@ -344,6 +344,8 @@ github.com/julienschmidt/httprouter v1.3.0/go.mod h1:JR6WtHb+2LUe8TCKY3cZOxFyyO8
 github.com/jung-kurt/gofpdf v1.0.3-0.20190309125859-24315acbbda5/go.mod h1:7Id9E/uU8ce6rXgefFLlgrJj/GYY22cpxn+r32jIOes=
 github.com/k1LoW/duration v1.2.0 h1:qq1gWtPh7YROFyerBufVP+ATR11mOOHDInrcC/Xe/6A=
 github.com/k1LoW/duration v1.2.0/go.mod h1:qUa0NptIiUl5EUsCc8wIiSaHuNjS4wmpYNMHp0l6pos=
+github.com/katanomi/controller-runtime v0.11.1-0.20250313025232-b71169a002ed h1:FQK6f+lf38BryrqY+H8VABuCrhpMtFhFWVGQImOdBzI=
+github.com/katanomi/controller-runtime v0.11.1-0.20250313025232-b71169a002ed/go.mod h1:N0jpP5Lo7lMTF9aL56Z/B2oWBJjey6StQM0jRbKQXtY=
 github.com/katanomi/knative-pkg v0.0.0-20240409030957-1aad1aa6fd94 h1:eNUp3DRoGb/9gxrZNxLhep7RxlFkNsz/7HwsQt/zbG4=
 github.com/katanomi/knative-pkg v0.0.0-20240409030957-1aad1aa6fd94/go.mod h1:isVZJOQCjQFyikBsijH6kqrBUCJyyhf5liX2cvLV5Lk=
 github.com/katanomi/zap v1.27.0-katanomi h1:xzSOfxghZLePXx7nvgbkQx+CEaKIdamYiVjxEXX1k1w=
@@ -1004,8 +1006,6 @@ rsc.io/binaryregexp v0.2.0/go.mod h1:qTv7/COck+e2FymRvadv62gMdZztPaShugOCi3I+8D8
 rsc.io/pdf v0.1.1/go.mod h1:n8OzWcQ6Sp37PL01nO98y4iUCRdTGarVfzxY20ICaU4=
 rsc.io/quote/v3 v3.1.0/go.mod h1:yEA65RcK8LyAZtP9Kv3t0HmxON59tX3rD+tICJqUlj0=
 rsc.io/sampler v1.3.0/go.mod h1:T1hPZKmBbMNahiBKFy5HrXp6adAjACjK9JXDnKaTXpA=
-sigs.k8s.io/controller-runtime v0.17.6 h1:12IXsozEsIXWAMRpgRlYS1jjAHQXHtWEOMdULh3DbEw=
-sigs.k8s.io/controller-runtime v0.17.6/go.mod h1:N0jpP5Lo7lMTF9aL56Z/B2oWBJjey6StQM0jRbKQXtY=
 sigs.k8s.io/json v0.0.0-20221116044647-bc3834ca7abd h1:EDPBXCAspyGV4jQlpZSudPeMmr1bNJefnuqLsRAsHZo=
 sigs.k8s.io/json v0.0.0-20221116044647-bc3834ca7abd/go.mod h1:B8JuhiUyNFVKdsE8h686QcCxMaH6HrOAZj4vswFpcB0=
 sigs.k8s.io/kustomize/api v0.13.5-0.20230601165947-6ce0bf390ce3 h1:XX3Ajgzov2RKUdc5jW3t5jwY7Bo7dcRm+tFxT+NfgY0=
