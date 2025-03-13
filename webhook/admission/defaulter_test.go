@@ -22,10 +22,11 @@ import (
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
+	kclient "github.com/katanomi/pkg/client"
 	"github.com/onsi/gomega"
 	admissionv1 "k8s.io/api/admission/v1"
 	"k8s.io/apimachinery/pkg/runtime"
-	"k8s.io/client-go/kubernetes/scheme"
+	"sigs.k8s.io/controller-runtime/pkg/client/fake"
 	"sigs.k8s.io/controller-runtime/pkg/webhook/admission"
 )
 
@@ -66,6 +67,8 @@ func (m *testContextInjectorObject) DeepCopyObject() runtime.Object {
 }
 
 func TestDefaulterContextInjector(t *testing.T) {
+	ctx := context.Background()
+	ctx = kclient.WithClient(ctx, fake.NewFakeClient())
 	g := gomega.NewGomegaWithT(t)
 	req := admission.Request{
 		AdmissionRequest: admissionv1.AdmissionRequest{
@@ -80,18 +83,14 @@ func TestDefaulterContextInjector(t *testing.T) {
 		Validator *admission.Webhook
 	}{
 		"object not implementing context injector interface": {
-			Validator: DefaultingWebhookFor(context.TODO(), &testDefaulterObj{}),
+			Validator: DefaultingWebhookFor(ctx, &testDefaulterObj{}),
 		},
 		"object implement the context injector interface": {
-			Validator: DefaultingWebhookFor(context.TODO(), &testContextInjectorObject{}),
+			Validator: DefaultingWebhookFor(ctx, &testContextInjectorObject{}),
 		},
 	}
-	decoder, _ := admission.NewDecoder(scheme.Scheme)
-	ctx := context.Background()
+
 	for name, test := range table {
-		if inject, ok := test.Validator.Handler.(admission.DecoderInjector); ok {
-			_ = inject.InjectDecoder(decoder)
-		}
 		t.Run(name, func(t *testing.T) {
 			g.Expect(func() {
 				test.Validator.Handle(ctx, req)

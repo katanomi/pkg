@@ -54,5 +54,5 @@ func TestTimeCursor_fail(t *testing.T) {
 	cursor, err = ParseTimeCursor(invalidContentStr)
 	g.Expect(cursor).To(BeNil())
 	g.Expect(err).NotTo(BeNil())
-	g.Expect(err.Error()).To(ContainSubstring("cannot unmarshal string into Go struct field TimeCursor.page of type int"))
+	g.Expect(err.Error()).To(ContainSubstring("cannot unmarshal string into Go struct field TimeCursor.Pager.page of type int"))
 }

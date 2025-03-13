@@ -25,12 +25,13 @@ import (
 	"github.com/onsi/gomega"
 
 	"github.com/google/go-cmp/cmp"
+	kclient "github.com/katanomi/pkg/client"
 	admissionv1 "k8s.io/api/admission/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
-	"k8s.io/client-go/kubernetes/scheme"
+	"sigs.k8s.io/controller-runtime/pkg/client/fake"
 	"sigs.k8s.io/controller-runtime/pkg/webhook/admission"
 )
 
@@ -90,6 +91,8 @@ func validateDeleteFunc(err error) ValidateDeleteFunc {
 }
 
 func TestValidatorCreate(t *testing.T) {
+	ctx := context.Background()
+	ctx = kclient.WithClient(ctx, fake.NewFakeClient())
 	table := map[string]struct {
 		Validator *admission.Webhook
 		Context   context.Context
@@ -97,7 +100,7 @@ func TestValidatorCreate(t *testing.T) {
 		Response  admission.Response
 	}{
 		"simple ok create validation": {
-			Validator: ValidatingWebhookFor(context.TODO(), &MyObject{}, []ValidateCreateFunc{validateCreateFunc(nil)}, nil, nil),
+			Validator: ValidatingWebhookFor(ctx, &MyObject{}, []ValidateCreateFunc{validateCreateFunc(nil)}, nil, nil),
 			Context:   context.TODO(),
 			Request: admission.Request{
 				AdmissionRequest: admissionv1.AdmissionRequest{
@@ -111,7 +114,7 @@ func TestValidatorCreate(t *testing.T) {
 			Response: admission.Allowed(""),
 		},
 		"error create validation": {
-			Validator: ValidatingWebhookFor(context.TODO(), &MyObject{}, nil, nil, nil),
+			Validator: ValidatingWebhookFor(ctx, &MyObject{}, nil, nil, nil),
 			Context:   context.TODO(),
 			Request: admission.Request{
 				AdmissionRequest: admissionv1.AdmissionRequest{
@@ -130,7 +133,7 @@ func TestValidatorCreate(t *testing.T) {
 			}),
 		},
 		"returns error from extra added validation": {
-			Validator: ValidatingWebhookFor(context.TODO(), &MyObject{}, []ValidateCreateFunc{validateCreateFunc(fmt.Errorf("this is an extra error"))}, nil, nil),
+			Validator: ValidatingWebhookFor(ctx, &MyObject{}, []ValidateCreateFunc{validateCreateFunc(fmt.Errorf("this is an extra error"))}, nil, nil),
 			Context:   context.TODO(),
 			Request: admission.Request{
 				AdmissionRequest: admissionv1.AdmissionRequest{
@@ -145,12 +148,7 @@ func TestValidatorCreate(t *testing.T) {
 		},
 	}
 
-	decoder, _ := admission.NewDecoder(scheme.Scheme)
-	t.Logf("decoder: %#v", decoder)
 	for name, test := range table {
-		if inject, ok := test.Validator.Handler.(admission.DecoderInjector); ok {
-			inject.InjectDecoder(decoder)
-		}
 		t.Run(name, func(t *testing.T) {
 
 			returned := test.Validator.Handle(test.Context, test.Request)
@@ -167,6 +165,8 @@ func TestValidatorCreate(t *testing.T) {
 }
 
 func TestValidatorUpdate(t *testing.T) {
+	ctx := context.Background()
+	ctx = kclient.WithClient(ctx, fake.NewFakeClient())
 	table := map[string]struct {
 		Validator *admission.Webhook
 		Context   context.Context
@@ -174,7 +174,7 @@ func TestValidatorUpdate(t *testing.T) {
 		Response  admission.Response
 	}{
 		"simple ok update validation": {
-			Validator: ValidatingWebhookFor(context.TODO(), &MyObject{}, nil, []ValidateUpdateFunc{validateUpdateFunc(nil)}, nil),
+			Validator: ValidatingWebhookFor(ctx, &MyObject{}, nil, []ValidateUpdateFunc{validateUpdateFunc(nil)}, nil),
 			Context:   context.TODO(),
 			Request: admission.Request{
 				AdmissionRequest: admissionv1.AdmissionRequest{
@@ -192,7 +192,7 @@ func TestValidatorUpdate(t *testing.T) {
 			Response: admission.Allowed(""),
 		},
 		"error update validation": {
-			Validator: ValidatingWebhookFor(context.TODO(), &MyObject{}, nil, nil, nil),
+			Validator: ValidatingWebhookFor(ctx, &MyObject{}, nil, nil, nil),
 			Context:   context.TODO(),
 			Request: admission.Request{
 				AdmissionRequest: admissionv1.AdmissionRequest{
@@ -215,7 +215,7 @@ func TestValidatorUpdate(t *testing.T) {
 			}),
 		},
 		"returns error from extra added validation": {
-			Validator: ValidatingWebhookFor(context.TODO(), &MyObject{}, nil, []ValidateUpdateFunc{validateUpdateFunc(fmt.Errorf("this is an extra error"))}, nil),
+			Validator: ValidatingWebhookFor(ctx, &MyObject{}, nil, []ValidateUpdateFunc{validateUpdateFunc(fmt.Errorf("this is an extra error"))}, nil),
 			Context:   context.TODO(),
 			Request: admission.Request{
 				AdmissionRequest: admissionv1.AdmissionRequest{
@@ -233,13 +233,7 @@ func TestValidatorUpdate(t *testing.T) {
 			Response: admission.Denied(fmt.Errorf("this is an extra error").Error()),
 		},
 	}
-
-	decoder, _ := admission.NewDecoder(scheme.Scheme)
-	t.Logf("decoder: %#v", decoder)
 	for name, test := range table {
-		if inject, ok := test.Validator.Handler.(admission.DecoderInjector); ok {
-			inject.InjectDecoder(decoder)
-		}
 		t.Run(name, func(t *testing.T) {
 
 			returned := test.Validator.Handle(test.Context, test.Request)
@@ -256,6 +250,8 @@ func TestValidatorUpdate(t *testing.T) {
 }
 
 func TestValidatorDelete(t *testing.T) {
+	ctx := context.Background()
+	ctx = kclient.WithClient(ctx, fake.NewFakeClient())
 	table := map[string]struct {
 		Validator *admission.Webhook
 		Context   context.Context
@@ -263,7 +259,7 @@ func TestValidatorDelete(t *testing.T) {
 		Response  admission.Response
 	}{
 		"simple ok delete validation": {
-			Validator: ValidatingWebhookFor(context.TODO(), &MyObject{}, nil, nil, []ValidateDeleteFunc{validateDeleteFunc(nil)}),
+			Validator: ValidatingWebhookFor(ctx, &MyObject{}, nil, nil, []ValidateDeleteFunc{validateDeleteFunc(nil)}),
 			Context:   context.TODO(),
 			Request: admission.Request{
 				AdmissionRequest: admissionv1.AdmissionRequest{
@@ -277,7 +273,7 @@ func TestValidatorDelete(t *testing.T) {
 			Response: admission.Allowed(""),
 		},
 		"error delete validation": {
-			Validator: ValidatingWebhookFor(context.TODO(), &MyObject{}, nil, nil, nil),
+			Validator: ValidatingWebhookFor(ctx, &MyObject{}, nil, nil, nil),
 			Context:   context.TODO(),
 			Request: admission.Request{
 				AdmissionRequest: admissionv1.AdmissionRequest{
@@ -296,7 +292,7 @@ func TestValidatorDelete(t *testing.T) {
 			}),
 		},
 		"returns error from extra added validation": {
-			Validator: ValidatingWebhookFor(context.TODO(), &MyObject{}, nil, nil, []ValidateDeleteFunc{validateDeleteFunc(fmt.Errorf("this is an extra error"))}),
+			Validator: ValidatingWebhookFor(ctx, &MyObject{}, nil, nil, []ValidateDeleteFunc{validateDeleteFunc(fmt.Errorf("this is an extra error"))}),
 			Context:   context.TODO(),
 			Request: admission.Request{
 				AdmissionRequest: admissionv1.AdmissionRequest{
@@ -311,12 +307,7 @@ func TestValidatorDelete(t *testing.T) {
 		},
 	}
 
-	decoder, _ := admission.NewDecoder(scheme.Scheme)
-	t.Logf("decoder: %#v", decoder)
 	for name, test := range table {
-		if inject, ok := test.Validator.Handler.(admission.DecoderInjector); ok {
-			inject.InjectDecoder(decoder)
-		}
 		t.Run(name, func(t *testing.T) {
 
 			returned := test.Validator.Handle(test.Context, test.Request)
@@ -355,6 +346,8 @@ func (i *injectContextObject) ValidateDelete(ctx context.Context) error {
 }
 
 func TestValidatorContextInjector(t *testing.T) {
+	ctx := context.Background()
+	ctx = kclient.WithClient(ctx, fake.NewFakeClient())
 	g := gomega.NewGomegaWithT(t)
 	req := admission.Request{
 		AdmissionRequest: admissionv1.AdmissionRequest{
@@ -369,18 +362,14 @@ func TestValidatorContextInjector(t *testing.T) {
 		Validator *admission.Webhook
 	}{
 		"object not implementing context injector interface": {
-			Validator: ValidatingWebhookFor(context.TODO(), &MyObject{}, nil, nil, nil),
+			Validator: ValidatingWebhookFor(ctx, &MyObject{}, nil, nil, nil),
 		},
 		"object implement the context injector interface": {
-			Validator: ValidatingWebhookFor(context.TODO(), &injectContextObject{}, nil, nil, nil),
+			Validator: ValidatingWebhookFor(ctx, &injectContextObject{}, nil, nil, nil),
 		},
 	}
-	decoder, _ := admission.NewDecoder(scheme.Scheme)
-	ctx := context.Background()
+
 	for name, test := range table {
-		if inject, ok := test.Validator.Handler.(admission.DecoderInjector); ok {
-			_ = inject.InjectDecoder(decoder)
-		}
 		t.Run(name, func(t *testing.T) {
 			g.Expect(func() {
 				test.Validator.Handle(ctx, req)

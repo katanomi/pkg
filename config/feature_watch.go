@@ -24,13 +24,9 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"knative.dev/pkg/logging"
-	"sigs.k8s.io/controller-runtime/pkg/builder"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/event"
-	"sigs.k8s.io/controller-runtime/pkg/handler"
-	"sigs.k8s.io/controller-runtime/pkg/predicate"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
-	"sigs.k8s.io/controller-runtime/pkg/source"
 )
 
 // ListByFeatureFlagChanged when the function switch is changed, get the object function that triggers reconile.
@@ -42,17 +38,6 @@ type HasFeatureChangedFunc func(new *FeatureFlags, old *FeatureFlags) bool
 // defaultFeatureChanged the default feature switch comparison function, compares whether all switches have changed.
 func defaultFeatureChanged(new *FeatureFlags, old *FeatureFlags) bool {
 	return equality.Semantic.DeepEqual(new, old)
-}
-
-// WatchFeatureFlagChanged trigger reconcile when the function switch is changed.
-func (manager *Manager) WatchFeatureFlagChanged(ctx context.Context, listFunc ListByFeatureFlagChanged, featureChanged HasFeatureChangedFunc) (source.Source, handler.EventHandler, builder.WatchesOption) {
-
-	return &source.Kind{Type: &corev1.ConfigMap{}},
-		handler.EnqueueRequestsFromMapFunc(enqueueRequestsConfigMapFunc(ctx, listFunc)),
-		// determine whether the function switch has changed, and return true when it changes.
-		builder.WithPredicates(predicate.Funcs{
-			UpdateFunc: predicatesUpdateFunc(manager, featureChanged),
-		})
 }
 
 func enqueueRequestsConfigMapFunc(ctx context.Context, listFunc ListByFeatureFlagChanged) func(client.Object) []reconcile.Request {
