@@ -71,14 +71,6 @@ type validatingHandler struct {
 	*zap.SugaredLogger
 }
 
-// var _ admission.DecoderInjector = &mutatingHandler{}
-
-// // InjectDecoder injects the decoder into a mutatingHandler.
-// func (h *validatingHandler) InjectDecoder(d *admission.Decoder) error {
-// 	h.decoder = d
-// 	return nil
-// }
-
 // Handle handles admission requests.
 func (h *validatingHandler) Handle(ctx context.Context, req admission.Request) admission.Response {
 	// the below panic was copied from the original controller-runtime validatingHandler

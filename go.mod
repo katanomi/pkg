@@ -199,6 +199,6 @@ replace (
 	go.uber.org/zap => github.com/katanomi/zap v1.27.0-katanomi // indirect
 	knative.dev/pkg => github.com/katanomi/knative-pkg v0.0.0-20240409030957-1aad1aa6fd94
 
-	// branch: alauda/release-0.17
-	sigs.k8s.io/controller-runtime => github.com/katanomi/controller-runtime v0.11.1-0.20250313025232-b71169a002ed
+	// branch: alaudx/release-0.17
+	sigs.k8s.io/controller-runtime => github.com/katanomi/controller-runtime v0.17.6-1
 )

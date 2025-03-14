@@ -62,14 +62,6 @@ type mutatingHandler struct {
 	*zap.SugaredLogger
 }
 
-// var _ admission.DecoderInjector = &mutatingHandler{}
-
-// // InjectDecoder injects the decoder into a mutatingHandler.
-// func (h *mutatingHandler) InjectDecoder(d *admission.Decoder) error {
-// 	h.decoder = d
-// 	return nil
-// }
-
 // Handle handles admission requests.
 func (h *mutatingHandler) Handle(ctx context.Context, req admission.Request) admission.Response {
 	if h.defaulter == nil {

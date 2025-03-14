@@ -344,8 +344,8 @@ github.com/julienschmidt/httprouter v1.3.0/go.mod h1:JR6WtHb+2LUe8TCKY3cZOxFyyO8
 github.com/jung-kurt/gofpdf v1.0.3-0.20190309125859-24315acbbda5/go.mod h1:7Id9E/uU8ce6rXgefFLlgrJj/GYY22cpxn+r32jIOes=
 github.com/k1LoW/duration v1.2.0 h1:qq1gWtPh7YROFyerBufVP+ATR11mOOHDInrcC/Xe/6A=
 github.com/k1LoW/duration v1.2.0/go.mod h1:qUa0NptIiUl5EUsCc8wIiSaHuNjS4wmpYNMHp0l6pos=
-github.com/katanomi/controller-runtime v0.11.1-0.20250313025232-b71169a002ed h1:FQK6f+lf38BryrqY+H8VABuCrhpMtFhFWVGQImOdBzI=
-github.com/katanomi/controller-runtime v0.11.1-0.20250313025232-b71169a002ed/go.mod h1:N0jpP5Lo7lMTF9aL56Z/B2oWBJjey6StQM0jRbKQXtY=
+github.com/katanomi/controller-runtime v0.17.6-1 h1:yzh2ohwKlOBDpx0DZPfE5e4giXJZ3tPCkY6TZIMbvQE=
+github.com/katanomi/controller-runtime v0.17.6-1/go.mod h1:N0jpP5Lo7lMTF9aL56Z/B2oWBJjey6StQM0jRbKQXtY=
 github.com/katanomi/knative-pkg v0.0.0-20240409030957-1aad1aa6fd94 h1:eNUp3DRoGb/9gxrZNxLhep7RxlFkNsz/7HwsQt/zbG4=
 github.com/katanomi/knative-pkg v0.0.0-20240409030957-1aad1aa6fd94/go.mod h1:isVZJOQCjQFyikBsijH6kqrBUCJyyhf5liX2cvLV5Lk=
 github.com/katanomi/zap v1.27.0-katanomi h1:xzSOfxghZLePXx7nvgbkQx+CEaKIdamYiVjxEXX1k1w=
