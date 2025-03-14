@@ -44,6 +44,7 @@ func ApprovingWebhookFor(ctx context.Context, approval Approval, getResourceAttr
 	}
 	return &admission.Webhook{
 		Handler: &approvingHandler{
+			decoder:               admission.NewDecoder(client.Scheme()),
 			approval:              approval,
 			client:                client,
 			getResourceAttributes: getResourceAttributes,
@@ -65,14 +66,6 @@ type approvingHandler struct {
 	*zap.SugaredLogger
 
 	validateApproval ValidateApprovalFunc
-}
-
-var _ admission.DecoderInjector = &approvingHandler{}
-
-// InjectDecoder injects the decoder into a approvingHandler.
-func (h *approvingHandler) InjectDecoder(d *admission.Decoder) error {
-	h.decoder = d
-	return nil
 }
 
 // Handle handles admission requests.

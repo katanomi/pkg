@@ -35,6 +35,8 @@ var k8sConfigSet *kubernetes.Clientset
 var testEnv *envtest.Environment
 
 func TestPkg(t *testing.T) {
+	// legacy kubebuilder test environment is disabled, this test should be skipped
+	t.SkipNow()
 	RegisterFailHandler(Fail)
 	RunSpecs(t, "AccessMode Suite")
 }

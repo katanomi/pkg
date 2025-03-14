@@ -77,11 +77,8 @@ func TestClusterRegistryClientGetConfig(t *testing.T) {
 	t.Run("get client", func(t *testing.T) {
 		client, err := clusterClient.GetClient(ctx, ref, scheme.Scheme)
 
-		// The create client method will do a request
-		// and in this case it should fail
-		// so there is nothing we can do actually
-		g.Expect(err).ToNot(BeNil())
-		g.Expect(client).To(BeNil())
+		g.Expect(err).To(BeNil())
+		g.Expect(client).ToNot(BeNil())
 	})
 
 	t.Run("get dynamic", func(t *testing.T) {

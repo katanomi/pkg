@@ -157,10 +157,7 @@ func WithCancelledBy(scheme *runtime.Scheme, isCancelled func(oldObj runtime.Obj
 		if req.Operation != admissionv1.Update {
 			return
 		}
-		decoder, err := admission.NewDecoder(scheme)
-		if err != nil {
-			return
-		}
+		decoder := admission.NewDecoder(scheme)
 
 		old := obj.DeepCopyObject()
 		if err := decoder.DecodeRaw(req.OldObject, old); err != nil {

@@ -39,25 +39,4 @@ func TestPkg(t *testing.T) {
 
 var _ = BeforeSuite(func() {
 	logf.SetLogger(zap.New(zap.WriteTo(GinkgoWriter), zap.UseDevMode(true)))
-
-	By("bootstrapping test environment")
-	testEnv = &envtest.Environment{}
-
-	cfg, err := testEnv.Start()
-	Expect(err).NotTo(HaveOccurred())
-	Expect(cfg).NotTo(BeNil())
-
-	// +kubebuilder:scaffold:scheme
-	k8sClient, err = client.New(cfg, client.Options{})
-	Expect(err).NotTo(HaveOccurred())
-	Expect(k8sClient).NotTo(BeNil())
-
-	k8sConfigSet, err = kubernetes.NewForConfig(cfg)
-	Expect(err).NotTo(HaveOccurred())
-	Expect(k8sConfigSet).NotTo(BeNil())
-})
-
-var _ = AfterSuite(func() {
-	err := testEnv.Stop()
-	Expect(err).NotTo(HaveOccurred())
 })

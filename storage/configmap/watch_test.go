@@ -46,7 +46,8 @@ func testConfigMap(name string, data map[string]string) *v1.ConfigMap {
 	}
 }
 
-var _ = Describe("testing for configmap watcher", func() {
+// legacy kubebuilder test environment is disabled, this test should be skipped
+var _ = PDescribe("testing for configmap watcher", func() {
 	// if a default configMap is provided, it will first trigger the update
 	// handler when the informer starts
 	var startInformer func(string, *v1.ConfigMap, func(cm *v1.ConfigMap))

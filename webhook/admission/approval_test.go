@@ -47,6 +47,7 @@ var _ = Context("Test.Approving.Handle", func() {
 			defer mockCtrl.Finish()
 
 			mockClient := mockclient.NewMockClient(mockCtrl)
+			mockClient.EXPECT().Scheme().Return(scheme.Scheme).AnyTimes()
 			ctx := logging.WithLogger(context.Background(), logger)
 			ctx = kclient.WithClient(ctx, mockClient)
 
@@ -137,15 +138,10 @@ func generateApproving(ctx context.Context, mockCtrl *gomock.Controller, mockCli
 	mockApproval.EXPECT().ModifiedOthers(gomock.Any(), gomock.Any()).Return(modifiedOthers).AnyTimes()
 	mockApproval.EXPECT().GetTriggeredBy(gomock.Any()).Return(nil).AnyTimes()
 
-	decoder, err := admission.NewDecoder(scheme.Scheme)
-	Expect(err).NotTo(HaveOccurred())
-	Expect(decoder).NotTo(BeNil())
-
 	webhook := ApprovingWebhookFor(ctx, mockApproval, getResourceAttributes)
 	approving, _ := webhook.Handler.(*approvingHandler)
 	Expect(approving).NotTo(BeNil())
 
-	approving.InjectDecoder(decoder)
 	approving.client = mockClient
 
 	mockClient.EXPECT().Create(gomock.Any(), gomock.Any(), gomock.Any()).DoAndReturn(
