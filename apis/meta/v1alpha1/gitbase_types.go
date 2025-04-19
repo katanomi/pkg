@@ -33,6 +33,23 @@ type GitUserBaseInfo struct {
 	Email string `json:"email"  variable:"example=joedoe@example.com"`
 }
 
+// ConvertToWithoutVariable convert GitUserBaseInfo to GitUserBaseInfoWithoutVariable
+func (g GitUserBaseInfo) ConvertToWithoutVariable() GitUserBaseInfoWithoutVariable {
+	return GitUserBaseInfoWithoutVariable{
+		Name:  g.Name,
+		Email: g.Email,
+	}
+}
+
+// GitUserBaseInfoWithoutVariable user base info without variable avoiding for
+// variable parse
+type GitUserBaseInfoWithoutVariable struct {
+	// Name is the login Name
+	Name string `json:"name" variable:"-"`
+	// Email is the login email
+	Email string `json:"email"  variable:"-"`
+}
+
 // GitRepo Repo base info
 type GitRepo struct {
 	// Project gitlab is empty string, github,gogs,gitea is owner name
