@@ -51,17 +51,18 @@ require (
 require (
 	github.com/alessio/shellescape v1.4.1
 	github.com/docker/distribution v2.8.2+incompatible
+	github.com/golang-jwt/jwt/v4 v4.5.2
 	github.com/joho/godotenv v1.4.0
 	github.com/joshdk/go-junit v1.0.0
 	github.com/k1LoW/duration v1.2.0
 	github.com/minio/minio-go/v7 v7.0.47
 	github.com/mitchellh/mapstructure v1.5.0
 	github.com/moby/patternmatcher v0.5.0
-	github.com/open-policy-agent/opa v0.61.0
+	github.com/open-policy-agent/opa v0.68.0
 	github.com/opencontainers/go-digest v1.0.0
 	github.com/pkg/errors v0.9.1
 	// try to keep this the same version as controller-runtime
-	github.com/prometheus/client_golang v1.18.0
+	github.com/prometheus/client_golang v1.20.2
 	github.com/regclient/regclient v0.7.1
 	github.com/robfig/cron/v3 v3.0.1
 	github.com/spf13/cobra v1.8.1
@@ -69,7 +70,7 @@ require (
 	github.com/tektoncd/pipeline v0.56.0
 	github.com/tidwall/gjson v1.14.4
 	golang.org/x/exp v0.0.0-20230905200255-921286631fa9
-	golang.org/x/net v0.37.0
+	golang.org/x/net v0.38.0
 	k8s.io/apiextensions-apiserver v0.29.15
 	k8s.io/cli-runtime v0.29.15
 	k8s.io/klog/v2 v2.130.1
@@ -143,7 +144,7 @@ require (
 	github.com/mxk/go-flowrate v0.0.0-20140419014527-cca7078d478f // indirect
 	github.com/peterbourgon/diskv v2.0.1+incompatible // indirect
 	github.com/prometheus/client_model v0.6.1 // indirect
-	github.com/prometheus/common v0.48.0 // indirect
+	github.com/prometheus/common v0.55.0 // indirect
 	github.com/prometheus/procfs v0.15.1 // indirect
 	github.com/prometheus/statsd_exporter v0.21.0 // indirect
 	github.com/rcrowley/go-metrics v0.0.0-20201227073835-cf1acfcdf475 // indirect
@@ -190,7 +191,6 @@ require (
 )
 
 require (
-	github.com/golang-jwt/jwt v3.2.2+incompatible
 	github.com/openzipkin/zipkin-go v0.4.0 // indirect
 	k8s.io/utils v0.0.0-20240711033017-18e509b52bc8
 )
