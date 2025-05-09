@@ -40,6 +40,7 @@ require (
 )
 
 require (
+	github.com/golang-jwt/jwt/v4 v4.5.2
 	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.60.0
 	go.opentelemetry.io/otel v1.35.0
 	go.opentelemetry.io/otel/exporters/jaeger v1.17.0
@@ -191,7 +192,6 @@ require (
 )
 
 require (
-	github.com/golang-jwt/jwt v3.2.2+incompatible
 	github.com/openzipkin/zipkin-go v0.4.0 // indirect
 	k8s.io/utils v0.0.0-20240711033017-18e509b52bc8
 )

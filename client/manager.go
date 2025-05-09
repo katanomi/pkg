@@ -26,7 +26,7 @@ import (
 
 	"k8s.io/apiserver/pkg/authentication/user"
 
-	"github.com/golang-jwt/jwt"
+	"github.com/golang-jwt/jwt/v4"
 	"github.com/katanomi/pkg/tracing"
 	"k8s.io/client-go/dynamic"
 
