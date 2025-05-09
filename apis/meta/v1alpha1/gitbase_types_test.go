@@ -96,6 +96,45 @@ func TestGitRepo_ProjectID(t *testing.T) {
 	}
 }
 
+func TestGitRepo_ProjectIDOrProject(t *testing.T) {
+	type fields struct {
+		Project    string
+		Repository string
+	}
+	tests := []struct {
+		name   string
+		fields fields
+		want   string
+	}{
+		{
+			name:   "empty",
+			fields: fields{Project: "", Repository: ""},
+			want:   "/",
+		},
+		{
+			name:   "normal project and repository",
+			fields: fields{Project: "project", Repository: "repo"},
+			want:   "project/repo",
+		},
+		{
+			name:   "only number project",
+			fields: fields{Project: "123", Repository: ""},
+			want:   "123",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			in := &GitRepo{
+				Project:    tt.fields.Project,
+				Repository: tt.fields.Repository,
+			}
+			if got := in.ProjectIDOrProject(); got != tt.want {
+				t.Errorf("GitRepo.ProjectIDOrProject() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
 var _ = DescribeTable("GitRepo.String", func(project, repository, expected string) {
 	repo := GitRepo{Project: project, Repository: repository}
 	Expect(repo.String()).To(Equal(expected), "for project %s and repository %s the expected value was %s", project, repository, expected)
