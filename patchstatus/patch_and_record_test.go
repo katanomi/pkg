@@ -19,6 +19,7 @@ package patchstatus
 import (
 	"context"
 	"errors"
+	"fmt"
 
 	kclient "github.com/katanomi/pkg/client"
 	. "github.com/onsi/ginkgo/v2"
@@ -34,20 +35,23 @@ import (
 
 var _ = Describe("Test.PatchStatusAndRecordEvent", func() {
 	var (
-		ctx                 context.Context
-		clt                 client.Client
-		configmap           *corev1.ConfigMap
-		recorder            record.EventRecorder
-		fakeRecorder        *record.FakeRecorder
-		err                 error
-		isConditionChanged  func() bool
-		getTopLevelConditon func() *apis.Condition
+		ctx                    context.Context
+		clt                    client.Client
+		configmap, newObj      *corev1.ConfigMap
+		recorder               record.EventRecorder
+		fakeRecorder           *record.FakeRecorder
+		err                    error
+		actualErr, expectedErr error
+		isConditionChanged     func() bool
+		getTopLevelConditon    func() *apis.Condition
 	)
 
 	BeforeEach(func() {
 		err = nil
+		expectedErr = nil
 		ctx = context.TODO()
 		configmap = &corev1.ConfigMap{}
+		newObj = &corev1.ConfigMap{}
 		clt = fake.NewClientBuilder().WithScheme(scheme).Build()
 		ctx = kclient.WithClient(ctx, clt)
 		ctx = logging.WithLogger(ctx, logger)
@@ -58,16 +62,40 @@ var _ = Describe("Test.PatchStatusAndRecordEvent", func() {
 	})
 
 	JustBeforeEach(func() {
-		PatchStatusAndRecordEvent(ctx, recorder, configmap, configmap, err, isConditionChanged, getTopLevelConditon)
+		actualErr = PatchStatusAndRecordEvent(ctx, recorder, newObj, configmap, err, isConditionChanged, getTopLevelConditon)
+		if expectedErr == nil {
+			Expect(actualErr).To(BeNil())
+		} else if actualErr == nil {
+			Expect(actualErr).To(Equal(expectedErr))
+		} else {
+			Expect(actualErr.Error()).To(BeEquivalentTo(expectedErr.Error()))
+		}
 	})
 
 	When("err is not nil", func() {
 		BeforeEach(func() {
 			err = errors.New("test error")
+			expectedErr = err
 		})
 		It("should record event", func() {
 			msg := <-fakeRecorder.Events
 			Expect(msg).To(Equal("Warning Error error: test error"))
+		})
+	})
+
+	When("patch failed", func() {
+		BeforeEach(func() {
+			newObj = &corev1.ConfigMap{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      "test",
+					Namespace: "test",
+				},
+			}
+			expectedErr = fmt.Errorf("failed to patch object: configmaps \"test\" not found")
+		})
+		It("should return patch error and not record any event", func() {
+			// Verify no events are recorded
+			Expect(fakeRecorder.Events).To(BeEmpty())
 		})
 	})
 
@@ -112,5 +140,4 @@ var _ = Describe("Test.PatchStatusAndRecordEvent", func() {
 			})
 		})
 	})
-
 })

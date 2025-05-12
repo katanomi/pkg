@@ -23,6 +23,7 @@ import (
 	. "github.com/onsi/gomega"
 
 	uberzap "go.uber.org/zap"
+	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
@@ -36,6 +37,7 @@ var (
 func init() {
 	logf.SetLogger(zap.New(zap.WriteTo(GinkgoWriter), zap.UseDevMode(true)))
 	logger = zap.NewRaw(zap.WriteTo(GinkgoWriter), zap.UseDevMode(true)).Sugar()
+	corev1.AddToScheme(scheme)
 }
 
 func TestPatchstatus(t *testing.T) {

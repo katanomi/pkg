@@ -18,6 +18,7 @@ package patchstatus
 
 import (
 	"context"
+	"fmt"
 
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -31,12 +32,13 @@ import (
 )
 
 // PatchStatusAndRecordEvent patch status and record event
+// If the input err is not nil, or patch failed, it will return an error.
 func PatchStatusAndRecordEvent(
 	ctx context.Context,
 	eventRecorder record.EventRecorder,
 	obj, old runtime.Object, err error,
 	isConditionChanged func() bool,
-	getTopLevelConditon func() *apis.Condition) {
+	getTopLevelConditon func() *apis.Condition) error {
 
 	log := logging.FromContext(ctx)
 	clt := kclient.Client(ctx)
@@ -47,7 +49,8 @@ func PatchStatusAndRecordEvent(
 	oldObj, oldIsObject := old.(client.Object)
 	if !oldIsObject {
 		log.Warnw("old object could not be patched because it is not a client.Object", "old", old)
-		return
+		// just return the original error, not creating a new one.
+		return err
 	}
 	clientObj, _ := obj.(client.Object)
 	patch := client.MergeFrom(oldObj)
@@ -59,6 +62,7 @@ func PatchStatusAndRecordEvent(
 		patchErr := clt.Status().Patch(ctx, clientObj, patch)
 		if patchErr != nil {
 			log.Warnw("object patch failed", "err", patchErr, "patchData", string(patchData))
+			return fmt.Errorf("failed to patch object: %w", patchErr)
 		} else {
 			log.Debugw("object patch success", "patchData", string(patchData))
 		}
@@ -70,16 +74,16 @@ func PatchStatusAndRecordEvent(
 			reason = metav1alpha1.ErrorReason
 		}
 		eventRecorder.Eventf(obj, corev1.EventTypeWarning, reason, "error: %s", err)
-		return
+		return err
 	}
 
 	if !isConditionChanged() {
-		return
+		return err
 	}
 
 	top := getTopLevelConditon()
 	if top == nil {
-		return
+		return err
 	}
 	switch top.Status {
 	case corev1.ConditionTrue, corev1.ConditionUnknown:
@@ -89,4 +93,5 @@ func PatchStatusAndRecordEvent(
 	default:
 		logging.FromContext(ctx).Warnw("unknown top condition status", "status", top.Status)
 	}
+	return err
 }
