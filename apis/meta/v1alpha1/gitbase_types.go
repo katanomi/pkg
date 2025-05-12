@@ -19,6 +19,7 @@ package v1alpha1
 import (
 	"errors"
 	"fmt"
+	"strconv"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -58,6 +59,23 @@ func (in *GitRepo) ProjectID() string {
 		return ""
 	}
 	return in.String()
+}
+
+// ProjectIDOrProject returns the project string when the project is a pure number and repository is empty.
+// Otherwise returns the result of ProjectID method.
+func (in *GitRepo) ProjectIDOrProject() string {
+	if in == nil {
+		return ""
+	}
+
+	if in.Repository == "" {
+		// Try to parse the project as an integer
+		if _, err := strconv.Atoi(in.Project); err == nil {
+			return in.Project
+		}
+	}
+
+	return in.ProjectID()
 }
 
 // String prints the GitRepo data in a user friendly format

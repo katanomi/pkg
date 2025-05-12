@@ -22,7 +22,7 @@ import (
 	"strings"
 
 	"github.com/emicklei/go-restful/v3"
-	"github.com/golang-jwt/jwt"
+	"github.com/golang-jwt/jwt/v4"
 	metav1alpha1 "github.com/katanomi/pkg/apis/meta/v1alpha1"
 	"github.com/katanomi/pkg/client"
 	authenticationv1 "k8s.io/api/authentication/v1"
