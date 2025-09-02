@@ -41,6 +41,9 @@ const (
 	// BuildMRCheckTimeoutContinueKey represent build merge request status check timeout continue key
 	BuildMRCheckTimeoutContinueKey = "build.mergerequest.checkTimeoutContinue"
 
+	// BuildRunQueueCheckPeriodKey represent the key of the default time interval of checking if the buildrun in queue is ready to start.
+	BuildRunQueueCheckPeriodKey = "buildrun.queue.checkPeriod"
+
 	// TemplateRenderCheckTimeoutKey represent templatrender timeout key
 	TemplateRenderCheckTimeoutKey = "templateRender.checkTimeout"
 
@@ -124,6 +127,9 @@ const (
 	// DefaultMRCheckTimeoutContinue represent default timeout continue for merge request status check
 	DefaultMRCheckTimeoutContinue FeatureValue = True
 
+	// DefaultBuildRunQueueCheckPeriod defines the default time interval of checking if the buildrun in queue is ready to start.
+	DefaultBuildRunQueueCheckPeriod FeatureValue = "3s"
+
 	// DefaultTemplateRenderCheckTimeout represent default timeout for templaterender check
 	DefaultTemplateRenderCheckTimeout FeatureValue = "30s"
 
@@ -175,6 +181,7 @@ var defaultFeatureValue = map[string]FeatureValue{
 	PrunerKeepFeatureKey:                   DefaultPrunerKeep,
 	BuildMRCheckTimeoutKey:                 DefaultMRCheckTimeout,
 	BuildMRCheckTimeoutContinueKey:         DefaultMRCheckTimeoutContinue,
+	BuildRunQueueCheckPeriodKey:            DefaultBuildRunQueueCheckPeriod,
 	TemplateRenderCheckTimeoutKey:          DefaultTemplateRenderCheckTimeout,
 	TemplateRenderRetentionTimeKey:         DefaultTemplateRenderRetentionTime,
 	PolicyRunRetentionTimeKey:              DefaultPolicyRunRetentionTime,
