@@ -521,6 +521,10 @@ func TestHashFolderErrorHandling(t *testing.T) {
 		{
 			name: "file permission denied",
 			setupFunc: func(t *testing.T) (string, func()) {
+				if os.Getuid() == 0 {
+					t.Skip("Skipping permission test when running as root")
+				}
+
 				tmpDir := t.TempDir()
 				testFile := filepath.Join(tmpDir, "unreadable.txt")
 
