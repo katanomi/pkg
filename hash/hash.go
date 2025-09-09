@@ -104,12 +104,16 @@ func HashFolder(ctx context.Context, folder string, filters ...HashFolderFilter)
 	digests := make([]digest.Digest, 0, 100)
 	log := logging.FromContext(ctx)
 	err = filepath.WalkDir(folder, func(path string, d fs.DirEntry, err error) (walkErr error) {
+		if err != nil {
+			log.Debugf("walk error for path %s: %q", path, err)
+			return err
+		}
 		for _, filter := range filters {
 			if filter != nil && !filter(ctx, path, d) {
 				return
 			}
 		}
-		if !d.IsDir() {
+		if d != nil && !d.IsDir() {
 			var (
 				link    string
 				data    []byte

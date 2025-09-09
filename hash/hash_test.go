@@ -23,6 +23,7 @@ import (
 	"io/fs"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"strings"
 	"testing"
 
@@ -490,6 +491,81 @@ func TestIgnoreFilesFilter(t *testing.T) {
 
 			filter := IgnoreFilesFilter(test.ignorePaths...)
 			g.Expect(filter(context.Background(), test.path, nil)).To(gomega.Equal(test.result))
+		})
+	}
+}
+
+func TestHashFolderErrorHandling(t *testing.T) {
+	tests := []struct {
+		name        string
+		setupFunc   func(t *testing.T) (string, func())
+		wantErr     bool
+		errContains string
+	}{
+		{
+			name: "non-existent folder",
+			setupFunc: func(t *testing.T) (string, func()) {
+				return "/non/existent/folder", nil
+			},
+			wantErr:     true,
+			errContains: "no such file or directory",
+		},
+		{
+			name: "empty folder path",
+			setupFunc: func(t *testing.T) (string, func()) {
+				return "", nil
+			},
+			wantErr:     true,
+			errContains: "no such file or directory",
+		},
+		{
+			name: "file permission denied",
+			setupFunc: func(t *testing.T) (string, func()) {
+				if os.Getuid() == 0 {
+					t.Skip("Skipping permission test when running as root")
+				}
+
+				tmpDir := t.TempDir()
+				testFile := filepath.Join(tmpDir, "unreadable.txt")
+
+				err := os.WriteFile(testFile, []byte("test content"), 0644)
+				if err != nil {
+					t.Fatal(err)
+				}
+
+				err = os.Chmod(testFile, 0000)
+				if err != nil {
+					t.Fatal(err)
+				}
+
+				return tmpDir, func() {
+					os.Chmod(testFile, 0644)
+				}
+			},
+			wantErr:     true,
+			errContains: "permission denied",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			g := gomega.NewGomegaWithT(t)
+
+			folder, cleanup := tt.setupFunc(t)
+			if cleanup != nil {
+				defer cleanup()
+			}
+
+			_, err := HashFolder(context.TODO(), folder)
+
+			if tt.wantErr {
+				g.Expect(err).ToNot(gomega.BeNil())
+				if tt.errContains != "" {
+					g.Expect(err.Error()).To(gomega.ContainSubstring(tt.errContains))
+				}
+			} else {
+				g.Expect(err).To(gomega.BeNil())
+			}
 		})
 	}
 }
