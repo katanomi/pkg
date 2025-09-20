@@ -1,0 +1,2 @@
+allowedKey1: "runtime1"
+notAllowedKey: "shouldNotBeMerged"

@@ -71,3 +71,16 @@ func MergeMapMap(left, right map[string]map[string]string) map[string]map[string
 	}
 	return left
 }
+
+// MergeMapPreserveEmpty merges the right map into left map, preserving the original left when both maps are empty.
+// Unlike MergeMap, this function returns the original left map unchanged when both maps are empty,
+// preventing modification of the left map's state (whether nil or empty). If a key exists in both maps,
+// the value from the right map takes precedence.
+// WARNING: This function modifies left in-place when merging is needed.
+// Returns the left map (modified or unchanged) containing all key-value pairs from both maps.
+func MergeMapPreserveEmpty(left, right map[string]string) map[string]string {
+	if len(left) == 0 && len(right) == 0 {
+		return left
+	}
+	return MergeMap(left, right)
+}

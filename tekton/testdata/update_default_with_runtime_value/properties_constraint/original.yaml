@@ -1,0 +1,11 @@
+name: "test-properties-constraint-param"
+type: "object"
+description: "Test Properties constraint validation"
+properties:
+  allowedKey1:
+    type: "string"
+  allowedKey2:
+    type: "string"
+default:
+  allowedKey1: "original1"
+  allowedKey2: "original2"

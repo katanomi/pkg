@@ -1,0 +1,18 @@
+# Expected result: object parameter with defined properties and filtered default values
+# Test Intent: Shows expected state after filtering ObjectVal based on Properties schema
+# Key validation points:
+# 1. Only allowedKey1 and allowedKey2 should remain in ObjectVal
+# 2. extraKey1 and extraKey2 should be removed
+# 3. Properties schema should remain unchanged
+
+name: "test-defined-properties"
+type: "object"
+description: "Test object parameter with defined properties and extra defaults"
+properties:
+  allowedKey1:
+    type: "string"
+  allowedKey2:
+    type: "string"
+default:
+  allowedKey1: "value1"
+  allowedKey2: "value2"

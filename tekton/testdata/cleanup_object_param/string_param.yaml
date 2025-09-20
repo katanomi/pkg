@@ -1,0 +1,10 @@
+# Test case: string parameter - should remain unchanged
+# Test Intent: Verify function does not modify non-object parameters
+# Key validation points:
+# 1. String parameters should be ignored
+# 2. No modifications should occur to non-object types
+
+name: "test-string-param"
+type: "string"
+description: "Test string parameter - should remain unchanged"
+default: "test-value"

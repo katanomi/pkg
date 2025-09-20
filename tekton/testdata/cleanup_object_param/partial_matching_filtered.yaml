@@ -1,0 +1,20 @@
+# Expected result: object parameter with partial matching - filtered result
+# Test Intent: Shows expected state after filtering with partial matches
+# Key validation points:
+# 1. matchingKey1 and matchingKey3 should be retained (they exist in Properties)
+# 2. matchingKey2 should not be in ObjectVal (it exists in Properties but not in defaults)
+# 3. nonMatchingKey1 and nonMatchingKey2 should be removed (not in Properties)
+
+name: "test-partial-matching"
+type: "object"
+description: "Test object parameter with partial matching properties and defaults"
+properties:
+  matchingKey1:
+    type: "string"
+  matchingKey2:
+    type: "string"
+  matchingKey3:
+    type: "string"
+default:
+  matchingKey1: "keep-this"
+  matchingKey3: "keep-this-too"

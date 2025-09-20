@@ -1,0 +1,4 @@
+name: "test-param"
+type: "string"
+description: "Test parameter for nil handling scenario"
+default: "original-value"

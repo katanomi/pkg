@@ -1,0 +1,4 @@
+name: "test-string-param"
+type: "string"
+description: "Test string parameter for update scenario"
+default: "runtime-value"

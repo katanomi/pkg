@@ -1,0 +1,4 @@
+name: "test-type-mismatch-param"
+type: "string"
+description: "Test type mismatch scenario"
+default: "original-string"

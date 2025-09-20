@@ -1,0 +1,11 @@
+name: "test-empty-object-param"
+type: "object"
+description: "Test empty object parameter"
+properties:
+  key1:
+    type: "string"
+  key2:
+    type: "string"
+  key3:
+    type: "string"
+default: {}

@@ -1,0 +1,18 @@
+# Test case: object parameter with defined properties but no matching default values
+# Test Intent: Verify function results in empty ObjectVal when no defaults match properties
+# Key validation points:
+# 1. Properties define expected keys but defaults contain different keys
+# 2. Result should be empty ObjectVal since no matches exist
+# 3. Properties schema should remain unchanged
+
+name: "test-no-matching-defaults"
+type: "object"
+description: "Test object parameter with defined properties but no matching defaults"
+properties:
+  expectedKey1:
+    type: "string"
+  expectedKey2:
+    type: "string"
+default:
+  differentKey1: "value1"
+  differentKey2: "value2"
