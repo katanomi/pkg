@@ -1,0 +1,25 @@
+# Test case: Extract parameter names from Param slice
+# Test Intent: Verify ExtractParamNames function correctly extracts all parameter names
+# Key validation points:
+# 1. All parameter names are extracted in order
+# 2. Different parameter types are handled correctly
+# 3. Empty values and special characters are preserved
+
+- name: param-string
+  value: "test-value"
+
+- name: param-array
+  value:
+    - "array-item-1"
+    - "array-item-2"
+
+- name: param-object
+  value:
+    key1: "value1"
+    key2: "value2"
+
+- name: param-with-special-chars
+  value: "special@#$%chars"
+
+- name: ""
+  value: "empty-name-param"

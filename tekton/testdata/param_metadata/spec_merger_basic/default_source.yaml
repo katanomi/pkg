@@ -1,0 +1,19 @@
+# Test case: Basic spec merging - default source for object parameter defaults
+# Test Intent: Define additional default values for object type parameters
+# Key validation points:
+# 1. Default source provides additional object properties
+# 2. Used only for object type parameters
+# 3. Merged with primary source defaults
+
+- name: param-object
+  type: object
+  description: "Default source for object parameter"
+  default:
+    key1: "default-value1"
+    key3: "additional-default"
+
+- name: param-extra-object
+  type: object
+  description: "Extra object parameter from default source"
+  default:
+    extraKey: "extra-value"

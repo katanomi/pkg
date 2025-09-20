@@ -1,0 +1,36 @@
+# Test case: Object type parameter merging - source specs
+# Test Intent: Define source specs for object parameter merging test
+# Key validation points:
+# 1. Updated descriptions and defaults for object parameters
+# 2. Source defaults take precedence over destination
+# 3. Object properties are properly handled
+
+- name: complex-object
+  type: object
+  description: "Updated complex object parameter description"
+  properties:
+    requiredProp:
+      type: string
+    optionalProp:
+      type: string
+    boolProp:
+      type: boolean
+  default:
+    requiredProp: "updated-required"
+    optionalProp: "updated-optional"
+
+- name: simple-object
+  type: object
+  description: "Updated simple object parameter description"
+  default:
+    anyKey: "updated-any-value"
+    newKey: "new-value"
+
+- name: empty-object
+  type: object
+  description: "Updated object parameter with non-empty default"
+  properties:
+    emptyProp:
+      type: string
+  default:
+    emptyProp: "now-has-value"

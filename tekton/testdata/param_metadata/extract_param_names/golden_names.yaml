@@ -1,0 +1,8 @@
+# Expected result: Parameter names extracted from params.yaml
+# Test Intent: Verify correct extraction of parameter names in order
+
+- param-string
+- param-array
+- param-object
+- param-with-special-chars
+- ""

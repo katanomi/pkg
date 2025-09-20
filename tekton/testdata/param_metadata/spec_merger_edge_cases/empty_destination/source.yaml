@@ -1,0 +1,8 @@
+# Source parameters that exist but won't be used since destination is empty
+# These parameters demonstrate that the processor should handle the case gracefully
+# even when source data exists but destination is empty
+
+- name: unused-param
+  type: string
+  description: "This parameter exists in source but destination is empty"
+  default: "unused-value"

@@ -1,0 +1,27 @@
+# Test case: Object type parameter merging - default source for additional defaults
+# Test Intent: Provide additional default values that will be merged for object parameters
+# Key validation points:
+# 1. Additional default values for object parameters
+# 2. Should be merged with source defaults (source takes precedence)
+# 3. Properties not in schema should be filtered out during cleanup
+
+- name: complex-object
+  type: object
+  description: "Default source for complex object"
+  default:
+    requiredProp: "fallback-required"
+    boolProp: "true"
+    extraDefaultProp: "extra-default"
+
+- name: simple-object
+  type: object
+  description: "Default source for simple object"
+  default:
+    anyKey: "fallback-any-value"
+    defaultOnlyKey: "default-only-value"
+
+- name: default-only-object
+  type: object
+  description: "Object parameter that exists only in default source"
+  default:
+    defaultKey: "default-value"

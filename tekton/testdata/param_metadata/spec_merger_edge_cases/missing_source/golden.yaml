@@ -1,0 +1,12 @@
+# Expected result after processing destination parameters with no matching source
+# Validates that destination parameters remain unchanged when source doesn't match
+# Key verification points:
+# 1. Original destination values should be preserved unchanged
+# 2. No source parameters should be added to the result
+# 3. Processing should return false for non-matching parameters
+
+# Destination parameter should remain unchanged since no matching source exists
+- name: dest-only-param
+  type: string
+  description: "Parameter that exists only in destination, no matching source"
+  default: "original-dest-value"

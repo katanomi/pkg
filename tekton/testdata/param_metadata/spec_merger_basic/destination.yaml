@@ -1,0 +1,32 @@
+# Test case: Basic spec merging - destination parameter specs
+# Test Intent: Define destination specs to be merged with source specs
+# Key validation points:
+# 1. Basic parameter types (string, array, object)
+# 2. Parameters with existing descriptions and defaults
+# 3. Parameters that will be updated by source specs
+
+- name: param-string
+  type: string
+  description: "Original string parameter description"
+  default: "original-default"
+
+- name: param-array
+  type: array
+  description: "Original array parameter description"
+  default: ["original", "array"]
+
+- name: param-object
+  type: object
+  description: "Original object parameter description"
+  properties:
+    key1:
+      type: string
+    key2:
+      type: string
+  default:
+    key1: "original"
+
+- name: param-only-in-dest
+  type: string
+  description: "Parameter that exists only in destination"
+  default: "dest-only"

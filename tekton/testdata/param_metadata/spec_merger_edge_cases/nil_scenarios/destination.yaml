@@ -1,0 +1,15 @@
+# Test case: Nil value scenarios
+# Test Intent: Validates behavior with nil default values and edge conditions
+# Key validation points:
+# 1. Nil default values should be handled gracefully
+# 2. Parameters without defaults should remain unchanged when source also has no default
+# 3. Nil to non-nil default transitions should work correctly
+
+- name: param-with-nil-default
+  type: string
+  description: "Parameter with nil default value"
+  # default field intentionally omitted to test nil handling
+
+- name: param-no-default
+  type: array
+  description: "Parameter without any default value"

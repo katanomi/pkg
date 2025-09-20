@@ -1,0 +1,16 @@
+# Expected result after processing nil default value scenarios
+# Validates that nil defaults are handled correctly and can be replaced
+# Key verification points:
+# 1. Nil defaults can be replaced with actual default values from source
+# 2. Parameters without defaults in both source and destination remain unchanged
+# 3. Description updates work correctly even with nil defaults
+
+- name: param-with-nil-default
+  type: string
+  description: "Updated description for parameter that had nil default"
+  default: "new-default-value"
+
+- name: param-no-default
+  type: array
+  description: "Updated description for parameter without default"
+  # Still no default since source also has no default

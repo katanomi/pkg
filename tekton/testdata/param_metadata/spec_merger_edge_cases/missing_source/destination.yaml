@@ -1,0 +1,11 @@
+# Test case: Missing source parameter handling
+# Test Intent: Validates behavior when destination parameters don't exist in source
+# Key validation points:
+# 1. Destination parameters should remain unchanged when not found in source
+# 2. Processor should return false for non-matching parameters
+# 3. Original values should be preserved
+
+- name: dest-only-param
+  type: string
+  description: "Parameter that exists only in destination, no matching source"
+  default: "original-dest-value"
