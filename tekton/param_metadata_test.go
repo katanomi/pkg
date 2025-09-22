@@ -119,6 +119,9 @@ var _ = Describe("NewSpecMerger", func() {
 		Entry("nil value scenarios",
 			"nil_scenarios",
 			"Tests behavior with nil default values and various edge conditions - should handle gracefully"),
+		Entry("type mismatch between source and destination parameters is ignored",
+			"type_mismatch",
+			"Tests that merge skips metadata updates when source and destination parameter types differ"),
 	)
 
 	Context("processor function behavior", func() {

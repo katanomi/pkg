@@ -1,0 +1,9 @@
+# Test case: Source array parameter causing type mismatch
+# Purpose: Provide conflicting type definition to verify merge skips updates
+
+- name: shared-param
+  type: array
+  description: "Source array parameter that should not override destination string metadata"
+  default:
+    - "source-array-item-1"
+    - "source-array-item-2"

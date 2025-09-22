@@ -1,0 +1,6 @@
+# Expected outcome: Destination metadata remains unchanged due to type mismatch
+
+- name: shared-param
+  type: string
+  description: "Destination string parameter that should remain unchanged when source type differs"
+  default: "destination-default-value"

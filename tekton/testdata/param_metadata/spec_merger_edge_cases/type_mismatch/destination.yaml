@@ -1,0 +1,11 @@
+# Test case: Destination string parameter with type mismatch in source
+# Test Intent: Ensure destination metadata stays intact when source type differs
+# Key validation points:
+# 1. Type mismatch between destination and source should skip metadata updates
+# 2. Destination description and default remain unchanged
+# 3. Processor still reports success to indicate parameter was considered
+
+- name: shared-param
+  type: string
+  description: "Destination string parameter that should remain unchanged when source type differs"
+  default: "destination-default-value"

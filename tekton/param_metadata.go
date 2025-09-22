@@ -95,9 +95,11 @@ func NewSpecMerger(
 	return NewSpecMergerForPointers(pointerDestination, source, defaultSource)
 }
 
-// NewSpecMergerForPointers creates an ItemProcessor for merging pipev1beta1.ParamSpec pointer arrays
+// NewSpecMergerForPointers creates an ItemProcessor for merging pipev1beta1.ParamSpec pointer arrays.
 // This function allows direct modification of the original ParamSpec objects through pointers,
-// avoiding the need for data copying and synchronization
+// avoiding the need for data copying and synchronization. If the source and destination
+// parameter types do not match, the merger will deliberately skip updating metadata to
+// preserve the destination parameter definition.
 func NewSpecMergerForPointers(
 	destination *[]*pipev1beta1.ParamSpec,
 	source []pipev1beta1.ParamSpec,
@@ -146,24 +148,38 @@ func NewSpecMergerForPointers(
 		logger := logging.FromContext(ctx)
 		logger.Debugw("merging param spec (pointer version)", "param", itemName)
 
+		destinationSpec := (*destination)[destinationIndex]
+		destinationType := destinationSpec.Type
+		sourceType := sourceSpec.Type
+		if destinationType != "" && sourceType != "" && destinationType != sourceType {
+			logger.Debugw("skip merging param metadata due to type mismatch",
+				"param", itemName,
+				"destinationType", destinationType,
+				"sourceType", sourceType,
+			)
+			return true
+		}
+
 		// Update basic metadata from source - directly modify the pointed-to object
-		(*destination)[destinationIndex].Description = sourceSpec.Description
+		destinationSpec.Description = sourceSpec.Description
 		if sourceSpec.Default != nil {
-			(*destination)[destinationIndex].Default = sourceSpec.Default.DeepCopy()
+			destinationSpec.Default = sourceSpec.Default.DeepCopy()
 		}
 
 		// Handle object parameter special processing
-		if (*destination)[destinationIndex].Type == pipev1beta1.ParamTypeObject {
+		if destinationSpec.Type == pipev1beta1.ParamTypeObject {
 			// For object type, merge default values from defaultSource if available
 			if defaultSpec, defaultExists := defaultSpecMap[itemName]; defaultExists && defaultSpec.Default != nil {
 				// Merge object defaults: source takes precedence, but preserve defaultSource-only keys
-				(*destination)[destinationIndex].Default = MergeObjectDefaults(defaultSpec.Default, (*destination)[destinationIndex].Default)
+				destinationSpec.Default = MergeObjectDefaults(defaultSpec.Default, destinationSpec.Default)
 				logger.Debugw("merging param object defaults (pointer version)", "param", itemName)
 			}
 
 			// Cleanup default values based on properties schema
-			CleanupObjectParamByProperties((*destination)[destinationIndex])
+			CleanupObjectParamByProperties(destinationSpec)
 		}
+
+		(*destination)[destinationIndex] = destinationSpec
 
 		return true
 	}
