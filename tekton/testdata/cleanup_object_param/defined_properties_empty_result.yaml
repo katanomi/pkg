@@ -1,0 +1,16 @@
+# Expected result: object parameter with defined properties but empty ObjectVal result
+# Test Intent: Shows expected state when no default values match the defined properties
+# Key validation points:
+# 1. Properties schema should remain unchanged
+# 2. ObjectVal should be empty since no defaults matched
+# 3. All non-matching defaults should be filtered out
+
+name: "test-no-matching-defaults"
+type: "object"
+description: "Test object parameter with defined properties but no matching defaults"
+properties:
+  expectedKey1:
+    type: "string"
+  expectedKey2:
+    type: "string"
+default: {}

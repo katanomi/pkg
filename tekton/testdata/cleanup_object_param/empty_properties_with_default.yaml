@@ -1,0 +1,12 @@
+# Test case: object parameter with empty properties but non-empty default
+# Test Intent: Verify function clears ObjectVal when Properties is empty and ObjectVal is non-empty
+# Key validation points:
+# 1. Empty Properties schema should trigger default clearing
+# 2. Non-empty ObjectVal should be cleared to nil
+
+name: "test-empty-properties"
+type: "object"
+description: "Test object parameter with empty properties but default values"
+default:
+  extraKey1: "value1"
+  extraKey2: "value2"

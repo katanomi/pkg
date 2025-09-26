@@ -1,0 +1,10 @@
+# Test case: object parameter with empty properties and empty default
+# Test Intent: Verify function preserves empty ObjectVal when Properties is empty
+# Key validation points:
+# 1. Empty Properties with empty ObjectVal should remain unchanged
+# 2. Function should preserve nil/empty values as-is
+
+name: "test-empty-properties-empty-default"
+type: "object"
+description: "Test object parameter with empty properties and empty default"
+default: {}

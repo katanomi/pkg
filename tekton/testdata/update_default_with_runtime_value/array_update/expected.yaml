@@ -1,0 +1,7 @@
+name: "test-array-param"
+type: "array"
+description: "Test array parameter for update scenario"
+default:
+  - "runtime1"
+  - "runtime2"
+  - "runtime3"

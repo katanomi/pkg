@@ -1,0 +1,11 @@
+# Expected result: object parameter with empty properties and cleared default
+# Test Intent: Shows expected state after clearing ObjectVal for empty Properties
+# Key validation points:
+# 1. Properties remains empty (unchanged)
+# 2. ObjectVal should be nil (cleared)
+# 3. Other parameter attributes should remain unchanged
+
+name: "test-empty-properties"
+type: "object"
+description: "Test object parameter with empty properties but default values"
+default: {}

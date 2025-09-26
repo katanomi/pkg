@@ -1,0 +1,6 @@
+# Test case: Exclude list for ProcessSelectiveItems test
+# Test Intent: Define which items should be skipped during processing
+# These item names should be excluded from processing
+
+- item-two
+- item-four

@@ -1,0 +1,16 @@
+# Test case: Edge case - missing source parameter specs
+# Test Intent: Test behavior when source parameters don't match destination
+# Key validation points:
+# 1. Missing source parameters should not be processed
+# 2. Original destination values should remain unchanged
+# 3. ItemProcessor should return false for missing source parameters
+
+- name: param-only-in-destination
+  type: string
+  description: "Parameter that has no matching source"
+  default: "original-value"
+
+- name: another-dest-only
+  type: array
+  description: "Another parameter without source match"
+  default: ["original", "array"]

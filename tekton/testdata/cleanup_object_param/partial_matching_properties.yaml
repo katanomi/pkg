@@ -1,0 +1,22 @@
+# Test case: object parameter with partial matching between properties and defaults
+# Test Intent: Verify function retains only properties that match schema definition
+# Key validation points:
+# 1. Some defaults match properties, some don't
+# 2. Only matching properties should be retained
+# 3. Non-matching defaults should be filtered out
+
+name: "test-partial-matching"
+type: "object"
+description: "Test object parameter with partial matching properties and defaults"
+properties:
+  matchingKey1:
+    type: "string"
+  matchingKey2:
+    type: "string"
+  matchingKey3:
+    type: "string"
+default:
+  matchingKey1: "keep-this"
+  matchingKey3: "keep-this-too"
+  nonMatchingKey1: "remove-this"
+  nonMatchingKey2: "remove-this-too"

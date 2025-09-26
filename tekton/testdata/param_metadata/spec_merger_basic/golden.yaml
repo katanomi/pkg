@@ -1,0 +1,34 @@
+# Expected result: Basic spec merging with source overriding destination
+# Test Intent: Verify correct merging behavior where source takes precedence
+# Key verification points:
+# 1. Source descriptions replace destination descriptions
+# 2. Source defaults replace destination defaults
+# 3. Parameters only in destination remain unchanged
+# 4. Parameters only in source are not added to destination
+
+- name: param-string
+  type: string
+  description: "Updated string parameter description"
+  default: "updated-default"
+
+- name: param-array
+  type: array
+  description: "Updated array parameter description"
+  default: ["updated", "array", "values"]
+
+- name: param-object
+  type: object
+  description: "Updated object parameter description"
+  properties:
+    key1:
+      type: string
+    key2:
+      type: string
+  default:
+    key1: "updated-value1"
+    key2: "new-value2"
+
+- name: param-only-in-dest
+  type: string
+  description: "Parameter that exists only in destination"
+  default: "dest-only"

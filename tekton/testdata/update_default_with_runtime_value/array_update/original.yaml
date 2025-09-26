@@ -1,0 +1,6 @@
+name: "test-array-param"
+type: "array"
+description: "Test array parameter for update scenario"
+default:
+  - "original1"
+  - "original2"

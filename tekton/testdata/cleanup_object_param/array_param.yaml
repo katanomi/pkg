@@ -1,0 +1,12 @@
+# Test case: array parameter - should remain unchanged
+# Test Intent: Verify function does not modify non-object parameters
+# Key validation points:
+# 1. Array parameters should be ignored
+# 2. No modifications should occur to non-object types
+
+name: "test-array-param"
+type: "array"
+description: "Test array parameter - should remain unchanged"
+default:
+  - "value1"
+  - "value2"

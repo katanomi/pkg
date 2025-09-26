@@ -1,0 +1,14 @@
+name: "test-object-param"
+type: "object"
+description: "Test object parameter with Properties"
+properties:
+  key1:
+    type: "string"
+  key2:
+    type: "string"
+  key3:
+    type: "string"
+default:
+  key1: "original1"
+  key2: "original2"
+  key3: "original3"

@@ -1,0 +1,35 @@
+# Test case: Object type parameter merging with complex defaults
+# Test Intent: Test object parameter special processing and default merging
+# Key validation points:
+# 1. Object parameters with properties schema
+# 2. Complex default value merging behavior
+# 3. Cleanup based on properties schema
+
+- name: complex-object
+  type: object
+  description: "Complex object parameter with properties schema"
+  properties:
+    requiredProp:
+      type: string
+    optionalProp:
+      type: string
+    boolProp:
+      type: boolean
+  default:
+    requiredProp: "original-required"
+    extraProp: "should-be-removed"
+
+- name: simple-object
+  type: object
+  description: "Simple object parameter without properties"
+  default:
+    anyKey: "any-value"
+    anotherKey: "another-value"
+
+- name: empty-object
+  type: object
+  description: "Object parameter with empty default"
+  properties:
+    emptyProp:
+      type: string
+  default: {}

@@ -1,0 +1,33 @@
+# Test case: Basic spec merging - source parameter specs
+# Test Intent: Define source specs that will override destination specs
+# Key validation points:
+# 1. Source descriptions override destination descriptions
+# 2. Source defaults override destination defaults
+# 3. New parameters in source are properly handled
+
+- name: param-string
+  type: string
+  description: "Updated string parameter description"
+  default: "updated-default"
+
+- name: param-array
+  type: array
+  description: "Updated array parameter description"
+  default: ["updated", "array", "values"]
+
+- name: param-object
+  type: object
+  description: "Updated object parameter description"
+  properties:
+    key1:
+      type: string
+    key2:
+      type: string
+  default:
+    key1: "updated-value1"
+    key2: "new-value2"
+
+- name: param-only-in-source
+  type: string
+  description: "Parameter that exists only in source"
+  default: "source-only"

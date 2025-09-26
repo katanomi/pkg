@@ -1,0 +1,25 @@
+# Test case: Edge case - parameters with nil values
+# Test Intent: Test behavior with nil default values and edge conditions
+# Key validation points:
+# 1. Parameters with nil defaults should be handled gracefully
+# 2. Different parameter types with missing/nil values
+# 3. Edge conditions that might occur in real usage
+
+- name: param-nil-default
+  type: string
+  description: "Parameter with nil default value"
+
+- name: param-empty-string
+  type: string
+  description: "Parameter with empty string default"
+  default: ""
+
+- name: param-empty-array
+  type: array
+  description: "Parameter with empty array default"
+  default: []
+
+- name: param-empty-object
+  type: object
+  description: "Parameter with empty object default"
+  default: {}

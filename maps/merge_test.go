@@ -258,3 +258,55 @@ func TestMergeMapMap(t *testing.T) {
 		})
 	}
 }
+
+func TestMergeMapPreserveEmpty(t *testing.T) {
+
+	table := map[string]struct {
+		Left   map[string]string
+		Right  map[string]string
+		Result map[string]string
+	}{
+		"both nil - preserve nil": {
+			Left:   nil,
+			Right:  nil,
+			Result: nil,
+		},
+		"both empty - preserve empty": {
+			Left:   map[string]string{},
+			Right:  map[string]string{},
+			Result: map[string]string{},
+		},
+		"nil left, empty right - preserve nil": {
+			Left:   nil,
+			Right:  map[string]string{},
+			Result: nil,
+		},
+		"empty left, nil right - preserve empty": {
+			Left:   map[string]string{},
+			Right:  nil,
+			Result: map[string]string{},
+		},
+		"normal merge - delegate to MergeMap": {
+			Left: map[string]string{
+				"a": "b",
+			},
+			Right: map[string]string{
+				"b": "c",
+				"a": "d",
+			},
+			Result: map[string]string{
+				"b": "c",
+				"a": "d",
+			},
+		},
+	}
+
+	for name, test := range table {
+		t.Run(name, func(t *testing.T) {
+			g := NewGomegaWithT(t)
+
+			result := MergeMapPreserveEmpty(test.Left, test.Right)
+			g.Expect(result).To(Equal(test.Result))
+		})
+	}
+}

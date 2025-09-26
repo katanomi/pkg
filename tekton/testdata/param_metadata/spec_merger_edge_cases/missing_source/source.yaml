@@ -1,0 +1,7 @@
+# Source parameters that don't match any destination parameters
+# This tests the case where source exists but destination parameters have different names
+
+- name: source-only-param
+  type: string
+  description: "Parameter that exists only in source, no matching destination"
+  default: "source-only-value"

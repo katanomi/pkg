@@ -1,0 +1,36 @@
+# Expected result: Object type parameter merging with cleanup
+# Test Intent: Verify object parameter merging and property-based cleanup
+# Key verification points:
+# 1. Source descriptions and defaults take precedence
+# 2. Object defaults are merged with defaultSource (source wins conflicts)
+# 3. Properties not in schema are removed during cleanup
+# 4. Empty properties schemas clear non-empty objectVal
+
+- name: complex-object
+  type: object
+  description: "Updated complex object parameter description"
+  properties:
+    optionalProp:
+      type: string
+    requiredProp:
+      type: string
+    boolProp:
+      type: boolean
+  default:
+    optionalProp: "updated-optional"
+    requiredProp: "updated-required"
+    boolProp: "true"
+
+- name: simple-object
+  type: object
+  description: "Updated simple object parameter description"
+  default: {}
+
+- name: empty-object
+  type: object
+  description: "Updated object parameter with non-empty default"
+  properties:
+    emptyProp:
+      type: string
+  default:
+    emptyProp: "now-has-value"

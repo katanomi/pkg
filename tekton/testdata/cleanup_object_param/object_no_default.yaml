@@ -1,0 +1,14 @@
+# Test case: object parameter without default value
+# Test Intent: Verify function handles object parameters with no default gracefully
+# Key validation points:
+# 1. Object parameters without default should remain unchanged
+# 2. Function should return early when default is nil
+
+name: "test-object-no-default"
+type: "object"
+description: "Test object parameter without default value"
+properties:
+  key1:
+    type: "string"
+  key2:
+    type: "string"

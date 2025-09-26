@@ -1,0 +1,12 @@
+# Source parameters with nil default handling
+# Tests various nil default scenarios and their interactions
+
+- name: param-with-nil-default
+  type: string
+  description: "Updated description for parameter that had nil default"
+  default: "new-default-value"
+
+- name: param-no-default
+  type: array
+  description: "Updated description for parameter without default"
+  # Still no default to test nil to nil behavior

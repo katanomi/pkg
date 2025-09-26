@@ -1,0 +1,6 @@
+# Expected result: Items that should be processed after applying exclude list
+# Test Intent: Verify only non-excluded items are processed
+# Only item-one and item-three should remain after excluding item-two and item-four
+
+- item-one
+- item-three

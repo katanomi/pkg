@@ -1,0 +1,20 @@
+# Test case: ProcessSelectiveItems with mixed item types
+# Test Intent: Verify selective processing functionality skips excluded items
+# Key validation points:
+# 1. Items not in exclude list are processed
+# 2. Items in exclude list are skipped
+# 3. Processing order is maintained
+
+# Test items with different names to simulate parameter specs
+- name: item-one
+  type: string
+  description: "First test item"
+- name: item-two
+  type: array
+  description: "Second test item"
+- name: item-three
+  type: object
+  description: "Third test item"
+- name: item-four
+  type: string
+  description: "Fourth test item"
