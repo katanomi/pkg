@@ -17,6 +17,7 @@ limitations under the License.
 package sharedmain
 
 import (
+	"context"
 	"net/http"
 	"net/http/httptest"
 	"reflect"
@@ -96,5 +97,62 @@ func TestAppWithFieldIndexer(t *testing.T) {
 			},
 		})
 		g.Expect(a.fieldIndexeres).Should(HaveLen(2))
+	})
+}
+
+func TestAppContextOpts(t *testing.T) {
+	t.Run("empty function list should return directly", func(t *testing.T) {
+		g := NewGomegaWithT(t)
+		a := &AppBuilder{}
+
+		result := a.ContextOpts()
+
+		g.Expect(result).Should(BeIdenticalTo(a))
+		g.Expect(a.Context).Should(BeNil())
+	})
+
+	t.Run("single context modification function", func(t *testing.T) {
+		g := NewGomegaWithT(t)
+		a := &AppBuilder{
+			Context: context.Background(),
+		}
+
+		type testKey struct{}
+		testValue := "test-value"
+
+		result := a.ContextOpts(func(ctx context.Context) context.Context {
+			return context.WithValue(ctx, testKey{}, testValue)
+		})
+
+		g.Expect(result).Should(BeIdenticalTo(a))
+		g.Expect(a.Context.Value(testKey{})).Should(Equal(testValue))
+	})
+
+	t.Run("multiple context modification functions applied in order", func(t *testing.T) {
+		g := NewGomegaWithT(t)
+		a := &AppBuilder{
+			Context: context.Background(),
+		}
+
+		type key1 struct{}
+		type key2 struct{}
+		type key3 struct{}
+
+		result := a.ContextOpts(
+			func(ctx context.Context) context.Context {
+				return context.WithValue(ctx, key1{}, "value1")
+			},
+			func(ctx context.Context) context.Context {
+				return context.WithValue(ctx, key2{}, "value2")
+			},
+			func(ctx context.Context) context.Context {
+				return context.WithValue(ctx, key3{}, "value3")
+			},
+		)
+
+		g.Expect(result).Should(BeIdenticalTo(a))
+		g.Expect(a.Context.Value(key1{})).Should(Equal("value1"))
+		g.Expect(a.Context.Value(key2{})).Should(Equal("value2"))
+		g.Expect(a.Context.Value(key3{})).Should(Equal("value3"))
 	})
 }

@@ -231,6 +231,18 @@ func (a *AppBuilder) Scheme(scheme *runtime.Scheme) *AppBuilder {
 	return a
 }
 
+// ContextOpts allows modifying the app context before it is used
+func (a *AppBuilder) ContextOpts(f ...func(ctx context.Context) context.Context) *AppBuilder {
+	if len(f) == 0 {
+		return a
+	}
+
+	for _, fn := range f {
+		a.Context = fn(a.Context)
+	}
+	return a
+}
+
 func (a *AppBuilder) initClient(clientVar ctrlclient.Client) {
 	a.initClientOnce.Do(func() {
 		if clientVar == nil {
@@ -305,7 +317,7 @@ func (a *AppBuilder) ConfigManager() *AppBuilder {
 
 	name := config.Name()
 	configMGR := config.NewManager(a.ConfigMapWatcher, a.Logger, name)
-	a.Context = config.WithKatanomiConfigManager(a.Context, configMGR)
+	a.Context = config.WithConfigManager(a.Context, configMGR)
 
 	return a
 }

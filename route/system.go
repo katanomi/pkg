@@ -36,7 +36,7 @@ type system struct {
 func NewSystem(ctx context.Context) Route {
 	return &system{
 		Context:       ctx,
-		ConfigManager: config.KatanomiConfigManager(ctx),
+		ConfigManager: config.ConfigManager(ctx),
 	}
 }
 

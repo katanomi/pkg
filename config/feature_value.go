@@ -67,7 +67,7 @@ func GetDurationConfig(ctx context.Context, key string, defaultDuration time.Dur
 	var retention time.Duration
 	var err error
 
-	manager := KatanomiConfigManager(ctx)
+	manager := ConfigManager(ctx)
 	if manager != nil {
 		retention, err = manager.GetFeatureFlag(key).AsDuration()
 		if err != nil {

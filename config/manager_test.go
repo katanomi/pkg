@@ -129,8 +129,8 @@ func TestKCMContext(t *testing.T) {
 	watcher := informer.NewInformedWatcher(client, "cm")
 	manager := NewManager(watcher, nil, "cm")
 
-	ctx = WithKatanomiConfigManager(ctx, manager)
-	g.Expect(KatanomiConfigManager(ctx)).To(Equal(manager))
+	ctx = WithConfigManager(ctx, manager)
+	g.Expect(ConfigManager(ctx)).To(Equal(manager))
 }
 
 func TestIsSameConfigMap(t *testing.T) {

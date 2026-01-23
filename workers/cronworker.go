@@ -98,7 +98,7 @@ func (cw *CronWorker) Setup(ctx context.Context, manager manager.Manager, logger
 		})
 	}
 
-	if kMgr := config.KatanomiConfigManager(ctx); kMgr != nil {
+	if kMgr := config.ConfigManager(ctx); kMgr != nil {
 		kMgr.AddWatcher(config.NewConfigWatcher(ConfigWatcherFunc(cw)))
 	}
 

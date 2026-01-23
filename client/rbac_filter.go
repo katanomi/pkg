@@ -70,6 +70,9 @@ func DynamicSubjectReviewFilter(ctx context.Context, resourceAttGetter ResourceA
 			"resource", resourceAtt.Resource,
 			"group", resourceAtt.Group,
 			"verb", resourceAtt.Verb,
+			"subresource", resourceAtt.Subresource,
+			"namespace", resourceAtt.Namespace,
+			"name", resourceAtt.Name,
 		)
 		reqCtx = logging.WithLogger(reqCtx, log)
 
@@ -255,7 +258,7 @@ func postSubjectAccessReview(ctx context.Context, clt client.Client, reviewObj s
 		err = errors.NewForbidden(schema.GroupResource{
 			Group:    resourceAtt.Group,
 			Resource: resourceAtt.Resource,
-		}, resourceAtt.Name, fmt.Errorf("access not allowed"))
+		}, resourceAtt.Name, fmt.Errorf("access not allowed, verb=%s, resource=%s", resourceAtt.Verb, fmt.Sprintf("%s/%s", resourceAtt.Resource, resourceAtt.Subresource)))
 		return
 	}
 	return

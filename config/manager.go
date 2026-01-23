@@ -207,16 +207,36 @@ func Name() string {
 	return defaultConfig
 }
 
+// Deprecated: use configKey
+// katanomiConfigKey is the context key for Katanomi Config Manager
 type katanomiConfigKey struct{}
 
+// Deprecated: use WithConfigManager
 // WithKatanomiConfigManager sets a Config Manager instance into a context
 func WithKatanomiConfigManager(ctx context.Context, manager *Manager) context.Context {
 	return context.WithValue(ctx, katanomiConfigKey{}, manager)
 }
 
+// Deprecated: use ConfigManage
 // KatanomiConfigManager returns a Config Manager, returns nil if not found
 func KatanomiConfigManager(ctx context.Context) *Manager {
 	val := ctx.Value(katanomiConfigKey{})
+	if val == nil {
+		return nil
+	}
+	return val.(*Manager)
+}
+
+type configKey struct{}
+
+// WithConfigManager sets a Config Manager instance into a context
+func WithConfigManager(ctx context.Context, manager *Manager) context.Context {
+	return context.WithValue(ctx, configKey{}, manager)
+}
+
+// ConfigManager returns a Config Manager, returns nil if not found
+func ConfigManager(ctx context.Context) *Manager {
+	val := ctx.Value(configKey{})
 	if val == nil {
 		return nil
 	}

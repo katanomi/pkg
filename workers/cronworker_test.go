@@ -106,7 +106,7 @@ var _ = Describe("Test.CronWorker", func() {
 		watcher = informer.NewInformedWatcher(client, ns)
 		cfgMgr = kconfig.NewManager(watcher, logger, cmName)
 
-		ctx = kconfig.WithKatanomiConfigManager(ctx, cfgMgr)
+		ctx = kconfig.WithConfigManager(ctx, cfgMgr)
 		ctx = restclient.WithRESTClient(ctx, restyClient)
 		fr = &fakeRunner{}
 

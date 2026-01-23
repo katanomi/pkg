@@ -160,6 +160,6 @@ require (
 )
 
 replace (
-	go.uber.org/zap => github.com/katanomi/zap v1.27.0-katanomi // indirect
+	go.uber.org/zap => github.com/AlaudaDevops/zap v1.27.2-alauda-0
 	knative.dev/pkg => github.com/katanomi/knative-pkg v0.0.0-20241021183759-9b9d535af5ad
 )
