@@ -4,7 +4,7 @@
    - v1.1.1
    digest: sha256:88008bc80503efb3d6c0a8c76fbda9e89067fc57c400c89901519984fc80ad93
  - type: HelmChart
-   url: index.docker.io/katanomi/controller
+   url: index.quay.io/katanomi/controller
    versions:
    - v1.1.1
    - latest

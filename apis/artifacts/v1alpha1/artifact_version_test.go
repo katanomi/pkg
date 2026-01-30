@@ -201,8 +201,8 @@ func TestArtifactVersionGetHelmChartFromValues(t *testing.T) {
 				"registry.katanomi.dev/abc/def:v1.1.1@sha256:88008bc80503efb3d6c0a8c76fbda9e89067fc57c400c89901519984fc80ad93",
 
 				// another artifact with digest and two tags
-				"index.docker.io/katanomi/controller:v1.1.1@sha256:88008bc80503efb3d6c0a8c76fbda9e89067fc57c400c89901519984fc80ad93",
-				"index.docker.io/katanomi/controller:latest@sha256:88008bc80503efb3d6c0a8c76fbda9e89067fc57c400c89901519984fc80ad93",
+				"index.quay.io/katanomi/controller:v1.1.1@sha256:88008bc80503efb3d6c0a8c76fbda9e89067fc57c400c89901519984fc80ad93",
+				"index.quay.io/katanomi/controller:latest@sha256:88008bc80503efb3d6c0a8c76fbda9e89067fc57c400c89901519984fc80ad93",
 			},
 			MustLoadReturnObjectFromYAML("testdata/ArtifactVersion.GetHelmChartFromValues.golden.yaml", &[]ArtifactVersion{}).(*[]ArtifactVersion),
 		},

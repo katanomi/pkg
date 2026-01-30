@@ -2,7 +2,7 @@
 "git.url":            "https://github.com/katanomi/pkg"
 "git.versionPhase":   ""
 "git.version":        "v1.2.3"
-"git.version.docker": "v1.2.3"
+"git.version.registry": "v1.2.3"
 "git.version.custom": "v1.2.3-custom"
 #
 "git.revision":      "refs/pulls/123/head"

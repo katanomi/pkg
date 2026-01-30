@@ -79,7 +79,7 @@ func (d *RegistrySchemeDetectionBySecret) DetectScheme(ctx context.Context, regi
 			log.Errorw("failed to get secret", "secretKey", secretKey, "error", err)
 			return "", fmt.Errorf("failed to get secret %s: %w", secretKey.String(), err)
 		}
-		username, password, err := getDockerAuthFromSecret(registry, secret)
+		username, password, err := getRegistryAuthFromSecret(registry, secret)
 		if err != nil {
 			log.Debugw("failed to get username and password from secret", "error", err)
 		}
@@ -100,14 +100,14 @@ func (d *RegistrySchemeDetectionBySecret) DetectSchemeWithDefault(ctx context.Co
 	return scheme
 }
 
-func getDockerAuthFromSecret(registryHost string, secret *corev1.Secret) (string, string, error) {
+func getRegistryAuthFromSecret(registryHost string, secret *corev1.Secret) (string, string, error) {
 	switch secret.Type {
 	case corev1.SecretTypeBasicAuth:
 		username := string(secret.Data[corev1.BasicAuthUsernameKey])
 		password := string(secret.Data[corev1.BasicAuthPasswordKey])
 		return username, password, nil
 	case corev1.SecretTypeDockerConfigJson:
-		return artifactsv1alpha1.GetAuthFromDockerConfigJson(registryHost, secret.Data[corev1.DockerConfigJsonKey])
+		return artifactsv1alpha1.GetAuthFromRegistryConfigJson(registryHost, secret.Data[corev1.DockerConfigJsonKey])
 	default:
 		return "", "", fmt.Errorf("unsupported secret type %s", secret.Type)
 	}

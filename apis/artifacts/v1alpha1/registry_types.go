@@ -24,20 +24,20 @@ import (
 	"strings"
 )
 
-// ImageConfig define sever and multiple docker credentials related content.
+// ImageConfig define sever and multiple podman credentials related content.
 type ImageConfig struct {
 	ImageAuths ImageAuths `json:"auths"`
 }
 
-// ImageAuths sever and DockerAuthItem list
+// ImageAuths server and auth item list
 type ImageAuths map[string][]DockerAuthItem
 
-// DockerConfigJson docker credentials data
-type DockerConfigJson struct {
+// RegistryConfigJson podman credentials data
+type RegistryConfigJson struct {
 	Auths map[string]DockerAuthItem `json:"auths"`
 }
 
-// DockerAuthItem docker credential information for a single repository
+// DockerAuthItem registry credential information for a single repository
 type DockerAuthItem struct {
 	// Username username
 	Username string `json:"username"`
@@ -51,20 +51,20 @@ type DockerAuthItem struct {
 	Scope string `json:"scope"`
 }
 
-// GenerateDockerAuth generate docker auth by input.
+// GenerateDockerAuth generates auth data from username and password.
 func GenerateDockerAuth(username, password []byte) string {
 	authData := make([]byte, 0, len(username)+len(password)+1)
 	return base64.StdEncoding.EncodeToString(fmt.Appendf(authData, "%s:%s", username, password))
 }
 
-// GetAuthFromDockerConfigJson get docker credential information from docker config json
-func GetAuthFromDockerConfigJson(registry string, dockerConfigJsonBytes []byte) (username, password string, err error) {
-	var dockerConfig DockerConfigJson
+// GetAuthFromRegistryConfigJson get podman credential information from podman config json
+func GetAuthFromRegistryConfigJson(registry string, registryConfigJsonBytes []byte) (username, password string, err error) {
+	var registryConfig RegistryConfigJson
 
-	if err = json.Unmarshal(dockerConfigJsonBytes, &dockerConfig); err != nil {
+	if err = json.Unmarshal(registryConfigJsonBytes, &registryConfig); err != nil {
 		return "", "", err
 	}
-	if dockerConfig.Auths == nil {
+	if registryConfig.Auths == nil {
 		return "", "", fmt.Errorf("no auths found")
 	}
 
@@ -76,13 +76,13 @@ func GetAuthFromDockerConfigJson(registry string, dockerConfigJsonBytes []byte) 
 	}
 
 	// generate all possible address
-	for address, auth := range dockerConfig.Auths {
+	for address, auth := range registryConfig.Auths {
 		address = strings.TrimRight(address, "/")
-		dockerConfig.Auths[address] = auth
+		registryConfig.Auths[address] = auth
 	}
 
 	for _, address := range candidate {
-		if auth, ok := dockerConfig.Auths[address]; ok {
+		if auth, ok := registryConfig.Auths[address]; ok {
 			return auth.Username, auth.Password, nil
 		}
 	}

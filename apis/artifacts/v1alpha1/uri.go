@@ -30,7 +30,7 @@ import (
 type Protocol string
 
 var (
-	// ProtocolDocker docker protocol
+	// ProtocolDocker legacy image protocol
 	ProtocolDocker Protocol = "docker"
 	// ProtocolHelmChart helm chart protocol
 	ProtocolHelmChart Protocol = "chart"
@@ -38,8 +38,8 @@ var (
 	ProtocolOCI Protocol = "oci"
 
 	// repositoryRegexp is adapted from the distribution implementation. The
-	// repository name set under OCI distribution spec is a subset of the docker
-	// spec. For maximum compatibility, the docker spec is verified client-side.
+	// repository name set under OCI distribution spec is a subset of the podman
+	// spec. For maximum compatibility, the podman spec is verified client-side.
 	// Further checks are left to the server-side.
 	// References:
 	// - https://github.com/distribution/distribution/blob/v2.7.1/reference/regexp.go#L53
@@ -47,14 +47,14 @@ var (
 	repositoryRegexp = regexp.MustCompile(`^[a-z0-9]+(?:(?:[._]|__|[-]*)[a-z0-9]+)*(?:/[a-z0-9]+(?:(?:[._]|__|[-]*)[a-z0-9]+)*)*$`)
 
 	// tagRegexp checks the tag name.
-	// The docker and OCI spec have the same regular expression.
+	// The podman and OCI spec have the same regular expression.
 	// Reference: https://github.com/opencontainers/distribution-spec/blob/main/spec.md#pulling-manifests
 	tagRegexp = regexp.MustCompile(`^[\w][\w.-]{0,127}$`)
 
 	digestRegexp = regexp.MustCompile(`(?P<algo>sha256):(?P<hash>[a-z0-9]{64})`)
 
 	// protocolRegexp check the protocol
-	// example: docker,
+	// example: podman,
 	protocolRegexp = regexp.MustCompile(`^[a-zA-Z][a-zA-Z\-]*[a-zA-Z]$`)
 
 	ErrInvalidProtocol = "invalid protocol format"
@@ -70,9 +70,9 @@ const (
 	SHA256 DigestAlgorithm = "sha256"
 )
 
-// URI represents artifact uri , like docker://gcr.io/tekton-releases/github.com/tektoncd/pipeline/cmd/nop:v0.37.1@sha256:04411f239bc7144c3248b53af6741c2726eaddbe9b9cf62a24cf812689cc3223
+// URI represents artifact uri , like podman://gcr.io/tekton-releases/github.com/tektoncd/pipeline/cmd/nop:v0.37.1@sha256:04411f239bc7144c3248b53af6741c2726eaddbe9b9cf62a24cf812689cc3223
 type URI struct {
-	// Protocol represent artifact transport protocol, it is optional, default value is docker
+	// Protocol represent artifact transport protocol, it is optional, default value is podman
 	Protocol string
 	// Host represent artifact host
 	Host string
@@ -170,7 +170,7 @@ func ParseURI(uri string, t ArtifactType) (URI, error) {
 		case ArtifactTypeContainerImage:
 			u.Protocol = string(ProtocolDocker)
 		default:
-			// when protocol is empty, set default docker
+			// when protocol is empty, set default podman
 			u.Protocol = string(ProtocolDocker)
 		}
 	}

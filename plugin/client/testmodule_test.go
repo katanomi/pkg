@@ -37,7 +37,7 @@ var _ = Describe("TestModules", func() {
 
 	BeforeEach(func() {
 		pluginClient = NewPluginClient(ClientOpts(defaultClient))
-		meta.BaseURL = "https://alauda.io"
+		meta.BaseURL = "https://quay.io"
 		secret = secretForTest()
 		ctx = context.Background()
 	})

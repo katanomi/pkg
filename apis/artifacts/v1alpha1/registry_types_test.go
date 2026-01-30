@@ -24,29 +24,29 @@ import (
 	. "github.com/onsi/gomega"
 )
 
-var _ = Describe("Test.GetAuthFromDockerConfigJson", func() {
+var _ = Describe("Test.GetAuthFromRegistryConfigJson", func() {
 	var (
 		emptyAuths = []byte("{}")
 		mockAuths  = []byte(`
 			{
 				"auths": {
-					"docker.io": {
+					"quay.io": {
 						"username": "u1",
 						"password": "p1"
 					},
-					"https://docker.io": {
+					"https://quay.io": {
 						"username": "u2",
 						"password": "p2"
 					},
-					"http://docker.io": {
+					"http://quay.io": {
 						"username": "u3",
 						"password": "p3"
 					},
-					"https://docker.io/user": {
+					"https://quay.io/user": {
 						"username": "u4",
 						"password": "p4"
 					},
-					"https://suffix.docker.io/////": {
+					"https://suffix.quay.io/////": {
 						"username": "u5",
 						"password": "p5"
 					}
@@ -54,9 +54,9 @@ var _ = Describe("Test.GetAuthFromDockerConfigJson", func() {
 			}
 		`)
 	)
-	DescribeTable("GetAuthFromDockerConfigJson",
-		func(registry string, dockerConfigJsonBytes []byte, username, password string, err error) {
-			actualUsername, actualPassword, actualErr := GetAuthFromDockerConfigJson(registry, dockerConfigJsonBytes)
+	DescribeTable("GetAuthFromRegistryConfigJson",
+		func(registry string, registryConfigJsonBytes []byte, username, password string, err error) {
+			actualUsername, actualPassword, actualErr := GetAuthFromRegistryConfigJson(registry, registryConfigJsonBytes)
 			Expect(username).To(Equal(actualUsername))
 			Expect(password).To(Equal(actualPassword))
 			errStr := ""
@@ -75,25 +75,25 @@ var _ = Describe("Test.GetAuthFromDockerConfigJson", func() {
 		Entry("auths is nil", "", emptyAuths,
 			"", "", errors.New("no auths found"),
 		),
-		Entry("just matched registry", "docker.io", mockAuths,
+		Entry("just matched registry", "quay.io", mockAuths,
 			"u1", "p1", nil,
 		),
-		Entry("just matched registry", "https://docker.io", mockAuths,
+		Entry("just matched registry", "https://quay.io", mockAuths,
 			"u2", "p2", nil,
 		),
-		Entry("just matched registry", "http://docker.io", mockAuths,
+		Entry("just matched registry", "http://quay.io", mockAuths,
 			"u3", "p3", nil,
 		),
-		Entry("just matched registry", "https://docker.io/user", mockAuths,
+		Entry("just matched registry", "https://quay.io/user", mockAuths,
 			"u4", "p4", nil,
 		),
-		Entry("matched registry suffixed with /", "https://suffix.docker.io", mockAuths,
+		Entry("matched registry suffixed with /", "https://suffix.quay.io", mockAuths,
 			"u5", "p5", nil,
 		),
-		Entry("matched registry suffixed with /", "https://suffix.docker.io/", mockAuths,
+		Entry("matched registry suffixed with /", "https://suffix.quay.io/", mockAuths,
 			"u5", "p5", nil,
 		),
-		Entry("fallback to host", "https://docker.io/not-exist", mockAuths,
+		Entry("fallback to host", "https://quay.io/not-exist", mockAuths,
 			"u1", "p1", nil,
 		),
 		Entry("not auth found", "not.exist.com", mockAuths,

@@ -38,11 +38,11 @@ var _ = Describe("Test.ContainerImagesOption.Validate", func() {
 		JustBeforeEach(func() {
 			imageOption = &ContainerImagesOption{
 				ContainerImages: []string{
-					"docker.io/centos:latest",
-					"docker.io/centos",
-					"docker.io/centos:",
-					"docker.io/centos@sha256:744c8b3d4c8f5b30a1a78c5e3893c4d3f793919d1e14bcaee61028931e9f9929",
-					"docker.io/centos:latest@sha256:744c8b3d4c8f5b30a1a78c5e3893c4d3f793919d1e14bcaee61028931e9f9929",
+					"quay.io/centos:latest",
+					"quay.io/centos",
+					"quay.io/centos:",
+					"quay.io/centos@sha256:744c8b3d4c8f5b30a1a78c5e3893c4d3f793919d1e14bcaee61028931e9f9929",
+					"quay.io/centos:latest@sha256:744c8b3d4c8f5b30a1a78c5e3893c4d3f793919d1e14bcaee61028931e9f9929",
 					"127.0.0.1:8080/centos@sha256:744c8b3d4c8f5b30a1a78c5e3893c4d3f793919d1e14bcaee61028931e9f9929",
 					"127.0.0.1/centos@sha256:744c8b3d4c8f5b30a1a78c5e3893c4d3f793919d1e14bcaee61028931e9f9929",
 				},
@@ -58,9 +58,9 @@ var _ = Describe("Test.ContainerImagesOption.Validate", func() {
 		JustBeforeEach(func() {
 			imageOption = &ContainerImagesOption{
 				ContainerImages: []string{
-					"docker.io/centos: test",
-					"docker.io/centos@sha256:744c8b3d4c8f5b30a1a7",
-					"docker.io/centos:latest@sha234:744c8b3d4c8f5b30a1a78c5e3893c4d3f793919d1e14bcaee61028931e9f9929",
+					"quay.io/centos: test",
+					"quay.io/centos@sha256:744c8b3d4c8f5b30a1a7",
+					"quay.io/centos:latest@sha234:744c8b3d4c8f5b30a1a78c5e3893c4d3f793919d1e14bcaee61028931e9f9929",
 					"127.0.0.1:8080/centos@744c8b3d4c8f5b30a1a78c5e3893c4d3f793919d1e14bcaee61028931e9f9929",
 					"127.0.0.1/centos:中文tag",
 				},
@@ -89,8 +89,8 @@ var _ = Describe("Test.ContainerImagesOption.Validate", func() {
 		JustBeforeEach(func() {
 			imageOption = &ContainerImagesOption{
 				ContainerImages: []string{
-					"docker.io/centos",
-					"docker.io/centos:",
+					"quay.io/centos",
+					"quay.io/centos:",
 					"127.0.0.1:8080/centos@sha256:744c8b3d4c8f5b30a1a78c5e3893c4d3f793919d1e14bcaee61028931e9f9929",
 				},
 			}
@@ -107,7 +107,7 @@ var _ = Describe("Test.ContainerImagesOption.Validate", func() {
 		JustBeforeEach(func() {
 			imageOption = &ContainerImagesOption{
 				ContainerImages: []string{
-					"docker.io/centos:test:1",
+					"quay.io/centos:test:1",
 					"127.0.0.1:8080/centos@sha256:744c8b3d4c8f5b30a1a78c5e3893c4d3f793919d1e14bcaee61028931e9f9929",
 				},
 			}
@@ -166,19 +166,19 @@ var _ = Describe("ContainerImagesOption.WriteResult", func() {
 		BeforeEach(func() {
 			artifactList = []artifacts.URI{
 				{
-					Host:      "index.docker.io",
+					Host:      "index.quay.io",
 					Path:      "katanomi/controller",
 					Digest:    "88008bc80503efb3d6c0a8c76fbda9e89067fc57c400c89901519984fc80ad93",
 					Algorithm: artifacts.SHA256,
 					Tag:       "v1.2.3",
 				},
 				{
-					Host: "index.docker.io",
+					Host: "index.quay.io",
 					Path: "katanomi/controller",
 					Tag:  "latest",
 				},
 				{
-					Host:      "docker.io",
+					Host:      "quay.io",
 					Path:      "katanomi/another",
 					Digest:    "88008bc80503efb3d6c0a8c76fbda9e89067fc57c400c89901519984fc80ad93",
 					Algorithm: artifacts.SHA256,

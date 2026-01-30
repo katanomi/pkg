@@ -31,7 +31,7 @@ const (
 // ArtifactParameterSpec specs for an strong typed parameter as an artifact
 // TODO: move to pkg/apis/artifacts/v1alpha1
 type ArtifactParameterSpec struct {
-	// URI for artifact, must be a complete identifier, i.e docker.io/katanomi/repository
+	// URI for artifact, must be a complete identifier, i.e quay.io/katanomi/repository
 	// +optional
 	URI string `json:"uri,omitempty"`
 

@@ -34,86 +34,86 @@ func TestParseURI(t *testing.T) {
 	}{
 		{
 			desc: "with no tags no digest",
-			uri:  "docker://docker.io/katanomi/pkg",
+			uri:  "docker://quay.io/katanomi/pkg",
 			u: URI{
-				Host:     "docker.io",
+				Host:     "quay.io",
 				Protocol: string(ProtocolDocker),
 				Path:     "katanomi/pkg",
-				Raw:      "docker://docker.io/katanomi/pkg",
+				Raw:      "docker://quay.io/katanomi/pkg",
 			},
 		},
 		{
 			desc: "with no digest",
-			uri:  "docker://docker.io/katanomi/pkg:v1",
+			uri:  "docker://quay.io/katanomi/pkg:v1",
 			u: URI{
-				Host:     "docker.io",
+				Host:     "quay.io",
 				Protocol: string(ProtocolDocker),
 				Path:     "katanomi/pkg",
 				Tag:      "v1",
-				Raw:      "docker://docker.io/katanomi/pkg:v1",
+				Raw:      "docker://quay.io/katanomi/pkg:v1",
 			},
 		},
 		{
 			desc: "with tag and digest",
-			uri:  "docker://docker.io/katanomi/pkg:v1@sha256:asdf",
+			uri:  "docker://quay.io/katanomi/pkg:v1@sha256:asdf",
 			u: URI{
-				Host:      "docker.io",
+				Host:      "quay.io",
 				Protocol:  string(ProtocolDocker),
 				Path:      "katanomi/pkg",
 				Tag:       "v1",
 				Digest:    "asdf",
 				Algorithm: "sha256",
-				Raw:       "docker://docker.io/katanomi/pkg:v1@sha256:asdf",
+				Raw:       "docker://quay.io/katanomi/pkg:v1@sha256:asdf",
 			},
 		},
 		{
 			desc: "with digest",
-			uri:  "docker://docker.io/katanomi/pkg@sha256:asdf",
+			uri:  "docker://quay.io/katanomi/pkg@sha256:asdf",
 			u: URI{
-				Host:      "docker.io",
+				Host:      "quay.io",
 				Protocol:  string(ProtocolDocker),
 				Path:      "katanomi/pkg",
 				Digest:    "asdf",
 				Algorithm: "sha256",
-				Raw:       "docker://docker.io/katanomi/pkg@sha256:asdf",
+				Raw:       "docker://quay.io/katanomi/pkg@sha256:asdf",
 			},
 		},
 		{
 			desc: "with type",
-			uri:  "docker.io/katanomi/pkg@sha256:asdf",
+			uri:  "quay.io/katanomi/pkg@sha256:asdf",
 			t:    ArtifactTypeHelmChart,
 			u: URI{
-				Host:      "docker.io",
+				Host:      "quay.io",
 				Protocol:  string(ProtocolHelmChart),
 				Path:      "katanomi/pkg",
 				Digest:    "asdf",
 				Algorithm: "sha256",
-				Raw:       "docker.io/katanomi/pkg@sha256:asdf",
+				Raw:       "quay.io/katanomi/pkg@sha256:asdf",
 			},
 		},
 		{
 			desc: "with diff protocol",
-			uri:  "docker://docker.io/katanomi/pkg@sha256:asdf",
+			uri:  "docker://quay.io/katanomi/pkg@sha256:asdf",
 			t:    ArtifactTypeHelmChart,
 			u: URI{
-				Host:      "docker.io",
+				Host:      "quay.io",
 				Protocol:  string(ProtocolDocker),
 				Path:      "katanomi/pkg",
 				Digest:    "asdf",
 				Algorithm: "sha256",
-				Raw:       "docker://docker.io/katanomi/pkg@sha256:asdf",
+				Raw:       "docker://quay.io/katanomi/pkg@sha256:asdf",
 			},
 		},
 		{
 			desc: "default protocol is docker",
-			uri:  "docker.io/katanomi/pkg@sha256:asdf",
+			uri:  "quay.io/katanomi/pkg@sha256:asdf",
 			u: URI{
-				Host:      "docker.io",
+				Host:      "quay.io",
 				Protocol:  string(ProtocolDocker),
 				Path:      "katanomi/pkg",
 				Digest:    "asdf",
 				Algorithm: "sha256",
-				Raw:       "docker.io/katanomi/pkg@sha256:asdf",
+				Raw:       "quay.io/katanomi/pkg@sha256:asdf",
 			},
 		},
 	}
@@ -141,27 +141,27 @@ func Test_StringWithDigestString(t *testing.T) {
 	}{
 		{
 			name:       "with tag and digest",
-			uri:        "docker.io/katanomi/pkg:v1@sha256:asdf",
-			wantString: "docker.io/katanomi/pkg:v1",
-			wantDigest: "docker.io/katanomi/pkg:v1@sha256:asdf",
+			uri:        "quay.io/katanomi/pkg:v1@sha256:asdf",
+			wantString: "quay.io/katanomi/pkg:v1",
+			wantDigest: "quay.io/katanomi/pkg:v1@sha256:asdf",
 		},
 		{
 			name:       "with digest",
-			uri:        "docker.io/katanomi/pkg@sha256:asdf",
-			wantString: "docker.io/katanomi/pkg@sha256:asdf",
-			wantDigest: "docker.io/katanomi/pkg@sha256:asdf",
+			uri:        "quay.io/katanomi/pkg@sha256:asdf",
+			wantString: "quay.io/katanomi/pkg@sha256:asdf",
+			wantDigest: "quay.io/katanomi/pkg@sha256:asdf",
 		},
 		{
 			name:       "with tag",
-			uri:        "docker.io/katanomi/pkg:v1",
-			wantString: "docker.io/katanomi/pkg:v1",
-			wantDigest: "docker.io/katanomi/pkg:v1",
+			uri:        "quay.io/katanomi/pkg:v1",
+			wantString: "quay.io/katanomi/pkg:v1",
+			wantDigest: "quay.io/katanomi/pkg:v1",
 		},
 		{
 			name:       "only path",
-			uri:        "docker.io/katanomi/pkg",
-			wantString: "docker.io/katanomi/pkg",
-			wantDigest: "docker.io/katanomi/pkg",
+			uri:        "quay.io/katanomi/pkg",
+			wantString: "quay.io/katanomi/pkg",
+			wantDigest: "quay.io/katanomi/pkg",
 		},
 	}
 
@@ -186,10 +186,10 @@ func Test_Validate(t *testing.T) {
 		{
 			name: "success validate",
 			uris: []string{
-				"docker.io/katanomi/pkg",
-				"docker.io/katanomi/pkg:v1",
-				"docker.io/katanomi/pkg@sha256:744c8b3d4c8f5b30a1a78c5e3893c4d3f793919d1e14bcaee61028931e9f9929",
-				"docker.io/katanomi/pkg:v1@sha256:744c8b3d4c8f5b30a1a78c5e3893c4d3f793919d1e14bcaee61028931e9f9929",
+				"quay.io/katanomi/pkg",
+				"quay.io/katanomi/pkg:v1",
+				"quay.io/katanomi/pkg@sha256:744c8b3d4c8f5b30a1a78c5e3893c4d3f793919d1e14bcaee61028931e9f9929",
+				"quay.io/katanomi/pkg:v1@sha256:744c8b3d4c8f5b30a1a78c5e3893c4d3f793919d1e14bcaee61028931e9f9929",
 				"127.0.0.1/katanomi/pkg",
 				"127.0.0.1:8080/katanomi/pkg",
 			},
@@ -208,9 +208,9 @@ func Test_Validate(t *testing.T) {
 		{
 			name: "failed validate path",
 			uris: []string{
-				"docker.io/katano#mi/pkg",
-				"docker.io/katano mi/pkg",
-				"docker.io/katano中文mi/pkg",
+				"quay.io/katano#mi/pkg",
+				"quay.io/katano mi/pkg",
+				"quay.io/katano中文mi/pkg",
 			},
 			wantErrs: []error{
 				fmt.Errorf("%s: invalid repository katano#mi/pkg", ErrInvalidReference),
@@ -221,10 +221,10 @@ func Test_Validate(t *testing.T) {
 		{
 			name: "failed validate tag",
 			uris: []string{
-				"docker.io/katanomi/pkg:v2&",
-				"docker.io/katanomi/pkg:v2中文",
-				"docker.io/katanomi/pkg: v2",
-				"docker.io/katanomi/pkg:v2:v1",
+				"quay.io/katanomi/pkg:v2&",
+				"quay.io/katanomi/pkg:v2中文",
+				"quay.io/katanomi/pkg: v2",
+				"quay.io/katanomi/pkg:v2:v1",
 			},
 			wantErrs: []error{
 				fmt.Errorf("%s: invalid tag v2&", ErrInvalidReference),
@@ -236,7 +236,7 @@ func Test_Validate(t *testing.T) {
 		{
 			name: "failed validate digest",
 			uris: []string{
-				"docker.io/katanomi/pkg@sha256:fdsa",
+				"quay.io/katanomi/pkg@sha256:fdsa",
 			},
 			wantErrs: []error{
 				fmt.Errorf("%s: invalid digest sha256:fdsa; invalid checksum digest length", ErrInvalidReference),
@@ -325,12 +325,12 @@ func TestAsDigestStringArray(t *testing.T) {
 		},
 		"multiple uris with and without digest": {
 			Input: []URI{
-				{Host: "docker.io", Path: "/katanomi/repo", Tag: "latest", Algorithm: SHA256, Digest: "0123456789012345678901234567890123456789012345678901234567890123"},
-				{Host: "index.docker.com", Path: "/someproject/somerepo", Tag: "v1.1.1"},
+				{Host: "quay.io", Path: "/katanomi/repo", Tag: "latest", Algorithm: SHA256, Digest: "0123456789012345678901234567890123456789012345678901234567890123"},
+				{Host: "registry.example.com", Path: "/someproject/somerepo", Tag: "v1.1.1"},
 			},
 			Result: []string{
-				"docker.io/katanomi/repo:latest@sha256:0123456789012345678901234567890123456789012345678901234567890123",
-				"index.docker.com/someproject/somerepo:v1.1.1",
+				"quay.io/katanomi/repo:latest@sha256:0123456789012345678901234567890123456789012345678901234567890123",
+				"registry.example.com/someproject/somerepo:v1.1.1",
 			},
 		},
 	}

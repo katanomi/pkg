@@ -68,7 +68,7 @@ func TestArtifactParameterSpec_Validate(t *testing.T) {
 		{
 			init: func(a *ArtifactParameterSpec) {
 				a.URI = " 127.0.0.1"
-				a.IntegrationClassName = "docker-registry"
+				a.IntegrationClassName = "registry"
 			},
 			evaluate: func(g *GomegaWithT, errs field.ErrorList) {
 				g.Expect(errs[0].Error()).To(ContainSubstring("invalid"))

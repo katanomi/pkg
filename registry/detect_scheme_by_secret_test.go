@@ -156,10 +156,10 @@ var _ = Describe("Test.RegistrySchemeDetectionBySecret", func() {
 			})
 		})
 
-		When("secret type is dockerconfig but not matched, no authentication information", func() {
+		When("secret type is registry config but not matched, no authentication information", func() {
 			BeforeEach(func() {
 				detect = detect.WithSecretRef(ref)
-				Expect(testing.LoadKubeResources("testdata/secret.dockerconfig.yaml", clt)).To(Succeed())
+				Expect(testing.LoadKubeResources("testdata/secret.registryconfig.yaml", clt)).To(Succeed())
 			})
 			It("should NOT return error", func() {
 				Expect(err).Should(BeNil())
