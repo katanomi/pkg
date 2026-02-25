@@ -22,6 +22,8 @@ import (
 	"net/http"
 	"testing"
 
+	kclient "github.com/AlaudaDevops/pkg/client"
+	kconfig "github.com/AlaudaDevops/pkg/config"
 	kscheme "github.com/AlaudaDevops/pkg/scheme"
 
 	"github.com/onsi/gomega"
@@ -415,3 +417,125 @@ func (v *fakeValidator) GroupVersionKind() schema.GroupVersionKind {
 }
 
 func (v *fakeValidator) SetGroupVersionKind(gvk schema.GroupVersionKind) {}
+
+// testConfigManagerValidatorState holds captured values shared across DeepCopy instances.
+type testConfigManagerValidatorState struct {
+	CapturedConfigManager *kconfig.Manager
+	CapturedClient        interface{}
+}
+
+// testConfigManagerValidatorObj is a Validator that captures the ConfigManager from context
+// during Validate*() to allow verification in tests.
+// The state pointer is shared across DeepCopy instances so captures are visible to the original.
+type testConfigManagerValidatorObj struct {
+	metav1.TypeMeta   `json:",inline"`
+	metav1.ObjectMeta `json:"metadata,omitempty"`
+
+	// state holds captured values shared across DeepCopy instances.
+	state *testConfigManagerValidatorState
+}
+
+func (v *testConfigManagerValidatorObj) DeepCopyObject() runtime.Object {
+	return &testConfigManagerValidatorObj{
+		TypeMeta:   v.TypeMeta,
+		ObjectMeta: v.ObjectMeta,
+		state:      v.state, // share state pointer so Validate*() captures are observable
+	}
+}
+
+func (v *testConfigManagerValidatorObj) ValidateCreate(ctx context.Context) error {
+	if v.state != nil {
+		v.state.CapturedConfigManager = kconfig.ConfigManager(ctx)
+		v.state.CapturedClient = kclient.Client(ctx)
+	}
+	return nil
+}
+
+func (v *testConfigManagerValidatorObj) ValidateUpdate(ctx context.Context, old runtime.Object) error {
+	if v.state != nil {
+		v.state.CapturedConfigManager = kconfig.ConfigManager(ctx)
+		v.state.CapturedClient = kclient.Client(ctx)
+	}
+	return nil
+}
+
+func (v *testConfigManagerValidatorObj) ValidateDelete(ctx context.Context) error {
+	if v.state != nil {
+		v.state.CapturedConfigManager = kconfig.ConfigManager(ctx)
+		v.state.CapturedClient = kclient.Client(ctx)
+	}
+	return nil
+}
+
+// TestValidatorInjectsConfigManagerFromHandlerCtx verifies that
+// validatingHandler.Handle propagates the ConfigManager stored in h.ctx
+// (set at webhook construction time) into the per-request ctx so that
+// Validator implementations can access it.
+func TestValidatorInjectsConfigManagerFromHandlerCtx(t *testing.T) {
+	g := gomega.NewGomegaWithT(t)
+
+	// Build a base context with scheme (required for decoder).
+	baseCtx := context.Background()
+	baseCtx = kscheme.WithScheme(baseCtx, scheme.Scheme)
+
+	// Prepare a non-nil ConfigManager to inject via h.ctx.
+	configManager := &kconfig.Manager{}
+
+	// handlerCtx simulates the context passed to ValidatingWebhookFor (stored as h.ctx).
+	handlerCtx := kconfig.WithConfigManager(baseCtx, configManager)
+
+	table := map[string]struct {
+		description       string
+		handlerCtx        context.Context
+		req               admission.Request
+		wantConfigManager *kconfig.Manager
+	}{
+		"ConfigManager is injected on Create when set in handler ctx": {
+			handlerCtx:        handlerCtx,
+			wantConfigManager: configManager,
+			req: admission.Request{
+				AdmissionRequest: admissionv1.AdmissionRequest{
+					Operation: admissionv1.Create,
+					Object: runtime.RawExtension{
+						Raw: []byte(`{"metadata":{"name":"test","namespace":"default"}}`),
+					},
+				},
+			},
+		},
+		"ConfigManager is nil when not set in handler ctx on Create": {
+			handlerCtx:        baseCtx,
+			wantConfigManager: nil,
+			req: admission.Request{
+				AdmissionRequest: admissionv1.AdmissionRequest{
+					Operation: admissionv1.Create,
+					Object: runtime.RawExtension{
+						Raw: []byte(`{"metadata":{"name":"test","namespace":"default"}}`),
+					},
+				},
+			},
+		},
+		"ConfigManager is injected on Delete when set in handler ctx": {
+			handlerCtx:        handlerCtx,
+			wantConfigManager: configManager,
+			req: admission.Request{
+				AdmissionRequest: admissionv1.AdmissionRequest{
+					Operation: admissionv1.Delete,
+					OldObject: runtime.RawExtension{
+						Raw: []byte(`{"metadata":{"name":"test","namespace":"default"}}`),
+					},
+				},
+			},
+		},
+	}
+
+	for name, tc := range table {
+		t.Run(name, func(t *testing.T) {
+			state := &testConfigManagerValidatorState{}
+			obj := &testConfigManagerValidatorObj{state: state}
+			wh := ValidatingWebhookFor(tc.handlerCtx, obj, nil, nil, nil)
+			response := wh.Handle(baseCtx, tc.req)
+			g.Expect(response.Allowed).To(gomega.BeTrue())
+			g.Expect(state.CapturedConfigManager).To(gomega.Equal(tc.wantConfigManager))
+		})
+	}
+}

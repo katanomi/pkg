@@ -22,6 +22,7 @@ import (
 	"net/http"
 
 	kclient "github.com/AlaudaDevops/pkg/client"
+	kconfig "github.com/AlaudaDevops/pkg/config"
 
 	kscheme "github.com/AlaudaDevops/pkg/scheme"
 
@@ -82,6 +83,9 @@ func (h *validatingHandler) Handle(ctx context.Context, req admission.Request) a
 	ctx = logging.WithLogger(ctx, h.SugaredLogger)
 	ctx = WithAdmissionRequest(ctx, req)
 	ctx = kclient.WithClient(ctx, kclient.Client(h.ctx))
+	if configM := kconfig.ConfigManager(h.ctx); configM != nil {
+		ctx = kconfig.WithConfigManager(ctx, configM)
+	}
 
 	if injector, ok := h.validator.(ContextInjector); ok {
 		ctx = injector.InjectContext(ctx)
