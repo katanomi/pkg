@@ -313,6 +313,8 @@ github.com/katanomi/controller-runtime v0.17.6-1 h1:yzh2ohwKlOBDpx0DZPfE5e4giXJZ
 github.com/katanomi/controller-runtime v0.17.6-1/go.mod h1:N0jpP5Lo7lMTF9aL56Z/B2oWBJjey6StQM0jRbKQXtY=
 github.com/katanomi/knative-pkg v0.0.0-20240409030957-1aad1aa6fd94 h1:eNUp3DRoGb/9gxrZNxLhep7RxlFkNsz/7HwsQt/zbG4=
 github.com/katanomi/knative-pkg v0.0.0-20240409030957-1aad1aa6fd94/go.mod h1:isVZJOQCjQFyikBsijH6kqrBUCJyyhf5liX2cvLV5Lk=
+github.com/katanomi/pipeline v0.56.1-0.20240218024938-b022b934e726 h1:oP552axt68aKFbA/sHKjYDBZvK0pqhk+dYwirJ6zwGc=
+github.com/katanomi/pipeline v0.56.1-0.20240218024938-b022b934e726/go.mod h1:d9alcAwRq8LtYGSOVj97xstu9sN3NE0zZV4yJxuj3vw=
 github.com/katanomi/zap v1.27.0-katanomi h1:xzSOfxghZLePXx7nvgbkQx+CEaKIdamYiVjxEXX1k1w=
 github.com/katanomi/zap v1.27.0-katanomi/go.mod h1:GB2qFLM7cTU87MWRP2mPIjqfIDnGu+VIO4V/SdhGo2E=
 github.com/kelseyhightower/envconfig v1.4.0 h1:Im6hONhd3pLkfDFsbRgu68RDNkGF1r3dvMUtDTo2cv8=
@@ -455,8 +457,8 @@ github.com/rogpeppe/go-internal v1.14.1/go.mod h1:MaRKkUm5W0goXpeCfT7UZI6fk/L7L7
 github.com/rs/xid v1.4.0 h1:qd7wPTDkN6KQx2VmMBLrpHkiyQwgFXRnkOLacUiaSNY=
 github.com/rs/xid v1.4.0/go.mod h1:trrq9SKmegXys3aeAKXMUTdJsYXVwGY3RLcfgqegfbg=
 github.com/russross/blackfriday/v2 v2.1.0/go.mod h1:+Rmxgy9KzJVeS9/2gXHxylqXiyQDYRxCVz55jmeOWTM=
-github.com/sergi/go-diff v1.3.2-0.20230802210424-5b0b94c5c0d3 h1:n661drycOFuPLCN3Uc8sB6B/s6Z4t2xvBgU1htSHuq8=
-github.com/sergi/go-diff v1.3.2-0.20230802210424-5b0b94c5c0d3/go.mod h1:A0bzQcvG0E7Rwjx0REVgAGH58e96+X0MeOfepqsbeW4=
+github.com/sergi/go-diff v1.3.1 h1:xkr+Oxo4BOQKmkn/B9eMK0g5Kg/983T9DqqPHwYqD+8=
+github.com/sergi/go-diff v1.3.1/go.mod h1:aMJSSKb2lpPvRNec0+w3fl7LP9IOFzdc9Pa4NFbPK1I=
 github.com/sirupsen/logrus v1.2.0/go.mod h1:LxeOpSwHxABJmUn/MG1IvRgCAasNZTLOkJPxbbu5VWo=
 github.com/sirupsen/logrus v1.4.2/go.mod h1:tLMulIdttU9McNUspp0xgXVQah82FyeX6MwdIuYE2rE=
 github.com/sirupsen/logrus v1.6.0/go.mod h1:7uNnSEd1DgxDLC74fIahvMZmmYsHGZGEOFrfsX/uA88=
@@ -486,8 +488,6 @@ github.com/stretchr/testify v1.11.1 h1:7s2iGBzp5EwR7/aIZr8ao5+dra3wiQyKjjFuvgVKu
 github.com/stretchr/testify v1.11.1/go.mod h1:wZwfW3scLgRK+23gO65QZefKpKQRnfz6sD981Nm4B6U=
 github.com/tchap/go-patricia/v2 v2.3.2 h1:xTHFutuitO2zqKAQ5rCROYgUb7Or/+IC3fts9/Yc7nM=
 github.com/tchap/go-patricia/v2 v2.3.2/go.mod h1:VZRHKAb53DLaG+nA9EaYYiaEx6YztwDlLElMsnSHD4k=
-github.com/tektoncd/pipeline v0.56.9 h1:JV0hDgC3F/yE5UlgJyQXsuNglS2zyhlBoRSAOBfRQ0E=
-github.com/tektoncd/pipeline v0.56.9/go.mod h1:YYBIHNFYeHMvB4+cYk56Ux7ji9zmETPoLTT8FDGMTT4=
 github.com/tidwall/gjson v1.18.0 h1:FIDeeyB800efLX89e5a8Y0BNH+LOngJyGrIWxG2FKQY=
 github.com/tidwall/gjson v1.18.0/go.mod h1:/wbyibRr2FHMks5tjHJ5F8dMZh3AcwJEMf5vlfC0lxk=
 github.com/tidwall/match v1.1.1 h1:+Ho715JplO36QYgwN9PGYNhgZvoUSc9X2c80KVTi+GA=

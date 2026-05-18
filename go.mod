@@ -199,6 +199,13 @@ require (
 )
 
 replace (
+	// CVE-2026-25542 / -40923 / -40924: upstream fix exists in
+	// tektoncd/pipeline v1.11.x, which requires k8s v0.36+ and is
+	// incompatible with the release-0.14 k8s v0.29 stack. The katanomi
+	// fork backports the security patches onto the v0.56.x line so we
+	// can stay on k8s v0.29 without an open .trivyignore exception.
+	github.com/tektoncd/pipeline => github.com/katanomi/pipeline v0.56.1-0.20240218024938-b022b934e726
+
 	go.uber.org/zap => github.com/katanomi/zap v1.27.0-katanomi // indirect
 	knative.dev/pkg => github.com/katanomi/knative-pkg v0.0.0-20240409030957-1aad1aa6fd94
 
