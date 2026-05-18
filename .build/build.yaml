@@ -208,8 +208,7 @@ spec:
             export TRIVY_CACHE=$GOCACHE/trivydb
             export TRIVY_DB_REPO=build-harbor.alauda.cn/ops/aquasecurity/trivy-db
             export TRIVY_REPORT_OUTPUT=bin/trivy-report.json
-            export TRIVY_SEVERITY=UNKNOWN,HIGH,CRITICAL
-            # export TRIVY_SEVERITY=UNKNOWN,MEDIUM,HIGH,CRITICAL
+            export TRIVY_SEVERITY=UNKNOWN,MEDIUM,HIGH,CRITICAL
             make trivy-repo-scan
             # TODO: Add report back to PR
         - name: build-outputs-path

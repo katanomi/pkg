@@ -177,7 +177,7 @@ govulncheck: ##@Setup Download govulncheck locally if necessary.
 # using master until 1.0.5 is released, https://github.com/golang/go/issues/66139
 	$(call go-install-tool,$(GOVULNCHECK),golang.org/x/vuln/cmd/govulncheck,$(GOVULNCHECK_VERSION))
 
-TRIVY_VERSION ?= 0.50.1
+TRIVY_VERSION ?= 0.69.3
 TRIVY = $(TOOLBIN)/trivy-$(TRIVY_VERSION)
 trivy: ##@Setup Download trivy locally if necessary.
 	$(call download-trivy,$(TRIVY),$(TRIVY_VERSION))
